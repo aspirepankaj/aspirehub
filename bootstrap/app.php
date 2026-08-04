@@ -17,9 +17,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/admin.php'));
 
             \Illuminate\Support\Facades\Route::middleware(['web'])
+                ->prefix('adminadspnl')
+                ->name('admin.')
+                ->group(base_path('routes/admin_auth.php'));
+
+            \Illuminate\Support\Facades\Route::middleware(['web'])
                 ->prefix('staffadspnl')
                 ->name('staff.')
                 ->group(base_path('routes/staff.php'));
+
+            \Illuminate\Support\Facades\Route::middleware(['web'])
+                ->prefix('staffadspnl')
+                ->name('staff.')
+                ->group(base_path('routes/staff_auth.php'));
 
             \Illuminate\Support\Facades\Route::middleware(['web'])
                 ->prefix('client')
@@ -38,7 +48,17 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectTo(
+            guests: function (Request $request) {
+                if ($request->is('adminadspnl*')) {
+                    return route('admin.login');
+                }
+                if ($request->is('staffadspnl*')) {
+                    return route('staff.login');
+                }
+                return route('login');
+            }
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

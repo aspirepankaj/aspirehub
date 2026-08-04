@@ -37,5 +37,13 @@ class User extends Authenticatable
     {
         return $this->hasOne(\App\Modules\Core\Authentication\Models\Admin::class, 'user_id');
     }
+
+    /**
+     * Get the client profile associated with the user.
+     */
+    public function client(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Modules\CRM\Clients\Models\Client::class, 'user_id');
+    }
 }
 

@@ -8,8 +8,12 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+Route::get('profile', function () {
+    $user = auth()->user();
+    if ($user && $user->admin && $user->admin->is_active) {
+        return redirect()->route('admin.profile');
+    }
+    return view('profile');
+})->middleware(['auth'])->name('profile');
 
 require __DIR__.'/auth.php';

@@ -19,6 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Livewire\Livewire::component('manage-clients', \App\Modules\CRM\Clients\Livewire\ManageClients::class);
     }
 }

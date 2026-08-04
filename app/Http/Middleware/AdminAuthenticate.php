@@ -25,7 +25,7 @@ class AdminAuthenticate
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors([
+            return redirect()->route('admin.login')->withErrors([
                 'email' => 'Access denied. You do not have administrator privileges.',
             ]);
         }

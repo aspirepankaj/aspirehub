@@ -15,10 +15,10 @@ class PasswordResetTest extends TestCase
 
     public function test_reset_password_link_screen_can_be_rendered(): void
     {
-        $response = $this->get('/forgot-password');
+        $response = $this->get('/adminadspnl/forgot-password');
 
         $response
-            ->assertSeeVolt('pages.auth.forgot-password')
+            ->assertSeeVolt('pages.admin-auth.forgot-password')
             ->assertStatus(200);
     }
 
@@ -28,7 +28,7 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        Volt::test('pages.auth.forgot-password')
+        Volt::test('pages.admin-auth.forgot-password')
             ->set('email', $user->email)
             ->call('sendPasswordResetLink');
 
@@ -41,15 +41,15 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        Volt::test('pages.auth.forgot-password')
+        Volt::test('pages.admin-auth.forgot-password')
             ->set('email', $user->email)
             ->call('sendPasswordResetLink');
 
         Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
-            $response = $this->get('/reset-password/'.$notification->token);
+            $response = $this->get('/adminadspnl/reset-password/'.$notification->token);
 
             $response
-                ->assertSeeVolt('pages.auth.reset-password')
+                ->assertSeeVolt('pages.admin-auth.reset-password')
                 ->assertStatus(200);
 
             return true;
@@ -62,12 +62,12 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        Volt::test('pages.auth.forgot-password')
+        Volt::test('pages.admin-auth.forgot-password')
             ->set('email', $user->email)
             ->call('sendPasswordResetLink');
 
         Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
-            $component = Volt::test('pages.auth.reset-password', ['token' => $notification->token])
+            $component = Volt::test('pages.admin-auth.reset-password', ['token' => $notification->token])
                 ->set('email', $user->email)
                 ->set('password', 'password')
                 ->set('password_confirmation', 'password');
@@ -75,7 +75,7 @@ class PasswordResetTest extends TestCase
             $component->call('resetPassword');
 
             $component
-                ->assertRedirect('/login')
+                ->assertRedirect('/adminadspnl/login')
                 ->assertHasNoErrors();
 
             return true;

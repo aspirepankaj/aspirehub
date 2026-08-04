@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Modules\Core\Dashboard\Livewire\AdminDashboard;
+use App\Modules\CRM\Clients\Livewire\ManageClients;
 
 Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 
@@ -9,10 +10,8 @@ Route::get('/', function () {
     return redirect()->route('admin.dashboard');
 });
 
-// Placeholder pages for other Admin panel sections
-Route::get('/clients', function () {
-    return view('modules.core.placeholder', ['title' => 'Clients Management']);
-})->name('clients');
+// Clients page using custom Livewire component
+Route::get('/clients', ManageClients::class)->name('clients');
 
 Route::get('/staff', function () {
     return view('modules.core.placeholder', ['title' => 'Staff Management']);
@@ -61,3 +60,7 @@ Route::get('/automation', function () {
 Route::get('/settings', function () {
     return view('modules.core.placeholder', ['title' => 'Settings Center']);
 })->name('settings');
+
+Route::get('/profile', function () {
+    return view('modules.core.profile');
+})->name('profile');

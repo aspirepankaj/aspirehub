@@ -58,20 +58,20 @@ class AdminDashboardTest extends TestCase
     public function test_guests_cannot_access_admin_dashboard()
     {
         $response = $this->get(route('admin.dashboard'));
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('admin.login'));
     }
 
     public function test_regular_users_cannot_access_admin_dashboard()
     {
         $response = $this->actingAs($this->regularUser)->get(route('admin.dashboard'));
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('admin.login'));
         $this->assertFalse(\Auth::check());
     }
 
     public function test_inactive_admins_cannot_access_admin_dashboard()
     {
         $response = $this->actingAs($this->inactiveAdminUser)->get(route('admin.dashboard'));
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('admin.login'));
         $this->assertFalse(\Auth::check());
     }
 
@@ -87,5 +87,12 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($this->adminUser)->get(route('admin.clients'));
         $response->assertStatus(200);
         $response->assertSee('Clients Management');
+    }
+
+    public function test_active_admins_can_access_profile_route()
+    {
+        $response = $this->actingAs($this->adminUser)->get(route('admin.profile'));
+        $response->assertStatus(200);
+        $response->assertSee('Profile Information');
     }
 }

@@ -27,11 +27,11 @@ class AuthenticationTest extends TestCase
 
     public function test_login_screen_can_be_rendered(): void
     {
-        $response = $this->get('/login');
+        $response = $this->get('/adminadspnl/login');
 
         $response
             ->assertOk()
-            ->assertSeeVolt('pages.auth.login');
+            ->assertSeeVolt('pages.admin-auth.login');
     }
 
     public function test_admins_can_authenticate_using_the_login_screen(): void
@@ -43,7 +43,7 @@ class AuthenticationTest extends TestCase
             'is_active' => true,
         ]);
 
-        $component = Volt::test('pages.auth.login')
+        $component = Volt::test('pages.admin-auth.login')
             ->set('form.email', $user->email)
             ->set('form.password', 'password');
 
@@ -60,7 +60,7 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $component = Volt::test('pages.auth.login')
+        $component = Volt::test('pages.admin-auth.login')
             ->set('form.email', $user->email)
             ->set('form.password', 'password');
 
@@ -82,7 +82,7 @@ class AuthenticationTest extends TestCase
             'is_active' => true,
         ]);
 
-        $component = Volt::test('pages.auth.login')
+        $component = Volt::test('pages.admin-auth.login')
             ->set('form.email', $user->email)
             ->set('form.password', 'wrong-password');
 
@@ -113,6 +113,70 @@ class AuthenticationTest extends TestCase
         $component
             ->assertHasNoErrors()
             ->assertRedirect('/');
+
+        $this->assertGuest();
+    }
+
+    public function test_client_login_screen_blocks_admins(): void
+    {
+        $user = User::factory()->create();
+        Admin::create([
+            'user_id' => $user->id,
+            'role_id' => $this->adminRole->id,
+            'is_active' => true,
+        ]);
+
+        $component = Volt::test('pages.auth.login')
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password');
+
+        $component->call('login');
+
+        $component
+            ->assertHasErrors(['form.email'])
+            ->assertNoRedirect();
+
+        $this->assertGuest();
+    }
+
+    public function test_client_login_screen_allows_clients(): void
+    {
+        $user = User::factory()->create();
+        \App\Modules\CRM\Clients\Models\Client::create([
+            'user_id' => $user->id,
+            'company_name' => 'Test Client Corp',
+        ]);
+
+        $component = Volt::test('pages.auth.login')
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password');
+
+        $component->call('login');
+
+        $component
+            ->assertHasNoErrors()
+            ->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_admin_login_screen_blocks_clients(): void
+    {
+        $user = User::factory()->create();
+        \App\Modules\CRM\Clients\Models\Client::create([
+            'user_id' => $user->id,
+            'company_name' => 'Test Client Corp',
+        ]);
+
+        $component = Volt::test('pages.admin-auth.login')
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password');
+
+        $component->call('login');
+
+        $component
+            ->assertHasErrors(['form.email'])
+            ->assertNoRedirect();
 
         $this->assertGuest();
     }

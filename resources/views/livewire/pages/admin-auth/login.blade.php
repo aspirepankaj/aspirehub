@@ -19,16 +19,16 @@ new #[Layout('layouts.auth')] class extends Component
         $this->form->authenticate();
 
         $user = \Illuminate\Support\Facades\Auth::user();
-        if (!$user || !$user->client) {
+        if (!$user || !$user->admin || !$user->admin->is_active) {
             \Illuminate\Support\Facades\Auth::logout();
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'form.email' => 'Access denied. You do not have client privileges.',
+                'form.email' => 'Access denied. You do not have administrator privileges.',
             ]);
         }
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: route('admin.dashboard', absolute: false), navigate: true);
     }
 }; ?>
 
@@ -51,8 +51,8 @@ new #[Layout('layouts.auth')] class extends Component
         <div>
             <div class="flex items-center justify-between">
                 <label for="password" class="block text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('Password') }}</label>
-                @if (Route::has('password.request'))
-                    <a class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline" href="{{ route('password.request') }}" wire:navigate>
+                @if (Route::has('admin.password.request'))
+                    <a class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline" href="{{ route('admin.password.request') }}" wire:navigate>
                         {{ __('Forgot password?') }}
                     </a>
                 @endif

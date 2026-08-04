@@ -38,16 +38,6 @@ class LoginForm extends Form
             ]);
         }
 
-        $user = Auth::user();
-        if (!$user || !$user->admin()->where('is_active', true)->exists()) {
-            Auth::logout();
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'form.email' => 'Access denied. You do not have administrator privileges.',
-            ]);
-        }
-
         RateLimiter::clear($this->throttleKey());
     }
 

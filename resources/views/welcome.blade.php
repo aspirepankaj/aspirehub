@@ -86,14 +86,14 @@
                         </button>
 
                         <!-- Portal Button -->
-                        @if (Route::has('login'))
+                        @if (Route::has('admin.login'))
                             @auth
                                 <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/10 transition-all duration-150">
                                     Admin Dashboard
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl active:scale-95 transition-all duration-150">
-                                    Portal Sign In
+                                <a href="{{ route('admin.login') }}" class="inline-flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl active:scale-95 transition-all duration-150">
+                                    Admin Sign In
                                 </a>
                             @endauth
                         @endif
@@ -119,9 +119,9 @@
                     </p>
 
                     <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        @if (Route::has('login'))
-                            <a href="{{ route('login') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 active:scale-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-500/15 hover:shadow-indigo-500/25 transition duration-150">
-                                Launch Portal login
+                        @if (Route::has('admin.login'))
+                            <a href="{{ route('admin.login') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 active:scale-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-500/15 hover:shadow-indigo-500/25 transition duration-150">
+                                Launch Admin Portal
                             </a>
                         @endif
                         <a href="#features" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-slate-900 hover:bg-slate-100/60 dark:hover:bg-slate-800/80 border border-slate-200/50 dark:border-slate-800/50 text-slate-700 dark:text-slate-300 font-semibold text-sm rounded-xl transition duration-150">
@@ -220,8 +220,8 @@
                     </ul>
 
                     <div class="mt-8">
-                        @if (Route::has('login'))
-                            <a href="{{ route('login') }}" class="w-full inline-flex items-center justify-center py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/10 transition-all duration-150">
+                        @if (Route::has('admin.login'))
+                            <a href="{{ route('admin.login') }}" class="w-full inline-flex items-center justify-center py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/10 transition-all duration-150">
                                 Sign In & Get Started
                             </a>
                         @endif
