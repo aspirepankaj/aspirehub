@@ -21,7 +21,7 @@
         </div>
 
         <!-- Add Client Button -->
-        <x-admin.button @click="$dispatch('open-modal', { name: 'add-client-modal' })" size="md" variant="primary" class="w-full sm:w-auto space-x-2">
+        <x-admin.button wire:click="openAddModal" size="md" variant="primary" class="w-full sm:w-auto space-x-2">
             <svg class="w-4 h-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>

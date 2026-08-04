@@ -42,6 +42,12 @@ class ManageClients extends Component
         $this->resetValidation();
     }
 
+    public function openAddModal()
+    {
+        $this->resetForm();
+        $this->dispatch('open-modal', name: 'add-client-modal');
+    }
+
     public function saveClient()
     {
         logger('saveClient reached! Name: ' . $this->name . ', Email: ' . $this->email);
