@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Aug 04, 2026 at 11:31 AM
+-- Generation Time: Aug 04, 2026 at 12:29 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -156,6 +156,39 @@ INSERT INTO `adspv_role_permissions` (`id`, `role_id`, `permission_id`, `created
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `adspv_websites`
+--
+
+CREATE TABLE `adspv_websites` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `client_id` bigint(20) UNSIGNED NOT NULL,
+  `site_name` varchar(255) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `site_type` enum('maintenance','design','development','speed_optimisation','other') NOT NULL DEFAULT 'maintenance',
+  `status` enum('active','inactive','suspended') NOT NULL DEFAULT 'active',
+  `admin_url` varchar(255) DEFAULT NULL,
+  `admin_username` varchar(255) DEFAULT NULL,
+  `admin_password` text DEFAULT NULL,
+  `hosting_provider` varchar(255) DEFAULT NULL,
+  `server_ip` varchar(100) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `added_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `edited_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `adspv_websites`
+--
+
+INSERT INTO `adspv_websites` (`id`, `client_id`, `site_name`, `url`, `site_type`, `status`, `admin_url`, `admin_username`, `admin_password`, `hosting_provider`, `server_ip`, `notes`, `added_by`, `edited_by`, `created_at`, `updated_at`) VALUES
+(1, 16, 'Calvin Yang', 'https://www.xevizilahoqufa.org.au', 'design', 'active', 'https://www.fymoritaninyp.in', 'viqep', 'eyJpdiI6InBuZ3lac1k5S1l0ek5OTFhpZVlGU0E9PSIsInZhbHVlIjoiaVJFZmkrT0pFd0t6M1puSE1oenpXdz09IiwibWFjIjoiODBiYjZlN2NhNmQzMDY4ZmU1YWYwNzI3MjIyOGJmYjYxNjFjMTZiNjcxY2NjYTRlNWQ2NmY5MGJjNGJiMDNiNSIsInRhZyI6IiJ9', 'Atque reprehenderit', 'Aliqua Eum ipsum c', 'Distinctio Sit quis', 1, 1, '2026-08-04 04:39:47', '2026-08-04 04:39:55'),
+(2, 2, 'Bethel Power', 'http://bethelpower.com/', 'maintenance', 'active', 'http://bethelpower.com/wp-admin', 'pankaj', 'eyJpdiI6InZnUVdSTk5tby9jN0E2TFh2dkt4Tnc9PSIsInZhbHVlIjoicDF6c0RwY2FvY0ZKL1JObVhOVy9XQT09IiwibWFjIjoiYmI5OGNjYTFhNGM0Nzk0ZGE2NmYyZjg2ZTMwOTNkY2Q2ZDFjYzU0ZWUzOWIwMzk3MTY0NTE3ODk5YTg0NzhkNSIsInRhZyI6IiJ9', 'Wp Engine', NULL, NULL, 1, NULL, '2026-08-04 04:58:29', '2026-08-04 04:58:29');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `cache`
 --
 
@@ -253,7 +286,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (6, '2026_08_03_100239_create_adspv_role_permissions_table', 1),
 (7, '2026_08_03_100240_create_adspv_admins_table', 1),
 (8, '2026_08_03_124412_create_adspv_clients_table', 2),
-(9, '2026_08_04_142500_add_added_by_and_edited_by_to_adspv_clients_table', 3);
+(9, '2026_08_04_142500_add_added_by_and_edited_by_to_adspv_clients_table', 3),
+(10, '2026_08_04_160000_create_adspv_websites_table', 4);
 
 -- --------------------------------------------------------
 
@@ -322,7 +356,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'System Admin', 'admin@aspirehub.com', '2026-08-03 04:57:10', '$2y$12$ezctHAyk9/bw/AqvNEvC6e50U7sC2B.1MS00Ih06v1D0m/Wh7QC0K', 'd2tJqhkl993A41AtanPUrldZhroKcu3S0S3xzX0PzdShiUmbpBJMbjJmO6ft', '2026-08-03 04:57:10', '2026-08-03 04:57:10'),
+(1, 'System Admin', 'admin@aspirehub.com', '2026-08-03 04:57:10', '$2y$12$ezctHAyk9/bw/AqvNEvC6e50U7sC2B.1MS00Ih06v1D0m/Wh7QC0K', 'i1timpkmMQFh4SLRCXCuImn8C6HZKXQpeWgB0UKRB4NEu6KMNvp1zDFmrV9i', '2026-08-03 04:57:10', '2026-08-03 04:57:10'),
 (2, 'Patience Chen', 'bewyvab@mailinator.com', NULL, '$2y$12$p0LSfwi3MOEUqdwdTANc7uC7ltiJ5ONjn40nucuwmD5za4OuldpRy', NULL, '2026-08-04 03:15:24', '2026-08-04 03:15:24'),
 (3, 'Steve Gagnon', 'steveg@bethelpower.com', NULL, '$2y$12$WI3wkSjR.2bdE21Cg/X6xOqdPFC8P./u1JH6PR7Zhbf5/5.ba9MXu', 'qhrIAxvUg3kvQDgyzxtZv1JSSCIsZ1zVeBU54CFPmPggMp4SI5CXd7DMTJgV', '2026-08-04 03:24:31', '2026-08-04 03:46:58'),
 (4, 'Melodie Burch', 'gyryziqa@mailinator.com', NULL, '$2y$12$yOIXIDqbkBd/F6crVO/5ZeZJtIJy/g2BrzhVcVjrHsps3vQDcRWFy', NULL, '2026-08-04 03:27:20', '2026-08-04 03:27:20'),
@@ -384,6 +418,15 @@ ALTER TABLE `adspv_role_permissions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `adspv_role_permissions_role_id_foreign` (`role_id`),
   ADD KEY `adspv_role_permissions_permission_id_foreign` (`permission_id`);
+
+--
+-- Indexes for table `adspv_websites`
+--
+ALTER TABLE `adspv_websites`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `adspv_websites_client_id_foreign` (`client_id`),
+  ADD KEY `adspv_websites_added_by_foreign` (`added_by`),
+  ADD KEY `adspv_websites_edited_by_foreign` (`edited_by`);
 
 --
 -- Indexes for table `cache`
@@ -482,6 +525,12 @@ ALTER TABLE `adspv_role_permissions`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `adspv_websites`
+--
+ALTER TABLE `adspv_websites`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `failed_jobs`
 --
 ALTER TABLE `failed_jobs`
@@ -497,7 +546,7 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -530,6 +579,14 @@ ALTER TABLE `adspv_clients`
 ALTER TABLE `adspv_role_permissions`
   ADD CONSTRAINT `adspv_role_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `adspv_permissions` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `adspv_role_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `adspv_roles` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `adspv_websites`
+--
+ALTER TABLE `adspv_websites`
+  ADD CONSTRAINT `adspv_websites_added_by_foreign` FOREIGN KEY (`added_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `adspv_websites_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `adspv_clients` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `adspv_websites_edited_by_foreign` FOREIGN KEY (`edited_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

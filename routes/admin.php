@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Modules\Core\Dashboard\Livewire\AdminDashboard;
 use App\Modules\CRM\Clients\Livewire\ManageClients;
+use App\Modules\CRM\Websites\Livewire\ManageWebsites;
 
 Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 
@@ -17,9 +18,7 @@ Route::get('/staff', function () {
     return view('modules.core.placeholder', ['title' => 'Staff Management']);
 })->name('staff');
 
-Route::get('/websites', function () {
-    return view('modules.core.placeholder', ['title' => 'Websites Management']);
-})->name('websites');
+Route::get('/websites', ManageWebsites::class)->name('websites');
 
 Route::get('/marketing-reports', function () {
     return view('modules.core.placeholder', ['title' => 'Marketing Reports']);
