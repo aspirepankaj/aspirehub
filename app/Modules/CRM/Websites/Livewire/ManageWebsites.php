@@ -121,8 +121,7 @@ class ManageWebsites extends Component
         $this->status           = $website->status;
         $this->admin_url        = $website->admin_url ?? '';
         $this->admin_username   = $website->admin_username ?? '';
-        // Don't expose the decrypted password in the form; show blank
-        $this->admin_password   = '';
+        $this->admin_password   = $website->admin_password ?? ''; // Load the decrypted password so the admin can see and edit it
         $this->passwordIsSet    = !empty($website->getRawOriginal('admin_password'));
         $this->hosting_provider = $website->hosting_provider ?? '';
         $this->server_ip        = $website->server_ip ?? '';

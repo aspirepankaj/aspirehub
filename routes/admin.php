@@ -52,6 +52,8 @@ Route::get('/documents', function () {
     return view('modules.core.placeholder', ['title' => 'Documents Library']);
 })->name('documents');
 
+use App\Modules\Core\Activity\Livewire\ManageActivityLogs;
+
 Route::get('/automation', function () {
     return view('modules.core.placeholder', ['title' => 'Workflow Automation']);
 })->name('automation');
@@ -63,3 +65,5 @@ Route::get('/settings', function () {
 Route::get('/profile', function () {
     return view('modules.core.profile');
 })->name('profile');
+
+Route::get('/activity-logs', ManageActivityLogs::class)->name('activity-logs');

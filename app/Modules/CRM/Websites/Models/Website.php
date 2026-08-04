@@ -8,8 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Crypt;
 
+use App\Modules\Core\Activity\Traits\LogsActivity;
+
 class Website extends Model
 {
+    use LogsActivity;
+
     protected $table = 'adspv_websites';
 
     protected $fillable = [
@@ -81,5 +85,21 @@ class Website extends Model
     public function editedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'edited_by');
+    }
+
+    protected function getActivityDescription(string $action): string
+    {
+        $userName = auth()->user()->name ?? 'System';
+        
+        switch ($action) {
+            case 'created':
+                return "{$userName} added new website: '{$this->site_name}'";
+            case 'updated':
+                return "{$userName} updated website parameters: '{$this->site_name}'";
+            case 'deleted':
+                return "{$userName} deleted website profile: '{$this->site_name}'";
+            default:
+                return "{$userName} performed action '{$action}' on website '{$this->site_name}'";
+        }
     }
 }

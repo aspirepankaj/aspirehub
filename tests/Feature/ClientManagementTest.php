@@ -90,7 +90,7 @@ class ClientManagementTest extends TestCase
             ->set('email', 'client@test.com')
             ->set('password', 'password123')
             ->set('company_name', 'Acme Corp')
-            ->set('phone', '1234567890')
+            ->set('phones', [['phone' => '1234567890', 'label' => 'Work']])
             ->set('status', 'active')
             ->set('notes', 'Some client notes here.')
             ->call('saveClient')
@@ -110,11 +110,16 @@ class ClientManagementTest extends TestCase
         $this->assertDatabaseHas('adspv_clients', [
             'user_id' => $user->id,
             'company_name' => 'Acme Corp',
-            'phone' => '1234567890',
             'status' => 'active',
             'notes' => 'Some client notes here.',
             'added_by' => $this->adminUser->id,
             'edited_by' => null,
+        ]);
+
+        // Verify custom phone table
+        $this->assertDatabaseHas('adspv_client_phones', [
+            'phone' => '1234567890',
+            'label' => 'Work'
         ]);
     }
 
@@ -158,7 +163,6 @@ class ClientManagementTest extends TestCase
         $client = Client::create([
             'user_id' => $clientUser->id,
             'company_name' => 'Original Corp',
-            'phone' => '1111111111',
             'status' => 'active',
             'notes' => 'Original notes.',
             'added_by' => $this->adminUser->id,
@@ -171,6 +175,7 @@ class ClientManagementTest extends TestCase
             ->assertSet('password', '') // Password should load empty
             ->set('name', 'Updated Name')
             ->set('company_name', 'Updated Corp')
+            ->set('phones', [['phone' => '9999999999', 'label' => 'Mobile']])
             ->call('updateClient')
             ->assertHasNoErrors()
             ->assertDispatched('close-modal', name: 'edit-client-modal');
@@ -186,6 +191,12 @@ class ClientManagementTest extends TestCase
             'id' => $client->id,
             'company_name' => 'Updated Corp',
             'edited_by' => $this->adminUser->id,
+        ]);
+
+        $this->assertDatabaseHas('adspv_client_phones', [
+            'client_id' => $client->id,
+            'phone' => '9999999999',
+            'label' => 'Mobile'
         ]);
     }
 
@@ -209,6 +220,7 @@ class ClientManagementTest extends TestCase
             ->set('name', 'Updated Name')
             // Save email unchanged (it should ignore itself and not fail unique check)
             ->set('email', 'original@client.com')
+            ->set('phones', [['phone' => '8888888888', 'label' => 'Work']])
             ->call('updateClient')
             ->assertHasNoErrors();
     }
