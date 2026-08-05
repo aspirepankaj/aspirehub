@@ -22,6 +22,8 @@ class WebsiteManagementTest extends TestCase
     private User $inactiveAdminUser;
     private Client $client;
 
+    private int $serviceTypeId;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -43,6 +45,9 @@ class WebsiteManagementTest extends TestCase
             'company_name' => 'Test Corp',
             'added_by'     => $this->adminUser->id,
         ]);
+
+        // Fetch or create a default service type ID to use in test website creations
+        $this->serviceTypeId = \App\Modules\CRM\Websites\Models\ServiceType::first()->id;
     }
 
     // ─── Access Control ──────────────────────────────────────────────────────────
@@ -82,7 +87,7 @@ class WebsiteManagementTest extends TestCase
             ->set('client_id', $this->client->id)
             ->set('site_name', 'Test Website')
             ->set('url', 'https://testwebsite.com')
-            ->set('site_type', 'maintenance')
+            ->set('service_type_id', $this->serviceTypeId)
             ->set('status', 'active')
             ->set('admin_url', 'https://testwebsite.com/wp-admin')
             ->set('admin_username', 'adminuser')
@@ -93,13 +98,13 @@ class WebsiteManagementTest extends TestCase
 
         // Check it was saved to DB
         $this->assertDatabaseHas('adspv_websites', [
-            'client_id'      => $this->client->id,
-            'site_name'      => 'Test Website',
-            'url'            => 'https://testwebsite.com',
-            'site_type'      => 'maintenance',
-            'status'         => 'active',
-            'admin_username' => 'adminuser',
-            'added_by'       => $this->adminUser->id,
+            'client_id'       => $this->client->id,
+            'site_name'       => 'Test Website',
+            'url'             => 'https://testwebsite.com',
+            'service_type_id' => $this->serviceTypeId,
+            'status'          => 'active',
+            'admin_username'  => 'adminuser',
+            'added_by'        => $this->adminUser->id,
         ]);
 
         // Verify password is encrypted in DB (not plain text)
@@ -129,7 +134,7 @@ class WebsiteManagementTest extends TestCase
             ->set('client_id', $this->client->id)
             ->set('site_name', 'Bad URL Site')
             ->set('url', 'not-a-valid-url')
-            ->set('site_type', 'maintenance')
+            ->set('service_type_id', $this->serviceTypeId)
             ->set('status', 'active')
             ->call('saveWebsite')
             ->assertHasErrors(['url']);
@@ -143,14 +148,14 @@ class WebsiteManagementTest extends TestCase
 
         // Create a website
         $website = Website::create([
-            'client_id'      => $this->client->id,
-            'site_name'      => 'Original Site',
-            'url'            => 'https://original.com',
-            'site_type'      => 'design',
-            'status'         => 'active',
-            'admin_username' => 'original_admin',
-            'admin_password' => 'original_secret',
-            'added_by'       => $this->adminUser->id,
+            'client_id'       => $this->client->id,
+            'site_name'       => 'Original Site',
+            'url'             => 'https://original.com',
+            'service_type_id' => $this->serviceTypeId,
+            'status'          => 'active',
+            'admin_username'  => 'original_admin',
+            'admin_password'  => 'original_secret',
+            'added_by'        => $this->adminUser->id,
         ]);
 
         $rawPasswordBefore = $website->fresh()->getRawOriginal('admin_password');
@@ -181,13 +186,13 @@ class WebsiteManagementTest extends TestCase
         $this->actingAs($this->adminUser);
 
         $website = Website::create([
-            'client_id'      => $this->client->id,
-            'site_name'      => 'Site With Password',
-            'url'            => 'https://example.com',
-            'site_type'      => 'development',
-            'status'         => 'active',
-            'admin_password' => 'old_password',
-            'added_by'       => $this->adminUser->id,
+            'client_id'       => $this->client->id,
+            'site_name'       => 'Site With Password',
+            'url'             => 'https://example.com',
+            'service_type_id' => $this->serviceTypeId,
+            'status'          => 'active',
+            'admin_password'  => 'old_password',
+            'added_by'        => $this->adminUser->id,
         ]);
 
         Livewire::test(ManageWebsites::class)

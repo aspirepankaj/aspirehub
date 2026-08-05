@@ -18,6 +18,7 @@ Route::get('/staff', function () {
     return view('modules.core.placeholder', ['title' => 'Staff Management']);
 })->name('staff');
 
+Route::get('/websites/service-types', \App\Modules\CRM\Websites\Livewire\ManageServiceTypes::class)->name('websites.service-types');
 Route::get('/websites', ManageWebsites::class)->name('websites');
 
 Route::get('/marketing-reports', function () {

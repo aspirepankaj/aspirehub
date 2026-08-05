@@ -56,17 +56,17 @@ class AdminDashboard extends Component
             ['title' => 'New support ticket received from Apex Retail', 'time' => '5 hours ago', 'type' => 'danger'],
         ];
 
-        // Recent activities loaded dynamically from database
+        // Recent activities loaded dynamically from database (only latest 5 for dashboard preview)
         $dbActivities = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
             ->latest()
-            ->limit(10)
+            ->limit(5)
             ->get();
 
         if ($dbActivities->isNotEmpty()) {
             $this->recentActivities = $dbActivities->map(fn($log) => [
                 'description' => $log->description,
-                'user' => $log->user->name ?? 'System',
-                'time' => $log->created_at->diffForHumans()
+                'user'        => $log->user->name ?? 'System',
+                'time'        => $log->created_at->diffForHumans()
             ])->toArray();
         } else {
             $this->recentActivities = [
