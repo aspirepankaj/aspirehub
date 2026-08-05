@@ -33,13 +33,13 @@
                 background: rgba(255, 255, 255, 0.6);
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.25);
+                border: 1px solid rgba(181, 181, 181, 25%);
             }
             .dark .glass-card {
                 background: rgba(30, 41, 59, 0.45);
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 25%);
             }
         </style>
     </head>

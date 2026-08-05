@@ -1,3 +1,8 @@
+<style>
+    .glass {
+    background: rgb(255 255 255);
+}
+</style>
 <aside :class="mobileSidebar ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 w-64 glass border-r border-slate-200/50 dark:border-slate-800/50 z-40 transition-transform duration-300 lg:translate-x-0 flex flex-col">
     <!-- Brand / Title -->
     <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200/50 dark:border-slate-800/50">
