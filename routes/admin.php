@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Modules\Core\Dashboard\Livewire\AdminDashboard;
 use App\Modules\CRM\Clients\Livewire\ManageClients;
 use App\Modules\CRM\Websites\Livewire\ManageWebsites;
-
+use App\Modules\CRM\Staff\Livewire\ManageStaff;
 Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 
 Route::get('/', function () {
@@ -14,9 +14,7 @@ Route::get('/', function () {
 // Clients page using custom Livewire component
 Route::get('/clients', ManageClients::class)->name('clients');
 
-Route::get('/staff', function () {
-    return view('modules.core.placeholder', ['title' => 'Staff Management']);
-})->name('staff');
+Route::get('/staff', ManageStaff::class)->name('staff');
 
 Route::get('/websites', ManageWebsites::class)->name('websites');
 

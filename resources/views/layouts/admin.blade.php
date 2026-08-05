@@ -14,7 +14,7 @@
 
         <!-- Scripts & Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+         @livewireStyles
         <style>
             body {
                 font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
@@ -43,6 +43,7 @@
             }
         </style>
     </head>
+
     <body class="font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
         
         <!-- Background decorative blobs -->

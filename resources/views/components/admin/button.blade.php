@@ -19,6 +19,8 @@
     $class = $baseStyles . ' ' . ($variants[$variant] ?? $variants['primary']) . ' ' . ($sizes[$size] ?? $sizes['md']);
 @endphp
 
-<button {{ $attributes->merge(['class' => $class]) }}>
+<button
+    type="{{ $attributes->get('type', 'button') }}"
+    {{ $attributes->except('type')->merge(['class' => $class]) }}>
     {{ $slot }}
 </button>
