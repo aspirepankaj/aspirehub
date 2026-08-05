@@ -20,7 +20,7 @@ class ManageClients extends Component
     public string $email = '';
     public string $password = '';
     public string $company_name = '';
-    public string $phone = '';
+    public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
     public string $status = 'active';
     public string $notes = '';
 
@@ -38,7 +38,8 @@ class ManageClients extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'company_name', 'phone', 'status', 'notes', 'editingClientId', 'editingUserId']);
+        $this->reset(['name', 'email', 'password', 'company_name', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId']);
+        $this->phones = [['phone' => '', 'label' => 'Work']];
         $this->resetValidation();
     }
 
@@ -46,6 +47,24 @@ class ManageClients extends Component
     {
         $this->resetForm();
         $this->dispatch('open-modal', name: 'add-client-modal');
+    }
+
+    public function addPhoneField()
+    {
+        if (count($this->phones) < 5) {
+            $this->phones[] = ['phone' => '', 'label' => 'Work'];
+        } else {
+            session()->flash('error', 'You can add a maximum of 5 phone numbers.');
+        }
+    }
+
+    public function removePhoneField($index)
+    {
+        unset($this->phones[$index]);
+        $this->phones = array_values($this->phones);
+        if (empty($this->phones)) {
+            $this->addPhoneField();
+        }
     }
 
     public function saveClient()
@@ -57,9 +76,14 @@ class ManageClients extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'company_name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:30',
+            'phones' => 'array|min:1',
+            'phones.*.phone' => 'required|string|max:30',
+            'phones.*.label' => 'required|string|max:50',
             'status' => 'required|in:active,inactive',
             'notes' => 'nullable|string',
+        ], [], [
+            'phones.*.phone' => 'phone number',
+            'phones.*.label' => 'phone label',
         ]);
 
         DB::transaction(function () {
@@ -71,14 +95,23 @@ class ManageClients extends Component
             ]);
 
             // 2. Create associated Client details
-            Client::create([
+            $client = Client::create([
                 'user_id' => $user->id,
                 'company_name' => $this->company_name,
-                'phone' => $this->phone,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'added_by' => auth()->id(),
             ]);
+
+            // 3. Create multiple client phones
+            foreach ($this->phones as $phoneData) {
+                if (!empty($phoneData['phone'])) {
+                    $client->phones()->create([
+                        'phone' => $phoneData['phone'],
+                        'label' => $phoneData['label'],
+                    ]);
+                }
+            }
         });
 
         $this->dispatch('close-modal', name: 'add-client-modal');
@@ -88,7 +121,7 @@ class ManageClients extends Component
 
     public function editClient($id)
     {
-        $client = Client::with('user')->findOrFail($id);
+        $client = Client::with(['user', 'phones'])->findOrFail($id);
 
         $this->editingClientId = $client->id;
         $this->editingUserId = $client->user_id;
@@ -97,7 +130,18 @@ class ManageClients extends Component
         $this->email = $client->user->email;
         $this->password = ''; // Leave password blank on edit unless updating
         $this->company_name = $client->company_name ?? '';
-        $this->phone = $client->phone ?? '';
+        
+        $this->phones = [];
+        foreach ($client->phones as $phoneRecord) {
+            $this->phones[] = [
+                'phone' => $phoneRecord->phone,
+                'label' => $phoneRecord->label,
+            ];
+        }
+        if (empty($this->phones)) {
+            $this->phones = [['phone' => '', 'label' => 'Work']];
+        }
+
         $this->status = $client->status;
         $this->notes = $client->notes ?? '';
 
@@ -112,9 +156,14 @@ class ManageClients extends Component
             'email' => 'required|email|max:255|unique:users,email,' . $this->editingUserId,
             'password' => 'nullable|string|min:8',
             'company_name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:30',
+            'phones' => 'array|min:1',
+            'phones.*.phone' => 'required|string|max:30',
+            'phones.*.label' => 'required|string|max:50',
             'status' => 'required|in:active,inactive',
             'notes' => 'nullable|string',
+        ], [], [
+            'phones.*.phone' => 'phone number',
+            'phones.*.label' => 'phone label',
         ]);
 
         DB::transaction(function () {
@@ -133,11 +182,21 @@ class ManageClients extends Component
             $client = Client::findOrFail($this->editingClientId);
             $client->update([
                 'company_name' => $this->company_name,
-                'phone' => $this->phone,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'edited_by' => auth()->id(),
             ]);
+
+            // 3. Sync client phones
+            $client->phones()->delete();
+            foreach ($this->phones as $phoneData) {
+                if (!empty($phoneData['phone'])) {
+                    $client->phones()->create([
+                        'phone' => $phoneData['phone'],
+                        'label' => $phoneData['label'],
+                    ]);
+                }
+            }
         });
 
         $this->dispatch('close-modal', name: 'edit-client-modal');
@@ -147,7 +206,7 @@ class ManageClients extends Component
 
     public function render()
     {
-        $clients = Client::with('user')
+        $clients = Client::with(['user', 'phones'])
             ->where(function ($query) {
                 $query->where('company_name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', function ($uQuery) {

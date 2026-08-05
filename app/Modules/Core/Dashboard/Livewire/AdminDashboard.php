@@ -56,13 +56,26 @@ class AdminDashboard extends Component
             ['title' => 'New support ticket received from Apex Retail', 'time' => '5 hours ago', 'type' => 'danger'],
         ];
 
-        // Recent activities
-        $this->recentActivities = [
-            ['description' => 'Administrator updated system settings', 'user' => 'Admin User', 'time' => '1 hour ago'],
-            ['description' => 'Staff John Doe resolved ticket #2481', 'user' => 'John Doe', 'time' => '3 hours ago'],
-            ['description' => 'Automatic payment received from Nova Tech', 'user' => 'Stripe Gateway', 'time' => '5 hours ago'],
-            ['description' => 'Client Stellar Design changed domain settings', 'user' => 'Stellar Admin', 'time' => '1 day ago'],
-        ];
+        // Recent activities loaded dynamically from database
+        $dbActivities = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        if ($dbActivities->isNotEmpty()) {
+            $this->recentActivities = $dbActivities->map(fn($log) => [
+                'description' => $log->description,
+                'user' => $log->user->name ?? 'System',
+                'time' => $log->created_at->diffForHumans()
+            ])->toArray();
+        } else {
+            $this->recentActivities = [
+                ['description' => 'Administrator updated system settings', 'user' => 'Admin User', 'time' => '1 hour ago'],
+                ['description' => 'Staff John Doe resolved ticket #2481', 'user' => 'John Doe', 'time' => '3 hours ago'],
+                ['description' => 'Automatic payment received from Nova Tech', 'user' => 'Stripe Gateway', 'time' => '5 hours ago'],
+                ['description' => 'Client Stellar Design changed domain settings', 'user' => 'Stellar Admin', 'time' => '1 day ago'],
+            ];
+        }
     }
 
     public function render()

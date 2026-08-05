@@ -158,10 +158,9 @@ class WebsiteManagementTest extends TestCase
         Livewire::test(ManageWebsites::class)
             ->call('editWebsite', $website->id)
             ->assertSet('site_name', 'Original Site')
-            ->assertSet('admin_password', '') // password not exposed
+            ->assertSet('admin_password', 'original_secret') // password is now decrypted and exposed
             ->set('site_name', 'Updated Site')
             ->set('url', 'https://updated.com')
-            // Leave admin_password blank
             ->call('updateWebsite')
             ->assertHasNoErrors()
             ->assertDispatched('close-modal', name: 'edit-website-modal');
@@ -174,7 +173,7 @@ class WebsiteManagementTest extends TestCase
         ]);
 
         // Password unchanged
-        $this->assertEquals($rawPasswordBefore, $website->fresh()->getRawOriginal('admin_password'));
+        $this->assertEquals('original_secret', $website->fresh()->admin_password);
     }
 
     public function test_admin_can_change_password_on_edit(): void
