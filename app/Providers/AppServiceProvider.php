@@ -22,5 +22,6 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('manage-clients', \App\Modules\CRM\Clients\Livewire\ManageClients::class);
         \Livewire\Livewire::component('manage-websites', \App\Modules\CRM\Websites\Livewire\ManageWebsites::class);
         \Livewire\Livewire::component('manage-activity-logs', \App\Modules\Core\Activity\Livewire\ManageActivityLogs::class);
+        \Livewire\Livewire::component('manage-service-types', \App\Modules\CRM\Websites\Livewire\ManageServiceTypes::class);
     }
 }

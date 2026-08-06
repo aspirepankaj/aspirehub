@@ -53,8 +53,7 @@
                class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group
                {{ $isActive 
                    ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500 pl-3 shadow-sm' 
-                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-900/40 hover:text-slate-900 dark:hover:text-slate-100' }}"
-               {{ in_array($item['route'], ['admin.websites.service-types', 'admin.websites', 'admin.clients']) ? '' : 'wire:navigate' }}>
+                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-900/40 hover:text-slate-900 dark:hover:text-slate-100' }}">
                 
                 <!-- SVG Icon -->
                 <svg class="w-5 h-5 transition-colors duration-200
