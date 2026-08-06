@@ -31,10 +31,17 @@
                 -webkit-backdrop-filter: blur(16px);
             }
             .glass-card {
-                background: rgba(255, 255, 255, 0.6);
+                /* background: rgba(255, 255, 255, 0.6);
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(181, 181, 181, 25%);
+                border: 1px solid rgba(181, 181, 181, 25%); */
+                /* From https://css.glass */
+background: rgba(255, 255, 255, 0.93);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(1px);
+-webkit-backdrop-filter: blur(1px);
+border: 1px solid rgba(255, 255, 255, 0.43);
             }
             .dark .glass-card {
                 background: rgba(30, 41, 59, 0.45);
