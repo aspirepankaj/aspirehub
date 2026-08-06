@@ -87,7 +87,7 @@ class WebsiteManagementTest extends TestCase
             ->set('client_id', $this->client->id)
             ->set('site_name', 'Test Website')
             ->set('url', 'https://testwebsite.com')
-            ->set('service_type_id', $this->serviceTypeId)
+            ->set('service_type_ids', [$this->serviceTypeId])
             ->set('status', 'active')
             ->set('admin_url', 'https://testwebsite.com/wp-admin')
             ->set('admin_username', 'adminuser')
@@ -101,15 +101,20 @@ class WebsiteManagementTest extends TestCase
             'client_id'       => $this->client->id,
             'site_name'       => 'Test Website',
             'url'             => 'https://testwebsite.com',
-            'service_type_id' => $this->serviceTypeId,
             'status'          => 'active',
             'admin_username'  => 'adminuser',
             'added_by'        => $this->adminUser->id,
         ]);
 
-        // Verify password is encrypted in DB (not plain text)
         $website = Website::where('site_name', 'Test Website')->first();
         $this->assertNotNull($website);
+
+        $this->assertDatabaseHas('adspv_website_service_type', [
+            'website_id' => $website->id,
+            'service_type_id' => $this->serviceTypeId,
+        ]);
+
+        // Verify password is encrypted in DB (not plain text)
         $this->assertNotEquals('secret123', $website->getRawOriginal('admin_password'));
         $this->assertEquals('secret123', Crypt::decryptString($website->getRawOriginal('admin_password')));
     }
@@ -134,7 +139,7 @@ class WebsiteManagementTest extends TestCase
             ->set('client_id', $this->client->id)
             ->set('site_name', 'Bad URL Site')
             ->set('url', 'not-a-valid-url')
-            ->set('service_type_id', $this->serviceTypeId)
+            ->set('service_type_ids', [$this->serviceTypeId])
             ->set('status', 'active')
             ->call('saveWebsite')
             ->assertHasErrors(['url']);
@@ -151,12 +156,12 @@ class WebsiteManagementTest extends TestCase
             'client_id'       => $this->client->id,
             'site_name'       => 'Original Site',
             'url'             => 'https://original.com',
-            'service_type_id' => $this->serviceTypeId,
             'status'          => 'active',
             'admin_username'  => 'original_admin',
             'admin_password'  => 'original_secret',
             'added_by'        => $this->adminUser->id,
         ]);
+        $website->serviceTypes()->sync([$this->serviceTypeId]);
 
         $rawPasswordBefore = $website->fresh()->getRawOriginal('admin_password');
 
@@ -189,11 +194,11 @@ class WebsiteManagementTest extends TestCase
             'client_id'       => $this->client->id,
             'site_name'       => 'Site With Password',
             'url'             => 'https://example.com',
-            'service_type_id' => $this->serviceTypeId,
             'status'          => 'active',
             'admin_password'  => 'old_password',
             'added_by'        => $this->adminUser->id,
         ]);
+        $website->serviceTypes()->sync([$this->serviceTypeId]);
 
         Livewire::test(ManageWebsites::class)
             ->call('editWebsite', $website->id)

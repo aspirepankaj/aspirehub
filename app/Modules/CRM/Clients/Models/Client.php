@@ -45,6 +45,11 @@ class Client extends Model
         return $this->hasMany(ClientPhone::class, 'client_id');
     }
 
+    public function plans(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Plan::class, 'adspv_client_plan', 'client_id', 'plan_id')->withTimestamps();
+    }
+
     protected function getActivityDescription(string $action): string
     {
         $userName = auth()->user()->name ?? 'System';

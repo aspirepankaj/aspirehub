@@ -51,6 +51,7 @@ border: 1px solid rgba(255, 255, 255, 0.43);
             }
         </style>
     </head>
+
     <body class="font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
         
         <!-- Background decorative blobs -->

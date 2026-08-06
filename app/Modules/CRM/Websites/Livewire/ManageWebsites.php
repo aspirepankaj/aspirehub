@@ -18,7 +18,7 @@ class ManageWebsites extends Component
     public int|string $client_id = '';
     public string $site_name = '';
     public string $url = '';
-    public int|string $service_type_id = '';
+    public array $service_type_ids = [];
     public string $status = 'active';
     public string $admin_url = '';
     public string $admin_username = '';
@@ -48,17 +48,18 @@ class ManageWebsites extends Component
     protected function rules(): array
     {
         return [
-            'client_id'        => 'required|exists:adspv_clients,id',
-            'site_name'        => 'required|string|max:255',
-            'url'              => 'required|url|max:255',
-            'service_type_id'  => 'required|exists:adspv_service_types,id',
-            'status'           => 'required|in:active,inactive,suspended',
-            'admin_url'        => 'nullable|url|max:255',
-            'admin_username'   => 'nullable|string|max:255',
-            'admin_password'   => 'nullable|string|min:4',
-            'hosting_provider' => 'nullable|string|max:255',
-            'server_ip'        => 'nullable|string|max:100',
-            'notes'            => 'nullable|string',
+            'client_id'          => 'required|exists:adspv_clients,id',
+            'site_name'          => 'required|string|max:255',
+            'url'                => 'required|url|max:255',
+            'service_type_ids'   => 'required|array|min:1',
+            'service_type_ids.*' => 'exists:adspv_service_types,id',
+            'status'             => 'required|in:active,inactive,suspended',
+            'admin_url'          => 'nullable|url|max:255',
+            'admin_username'     => 'nullable|string|max:255',
+            'admin_password'     => 'nullable|string|min:4',
+            'hosting_provider'   => 'nullable|string|max:255',
+            'server_ip'          => 'nullable|string|max:100',
+            'notes'              => 'nullable|string',
         ];
     }
 
@@ -127,13 +128,14 @@ class ManageWebsites extends Component
     public function resetForm(): void
     {
         $this->reset([
-            'client_id', 'site_name', 'url', 'service_type_id', 'status',
+            'client_id', 'site_name', 'url', 'service_type_ids', 'status',
             'admin_url', 'admin_username', 'admin_password',
             'hosting_provider', 'server_ip', 'notes',
             'editingWebsiteId', 'passwordIsSet',
             'revealAddPassword', 'revealEditPassword',
         ]);
         $this->status    = 'active';
+        $this->service_type_ids = [];
         $this->resetValidation();
     }
 
@@ -149,11 +151,10 @@ class ManageWebsites extends Component
         $this->validate();
 
         DB::transaction(function () {
-            Website::create([
+            $website = Website::create([
                 'client_id'        => $this->client_id,
                 'site_name'        => $this->site_name,
                 'url'              => $this->url,
-                'service_type_id'  => $this->service_type_id,
                 'status'           => $this->status,
                 'admin_url'        => $this->admin_url ?: null,
                 'admin_username'   => $this->admin_username ?: null,
@@ -163,6 +164,8 @@ class ManageWebsites extends Component
                 'notes'            => $this->notes ?: null,
                 'added_by'         => auth()->id(),
             ]);
+
+            $website->serviceTypes()->sync($this->service_type_ids);
         });
 
         $this->dispatch('close-modal', name: 'add-website-modal');
@@ -173,13 +176,13 @@ class ManageWebsites extends Component
     // ─── Load for Edit ──────────────────────────────────────────────────────────
     public function editWebsite(int $id): void
     {
-        $website = Website::findOrFail($id);
+        $website = Website::with('serviceTypes')->findOrFail($id);
 
         $this->editingWebsiteId = $website->id;
         $this->client_id        = $website->client_id;
         $this->site_name        = $website->site_name;
         $this->url              = $website->url;
-        $this->service_type_id  = $website->service_type_id;
+        $this->service_type_ids = $website->serviceTypes->pluck('id')->toArray();
         $this->status           = $website->status;
         $this->admin_url        = $website->admin_url ?? '';
         $this->admin_username   = $website->admin_username ?? '';
@@ -209,7 +212,6 @@ class ManageWebsites extends Component
                 'client_id'        => $this->client_id,
                 'site_name'        => $this->site_name,
                 'url'              => $this->url,
-                'service_type_id'  => $this->service_type_id,
                 'status'           => $this->status,
                 'admin_url'        => $this->admin_url ?: null,
                 'admin_username'   => $this->admin_username ?: null,
@@ -225,6 +227,7 @@ class ManageWebsites extends Component
             }
 
             $website->update($data);
+            $website->serviceTypes()->sync($this->service_type_ids);
         });
 
         $this->dispatch('close-modal', name: 'edit-website-modal');
@@ -235,7 +238,7 @@ class ManageWebsites extends Component
     // ─── Render ─────────────────────────────────────────────────────────────────
     public function render()
     {
-        $websites = Website::with(['client.user', 'serviceType'])
+        $websites = Website::with(['client.user', 'serviceTypes'])
             ->when($this->search, function ($q) {
                 $q->where(function($sq) {
                     $sq->where('site_name', 'like', '%' . $this->search . '%')
@@ -249,7 +252,7 @@ class ManageWebsites extends Component
                 });
             })
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
-            ->when($this->serviceTypeFilter, fn($q) => $q->where('service_type_id', $this->serviceTypeFilter))
+            ->when($this->serviceTypeFilter, fn($q) => $q->whereHas('serviceTypes', fn($sq) => $sq->where('service_type_id', $this->serviceTypeFilter)))
             ->latest()
             ->paginate(12);
 

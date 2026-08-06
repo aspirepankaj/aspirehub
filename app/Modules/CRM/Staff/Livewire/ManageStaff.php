@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Modules\CRM\Clients\Livewire;
+namespace App\Modules\CRM\Staff\Livewire;
 
 use App\Models\User;
-use App\Modules\CRM\Clients\Models\Client;
+use App\Modules\CRM\Staff\Models\Staff;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.admin')]
-class ManageClients extends Component
+class ManageStaff extends Component
 {
     use WithPagination;
 
@@ -23,95 +23,48 @@ class ManageClients extends Component
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
     public string $status = 'active';
     public string $notes = '';
-    public array $plan_ids = [];
 
-    // Search & Filter
+    // Search query
     public string $search = '';
-    public string $statusFilter = '';
-    public string $planFilter = '';
-
-    // Bulk selection
-    public array $selectedClients = [];
-    public bool $selectAll = false;
 
     // Edit state tracking
-    public ?int $editingClientId = null;
+    public ?int $editingStaffId = null;
     public ?int $editingUserId = null;
 
-    public function updatingSearch(): void
+    public function updatingSearch()
     {
-        $this->selectedClients = [];
-        $this->selectAll = false;
         $this->resetPage();
-    }
-
-    public function updatingStatusFilter(): void
-    {
-        $this->selectedClients = [];
-        $this->selectAll = false;
-        $this->resetPage();
-    }
-
-    public function updatingPlanFilter(): void
-    {
-        $this->selectedClients = [];
-        $this->selectAll = false;
-        $this->resetPage();
-    }
-
-    public function clearFilters(): void
-    {
-        $this->search = '';
-        $this->statusFilter = '';
-        $this->planFilter = '';
-        $this->selectedClients = [];
-        $this->selectAll = false;
-        $this->resetPage();
-    }
-
-    public function toggleSelectAll(array $pageIds): void
-    {
-        if ($this->selectAll) {
-            $this->selectedClients = $pageIds;
-        } else {
-            $this->selectedClients = [];
-        }
-    }
-
-    public function bulkActivate(): void
-    {
-        if (empty($this->selectedClients)) return;
-
-        Client::whereIn('id', $this->selectedClients)->update(['status' => 'active']);
-        $count = count($this->selectedClients);
-        $this->selectedClients = [];
-        $this->selectAll = false;
-        session()->flash('success', "{$count} client(s) activated successfully.");
-    }
-
-    public function bulkDeactivate(): void
-    {
-        if (empty($this->selectedClients)) return;
-
-        Client::whereIn('id', $this->selectedClients)->update(['status' => 'inactive']);
-        $count = count($this->selectedClients);
-        $this->selectedClients = [];
-        $this->selectAll = false;
-        session()->flash('success', "{$count} client(s) deactivated successfully.");
     }
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'company_name', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids']);
-        $this->phones = [['phone' => '', 'label' => 'Work']];
-        $this->plan_ids = [];
+        $this->reset([
+            'name',
+            'email',
+            'password',
+            'company_name',
+            'phones',
+            'notes',
+            'editingStaffId',
+            'editingUserId',
+        ]);
+
+        $this->status = 'active';
+
+        $this->phones = [
+            [
+                'phone' => '',
+                'label' => 'Work',
+            ]
+        ];
+
         $this->resetValidation();
     }
 
     public function openAddModal()
     {
         $this->resetForm();
-        $this->dispatch('open-modal', name: 'add-client-modal');
+        $this->dispatch('open-modal', name: 'add-staff-modal');
     }
 
     public function addPhoneField()
@@ -132,9 +85,9 @@ class ManageClients extends Component
         }
     }
 
-    public function saveClient()
+    public function saveStaff()
     {
-        logger('saveClient reached! Name: ' . $this->name . ', Email: ' . $this->email);
+        logger('saveStaff reached! Name: ' . $this->name . ', Email: ' . $this->email);
 
         $this->validate([
             'name' => 'required|string|max:255',
@@ -146,8 +99,6 @@ class ManageClients extends Component
             'phones.*.label' => 'required|string|max:50',
             'status' => 'required|in:active,inactive',
             'notes' => 'nullable|string',
-            'plan_ids' => 'nullable|array',
-            'plan_ids.*' => 'exists:adspv_plans,id',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
@@ -161,8 +112,8 @@ class ManageClients extends Component
                 'password' => Hash::make($this->password),
             ]);
 
-            // 2. Create associated Client details
-            $client = Client::create([
+            // 2. Create associated Staff details
+            $Staff = Staff::create([
                 'user_id' => $user->id,
                 'company_name' => $this->company_name,
                 'status' => $this->status,
@@ -170,40 +121,36 @@ class ManageClients extends Component
                 'added_by' => auth()->id(),
             ]);
 
-            // 3. Create multiple client phones
+            // 3. Create multiple Staff phones
             foreach ($this->phones as $phoneData) {
                 if (!empty($phoneData['phone'])) {
-                    $client->phones()->create([
+                    $Staff->phones()->create([
                         'phone' => $phoneData['phone'],
                         'label' => $phoneData['label'],
                     ]);
                 }
             }
-
-            // 4. Sync plans
-            $client->plans()->sync($this->plan_ids);
         });
 
-        $this->dispatch('close-modal', name: 'add-client-modal');
+        $this->dispatch('close-modal', name: 'add-staff-modal');
         $this->resetForm();
-        session()->flash('success', 'Client created successfully!');
+        session()->flash('success', 'Staff created successfully!');
     }
 
-    public function editClient($id)
+    public function editStaff($id)
     {
-        $client = Client::with(['user', 'phones', 'plans'])->findOrFail($id);
+        $Staff = Staff::with(['user', 'phones'])->findOrFail($id);
 
-        $this->editingClientId = $client->id;
-        $this->editingUserId = $client->user_id;
-        $this->plan_ids = $client->plans->pluck('id')->toArray();
+        $this->editingStaffId = $Staff->id;
+        $this->editingUserId = $Staff->user_id;
 
-        $this->name = $client->user->name;
-        $this->email = $client->user->email;
+        $this->name = $Staff->user->name;
+        $this->email = $Staff->user->email;
         $this->password = ''; // Leave password blank on edit unless updating
-        $this->company_name = $client->company_name ?? '';
+        $this->company_name = $Staff->company_name ?? '';
         
         $this->phones = [];
-        foreach ($client->phones as $phoneRecord) {
+        foreach ($Staff->phones as $phoneRecord) {
             $this->phones[] = [
                 'phone' => $phoneRecord->phone,
                 'label' => $phoneRecord->label,
@@ -213,14 +160,14 @@ class ManageClients extends Component
             $this->phones = [['phone' => '', 'label' => 'Work']];
         }
 
-        $this->status = $client->status;
-        $this->notes = $client->notes ?? '';
+        $this->status = $Staff->status;
+        $this->notes = $Staff->notes ?? '';
 
         $this->resetValidation();
-        $this->dispatch('open-modal', name: 'edit-client-modal');
+        $this->dispatch('open-modal', name: 'edit-staff-modal');
     }
 
-    public function updateClient()
+    public function updateStaff()
     {
         $this->validate([
             'name' => 'required|string|max:255',
@@ -232,8 +179,6 @@ class ManageClients extends Component
             'phones.*.label' => 'required|string|max:50',
             'status' => 'required|in:active,inactive',
             'notes' => 'nullable|string',
-            'plan_ids' => 'nullable|array',
-            'plan_ids.*' => 'exists:adspv_plans,id',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
@@ -251,38 +196,35 @@ class ManageClients extends Component
             }
             $user->update($userUpdateData);
 
-            // 2. Update associated Client details
-            $client = Client::findOrFail($this->editingClientId);
-            $client->update([
+            // 2. Update associated Staff details
+            $Staff = Staff::findOrFail($this->editingStaffId);
+            $Staff->update([
                 'company_name' => $this->company_name,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'edited_by' => auth()->id(),
             ]);
 
-            // 3. Sync client phones
-            $client->phones()->delete();
+            // 3. Sync Staff phones
+            $Staff->phones()->delete();
             foreach ($this->phones as $phoneData) {
                 if (!empty($phoneData['phone'])) {
-                    $client->phones()->create([
+                    $Staff->phones()->create([
                         'phone' => $phoneData['phone'],
                         'label' => $phoneData['label'],
                     ]);
                 }
             }
-
-            // 4. Sync plans
-            $client->plans()->sync($this->plan_ids);
         });
 
-        $this->dispatch('close-modal', name: 'edit-client-modal');
+        $this->dispatch('close-modal', name: 'edit-staff-modal');
         $this->resetForm();
-        session()->flash('success', 'Client updated successfully!');
+        session()->flash('success', 'Staff updated successfully!');
     }
 
     public function render()
     {
-        $clients = Client::with(['user', 'phones', 'plans'])
+        $Staff = Staff::with(['user', 'phones'])
             ->where(function ($query) {
                 $query->where('company_name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', function ($uQuery) {
@@ -290,21 +232,11 @@ class ManageClients extends Component
                             ->orWhere('email', 'like', '%' . $this->search . '%');
                     });
             })
-            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
-            ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)))
             ->latest()
             ->paginate(10);
 
-        $hasActiveFilters = $this->search || $this->statusFilter || $this->planFilter;
-        $pageIds = $clients->pluck('id')->toArray();
-
-        $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
-
-        return view('modules.crm.clients.manage-clients', [
-            'clients'          => $clients,
-            'plans'            => $plans,
-            'hasActiveFilters' => $hasActiveFilters,
-            'pageIds'          => $pageIds,
-        ])->layoutData(['title' => 'Clients Management - Aspire Hub']);
+        return view('modules.crm.staff.manage-staff', [
+            'Staff' => $Staff,
+        ])->layoutData(['title' => 'Staff Management - Aspire Hub']);
     }
 }

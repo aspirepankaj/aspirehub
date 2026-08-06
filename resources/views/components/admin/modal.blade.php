@@ -1,4 +1,4 @@
-@props(['name', 'title' => null])
+@props(['name', 'title' => null, 'maxWidth' => 'max-w-lg'])
 <div x-data="{ show: false }" 
      x-show="show" 
      @open-modal.window="if ($event.detail.name === '{{ $name }}') show = true"
@@ -17,9 +17,9 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="relative w-full max-w-lg glass-card p-6 rounded-3xl shadow-2xl z-10 border border-white/20 dark:border-slate-800/30">
+         class="relative w-full {{ $maxWidth }} max-h-[90vh] flex flex-col glass-card p-6 rounded-3xl shadow-2xl z-10 border border-white/20 dark:border-slate-800/30">
         
-        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/50 dark:border-slate-800/50 shrink-0">
             <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ $title ?? 'Modal Window' }}</h3>
             <button @click="show = false" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -28,7 +28,7 @@
             </button>
         </div>
 
-        <div>
+        <div class="overflow-y-auto flex-1 pr-1.5 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
             {{ $slot }}
         </div>
     </div>

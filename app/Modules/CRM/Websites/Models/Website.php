@@ -20,7 +20,6 @@ class Website extends Model
         'client_id',
         'site_name',
         'url',
-        'service_type_id',
         'status',
         'admin_url',
         'admin_username',
@@ -61,9 +60,9 @@ class Website extends Model
 
     // ─── Relationships ──────────────────────────────────────────────────────────
 
-    public function serviceType(): BelongsTo
+    public function serviceTypes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(ServiceType::class, 'service_type_id');
+        return $this->belongsToMany(ServiceType::class, 'adspv_website_service_type', 'website_id', 'service_type_id')->withTimestamps();
     }
 
     public function client(): BelongsTo
