@@ -11,7 +11,8 @@
         </p>
 
         <button type="button" wire:click="openAddModal"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-semibold shadow-sm shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
+                style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -83,16 +84,16 @@
     <x-admin.modal name="add-service-type-modal" title="Add Service Type">
         <div class="space-y-4 mt-2">
             <div>
-                <label for="name" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Name</label>
+                <label for="name" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Name</label>
                 <input wire:model="name" id="name" type="text" placeholder="e.g. SEO, API Integration"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150" />
+                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('name')" class="mt-1" />
             </div>
 
             <div>
-                <label for="color" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Badge Color Theme</label>
+                <label for="color" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Badge Color Theme</label>
                 <select wire:model="color" id="color"
-                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
+                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
                     <option value="indigo">Indigo (Blue-Purple)</option>
                     <option value="emerald">Emerald (Green)</option>
                     <option value="pink">Pink (Red-Pink)</option>
@@ -108,7 +109,7 @@
 
             <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">
                 <button type="button" @click="$dispatch('close-modal', { name: 'add-service-type-modal' })"
-                        class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
+                        class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
                 <x-admin.button type="button" wire:click="saveType" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
@@ -126,16 +127,16 @@
     <x-admin.modal name="edit-service-type-modal" title="Edit Service Type">
         <div class="space-y-4 mt-2">
             <div>
-                <label for="edit_name" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Name</label>
+                <label for="edit_name" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Name</label>
                 <input wire:model="name" id="edit_name" type="text"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150" />
+                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('name')" class="mt-1" />
             </div>
 
             <div>
-                <label for="edit_color" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Badge Color Theme</label>
+                <label for="edit_color" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Badge Color Theme</label>
                 <select wire:model="color" id="edit_color"
-                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
+                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
                     <option value="indigo">Indigo (Blue-Purple)</option>
                     <option value="emerald">Emerald (Green)</option>
                     <option value="pink">Pink (Red-Pink)</option>
@@ -151,7 +152,7 @@
 
             <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">
                 <button type="button" @click="$dispatch('close-modal', { name: 'edit-service-type-modal' })"
-                        class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
+                        class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
                 <x-admin.button type="button" wire:click="updateType" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
