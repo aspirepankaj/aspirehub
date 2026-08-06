@@ -171,6 +171,17 @@
                         </div>
                     @endforeach
                 </div>
+
+                {{-- View All Link --}}
+                <div class="mt-5 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">
+                    <a href="{{ route('admin.activity-logs') }}" wire:navigate
+                       class="flex items-center justify-center gap-2 w-full py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-150">
+                        View All Activity
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </a>
+                </div>
             </x-admin.card>
         </div>
     </div>

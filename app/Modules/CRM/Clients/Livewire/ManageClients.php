@@ -24,16 +24,70 @@ class ManageClients extends Component
     public string $status = 'active';
     public string $notes = '';
 
-    // Search query
+    // Search & Filter
     public string $search = '';
+    public string $statusFilter = '';
+
+    // Bulk selection
+    public array $selectedClients = [];
+    public bool $selectAll = false;
 
     // Edit state tracking
     public ?int $editingClientId = null;
     public ?int $editingUserId = null;
 
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
+        $this->selectedClients = [];
+        $this->selectAll = false;
         $this->resetPage();
+    }
+
+    public function updatingStatusFilter(): void
+    {
+        $this->selectedClients = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->statusFilter = '';
+        $this->selectedClients = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
+    public function toggleSelectAll(array $pageIds): void
+    {
+        if ($this->selectAll) {
+            $this->selectedClients = $pageIds;
+        } else {
+            $this->selectedClients = [];
+        }
+    }
+
+    public function bulkActivate(): void
+    {
+        if (empty($this->selectedClients)) return;
+
+        Client::whereIn('id', $this->selectedClients)->update(['status' => 'active']);
+        $count = count($this->selectedClients);
+        $this->selectedClients = [];
+        $this->selectAll = false;
+        session()->flash('success', "{$count} client(s) activated successfully.");
+    }
+
+    public function bulkDeactivate(): void
+    {
+        if (empty($this->selectedClients)) return;
+
+        Client::whereIn('id', $this->selectedClients)->update(['status' => 'inactive']);
+        $count = count($this->selectedClients);
+        $this->selectedClients = [];
+        $this->selectAll = false;
+        session()->flash('success', "{$count} client(s) deactivated successfully.");
     }
 
     public function resetForm()
@@ -214,11 +268,17 @@ class ManageClients extends Component
                             ->orWhere('email', 'like', '%' . $this->search . '%');
                     });
             })
+            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->latest()
             ->paginate(10);
 
+        $hasActiveFilters = $this->search || $this->statusFilter;
+        $pageIds = $clients->pluck('id')->toArray();
+
         return view('modules.crm.clients.manage-clients', [
-            'clients' => $clients,
+            'clients'          => $clients,
+            'hasActiveFilters' => $hasActiveFilters,
+            'pageIds'          => $pageIds,
         ])->layoutData(['title' => 'Clients Management - Aspire Hub']);
     }
 }

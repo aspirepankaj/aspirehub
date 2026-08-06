@@ -16,6 +16,7 @@ Route::get('/clients', ManageClients::class)->name('clients');
 
 Route::get('/staff', ManageStaff::class)->name('staff');
 
+Route::get('/websites/service-types', \App\Modules\CRM\Websites\Livewire\ManageServiceTypes::class)->name('websites.service-types');
 Route::get('/websites', ManageWebsites::class)->name('websites');
 
 Route::get('/marketing-reports', function () {

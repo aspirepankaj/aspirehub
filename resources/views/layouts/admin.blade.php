@@ -14,7 +14,8 @@
 
         <!-- Scripts & Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-         @livewireStyles
+        @livewireStyles
+
         <style>
             body {
                 font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
@@ -74,5 +75,7 @@
                 </footer>
             </div>
         </div>
+
+        @livewireScripts
     </body>
 </html>

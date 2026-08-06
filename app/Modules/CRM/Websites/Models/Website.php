@@ -20,7 +20,7 @@ class Website extends Model
         'client_id',
         'site_name',
         'url',
-        'site_type',
+        'service_type_id',
         'status',
         'admin_url',
         'admin_username',
@@ -30,17 +30,6 @@ class Website extends Model
         'notes',
         'added_by',
         'edited_by',
-    ];
-
-    /**
-     * Service type labels and their badge colours.
-     */
-    public static array $siteTypes = [
-        'maintenance'       => ['label' => 'Maintenance',       'color' => 'emerald'],
-        'design'            => ['label' => 'Design',            'color' => 'pink'],
-        'development'       => ['label' => 'Development',       'color' => 'indigo'],
-        'speed_optimisation'=> ['label' => 'Speed Optimisation','color' => 'amber'],
-        'other'             => ['label' => 'Other',             'color' => 'slate'],
     ];
 
     /**
@@ -71,6 +60,11 @@ class Website extends Model
     }
 
     // ─── Relationships ──────────────────────────────────────────────────────────
+
+    public function serviceType(): BelongsTo
+    {
+        return $this->belongsTo(ServiceType::class, 'service_type_id');
+    }
 
     public function client(): BelongsTo
     {

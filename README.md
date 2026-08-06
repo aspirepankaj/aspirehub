@@ -121,6 +121,9 @@ app/
 
 ---
 
+
+\Livewire\Livewire::component('your-component-name', \App\Modules\Path\To\YourComponent::class);
+
 ## Running Tests
 
 Automated testing is configured to run using an in-memory SQLite database (`:memory:`) automatically. To run the automated feature tests, execute:

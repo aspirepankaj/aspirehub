@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Forms\LoginForm;
+use App\Modules\Core\Activity\Models\ActivityLog;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -16,17 +17,54 @@ new #[Layout('layouts.auth')] class extends Component
     {
         $this->validate();
 
-        $this->form->authenticate();
+        try {
+            $this->form->authenticate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log failed login attempt (no auth user available yet)
+            ActivityLog::create([
+                'user_id'      => null,
+                'action'       => 'failed_login',
+                'description'  => "Failed login attempt for email: {$this->form->email}",
+                'meta'         => [
+                    'ip'    => request()->ip(),
+                    'agent' => request()->userAgent(),
+                ],
+            ]);
+            throw $e;
+        }
 
         $user = \Illuminate\Support\Facades\Auth::user();
         if (!$user || !$user->admin || !$user->admin->is_active) {
             \Illuminate\Support\Facades\Auth::logout();
+
+            // Log access-denied attempt
+            ActivityLog::create([
+                'user_id'      => $user?->id,
+                'action'       => 'access_denied',
+                'description'  => "Login denied — no admin privileges for: {$this->form->email}",
+                'meta'         => [
+                    'ip'    => request()->ip(),
+                    'agent' => request()->userAgent(),
+                ],
+            ]);
+
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'form.email' => 'Access denied. You do not have administrator privileges.',
             ]);
         }
 
         Session::regenerate();
+
+        // Log successful login
+        ActivityLog::create([
+            'user_id'      => $user->id,
+            'action'       => 'login',
+            'description'  => "{$user->name} logged into the admin panel",
+            'meta'         => [
+                'ip'    => request()->ip(),
+                'agent' => request()->userAgent(),
+            ],
+        ]);
 
         $this->redirectIntended(default: route('admin.dashboard', absolute: false), navigate: true);
     }

@@ -14,6 +14,8 @@ class ManageActivityLogs extends Component
 
     public string $search = '';
     public string $actionFilter = '';
+    public string $dateFrom = '';
+    public string $dateTo = '';
 
     public function updatingSearch(): void
     {
@@ -22,6 +24,25 @@ class ManageActivityLogs extends Component
 
     public function updatingActionFilter(): void
     {
+        $this->resetPage();
+    }
+
+    public function updatingDateFrom(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingDateTo(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->actionFilter = '';
+        $this->dateFrom = '';
+        $this->dateTo = '';
         $this->resetPage();
     }
 
@@ -39,11 +60,20 @@ class ManageActivityLogs extends Component
             ->when($this->actionFilter, function ($q) {
                 $q->where('action', $this->actionFilter);
             })
+            ->when($this->dateFrom, function ($q) {
+                $q->whereDate('created_at', '>=', $this->dateFrom);
+            })
+            ->when($this->dateTo, function ($q) {
+                $q->whereDate('created_at', '<=', $this->dateTo);
+            })
             ->latest()
             ->paginate(15);
 
+        $hasActiveFilters = $this->search || $this->actionFilter || $this->dateFrom || $this->dateTo;
+
         return view('modules.core.activity.manage-activity-logs', [
-            'logs' => $logs
+            'logs' => $logs,
+            'hasActiveFilters' => $hasActiveFilters,
         ])->layoutData(['title' => 'System Activity Logs - Aspire Hub']);
     }
 }

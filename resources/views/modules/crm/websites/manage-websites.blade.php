@@ -26,29 +26,95 @@
     {{-- Breadcrumbs --}}
     <x-admin.breadcrumbs :items="['Websites' => null]" />
 
-    {{-- Toolbar --}}
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-        {{-- Search --}}
-        <div class="relative w-full sm:max-w-md">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400 dark:text-slate-500">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </span>
-            <input wire:model.live.debounce.300ms="search"
-                   type="text"
-                   autocomplete="off"
-                   placeholder="Search by site name, URL, or client..."
-                   class="block w-full pl-11 pr-4.5 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-        </div>
+    {{-- ══════════════════════════════════════════════
+         PAGE HEADER — Title + Add Website button
+    ══════════════════════════════════════════════ --}}
+    <div class="flex items-center justify-between gap-4 mb-5">
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">
+            Manage and track all customer websites, logins, and configurations
+        </p>
 
-        {{-- Add Website Button --}}
-        <x-admin.button wire:click="openAddModal" size="md" variant="primary" class="w-full sm:w-auto space-x-2">
-            <svg class="w-4 h-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {{-- Add Website button --}}
+        <button type="button" wire:click="openAddModal"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-semibold shadow-sm shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            <span>Add Website</span>
-        </x-admin.button>
+            Add Website
+        </button>
+    </div>
+
+    {{-- ══════════════════════════════════════════════
+         FILTERS — 3-Column Layout (Search + Status + Service Type)
+    ══════════════════════════════════════════════ --}}
+    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+            {{-- Search --}}
+            <div class="relative flex items-center">
+                <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input wire:model.live.debounce.300ms="search"
+                       type="text"
+                       autocomplete="off"
+                       placeholder="Search by site name, URL, or client..."
+                       class="block w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150" />
+            </div>
+
+            {{-- Status Filter --}}
+            <div class="relative flex items-center">
+                <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                </svg>
+                <select wire:model.live="statusFilter"
+                        class="block w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150 appearance-none">
+                    <option value="" class="dark:bg-slate-900">All Statuses</option>
+                    <option value="active" class="dark:bg-slate-900">Active</option>
+                    <option value="inactive" class="dark:bg-slate-900">Inactive</option>
+                    <option value="suspended" class="dark:bg-slate-900">Suspended</option>
+                </select>
+                <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+
+            {{-- Service Type Filter --}}
+            <div class="relative flex items-center">
+                <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <select wire:model.live="serviceTypeFilter"
+                        class="block w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150 appearance-none">
+                    <option value="" class="dark:bg-slate-900">All Service Types</option>
+                    @foreach($serviceTypes as $typeOpt)
+                        <option value="{{ $typeOpt->id }}" class="dark:bg-slate-900">{{ $typeOpt->name }}</option>
+                    @endforeach
+                </select>
+                <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+
+        {{-- Clear Filters row --}}
+        @if($hasActiveFilters)
+            <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+                <span class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Filters active — showing filtered results
+                </span>
+                <button type="button" wire:click="clearFilters"
+                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200/60 dark:border-red-800/30 hover:bg-red-100 dark:hover:bg-red-500/20 text-xs font-bold transition-all duration-150 active:scale-95">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Clear Filters
+                </button>
+            </div>
+        @endif
     </div>
 
     {{-- Flash Message --}}
@@ -56,8 +122,46 @@
         <x-admin.alert type="success" class="mb-6" :message="session('success')" />
     @endif
 
-    {{-- Websites Table --}}
+    {{-- Websites Table Card --}}
     <x-admin.card>
+
+        {{-- Bulk Action Bar --}}
+        @if(count($selectedWebsites) > 0)
+            <div class="flex items-center justify-between gap-3 mb-4 px-1 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-700/30">
+                <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-2 pl-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    {{ count($selectedWebsites) }} website(s) selected
+                </span>
+                <div class="flex items-center gap-2 pr-2">
+                    <button type="button" wire:click="bulkActivate"
+                            wire:confirm="Activate {{ count($selectedWebsites) }} selected website(s)?"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-emerald-500/20">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Activate
+                    </button>
+                    <button type="button" wire:click="bulkDeactivate"
+                            wire:confirm="Deactivate {{ count($selectedWebsites) }} selected website(s)?"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-500 hover:bg-slate-600 text-white text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-slate-500/20">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        Deactivate
+                    </button>
+                    <button type="button" wire:click="$set('selectedWebsites', []); $set('selectAll', false)"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 transition-all duration-150 active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        @endif
+
         @if($websites->isEmpty())
             <div class="text-center py-16">
                 <svg class="w-14 h-14 text-slate-300 dark:text-slate-700 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -67,71 +171,108 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Try refining your search or add a new website above.</p>
             </div>
         @else
-            <x-admin.table :headers="['Website', 'Client', 'Service Type', 'Status', 'Hosting', 'Added', 'Actions']">
-                @foreach($websites as $website)
-                    @php
-                        $typeColor  = $typeColors[$website->site_type]  ?? 'slate';
-                        $typeLabel  = $typeLabels[$website->site_type]  ?? 'Other';
-                        $statColor  = $statusColors[$website->status]   ?? 'slate';
-                    @endphp
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
-                        {{-- Website Name + URL --}}
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-900 dark:text-white">{{ $website->site_name }}</div>
-                            <a href="{{ $website->url }}" target="_blank"
-                               class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 font-medium truncate max-w-[200px] block">
-                                {{ $website->url }}
-                            </a>
-                        </td>
+            <div class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
+                    <thead>
+                        <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            {{-- Select All checkbox --}}
+                            <th class="px-4 py-4 w-10">
+                                <input type="checkbox"
+                                       wire:model.live="selectAll"
+                                       wire:change="toggleSelectAll({{ json_encode($pageIds) }})"
+                                       class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
+                            </th>
+                            <th class="px-4 py-4">Website</th>
+                            <th class="px-4 py-4">Client</th>
+                            <th class="px-4 py-4">Service Type</th>
+                            <th class="px-4 py-4">Status</th>
+                            <th class="px-4 py-4">Hosting</th>
+                            <th class="px-4 py-4">Added</th>
+                            <th class="px-4 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                        @foreach($websites as $website)
+                            @php
+                                $typeColor  = $typeColors[$website->site_type]  ?? 'slate';
+                                $typeLabel  = $typeLabels[$website->site_type]  ?? 'Other';
+                                $statColor  = $statusColors[$website->status]   ?? 'slate';
+                            @endphp
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors {{ in_array($website->id, $selectedWebsites) ? 'bg-indigo-50/40 dark:bg-indigo-900/10' : '' }}">
+                                {{-- Row Checkbox --}}
+                                <td class="px-4 py-4 w-10">
+                                    <input type="checkbox"
+                                           wire:model.live="selectedWebsites"
+                                           value="{{ $website->id }}"
+                                           class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
+                                </td>
 
-                        {{-- Client --}}
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                {{ $website->client->company_name ?: ($website->client->user->name ?? '—') }}
-                            </div>
-                            <div class="text-xs text-slate-400 dark:text-slate-500">
-                                {{ $website->client->user->email ?? '' }}
-                            </div>
-                        </td>
+                                {{-- Website Name + URL --}}
+                                <td class="px-4 py-4">
+                                    <div class="font-bold text-slate-900 dark:text-white">{{ $website->site_name }}</div>
+                                    <a href="{{ $website->url }}" target="_blank"
+                                       class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 font-medium truncate max-w-[200px] block">
+                                        {{ $website->url }}
+                                    </a>
+                                </td>
 
-                        {{-- Service Type Badge --}}
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg
-                                bg-{{ $typeColor }}-500/10 text-{{ $typeColor }}-600 dark:text-{{ $typeColor }}-400">
-                                {{ $typeLabel }}
-                            </span>
-                        </td>
+                                {{-- Client --}}
+                                <td class="px-4 py-4">
+                                    <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                        {{ $website->client->company_name ?: ($website->client->user->name ?? '—') }}
+                                    </div>
+                                    <div class="text-xs text-slate-400 dark:text-slate-500">
+                                        {{ $website->client->user->email ?? '' }}
+                                    </div>
+                                </td>
 
-                        {{-- Status Badge --}}
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg
-                                bg-{{ $statColor }}-500/10 text-{{ $statColor }}-600 dark:text-{{ $statColor }}-400">
-                                {{ ucfirst($website->status) }}
-                            </span>
-                        </td>
+                                {{-- Service Type Badge --}}
+                                <td class="px-4 py-4">
+                                    @if($website->serviceType)
+                                        <span class="px-2.5 py-1 text-xs font-bold rounded-lg
+                                            bg-{{ $website->serviceType->color }}-500/10 text-{{ $website->serviceType->color }}-600 dark:text-{{ $website->serviceType->color }}-400 uppercase tracking-wider text-[10px]">
+                                            {{ $website->serviceType->name }}
+                                        </span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
 
-                        {{-- Hosting --}}
-                        <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 font-medium">
-                            {{ $website->hosting_provider ?: '—' }}
-                        </td>
+                                {{-- Status Badge --}}
+                                <td class="px-4 py-4">
+                                    @php
+                                        $statColor = $statusColors[$website->status] ?? 'slate';
+                                    @endphp
+                                    <span class="px-2.5 py-1 text-xs font-bold rounded-lg
+                                        bg-{{ $statColor }}-500/10 text-{{ $statColor }}-600 dark:text-{{ $statColor }}-400">
+                                        {{ ucfirst($website->status) }}
+                                    </span>
+                                </td>
 
-                        {{-- Added At --}}
-                        <td class="px-6 py-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
-                            {{ $website->created_at->diffForHumans() }}
-                        </td>
+                                {{-- Hosting --}}
+                                <td class="px-4 py-4 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                                    {{ $website->hosting_provider ?: '—' }}
+                                </td>
 
-                        {{-- Actions --}}
-                        <td class="px-6 py-4 text-right">
-                            <button type="button" wire:click="editWebsite({{ $website->id }})"
-                                    class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                @endforeach
-            </x-admin.table>
+                                {{-- Added At --}}
+                                <td class="px-4 py-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                                    {{ $website->created_at->diffForHumans() }}
+                                </td>
+
+                                {{-- Actions --}}
+                                <td class="px-4 py-4 text-right">
+                                    <button type="button" wire:click="editWebsite({{ $website->id }})"
+                                            class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
             <div class="mt-6">
                 {{ $websites->links() }}
@@ -279,16 +420,15 @@
             {{-- Service Type & Status --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="add_site_type" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Type *</label>
-                    <select wire:model="site_type" id="add_site_type"
+                    <label for="add_service_type_id" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Type *</label>
+                    <select wire:model="service_type_id" id="add_service_type_id"
                             class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
-                        <option value="maintenance"        class="dark:bg-slate-900">Maintenance</option>
-                        <option value="design"             class="dark:bg-slate-900">Design</option>
-                        <option value="development"        class="dark:bg-slate-900">Development</option>
-                        <option value="speed_optimisation" class="dark:bg-slate-900">Speed Optimisation</option>
-                        <option value="other"              class="dark:bg-slate-900">Other</option>
+                        <option value="" class="dark:bg-slate-900">— Select Service Type —</option>
+                        @foreach($serviceTypes as $typeOpt)
+                            <option value="{{ $typeOpt->id }}" class="dark:bg-slate-900">{{ $typeOpt->name }}</option>
+                        @endforeach
                     </select>
-                    <x-input-error :messages="$errors->get('site_type')" class="mt-1" />
+                    <x-input-error :messages="$errors->get('service_type_id')" class="mt-1" />
                 </div>
                 <div>
                     <label for="add_status" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status *</label>
@@ -539,16 +679,15 @@
             {{-- Service Type & Status --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="edit_site_type" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Type *</label>
-                    <select wire:model="site_type" id="edit_site_type"
+                    <label for="edit_service_type_id" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Type *</label>
+                    <select wire:model="service_type_id" id="edit_service_type_id"
                             class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
-                        <option value="maintenance"        class="dark:bg-slate-900">Maintenance</option>
-                        <option value="design"             class="dark:bg-slate-900">Design</option>
-                        <option value="development"        class="dark:bg-slate-900">Development</option>
-                        <option value="speed_optimisation" class="dark:bg-slate-900">Speed Optimisation</option>
-                        <option value="other"              class="dark:bg-slate-900">Other</option>
+                        <option value="" class="dark:bg-slate-900">— Select Service Type —</option>
+                        @foreach($serviceTypes as $typeOpt)
+                            <option value="{{ $typeOpt->id }}" class="dark:bg-slate-900">{{ $typeOpt->name }}</option>
+                        @endforeach
                     </select>
-                    <x-input-error :messages="$errors->get('site_type')" class="mt-1" />
+                    <x-input-error :messages="$errors->get('service_type_id')" class="mt-1" />
                 </div>
                 <div>
                     <label for="edit_status" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status *</label>
