@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('adspv_staff_phones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('staff_id')->constrained('adspv_clients')->onDelete('cascade');
+            $table->foreignId('staff_id')->constrained('adspv_staff')->onDelete('cascade');
             $table->string('phone');
             $table->string('label')->nullable()->default('Work'); // e.g. Work, Mobile, Home
             $table->timestamps();
