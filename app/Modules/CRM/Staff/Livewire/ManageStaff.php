@@ -20,20 +20,88 @@ class ManageStaff extends Component
     public string $email = '';
     public string $password = '';
     public string $company_name = '';
+    public string $role = '';
+    public string $department = '';
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
     public string $status = 'active';
     public string $notes = '';
 
-    // Search query
+    // Search & Filter
     public string $search = '';
+    public string $statusFilter = '';
+
+    // Bulk selection
+    public array $selectedStaff = [];
+    public bool $selectAll = false;
 
     // Edit state tracking
     public ?int $editingStaffId = null;
     public ?int $editingUserId = null;
 
-    public function updatingSearch()
+    // Dropdown options
+    public array $roles = [
+        'Account Manager', 'SEO Specialist', 'Developer', 'Designer',
+        'Support Lead', 'Marketing Manager', 'DevOps', 'Content Writer',
+        'Sales Executive', 'HR Manager', 'Project Manager', 'Quality Analyst',
+    ];
+
+    public array $departments = [
+        'Client Success', 'Marketing', 'Engineering', 'Design',
+        'Support', 'Operations', 'Sales', 'HR', 'Finance',
+    ];
+
+    public function updatingSearch(): void
     {
+        $this->selectedStaff = [];
+        $this->selectAll = false;
         $this->resetPage();
+    }
+
+    public function updatingStatusFilter(): void
+    {
+        $this->selectedStaff = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->statusFilter = '';
+        $this->selectedStaff = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
+    public function toggleSelectAll(array $pageIds): void
+    {
+        if ($this->selectAll) {
+            $this->selectedStaff = $pageIds;
+        } else {
+            $this->selectedStaff = [];
+        }
+    }
+
+    public function bulkActivate(): void
+    {
+        if (empty($this->selectedStaff)) return;
+
+        Staff::whereIn('id', $this->selectedStaff)->update(['status' => 'active']);
+        $count = count($this->selectedStaff);
+        $this->selectedStaff = [];
+        $this->selectAll = false;
+        session()->flash('success', "{$count} staff member(s) activated successfully.");
+    }
+
+    public function bulkDeactivate(): void
+    {
+        if (empty($this->selectedStaff)) return;
+
+        Staff::whereIn('id', $this->selectedStaff)->update(['status' => 'inactive']);
+        $count = count($this->selectedStaff);
+        $this->selectedStaff = [];
+        $this->selectAll = false;
+        session()->flash('success', "{$count} staff member(s) deactivated successfully.");
     }
 
     public function resetForm()
@@ -43,6 +111,8 @@ class ManageStaff extends Component
             'email',
             'password',
             'company_name',
+            'role',
+            'department',
             'phones',
             'notes',
             'editingStaffId',
@@ -87,13 +157,13 @@ class ManageStaff extends Component
 
     public function saveStaff()
     {
-        logger('saveStaff reached! Name: ' . $this->name . ', Email: ' . $this->email);
-
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'company_name' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:100',
+            'department' => 'nullable|string|max:100',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -113,9 +183,11 @@ class ManageStaff extends Component
             ]);
 
             // 2. Create associated Staff details
-            $Staff = Staff::create([
+            $staffRecord = Staff::create([
                 'user_id' => $user->id,
                 'company_name' => $this->company_name,
+                'role' => $this->role,
+                'department' => $this->department,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'added_by' => auth()->id(),
@@ -124,7 +196,7 @@ class ManageStaff extends Component
             // 3. Create multiple Staff phones
             foreach ($this->phones as $phoneData) {
                 if (!empty($phoneData['phone'])) {
-                    $Staff->phones()->create([
+                    $staffRecord->phones()->create([
                         'phone' => $phoneData['phone'],
                         'label' => $phoneData['label'],
                     ]);
@@ -139,18 +211,20 @@ class ManageStaff extends Component
 
     public function editStaff($id)
     {
-        $Staff = Staff::with(['user', 'phones'])->findOrFail($id);
+        $staffRecord = Staff::with(['user', 'phones'])->findOrFail($id);
 
-        $this->editingStaffId = $Staff->id;
-        $this->editingUserId = $Staff->user_id;
+        $this->editingStaffId = $staffRecord->id;
+        $this->editingUserId = $staffRecord->user_id;
 
-        $this->name = $Staff->user->name;
-        $this->email = $Staff->user->email;
+        $this->name = $staffRecord->user->name;
+        $this->email = $staffRecord->user->email;
         $this->password = ''; // Leave password blank on edit unless updating
-        $this->company_name = $Staff->company_name ?? '';
-        
+        $this->company_name = $staffRecord->company_name ?? '';
+        $this->role = $staffRecord->role ?? '';
+        $this->department = $staffRecord->department ?? '';
+
         $this->phones = [];
-        foreach ($Staff->phones as $phoneRecord) {
+        foreach ($staffRecord->phones as $phoneRecord) {
             $this->phones[] = [
                 'phone' => $phoneRecord->phone,
                 'label' => $phoneRecord->label,
@@ -160,8 +234,8 @@ class ManageStaff extends Component
             $this->phones = [['phone' => '', 'label' => 'Work']];
         }
 
-        $this->status = $Staff->status;
-        $this->notes = $Staff->notes ?? '';
+        $this->status = $staffRecord->status;
+        $this->notes = $staffRecord->notes ?? '';
 
         $this->resetValidation();
         $this->dispatch('open-modal', name: 'edit-staff-modal');
@@ -174,6 +248,8 @@ class ManageStaff extends Component
             'email' => 'required|email|max:255|unique:users,email,' . $this->editingUserId,
             'password' => 'nullable|string|min:8',
             'company_name' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:100',
+            'department' => 'nullable|string|max:100',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -197,19 +273,21 @@ class ManageStaff extends Component
             $user->update($userUpdateData);
 
             // 2. Update associated Staff details
-            $Staff = Staff::findOrFail($this->editingStaffId);
-            $Staff->update([
+            $staffRecord = Staff::findOrFail($this->editingStaffId);
+            $staffRecord->update([
                 'company_name' => $this->company_name,
+                'role' => $this->role,
+                'department' => $this->department,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'edited_by' => auth()->id(),
             ]);
 
             // 3. Sync Staff phones
-            $Staff->phones()->delete();
+            $staffRecord->phones()->delete();
             foreach ($this->phones as $phoneData) {
                 if (!empty($phoneData['phone'])) {
-                    $Staff->phones()->create([
+                    $staffRecord->phones()->create([
                         'phone' => $phoneData['phone'],
                         'label' => $phoneData['label'],
                     ]);
@@ -227,16 +305,24 @@ class ManageStaff extends Component
         $Staff = Staff::with(['user', 'phones'])
             ->where(function ($query) {
                 $query->where('company_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('role', 'like', '%' . $this->search . '%')
+                    ->orWhere('department', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', function ($uQuery) {
                         $uQuery->where('name', 'like', '%' . $this->search . '%')
                             ->orWhere('email', 'like', '%' . $this->search . '%');
                     });
             })
+            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->latest()
             ->paginate(10);
 
+        $hasActiveFilters = $this->search || $this->statusFilter;
+        $pageIds = $Staff->pluck('id')->toArray();
+
         return view('modules.crm.staff.manage-staff', [
-            'Staff' => $Staff,
+            'Staff'            => $Staff,
+            'hasActiveFilters' => $hasActiveFilters,
+            'pageIds'          => $pageIds,
         ])->layoutData(['title' => 'Staff Management - Aspire Hub']);
     }
 }

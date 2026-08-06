@@ -5,7 +5,7 @@
     <x-admin.breadcrumbs :items="['Staff' => null]" />
 
     <!-- Search and Actions Bar -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
         <!-- Search bar -->
         <div class="relative w-full sm:max-w-md">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400 dark:text-slate-500">
@@ -16,7 +16,7 @@
             <input wire:model.live.debounce.300ms="search" 
                    type="text" 
                    autocomplete="off"
-                   placeholder="Search by name, email, or company..." 
+                   placeholder="Search by name, email, company, role..." 
                    class="block w-full pl-11 pr-4.5 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
         </div>
 
@@ -27,6 +27,42 @@
             </svg>
             <span>Add Staff</span>
         </x-admin.button>
+    </div>
+
+    <!-- Status Filter Row -->
+    <div class="flex flex-col sm:flex-row items-center gap-3 mb-6">
+        <div class="relative w-full sm:w-56">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400 dark:text-slate-500">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+            </span>
+            <select wire:model.live="statusFilter"
+                    class="block w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
+        @if($hasActiveFilters)
+            <button type="button" wire:click="clearFilters" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition">
+                Clear Filters
+            </button>
+        @endif
+
+        <!-- Bulk Actions (shown only when rows are selected) -->
+        @if(count($selectedStaff) > 0)
+            <div class="flex items-center gap-2 ml-auto">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ count($selectedStaff) }} selected</span>
+                <button type="button" wire:click="bulkActivate" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition">
+                    Activate
+                </button>
+                <button type="button" wire:click="bulkDeactivate" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-500/10 text-slate-500 dark:text-slate-400 hover:bg-slate-500/20 transition">
+                    Deactivate
+                </button>
+            </div>
+        @endif
     </div>
 
     <!-- Success Message Alert -->
@@ -45,15 +81,49 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Try refining your search keyword or create a new staff profile above.</p>
             </div>
         @else
-            <x-admin.table :headers="['Staff Details', 'Company Name', 'Phone Numbers', 'Status', 'Registered', 'Actions']">
+            <div class="flex items-center justify-between gap-3 mb-4 px-1 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-700/30">
+            <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
+                <thead>
+                    <tr class="border-b border-slate-100 dark:border-slate-800/50">
+                        <th class="px-6 py-3 w-10">
+                            <input type="checkbox" wire:model.live="selectAll" wire:change="toggleSelectAll({{ json_encode($pageIds) }})"
+                                   class="rounded-md border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/50" />
+                        </th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Staff Details</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company Name</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Role</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Department</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Phone Numbers</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Registered</th>
+                        <th class="px-6 py-3 text-right text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
                 @foreach($Staff as $staff)
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors" wire:key="staff-row-{{ $staff->id }}">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" wire:model.live="selectedStaff" value="{{ $staff->id }}"
+                                   class="rounded-md border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/50" />
+                        </td>
                         <td class="px-6 py-4">
                             <div class="font-bold text-slate-900 dark:text-white">{{ $staff->user->name ?? 'Deleted User' }}</div>
                             <div class="text-xs text-slate-400 dark:text-slate-500">{{ $staff->user->email ?? 'N/A' }}</div>
                         </td>
                         <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-semibold">
                             {{ $staff->company_name ?: '—' }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300 text-sm font-medium">
+                            {{ $staff->role ?: '—' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($staff->department)
+                                <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                    {{ $staff->department }}
+                                </span>
+                            @else
+                                <span class="text-slate-400 dark:text-slate-500">—</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs">
                             @if($staff->phones->isEmpty())
@@ -87,7 +157,9 @@
                         </td>
                     </tr>
                 @endforeach
-            </x-admin.table>
+                </tbody>
+            </table>
+            </div>
 
             <div class="mt-6">
                 {{ $Staff->links() }}
@@ -128,6 +200,32 @@
                 <input wire:model="company_name" id="company_name" type="text" placeholder="e.g. Acme Corp"
                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('company_name')" class="mt-1" />
+            </div>
+
+            <!-- Role & Department -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="role" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ __('Role') }}</label>
+                    <select wire:model="role" id="role"
+                            class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
+                        <option value="">Select Role</option>
+                        @foreach($roles as $r)
+                            <option value="{{ $r }}">{{ $r }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('role')" class="mt-1" />
+                </div>
+                <div>
+                    <label for="department" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ __('Department') }}</label>
+                    <select wire:model="department" id="department"
+                            class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
+                        <option value="">Select Department</option>
+                        @foreach($departments as $d)
+                            <option value="{{ $d }}">{{ $d }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('department')" class="mt-1" />
+                </div>
             </div>
 
             <!-- Phones Section -->
@@ -245,6 +343,31 @@
                 <input wire:model="company_name" id="edit_company_name" type="text" placeholder="e.g. Acme Corp"
                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('company_name')" class="mt-1" />
+            </div>
+
+            <!-- Role & Department -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="edit_role" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ __('Role') }}</label>
+                    <select wire:model="role" id="edit_role"
+                            class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
+                        <option value="">Select Role</option>
+                        @foreach($roles as $r)
+                            <option value="{{ $r }}">{{ $r }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('role')" class="mt-1" />
+                </div>
+                <div>
+                    <label for="edit_department" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ __('Department') }}</label>
+                    <select wire:model="department" id="edit_department"
+                            class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
+                        <option value="">Select Department</option>
+                        @foreach($departments as $d)
+                            <option value="{{ $d }}">{{ $d }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('department')" class="mt-1" />
             </div>
 
             <!-- Phones Section (Edit) -->
