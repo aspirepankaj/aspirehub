@@ -13,6 +13,7 @@ Route::get('/', function () {
 
 // Clients page using custom Livewire component
 Route::get('/clients', ManageClients::class)->name('clients');
+Route::get('/clients/plans', \App\Modules\CRM\Clients\Livewire\ManagePlans::class)->name('clients.plans');
 
 Route::get('/staff', ManageStaff::class)->name('staff');
 

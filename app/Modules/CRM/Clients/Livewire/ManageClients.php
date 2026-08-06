@@ -23,10 +23,12 @@ class ManageClients extends Component
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
     public string $status = 'active';
     public string $notes = '';
+    public array $plan_ids = [];
 
     // Search & Filter
     public string $search = '';
     public string $statusFilter = '';
+    public string $planFilter = '';
 
     // Bulk selection
     public array $selectedClients = [];
@@ -50,10 +52,18 @@ class ManageClients extends Component
         $this->resetPage();
     }
 
+    public function updatingPlanFilter(): void
+    {
+        $this->selectedClients = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
         $this->statusFilter = '';
+        $this->planFilter = '';
         $this->selectedClients = [];
         $this->selectAll = false;
         $this->resetPage();
@@ -92,8 +102,9 @@ class ManageClients extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'company_name', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId']);
+        $this->reset(['name', 'email', 'password', 'company_name', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids']);
         $this->phones = [['phone' => '', 'label' => 'Work']];
+        $this->plan_ids = [];
         $this->resetValidation();
     }
 
@@ -135,6 +146,8 @@ class ManageClients extends Component
             'phones.*.label' => 'required|string|max:50',
             'status' => 'required|in:active,inactive',
             'notes' => 'nullable|string',
+            'plan_ids' => 'nullable|array',
+            'plan_ids.*' => 'exists:adspv_plans,id',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
@@ -166,6 +179,9 @@ class ManageClients extends Component
                     ]);
                 }
             }
+
+            // 4. Sync plans
+            $client->plans()->sync($this->plan_ids);
         });
 
         $this->dispatch('close-modal', name: 'add-client-modal');
@@ -175,10 +191,11 @@ class ManageClients extends Component
 
     public function editClient($id)
     {
-        $client = Client::with(['user', 'phones'])->findOrFail($id);
+        $client = Client::with(['user', 'phones', 'plans'])->findOrFail($id);
 
         $this->editingClientId = $client->id;
         $this->editingUserId = $client->user_id;
+        $this->plan_ids = $client->plans->pluck('id')->toArray();
 
         $this->name = $client->user->name;
         $this->email = $client->user->email;
@@ -215,6 +232,8 @@ class ManageClients extends Component
             'phones.*.label' => 'required|string|max:50',
             'status' => 'required|in:active,inactive',
             'notes' => 'nullable|string',
+            'plan_ids' => 'nullable|array',
+            'plan_ids.*' => 'exists:adspv_plans,id',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
@@ -251,6 +270,9 @@ class ManageClients extends Component
                     ]);
                 }
             }
+
+            // 4. Sync plans
+            $client->plans()->sync($this->plan_ids);
         });
 
         $this->dispatch('close-modal', name: 'edit-client-modal');
@@ -260,7 +282,7 @@ class ManageClients extends Component
 
     public function render()
     {
-        $clients = Client::with(['user', 'phones'])
+        $clients = Client::with(['user', 'phones', 'plans'])
             ->where(function ($query) {
                 $query->where('company_name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', function ($uQuery) {
@@ -269,14 +291,18 @@ class ManageClients extends Component
                     });
             })
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)))
             ->latest()
             ->paginate(10);
 
-        $hasActiveFilters = $this->search || $this->statusFilter;
+        $hasActiveFilters = $this->search || $this->statusFilter || $this->planFilter;
         $pageIds = $clients->pluck('id')->toArray();
+
+        $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
 
         return view('modules.crm.clients.manage-clients', [
             'clients'          => $clients,
+            'plans'            => $plans,
             'hasActiveFilters' => $hasActiveFilters,
             'pageIds'          => $pageIds,
         ])->layoutData(['title' => 'Clients Management - Aspire Hub']);

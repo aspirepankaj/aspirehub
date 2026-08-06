@@ -34,14 +34,24 @@
             Manage and track all customer websites, logins, and configurations
         </p>
 
-        {{-- Add Website button --}}
-        <button type="button" wire:click="openAddModal"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-semibold shadow-sm shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Add Website
-        </button>
+        <div class="flex items-center gap-2.5">
+            <a href="{{ route('admin.websites.service-types') }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-sm font-semibold transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                </svg>
+                Manage Service Types
+            </a>
+
+            {{-- Add Website button --}}
+            <button type="button" wire:click="openAddModal"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-semibold shadow-sm shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Website
+            </button>
+        </div>
     </div>
 
     {{-- ══════════════════════════════════════════════
@@ -228,11 +238,15 @@
 
                                 {{-- Service Type Badge --}}
                                 <td class="px-4 py-4">
-                                    @if($website->serviceType)
-                                        <span class="px-2.5 py-1 text-xs font-bold rounded-lg
-                                            bg-{{ $website->serviceType->color }}-500/10 text-{{ $website->serviceType->color }}-600 dark:text-{{ $website->serviceType->color }}-400 uppercase tracking-wider text-[10px]">
-                                            {{ $website->serviceType->name }}
-                                        </span>
+                                    @if($website->serviceTypes->isNotEmpty())
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach($website->serviceTypes as $sT)
+                                                <span class="px-2.5 py-1 text-xs font-bold rounded-lg
+                                                    bg-{{ $sT->color }}-500/10 text-{{ $sT->color }}-600 dark:text-{{ $sT->color }}-400 uppercase tracking-wider text-[10px]">
+                                                    {{ $sT->name }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     @else
                                         —
                                     @endif
@@ -283,7 +297,7 @@
     {{-- ═══════════════════════════════════════════════════════════
          ADD WEBSITE MODAL
     ═══════════════════════════════════════════════════════════ --}}
-    <x-admin.modal name="add-website-modal" title="Add New Website">
+    <x-admin.modal name="add-website-modal" title="Add New Website" maxWidth="max-w-3xl">
         <div class="space-y-4 mt-2">
 
             {{-- Client Searchable Dropdown (Add Modal) --}}
@@ -417,18 +431,19 @@
                 <x-input-error :messages="$errors->get('url')" class="mt-1" />
             </div>
 
-            {{-- Service Type & Status --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="add_service_type_id" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Type *</label>
-                    <select wire:model="service_type_id" id="add_service_type_id"
-                            class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
-                        <option value="" class="dark:bg-slate-900">— Select Service Type —</option>
+                    <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Types *</label>
+                    <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-28 overflow-y-auto scrollbar-thin">
                         @foreach($serviceTypes as $typeOpt)
-                            <option value="{{ $typeOpt->id }}" class="dark:bg-slate-900">{{ $typeOpt->name }}</option>
+                            <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
+                                <input type="checkbox" wire:model="service_type_ids" value="{{ $typeOpt->id }}"
+                                       class="rounded border-slate-200/60 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $typeOpt->name }}</span>
+                            </label>
                         @endforeach
-                    </select>
-                    <x-input-error :messages="$errors->get('service_type_id')" class="mt-1" />
+                    </div>
+                    <x-input-error :messages="$errors->get('service_type_ids')" class="mt-1" />
                 </div>
                 <div>
                     <label for="add_status" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status *</label>
@@ -543,7 +558,7 @@
     {{-- ═══════════════════════════════════════════════════════════
          EDIT WEBSITE MODAL
     ═══════════════════════════════════════════════════════════ --}}
-    <x-admin.modal name="edit-website-modal" title="Edit Website">
+    <x-admin.modal name="edit-website-modal" title="Edit Website" maxWidth="max-w-3xl">
         <div class="space-y-4 mt-2">
 
             {{-- Client Searchable Dropdown (Edit Modal) --}}
@@ -676,18 +691,19 @@
                 <x-input-error :messages="$errors->get('url')" class="mt-1" />
             </div>
 
-            {{-- Service Type & Status --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="edit_service_type_id" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Type *</label>
-                    <select wire:model="service_type_id" id="edit_service_type_id"
-                            class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
-                        <option value="" class="dark:bg-slate-900">— Select Service Type —</option>
+                    <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Service Types *</label>
+                    <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-28 overflow-y-auto scrollbar-thin">
                         @foreach($serviceTypes as $typeOpt)
-                            <option value="{{ $typeOpt->id }}" class="dark:bg-slate-900">{{ $typeOpt->name }}</option>
+                            <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
+                                <input type="checkbox" wire:model="service_type_ids" value="{{ $typeOpt->id }}"
+                                       class="rounded border-slate-200/60 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $typeOpt->name }}</span>
+                            </label>
                         @endforeach
-                    </select>
-                    <x-input-error :messages="$errors->get('service_type_id')" class="mt-1" />
+                    </div>
+                    <x-input-error :messages="$errors->get('service_type_ids')" class="mt-1" />
                 </div>
                 <div>
                     <label for="edit_status" class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status *</label>

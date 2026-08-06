@@ -17,9 +17,9 @@ class ServiceType extends Model
         'color',
     ];
 
-    public function websites(): HasMany
+    public function websites(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(Website::class, 'service_type_id');
+        return $this->belongsToMany(Website::class, 'adspv_website_service_type', 'service_type_id', 'website_id')->withTimestamps();
     }
 
     public function getActivityDescription(string $event): string
