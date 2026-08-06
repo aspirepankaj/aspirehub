@@ -46,6 +46,28 @@
             </select>
         </div>
 
+        <!-- Role Filter -->
+        <div class="relative w-full sm:w-56">
+            <select wire:model.live="roleFilter"
+                    class="block w-full pl-4 pr-4 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                <option value="">All Roles</option>
+                @foreach($roles as $r)
+                    <option value="{{ $r }}">{{ $r }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Department Filter -->
+        <div class="relative w-full sm:w-56">
+            <select wire:model.live="departmentFilter"
+                    class="block w-full pl-4 pr-4 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                <option value="">All Departments</option>
+                @foreach($departments as $d)
+                    <option value="{{ $d }}">{{ $d }}</option>
+                @endforeach
+            </select>
+        </div>
+
         @if($hasActiveFilters)
             <button type="button" wire:click="clearFilters" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition">
                 Clear Filters
@@ -66,9 +88,32 @@
         @endif
     </div>
 
-    <!-- Success Message Alert -->
+    <!-- Success Message Alert (auto-dismisses after 3 seconds) -->
     @if (session('success'))
-        <x-admin.alert type="success" class="mb-6" :message="session('success')" />
+        <div wire:key="flash-success-{{ now()->timestamp }}"
+             x-data="{ show: true }"
+             x-show="show"
+             x-init="setTimeout(() => show = false, 3000)"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="mb-6">
+            <x-admin.alert type="success" :message="session('success')" />
+        </div>
+    @endif
+
+    <!-- Error Message Alert (auto-dismisses after 3 seconds) -->
+    @if (session('error'))
+        <div wire:key="flash-error-{{ now()->timestamp }}"
+             x-data="{ show: true }"
+             x-show="show"
+             x-init="setTimeout(() => show = false, 3000)"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="mb-6">
+            <x-admin.alert type="danger" :message="session('error')" />
+        </div>
     @endif
 
     <!-- Staff Table Card -->

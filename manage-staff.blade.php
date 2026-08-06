@@ -45,6 +45,28 @@
             </select>
         </div>
 
+        <!-- Role Filter -->
+        <div class="relative w-full sm:w-56">
+            <select wire:model.live="roleFilter"
+                    class="block w-full pl-4 pr-4 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                <option value="">All Roles</option>
+                @foreach($roles as $r)
+                    <option value="{{ $r }}">{{ $r }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Department Filter -->
+        <div class="relative w-full sm:w-56">
+            <select wire:model.live="departmentFilter"
+                    class="block w-full pl-4 pr-4 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                <option value="">All Departments</option>
+                @foreach($departments as $d)
+                    <option value="{{ $d }}">{{ $d }}</option>
+                @endforeach
+            </select>
+        </div>
+
         @if($hasActiveFilters)
             <button type="button" wire:click="clearFilters" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition">
                 Clear Filters
@@ -81,13 +103,13 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Try refining your search keyword or create a new staff profile above.</p>
             </div>
         @else
-            <div class="overflow-x-auto">
-            <table class="min-w-full">
+            <div class="flex items-center justify-between gap-3 mb-4 px-1 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-700/30">
+            <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800/50">
                         <th class="px-6 py-3 w-10">
                             <input type="checkbox" wire:model.live="selectAll" wire:change="toggleSelectAll({{ json_encode($pageIds) }})"
-                                   class="appearance-none w-4 h-4 rounded-[4px] border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 checked:bg-indigo-600 checked:border-indigo-600 relative cursor-pointer before:content-[''] before:absolute before:inset-0 before:m-auto checked:before:content-['✓'] checked:before:text-white checked:before:text-[10px] checked:before:font-bold checked:before:flex checked:before:items-center checked:before:justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
+                                   class="rounded-md border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/50" />
                         </th>
                         <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Staff Details</th>
                         <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company Name</th>
@@ -104,7 +126,7 @@
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors" wire:key="staff-row-{{ $staff->id }}">
                         <td class="px-6 py-4">
                             <input type="checkbox" wire:model.live="selectedStaff" value="{{ $staff->id }}"
-                                   class="appearance-none w-4 h-4 rounded-[4px] border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 checked:bg-indigo-600 checked:border-indigo-600 relative cursor-pointer before:content-[''] before:absolute before:inset-0 before:m-auto checked:before:content-['✓'] checked:before:text-white checked:before:text-[10px] checked:before:font-bold checked:before:flex checked:before:items-center checked:before:justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
+                                   class="rounded-md border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/50" />
                         </td>
                         <td class="px-6 py-4">
                             <div class="font-bold text-slate-900 dark:text-white">{{ $staff->user->name ?? 'Deleted User' }}</div>

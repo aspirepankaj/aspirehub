@@ -29,6 +29,8 @@ class ManageStaff extends Component
     // Search & Filter
     public string $search = '';
     public string $statusFilter = '';
+    public string $roleFilter = '';
+    public string $departmentFilter = '';
 
     // Bulk selection
     public array $selectedStaff = [];
@@ -64,10 +66,26 @@ class ManageStaff extends Component
         $this->resetPage();
     }
 
+    public function updatingRoleFilter(): void
+    {
+        $this->selectedStaff = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
+    public function updatingDepartmentFilter(): void
+    {
+        $this->selectedStaff = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
         $this->statusFilter = '';
+        $this->roleFilter = '';
+        $this->departmentFilter = '';
         $this->selectedStaff = [];
         $this->selectAll = false;
         $this->resetPage();
@@ -302,21 +320,25 @@ class ManageStaff extends Component
 
     public function render()
     {
+        $searchTerm = trim($this->search);
+
         $Staff = Staff::with(['user', 'phones'])
-            ->where(function ($query) {
-                $query->where('company_name', 'like', '%' . $this->search . '%')
-                    ->orWhere('role', 'like', '%' . $this->search . '%')
-                    ->orWhere('department', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('user', function ($uQuery) {
-                        $uQuery->where('name', 'like', '%' . $this->search . '%')
-                            ->orWhere('email', 'like', '%' . $this->search . '%');
+            ->where(function ($query) use ($searchTerm) {
+                $query->where('company_name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('role', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('department', 'like', '%' . $searchTerm . '%')
+                    ->orWhereHas('user', function ($uQuery) use ($searchTerm) {
+                        $uQuery->where('name', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('email', 'like', '%' . $searchTerm . '%');
                     });
             })
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->roleFilter, fn($q) => $q->where('role', $this->roleFilter))
+            ->when($this->departmentFilter, fn($q) => $q->where('department', $this->departmentFilter))
             ->latest()
             ->paginate(10);
 
-        $hasActiveFilters = $this->search || $this->statusFilter;
+        $hasActiveFilters = $this->search || $this->statusFilter || $this->roleFilter || $this->departmentFilter;
         $pageIds = $Staff->pluck('id')->toArray();
 
         return view('modules.crm.staff.manage-staff', [
