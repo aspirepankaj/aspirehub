@@ -174,6 +174,7 @@
                             <th class="px-4 py-4">Client Details</th>
                             <th class="px-4 py-4">Company Name</th>
                             <th class="px-4 py-4">Plans</th>
+                            <th class="px-4 py-4">Websites</th>
                             <th class="px-4 py-4">Phone Numbers</th>
                             <th class="px-4 py-4">Status</th>
                             <th class="px-4 py-4">Registered</th>
@@ -209,6 +210,14 @@
                                     @else
                                         —
                                     @endif
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                        </svg>
+                                        {{ $client->websites_count }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs">
                                     @if($client->phones->isEmpty())

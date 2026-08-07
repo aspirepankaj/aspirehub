@@ -230,10 +230,10 @@
                                 {{-- Client --}}
                                 <td class="px-4 py-4">
                                     <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                        {{ $website->client->company_name ?: ($website->client->user->name ?? '—') }}
+                                        {{ $website->client->user->name ?? '—' }}
                                     </div>
                                     <div class="text-xs text-slate-400 dark:text-slate-500">
-                                        {{ $website->client->user->email ?? '' }}
+                                        {{ $website->client->company_name ?: ($website->client->user->email ?? '') }}
                                     </div>
                                 </td>
 
@@ -308,7 +308,7 @@
                     search: '',
                     selectedId: @entangle('client_id'),
                     selectedLabel: '',
-                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'label' => $c->company_name ?: $c->user->name, 'sub' => $c->user->email ?? ''])) }},
+                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'label' => $c->user->name, 'sub' => $c->company_name ?: ($c->user->email ?? '')])) }},
                     get filtered() {
                         if (!this.search) return this.clients;
                         const q = this.search.toLowerCase();
@@ -569,7 +569,7 @@
                     search: '',
                     selectedId: @entangle('client_id'),
                     selectedLabel: '',
-                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'label' => $c->company_name ?: $c->user->name, 'sub' => $c->user->email ?? ''])) }},
+                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'label' => $c->user->name, 'sub' => $c->company_name ?: ($c->user->email ?? '')])) }},
                     get filtered() {
                         if (!this.search) return this.clients;
                         const q = this.search.toLowerCase();

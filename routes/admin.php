@@ -5,6 +5,10 @@ use App\Modules\Core\Dashboard\Livewire\AdminDashboard;
 use App\Modules\CRM\Clients\Livewire\ManageClients;
 use App\Modules\CRM\Websites\Livewire\ManageWebsites;
 use App\Modules\CRM\Staff\Livewire\ManageStaff;
+use App\Modules\CRM\Maintenance\Livewire\ManageMaintenanceReports;
+use App\Modules\CRM\Maintenance\Livewire\CreateMaintenanceReport;
+use App\Modules\CRM\Maintenance\Livewire\EditMaintenanceReport;
+use App\Modules\CRM\Maintenance\Livewire\ViewMaintenanceReport;
 Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 
 Route::get('/', function () {
@@ -24,9 +28,11 @@ Route::get('/marketing-reports', function () {
     return view('modules.core.placeholder', ['title' => 'Marketing Reports']);
 })->name('marketing');
 
-Route::get('/maintenance-reports', function () {
-    return view('modules.core.placeholder', ['title' => 'Maintenance Reports']);
-})->name('maintenance');
+Route::get('/maintenance-reports', ManageMaintenanceReports::class)->name('maintenance');
+Route::get('/maintenance-reports/create', CreateMaintenanceReport::class)->name('maintenance.create');
+Route::get('/maintenance-reports/{id}/edit', EditMaintenanceReport::class)->name('maintenance.edit');
+Route::get('/maintenance-reports/{id}', ViewMaintenanceReport::class)->name('maintenance.view');
+Route::get('/maintenance-reports/{id}/pdf', [ManageMaintenanceReports::class, 'downloadPdf'])->name('maintenance.pdf');
 
 Route::get('/support-center', function () {
     return view('modules.core.placeholder', ['title' => 'Support Center']);
@@ -48,9 +54,9 @@ Route::get('/notifications', function () {
     return view('modules.core.placeholder', ['title' => 'Notifications Center']);
 })->name('notifications');
 
-Route::get('/documents', function () {
-    return view('modules.core.placeholder', ['title' => 'Documents Library']);
-})->name('documents');
+use App\Modules\CRM\Documents\Livewire\ManageDocuments;
+
+Route::get('/documents', ManageDocuments::class)->name('documents');
 
 use App\Modules\Core\Activity\Livewire\ManageActivityLogs;
 

@@ -50,6 +50,11 @@ class Client extends Model
         return $this->belongsToMany(Plan::class, 'adspv_client_plan', 'client_id', 'plan_id')->withTimestamps();
     }
 
+    public function websites(): HasMany
+    {
+        return $this->hasMany(\App\Modules\CRM\Websites\Models\Website::class, 'client_id');
+    }
+
     protected function getActivityDescription(string $action): string
     {
         $userName = auth()->user()->name ?? 'System';

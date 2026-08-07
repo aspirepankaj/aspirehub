@@ -283,6 +283,7 @@ class ManageClients extends Component
     public function render()
     {
         $clients = Client::with(['user', 'phones', 'plans'])
+            ->withCount('websites')
             ->where(function ($query) {
                 $query->where('company_name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('user', function ($uQuery) {
