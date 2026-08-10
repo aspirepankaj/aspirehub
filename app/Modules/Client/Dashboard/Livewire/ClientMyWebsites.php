@@ -79,6 +79,7 @@ class ClientMyWebsites extends Component
                 'mr.security_malware_scan',
                 'mr.security_firewall_status',
                 'mr.security_plugin_status',
+                'mr.security_health',
                 'mr.security_notes',
 
                 // Health

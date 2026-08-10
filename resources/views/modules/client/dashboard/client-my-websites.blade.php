@@ -32,7 +32,7 @@
             @php
                 $health = min((int)($website->health_score ?? 0), 100);
                 $performance = min((int)($website->performance_desktop ?? 0), 100);
-                $security = 100;
+                $security = is_numeric($website->security_health ?? null) ? min((int)$website->security_health, 100) : 100;
                 $status = $website->maintenance_status ?: 'Operational';
             @endphp
 
@@ -95,10 +95,10 @@
 
                             </div>
 
-                            <div class="h-2 rounded-full bg-slate-100">
+                            <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
 
                                 <div
-                                    class="h-2 rounded-full bg-emerald-500"
+                                    class="h-2 rounded-full {{ $health >= 90 ? 'bg-emerald-500' : ($health >= 50 ? 'bg-amber-500' : 'bg-rose-500') }}"
                                     style="width: {{ $health }}%">
                                 </div>
 
@@ -117,10 +117,10 @@
 
                             </div>
 
-                            <div class="h-2 rounded-full bg-slate-100">
+                            <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
 
                                 <div
-                                    class="h-2 rounded-full bg-amber-500"
+                                    class="h-2 rounded-full {{ $performance >= 90 ? 'bg-emerald-500' : ($performance >= 50 ? 'bg-amber-500' : 'bg-rose-500') }}"
                                     style="width: {{ $performance }}%">
                                 </div>
 
@@ -139,10 +139,10 @@
 
                             </div>
 
-                            <div class="h-2 rounded-full bg-slate-100">
+                            <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
 
                                 <div
-                                    class="h-2 rounded-full bg-emerald-500"
+                                    class="h-2 rounded-full {{ $security >= 90 ? 'bg-emerald-500' : ($security >= 50 ? 'bg-amber-500' : 'bg-rose-500') }}"
                                     style="width: {{ $security }}%">
                                 </div>
 

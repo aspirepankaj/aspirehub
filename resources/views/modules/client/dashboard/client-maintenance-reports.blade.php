@@ -25,7 +25,7 @@
                 $formattedDate = \Carbon\Carbon::parse($report->maintenance_date)->format('M j, Y');
                 $healthScore = $report->health_score ?? 100;
                 $perfScore = $report->performance_desktop ?? 100;
-                $securityScore = 98; // High standard static/dynamic score
+                $securityScore = is_numeric($report->security_health) ? (int)$report->security_health : 100;
             @endphp
             <div class="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm hover:border-slate-350 dark:hover:border-slate-750 transition duration-150 flex flex-col justify-between max-w-2xl">
                 
@@ -48,9 +48,9 @@
                         <!-- Health Score -->
                         <div class="flex flex-col items-center">
                             <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
-                                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg);">
+                                <svg width="44" height="44" viewBox="0 0 44 44" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
                                     <circle cx="22" cy="22" r="18" stroke="#e2e8f0" stroke-width="3" fill="transparent" class="dark:stroke-slate-850" />
-                                    <circle cx="22" cy="22" r="18" stroke="#10b981" stroke-width="3" fill="transparent"
+                                    <circle cx="22" cy="22" r="18" stroke="{{ $healthScore >= 90 ? '#10b981' : ($healthScore >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="3" fill="transparent"
                                             stroke-dasharray="{{ 2 * pi() * 18 }}" stroke-dashoffset="{{ (1 - $healthScore / 100) * (2 * pi() * 18) }}" stroke-linecap="round" />
                                 </svg>
                                 <span style="position: absolute; font-size: 11px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $healthScore }}</span>
@@ -61,9 +61,9 @@
                         <!-- Perf Score -->
                         <div class="flex flex-col items-center">
                             <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
-                                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg);">
+                                <svg width="44" height="44" viewBox="0 0 44 44" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
                                     <circle cx="22" cy="22" r="18" stroke="#e2e8f0" stroke-width="3" fill="transparent" class="dark:stroke-slate-850" />
-                                    <circle cx="22" cy="22" r="18" stroke="#10b981" stroke-width="3" fill="transparent"
+                                    <circle cx="22" cy="22" r="18" stroke="{{ $perfScore >= 90 ? '#10b981' : ($perfScore >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="3" fill="transparent"
                                             stroke-dasharray="{{ 2 * pi() * 18 }}" stroke-dashoffset="{{ (1 - $perfScore / 100) * (2 * pi() * 18) }}" stroke-linecap="round" />
                                 </svg>
                                 <span style="position: absolute; font-size: 11px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $perfScore }}</span>
@@ -74,9 +74,9 @@
                         <!-- Security Score -->
                         <div class="flex flex-col items-center">
                             <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
-                                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg);">
+                                <svg width="44" height="44" viewBox="0 0 44 44" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
                                     <circle cx="22" cy="22" r="18" stroke="#e2e8f0" stroke-width="3" fill="transparent" class="dark:stroke-slate-850" />
-                                    <circle cx="22" cy="22" r="18" stroke="#10b981" stroke-width="3" fill="transparent"
+                                    <circle cx="22" cy="22" r="18" stroke="{{ $securityScore >= 90 ? '#10b981' : ($securityScore >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="3" fill="transparent"
                                             stroke-dasharray="{{ 2 * pi() * 18 }}" stroke-dashoffset="{{ (1 - $securityScore / 100) * (2 * pi() * 18) }}" stroke-linecap="round" />
                                 </svg>
                                 <span style="position: absolute; font-size: 11px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $securityScore }}</span>
@@ -109,36 +109,40 @@
                 <!-- Checklist -->
                 <div class="space-y-2.5 mb-6 text-sm font-semibold text-slate-700 dark:text-slate-350">
                     <div class="flex items-center gap-2.5">
-                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $report->wp_updated ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-500/10 text-slate-500' }}">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                         </span>
-                        <span>WordPress core updated to latest secure version</span>
+                        <span>WordPress Core: {{ $report->wp_updated ? 'Updated to latest secure version' : 'Version ' . ($report->wp_version_current ?? 'up to date') }}</span>
                     </div>
                     <div class="flex items-center gap-2.5">
-                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $report->updates_count > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-500/10 text-slate-500' }}">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                         </span>
-                        <span>Plugins updated successfully — no compatibility issues</span>
+                        <span>Plugins: {{ $report->updates_count > 0 ? $report->updates_count . ' plugins updated successfully' : 'All plugins up to date' }}</span>
                     </div>
                     <div class="flex items-center gap-2.5">
-                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $report->backup_completed ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-650' }}">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                @if($report->backup_completed)
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                @else
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                @endif
                             </svg>
                         </span>
-                        <span>Daily backups verified and restore points confirmed</span>
+                        <span>Backups: {{ $report->backup_completed ? 'Daily backup verified & confirmed (' . ($report->backup_location ?? 'Cloud') . ')' : 'No backup completed' }}</span>
                     </div>
                     <div class="flex items-center gap-2.5">
-                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $report->security_ssl_status === 'Active' || $report->security_ssl_status === 'active' || $report->security_ssl_status === 'Enabled' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-500/10 text-slate-500' }}">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                         </span>
-                        <span>SSL certificate active and healthy</span>
+                        <span>SSL Certificate: {{ $report->security_ssl_status ?: 'Active and healthy' }}</span>
                     </div>
                 </div>
 
@@ -181,11 +185,11 @@
     <!-- Compare Modal -->
     @if ($showCompareModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-2xl w-full p-6 shadow-2xl space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-4xl w-full p-6 shadow-2xl space-y-6">
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                     <div>
-                        <h3 class="text-xl font-black text-slate-900 dark:text-white">Maintenance Comparison</h3>
-                        <p class="text-xs text-slate-400 dark:text-slate-550 mt-1">Comparing current month optimization audit with previous cycle.</p>
+                        <h3 class="text-xl font-black text-slate-900 dark:text-white">Compare with previous</h3>
+                        <p class="text-xs text-slate-400 dark:text-slate-550 mt-1">Comparing optimization metrics side by side.</p>
                     </div>
                     <button type="button" wire:click="closeCompare" class="text-slate-400 hover:text-slate-650 dark:hover:text-white p-1 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -195,109 +199,136 @@
                 </div>
 
                 @if ($compareCurrent)
-                    <div class="space-y-4">
-                        <div class="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            Website: <span class="text-indigo-500">{{ $compareCurrent['site_name'] }}</span>
+                    @php
+                        $cHealth = $compareCurrent['health_score'] ?? 100;
+                        $cPerf = $compareCurrent['performance_desktop'] ?? 100;
+                        $cSec = is_numeric($compareCurrent['security_health'] ?? null) ? (int)$compareCurrent['security_health'] : 100;
+                    @endphp
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-850">
+                        
+                        <!-- Current Cycle -->
+                        <div class="space-y-6">
+                            <div class="text-xs font-bold tracking-widest text-slate-400 uppercase border-b border-slate-200 dark:border-slate-850 pb-1 w-fit">
+                                {{ strtoupper(\Carbon\Carbon::parse($compareCurrent['maintenance_date'])->format('F Y')) }}
+                            </div>
+                            
+                            <div class="flex items-center gap-6">
+                                <!-- Health Score -->
+                                <div class="flex flex-col items-center">
+                                    <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="64" height="64" viewBox="0 0 64 64" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                                            <circle cx="32" cy="32" r="26" stroke="#e2e8f0" stroke-width="4" fill="transparent" class="dark:stroke-slate-800" />
+                                            <circle cx="32" cy="32" r="26" stroke="{{ $cHealth >= 90 ? '#10b981' : ($cHealth >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="4" fill="transparent"
+                                                    stroke-dasharray="{{ 2 * pi() * 26 }}" stroke-dashoffset="{{ (1 - $cHealth / 100) * (2 * pi() * 26) }}" stroke-linecap="round" />
+                                        </svg>
+                                        <span style="position: absolute; font-size: 13px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $cHealth }}</span>
+                                    </div>
+                                    <span class="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">Health</span>
+                                </div>
+
+                                <!-- Perf Score -->
+                                <div class="flex flex-col items-center">
+                                    <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="64" height="64" viewBox="0 0 64 64" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                                            <circle cx="32" cy="32" r="26" stroke="#e2e8f0" stroke-width="4" fill="transparent" class="dark:stroke-slate-800" />
+                                            <circle cx="32" cy="32" r="26" stroke="{{ $cPerf >= 90 ? '#10b981' : ($cPerf >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="4" fill="transparent"
+                                                    stroke-dasharray="{{ 2 * pi() * 26 }}" stroke-dashoffset="{{ (1 - $cPerf / 100) * (2 * pi() * 26) }}" stroke-linecap="round" />
+                                        </svg>
+                                        <span style="position: absolute; font-size: 13px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $cPerf }}</span>
+                                    </div>
+                                    <span class="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">Perf</span>
+                                </div>
+
+                                <!-- Security Score -->
+                                <div class="flex flex-col items-center">
+                                    <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="64" height="64" viewBox="0 0 64 64" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                                            <circle cx="32" cy="32" r="26" stroke="#e2e8f0" stroke-width="4" fill="transparent" class="dark:stroke-slate-800" />
+                                            <circle cx="32" cy="32" r="26" stroke="{{ $cSec >= 90 ? '#10b981' : ($cSec >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="4" fill="transparent"
+                                                    stroke-dasharray="{{ 2 * pi() * 26 }}" stroke-dashoffset="{{ (1 - $cSec / 100) * (2 * pi() * 26) }}" stroke-linecap="round" />
+                                        </svg>
+                                        <span style="position: absolute; font-size: 13px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $cSec }}</span>
+                                    </div>
+                                    <span class="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">Sec</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold pt-2">
+                                <div>Backups: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $compareCurrent['backups_count'] }}</span></div>
+                                <div>Updates: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $compareCurrent['updates_count'] }}</span></div>
+                                <div>Support Tickets: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $compareCurrent['support_tickets_completed'] }} completed</span></div>
+                            </div>
                         </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs font-semibold">
-                                <thead>
-                                    <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                                        <th class="py-2.5">Metric</th>
-                                        <th class="py-2.5 px-4 text-center">Previous ({{ $comparePrevious ? \Carbon\Carbon::parse($comparePrevious['maintenance_date'])->format('F Y') : 'N/A' }})</th>
-                                        <th class="py-2.5 px-4 text-center">Current ({{ \Carbon\Carbon::parse($compareCurrent['maintenance_date'])->format('F Y') }})</th>
-                                        <th class="py-2.5 pl-4 text-right">Difference</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
+                        <!-- Previous Cycle -->
+                        <div class="space-y-6 pt-6 md:pt-0 md:pl-8">
+                            @if ($comparePrevious)
+                                @php
+                                    $pHealth = $comparePrevious['health_score'] ?? 100;
+                                    $pPerformance = $comparePrevious['performance_desktop'] ?? 100;
+                                    $pSec = is_numeric($comparePrevious['security_health'] ?? null) ? (int)$comparePrevious['security_health'] : 100;
+                                @endphp
+                                <div class="text-xs font-bold tracking-widest text-slate-400 uppercase border-b border-slate-200 dark:border-slate-850 pb-1 w-fit">
+                                    {{ strtoupper(\Carbon\Carbon::parse($comparePrevious['maintenance_date'])->format('F Y')) }}
+                                </div>
+                                
+                                <div class="flex items-center gap-6">
                                     <!-- Health Score -->
-                                    <tr>
-                                        <td class="py-3">Health Score</td>
-                                        <td class="py-3 px-4 text-center">{{ $comparePrevious['health_score'] ?? '—' }}</td>
-                                        <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white">{{ $compareCurrent['health_score'] ?? '—' }}</td>
-                                        <td class="py-3 pl-4 text-right">
-                                            @if ($comparePrevious)
-                                                @php $diff = ($compareCurrent['health_score'] ?? 0) - ($comparePrevious['health_score'] ?? 0); @endphp
-                                                <span class="{{ $diff >= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold">
-                                                    {{ $diff >= 0 ? '+' : '' }}{{ $diff }}
-                                                </span>
-                                            @else
-                                                <span class="text-slate-400">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
+                                    <div class="flex flex-col items-center">
+                                        <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                                            <svg width="64" height="64" viewBox="0 0 64 64" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                                                <circle cx="32" cy="32" r="26" stroke="#e2e8f0" stroke-width="4" fill="transparent" class="dark:stroke-slate-800" />
+                                                <circle cx="32" cy="32" r="26" stroke="{{ $pHealth >= 90 ? '#10b981' : ($pHealth >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="4" fill="transparent"
+                                                        stroke-dasharray="{{ 2 * pi() * 26 }}" stroke-dashoffset="{{ (1 - $pHealth / 100) * (2 * pi() * 26) }}" stroke-linecap="round" />
+                                            </svg>
+                                            <span style="position: absolute; font-size: 13px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $pHealth }}</span>
+                                        </div>
+                                        <span class="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">Health</span>
+                                    </div>
+
                                     <!-- Perf Score -->
-                                    <tr>
-                                        <td class="py-3">Performance Score</td>
-                                        <td class="py-3 px-4 text-center">{{ $comparePrevious['performance_desktop'] ?? '—' }}</td>
-                                        <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white">{{ $compareCurrent['performance_desktop'] ?? '—' }}</td>
-                                        <td class="py-3 pl-4 text-right">
-                                            @if ($comparePrevious)
-                                                @php $diff = ($compareCurrent['performance_desktop'] ?? 0) - ($comparePrevious['performance_desktop'] ?? 0); @endphp
-                                                <span class="{{ $diff >= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold">
-                                                    {{ $diff >= 0 ? '+' : '' }}{{ $diff }}
-                                                </span>
-                                            @else
-                                                <span class="text-slate-400">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <!-- Backups -->
-                                    <tr>
-                                        <td class="py-3">Backups Completed</td>
-                                        <td class="py-3 px-4 text-center">{{ $comparePrevious['backups_count'] ?? '—' }}</td>
-                                        <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white">{{ $compareCurrent['backups_count'] ?? '—' }}</td>
-                                        <td class="py-3 pl-4 text-right">
-                                            @if ($comparePrevious)
-                                                @php $diff = ($compareCurrent['backups_count'] ?? 0) - ($comparePrevious['backups_count'] ?? 0); @endphp
-                                                <span class="{{ $diff >= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold">
-                                                    {{ $diff >= 0 ? '+' : '' }}{{ $diff }}
-                                                </span>
-                                            @else
-                                                <span class="text-slate-400">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <!-- Updates -->
-                                    <tr>
-                                        <td class="py-3">Plugins Updated</td>
-                                        <td class="py-3 px-4 text-center">{{ $comparePrevious['updates_count'] ?? '—' }}</td>
-                                        <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white">{{ $compareCurrent['updates_count'] ?? '—' }}</td>
-                                        <td class="py-3 pl-4 text-right">
-                                            @if ($comparePrevious)
-                                                @php $diff = ($compareCurrent['updates_count'] ?? 0) - ($comparePrevious['updates_count'] ?? 0); @endphp
-                                                <span class="{{ $diff >= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold">
-                                                    {{ $diff >= 0 ? '+' : '' }}{{ $diff }}
-                                                </span>
-                                            @else
-                                                <span class="text-slate-400">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <!-- Issues Found -->
-                                    <tr>
-                                        <td class="py-3">Issues Found</td>
-                                        <td class="py-3 px-4 text-center">{{ $comparePrevious['issues_found'] ?? '—' }}</td>
-                                        <td class="py-3 px-4 text-center font-bold text-slate-900 dark:text-white">{{ $compareCurrent['issues_found'] ?? '—' }}</td>
-                                        <td class="py-3 pl-4 text-right">
-                                            @if ($comparePrevious)
-                                                @php $diff = ($compareCurrent['issues_found'] ?? 0) - ($comparePrevious['issues_found'] ?? 0); @endphp
-                                                <span class="{{ $diff <= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold">
-                                                    {{ $diff >= 0 ? '+' : '' }}{{ $diff }}
-                                                </span>
-                                            @else
-                                                <span class="text-slate-400">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                    <div class="flex flex-col items-center">
+                                        <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                                            <svg width="64" height="64" viewBox="0 0 64 64" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                                                <circle cx="32" cy="32" r="26" stroke="#e2e8f0" stroke-width="4" fill="transparent" class="dark:stroke-slate-800" />
+                                                <circle cx="32" cy="32" r="26" stroke="{{ $pPerformance >= 90 ? '#10b981' : ($pPerformance >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="4" fill="transparent"
+                                                        stroke-dasharray="{{ 2 * pi() * 26 }}" stroke-dashoffset="{{ (1 - $pPerformance / 100) * (2 * pi() * 26) }}" stroke-linecap="round" />
+                                            </svg>
+                                            <span style="position: absolute; font-size: 13px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $pPerformance }}</span>
+                                        </div>
+                                        <span class="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">Perf</span>
+                                    </div>
+
+                                    <!-- Security Score -->
+                                    <div class="flex flex-col items-center">
+                                        <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                                            <svg width="64" height="64" viewBox="0 0 64 64" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                                                <circle cx="32" cy="32" r="26" stroke="#e2e8f0" stroke-width="4" fill="transparent" class="dark:stroke-slate-800" />
+                                                <circle cx="32" cy="32" r="26" stroke="{{ $pSec >= 90 ? '#10b981' : ($pSec >= 50 ? '#f59e0b' : '#ef4444') }}" stroke-width="4" fill="transparent"
+                                                        stroke-dasharray="{{ 2 * pi() * 26 }}" stroke-dashoffset="{{ (1 - $pSec / 100) * (2 * pi() * 26) }}" stroke-linecap="round" />
+                                            </svg>
+                                            <span style="position: absolute; font-size: 13px; font-weight: 800;" class="text-slate-900 dark:text-white">{{ $pSec }}</span>
+                                        </div>
+                                        <span class="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">Sec</span>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold pt-2">
+                                    <div>Backups: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $comparePrevious['backups_count'] }}</span></div>
+                                    <div>Updates: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $comparePrevious['updates_count'] }}</span></div>
+                                    <div>Support Tickets: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $comparePrevious['support_tickets_completed'] }} completed</span></div>
+                                </div>
+                            @else
+                                <div class="h-full flex items-center justify-center text-xs text-slate-400 italic">
+                                    No previous cycle found to compare.
+                                </div>
+                            @endif
                         </div>
+
                     </div>
                 @endif
 
-                <div class="flex justify-end pt-2">
+                <div class="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
                     <button type="button" wire:click="closeCompare" class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition shadow-sm">
                         Close Comparison
                     </button>
