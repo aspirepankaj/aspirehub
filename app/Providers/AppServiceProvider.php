@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('manage-documents', \App\Modules\CRM\Documents\Livewire\ManageDocuments::class);
         \Livewire\Livewire::component('client-dashboard', \App\Modules\Client\Dashboard\Livewire\ClientDashboard::class);
         \Livewire\Livewire::component('client-websites', \App\Modules\Client\Dashboard\Livewire\ClientMyWebsites::class);
+        \Livewire\Livewire::component('client-profile', \App\Modules\Client\Dashboard\Livewire\ClientProfile::class);
 
 
     }
