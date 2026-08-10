@@ -56,12 +56,18 @@ class ManageClients extends Component
 
     public function viewClientDetail(int $id)
     {
+        $currentPage = $this->paginators['page'] ?? 1;
+        session()->put('clients_list_page', $currentPage);
+        
         return $this->redirect(route('admin.clients.detail', ['id' => $id]), navigate: true);
     }
 
     public function closeClientDetail()
     {
-        return $this->redirect(route('admin.clients'), navigate: true);
+        $page = session()->get('clients_list_page', 1);
+        session()->forget('clients_list_page');
+        
+        return $this->redirect(route('admin.clients', ['page' => $page]), navigate: true);
     }
 
     public function setTab(string $tab): void
@@ -346,11 +352,23 @@ class ManageClients extends Component
 
     public function getQueryString()
     {
+        if ($this->selectedClientDetailId) {
+            return [
+                'activeTab' => ['as' => 'tab', 'history' => true],
+            ];
+        }
         return [];
     }
 
     public function queryStringHandlesPagination()
     {
+        if ($this->selectedClientDetailId) {
+            return collect($this->paginators)
+                ->only(['activitypage', 'maintenancepage', 'documentspage'])
+                ->mapWithKeys(function ($page, $pageName) {
+                    return ['paginators.'.$pageName => ['history' => true, 'as' => $pageName, 'keep' => false]];
+                })->toArray();
+        }
         return [];
     }
 
@@ -377,16 +395,22 @@ class ManageClients extends Component
             $clientMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'website'])
                 ->where('client_id', $this->selectedClientDetailId)
                 ->latest()
-                ->get();
+                ->paginate(10, ['*'], 'maintenancepage')
+                ->onEachSide(1);
                 
             $clientDocuments = \App\Modules\CRM\Documents\Models\Document::with('addedBy')
                 ->where('client_id', $this->selectedClientDetailId)
                 ->latest()
-                ->get();
+                ->paginate(10, ['*'], 'documentspage')
+                ->onEachSide(1);
 
             $websiteIds = $clientWebsites->pluck('id')->toArray();
-            $reportIds = $clientMaintenanceReports->pluck('id')->toArray();
-            $docIds = $clientDocuments->pluck('id')->toArray();
+            $reportIds = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::where('client_id', $this->selectedClientDetailId)
+                ->pluck('id')
+                ->toArray();
+            $docIds = \App\Modules\CRM\Documents\Models\Document::where('client_id', $this->selectedClientDetailId)
+                ->pluck('id')
+                ->toArray();
 
             $clientActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
                 ->where(function ($query) use ($websiteIds, $reportIds, $docIds) {
@@ -417,7 +441,8 @@ class ManageClients extends Component
                     });
                 })
                 ->latest()
-                ->paginate(10, ['*'], 'activityPage');
+                ->paginate(10, ['*'], 'activitypage')
+                ->onEachSide(1);
         } else {
             $clients = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
                 ->withCount('websites')
@@ -431,7 +456,8 @@ class ManageClients extends Component
                 ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
                 ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)))
                 ->latest()
-                ->paginate(10);
+                ->paginate(10)
+                ->onEachSide(1);
 
             $hasActiveFilters = $this->search || $this->statusFilter || $this->planFilter;
             $pageIds = $clients->pluck('id')->toArray();

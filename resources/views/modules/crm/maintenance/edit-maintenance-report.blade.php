@@ -75,6 +75,13 @@
                         </button>
                     </div>
 
+                    <style>
+                        .dropdown-hover-item:hover {
+                            background-color: #6366f1 !important;
+                            color: #ffffff !important;
+                        }
+                    </style>
+
                     <!-- Dropdown List -->
                     <div x-show="open" 
                          x-transition
@@ -82,7 +89,7 @@
                         <template x-for="c in clients" :key="c.id">
                             <div x-show="search === '' || c.name.toLowerCase().includes(search.toLowerCase())"
                                  x-on:click="select(c.id, c.name)"
-                                 class="px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-indigo-500 hover:text-white cursor-pointer transition-colors font-medium"
+                                 class="px-4 py-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer transition-colors font-medium dropdown-hover-item"
                                  x-text="c.name">
                             </div>
                         </template>
@@ -114,12 +121,27 @@
                     <x-input-error :messages="$errors->get('developer_id')" class="mt-1" />
                 </div>
 
-                {{-- Month --}}
-                <div>
-                    <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Maintenance Month</label>
-                    <input wire:model="maintenance_month" type="month"
-                           class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
-                    <x-input-error :messages="$errors->get('maintenance_month')" class="mt-1" />
+                {{-- Month & Year Selector --}}
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Month</label>
+                        <select wire:model.live="month_select"
+                                class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                            @foreach(range(1, 12) as $m)
+                                <option value="{{ sprintf('%02d', $m) }}">{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Year</label>
+                        <select wire:model.live="year_select"
+                                class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                            @foreach(range(date('Y') - 5, date('Y') + 5) as $y)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <input type="hidden" wire:model="maintenance_month" />
                 </div>
 
                 {{-- Date --}}
@@ -285,7 +307,7 @@
             <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
                 <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">6. Security Checks</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Malware Scan</label>
                     <select wire:model="security_malware_scan" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm">
@@ -318,7 +340,16 @@
                         <option value="missing">Missing / Self-Signed</option>
                     </select>
                 </div>
-                <div class="col-span-1 md:col-span-4">
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Security Health</label>
+                    <select wire:model="security_health" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm">
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Action Required">Action Required</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+                <div class="col-span-1 md:col-span-5">
                     <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Security Notes</label>
                     <textarea wire:model="security_notes" rows="2" placeholder="Security vulnerabilities or scanning observations..." class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm w-full"></textarea>
                 </div>

@@ -19,9 +19,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(function ($user, string $token) {
+            if ($user->staff()->exists()) {
+                return url(route('staff.password.reset', [
+                    'token' => $token,
+                    'email' => $user->getEmailForPasswordReset(),
+                ], false));
+            }
+            return url(route('password.reset', [
+                'token' => $token,
+                'email' => $user->getEmailForPasswordReset(),
+            ], false));
+        });
+
         \Livewire\Livewire::component('manage-clients', \App\Modules\CRM\Clients\Livewire\ManageClients::class);
         \Livewire\Livewire::component('manage-websites', \App\Modules\CRM\Websites\Livewire\ManageWebsites::class);
         \Livewire\Livewire::component('manage-activity-logs', \App\Modules\Core\Activity\Livewire\ManageActivityLogs::class);
+        \Livewire\Livewire::component('manage-email-logs', \App\Modules\Core\Activity\Livewire\ManageEmailLogs::class);
         \Livewire\Livewire::component('manage-service-types', \App\Modules\CRM\Websites\Livewire\ManageServiceTypes::class);
         \Livewire\Livewire::component('manage-staff', \App\Modules\CRM\Staff\Livewire\ManageStaff::class);
         \Livewire\Livewire::component('manage-plans', \App\Modules\CRM\Clients\Livewire\ManagePlans::class);
@@ -39,6 +53,14 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('client-maintenance', \App\Modules\Client\Dashboard\Livewire\ClientMaintenanceReports::class);
         \Livewire\Livewire::component('client-view-maintenance-report', \App\Modules\Client\Dashboard\Livewire\ClientViewMaintenanceReport::class);
 
-
+        \Livewire\Livewire::component('staff-dashboard', \App\Modules\CRM\Staff\Livewire\Portal\StaffDashboard::class);
+        \Livewire\Livewire::component('staff-clients', \App\Modules\CRM\Staff\Livewire\Portal\StaffClients::class);
+        \Livewire\Livewire::component('staff-websites', \App\Modules\CRM\Staff\Livewire\Portal\StaffWebsites::class);
+        \Livewire\Livewire::component('staff-maintenance', \App\Modules\CRM\Staff\Livewire\Portal\StaffMaintenance::class);
+        \Livewire\Livewire::component('staff-create-maintenance-report', \App\Modules\CRM\Staff\Livewire\Portal\StaffCreateMaintenanceReport::class);
+        \Livewire\Livewire::component('staff-edit-maintenance-report', \App\Modules\CRM\Staff\Livewire\Portal\StaffEditMaintenanceReport::class);
+        \Livewire\Livewire::component('staff-view-maintenance-report', \App\Modules\CRM\Staff\Livewire\Portal\StaffViewMaintenanceReport::class);
+        \Livewire\Livewire::component('staff-documents', \App\Modules\CRM\Staff\Livewire\Portal\StaffDocuments::class);
+        \Livewire\Livewire::component('staff-profile', \App\Modules\CRM\Staff\Livewire\Portal\StaffProfile::class);
     }
 }

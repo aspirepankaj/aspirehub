@@ -45,5 +45,13 @@ class User extends Authenticatable
     {
         return $this->hasOne(\App\Modules\CRM\Clients\Models\Client::class, 'user_id');
     }
+
+    /**
+     * Get the staff profile associated with the user.
+     */
+    public function staff(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Modules\CRM\Staff\Models\Staff::class, 'user_id');
+    }
 }
 

@@ -25,8 +25,13 @@ new class extends Component
         $user = Auth::user();
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->phone = $user->admin?->phone ?? '';
-        $this->existing_profile_image = $user->admin?->profile_image;
+        if ($user->admin) {
+            $this->phone = $user->admin->phone ?? '';
+            $this->existing_profile_image = $user->admin->profile_image;
+        } elseif ($user->staff) {
+            $this->phone = $user->staff->phones()->first()?->phone ?? '';
+            $this->existing_profile_image = $user->staff->profile_image;
+        }
     }
 
     /**
@@ -63,6 +68,27 @@ new class extends Component
                 $this->reset('profile_image');
             }
             $user->admin->update($adminData);
+        } elseif ($user->staff) {
+            $staffData = [];
+            if ($this->profile_image) {
+                $path = $this->profile_image->store('profile_images', 'public');
+                $staffData['profile_image'] = $path;
+                $this->existing_profile_image = $path;
+                $this->reset('profile_image');
+            }
+            $user->staff->update($staffData);
+
+            if (!empty($validated['phone'])) {
+                $phoneRecord = $user->staff->phones()->first();
+                if ($phoneRecord) {
+                    $phoneRecord->update(['phone' => $validated['phone']]);
+                } else {
+                    $user->staff->phones()->create([
+                        'phone' => $validated['phone'],
+                        'label' => 'Work',
+                    ]);
+                }
+            }
         }
 
         $this->dispatch('profile-updated', name: $user->name);

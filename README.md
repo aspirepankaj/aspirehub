@@ -95,6 +95,24 @@ Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
 ---
 
+## Email & SMTP Configuration
+The platform uses **Laravel's native mail infrastructure** (with Symfony Mailer). No external Composer packages are required.
+
+To enable sending PDF maintenance reports directly to client emails, update the following keys in your `.env` file using your Google Gmail account & App Password:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-gmail-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="your-email@gmail.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+---
+
 ## Folder Architecture
 
 The project is structured under **Domain Driven Modular Architecture**:

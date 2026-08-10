@@ -358,7 +358,8 @@ class ManageStaff extends Component
             ->when($this->designationFilter, fn($q) => $q->whereHas('designations', fn($dq) => $dq->where('adspv_designations.id', $this->designationFilter)))
             ->when($this->departmentFilter, fn($q) => $q->where('department', $this->departmentFilter))
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->onEachSide(1);
 
         $hasActiveFilters = $this->search || $this->statusFilter || $this->designationFilter || $this->departmentFilter;
         $pageIds = $Staff->pluck('id')->toArray();

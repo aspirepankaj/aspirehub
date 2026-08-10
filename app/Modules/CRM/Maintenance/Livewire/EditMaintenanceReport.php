@@ -26,8 +26,20 @@ class EditMaintenanceReport extends Component
     public ?int $website_id = null;
     public ?int $developer_id = null;
     public string $maintenance_month = '';
+    public string $month_select = '';
+    public string $year_select = '';
     public string $maintenance_date = '';
     public string $status = 'draft';
+
+    public function updatedMonthSelect($value)
+    {
+        $this->maintenance_month = $this->year_select . '-' . sprintf('%02d', $value);
+    }
+
+    public function updatedYearSelect($value)
+    {
+        $this->maintenance_month = $value . '-' . sprintf('%02d', $this->month_select);
+    }
 
     // 2. WordPress Info
     public string $wp_version_current = '';
@@ -56,6 +68,7 @@ class EditMaintenanceReport extends Component
     public string $security_plugin_status = '';
     public string $security_ssl_status = '';
     public string $security_notes = '';
+    public string $security_health = 'Excellent';
 
     // 7. Health
     public ?int $health_score = null;
@@ -100,9 +113,14 @@ class EditMaintenanceReport extends Component
         $this->website_id = $report->website_id;
         $this->developer_id = $report->developer_id;
         try {
-            $this->maintenance_month = \Carbon\Carbon::parse($report->maintenance_month)->format('Y-m');
+            $parsedDate = \Carbon\Carbon::parse($report->maintenance_month);
+            $this->maintenance_month = $parsedDate->format('Y-m');
+            $this->month_select = $parsedDate->format('m');
+            $this->year_select = $parsedDate->format('Y');
         } catch (\Exception $e) {
             $this->maintenance_month = '';
+            $this->month_select = date('m');
+            $this->year_select = date('Y');
         }
         $this->maintenance_date = $report->maintenance_date ? $report->maintenance_date->format('Y-m-d') : '';
         $this->status = $report->status;
@@ -127,6 +145,7 @@ class EditMaintenanceReport extends Component
         $this->security_plugin_status = $report->security_plugin_status ?? 'active';
         $this->security_ssl_status = $report->security_ssl_status ?? 'valid';
         $this->security_notes = $report->security_notes ?? '';
+        $this->security_health = $report->security_health ?? 'Excellent';
 
         $this->health_score = $report->health_score;
         $this->health_critical_issues = $report->health_critical_issues;
@@ -204,6 +223,7 @@ class EditMaintenanceReport extends Component
             'security_plugin_status' => 'nullable|string',
             'security_ssl_status' => 'nullable|string',
             'security_notes' => 'nullable|string',
+            'security_health' => 'nullable|string',
 
             'health_score' => 'nullable|integer|min:0|max:100',
             'health_critical_issues' => 'nullable|integer|min:0',
@@ -302,6 +322,7 @@ class EditMaintenanceReport extends Component
                 'security_plugin_status' => $this->security_plugin_status,
                 'security_ssl_status' => $this->security_ssl_status,
                 'security_notes' => $this->security_notes,
+                'security_health' => $this->security_health,
 
                 'health_score' => $this->health_score ?: 0,
                 'health_critical_issues' => $this->health_critical_issues ?: 0,

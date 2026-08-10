@@ -274,7 +274,8 @@
             <td>
                 <strong>Malware Scan:</strong> <span style="text-transform: uppercase;">{{ $report->security_malware_scan }}</span><br>
                 <strong>Firewall Shield:</strong> <span style="text-transform: uppercase;">{{ $report->security_firewall_status }}</span><br>
-                <strong>SSL Certificate:</strong> <span style="text-transform: uppercase;">{{ $report->security_ssl_status }}</span>
+                <strong>SSL Certificate:</strong> <span style="text-transform: uppercase;">{{ $report->security_ssl_status }}</span><br>
+                <strong>Security Health:</strong> <span style="text-transform: uppercase;">{{ $report->security_health ?: 'Excellent' }}</span>
             </td>
             <td>
                 <strong>Backup Status:</strong> {{ $report->backup_completed ? 'Completed' : 'Failed' }}<br>

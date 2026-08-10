@@ -24,8 +24,20 @@ class CreateMaintenanceReport extends Component
     public ?int $website_id = null;
     public ?int $developer_id = null;
     public string $maintenance_month = '';
+    public string $month_select = '';
+    public string $year_select = '';
     public string $maintenance_date = '';
     public string $status = 'draft';
+
+    public function updatedMonthSelect($value)
+    {
+        $this->maintenance_month = $this->year_select . '-' . sprintf('%02d', $value);
+    }
+
+    public function updatedYearSelect($value)
+    {
+        $this->maintenance_month = $value . '-' . sprintf('%02d', $this->month_select);
+    }
 
     // 2. WordPress Info
     public string $wp_version_current = '';
@@ -54,6 +66,7 @@ class CreateMaintenanceReport extends Component
     public string $security_plugin_status = 'active';
     public string $security_ssl_status = 'valid';
     public string $security_notes = '';
+    public string $security_health = 'Excellent';
 
     // 7. Health
     public ?int $health_score = 100;
@@ -92,6 +105,8 @@ class CreateMaintenanceReport extends Component
     {
         $this->developer_id = auth()->id();
         $this->maintenance_date = date('Y-m-d');
+        $this->month_select = date('m');
+        $this->year_select = date('Y');
         $this->maintenance_month = date('Y-m');
         $this->addPluginField(); // Start with 1 empty row
     }
@@ -128,6 +143,7 @@ class CreateMaintenanceReport extends Component
             $this->security_plugin_status = $latestReport->security_plugin_status ?? 'active';
             $this->security_ssl_status = $latestReport->security_ssl_status ?? 'valid';
             $this->security_notes = $latestReport->security_notes ?? '';
+            $this->security_health = $latestReport->security_health ?? 'Excellent';
 
             $this->health_score = $latestReport->health_score;
             $this->health_critical_issues = $latestReport->health_critical_issues;
@@ -195,6 +211,7 @@ class CreateMaintenanceReport extends Component
         $this->security_plugin_status = 'active';
         $this->security_ssl_status = 'valid';
         $this->security_notes = '';
+        $this->security_health = 'Excellent';
 
         // Reset Health
         $this->health_score = 100;
@@ -254,6 +271,7 @@ class CreateMaintenanceReport extends Component
             'security_plugin_status' => 'nullable|string',
             'security_ssl_status' => 'nullable|string',
             'security_notes' => 'nullable|string',
+            'security_health' => 'nullable|string',
 
             'health_score' => 'nullable|integer|min:0|max:100',
             'health_critical_issues' => 'nullable|integer|min:0',
@@ -342,6 +360,7 @@ class CreateMaintenanceReport extends Component
                 'security_plugin_status' => $this->security_plugin_status,
                 'security_ssl_status' => $this->security_ssl_status,
                 'security_notes' => $this->security_notes,
+                'security_health' => $this->security_health,
 
                 'health_score' => $this->health_score ?: 0,
                 'health_critical_issues' => $this->health_critical_issues ?: 0,

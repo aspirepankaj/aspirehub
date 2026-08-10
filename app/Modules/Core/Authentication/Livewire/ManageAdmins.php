@@ -248,7 +248,8 @@ class ManageAdmins extends Component
                 $query->where('is_active', $this->statusFilter === 'active');
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->onEachSide(1);
 
         $hasActiveFilters = $this->search !== '' || $this->statusFilter !== '';
         $pageIds = $admins->pluck('id')->toArray();

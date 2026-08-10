@@ -22,9 +22,40 @@ new #[Layout('layouts.auth')] class extends Component
         );
 
         if ($status != Password::RESET_LINK_SENT) {
+            // Log failed link attempt
+            \App\Modules\Core\Activity\Models\EmailLog::create([
+                'sender_id' => null,
+                'recipient_email' => $this->email,
+                'subject' => 'Reset Password Notification',
+                'status' => 'failed',
+                'error_message' => __($status),
+            ]);
+
             $this->addError('email', __($status));
 
             return;
+        }
+
+        $user = \App\Models\User::where('email', $this->email)->first();
+        if ($user) {
+            // Log successful email dispatch
+            \App\Modules\Core\Activity\Models\EmailLog::create([
+                'sender_id' => null,
+                'recipient_email' => $this->email,
+                'subject' => 'Reset Password Notification',
+                'status' => 'sent',
+            ]);
+
+            // Log activity log
+            \App\Modules\Core\Activity\Models\ActivityLog::create([
+                'user_id' => $user->id,
+                'action' => 'password_reset_requested',
+                'description' => "Requested password reset link for: {$this->email}",
+                'meta' => [
+                    'ip' => request()->ip(),
+                    'agent' => request()->userAgent(),
+                ],
+            ]);
         }
 
         $this->reset('email');

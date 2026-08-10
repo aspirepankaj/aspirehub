@@ -9,6 +9,9 @@ Route::get('dashboard', function () {
     if ($user && $user->admin && $user->admin->is_active) {
         return redirect()->route('admin.dashboard');
     }
+    if ($user && $user->staff && $user->staff->status === 'active') {
+        return redirect()->route('staff.dashboard');
+    }
     return redirect()->route('client.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -17,7 +20,15 @@ Route::get('profile', function () {
     if ($user && $user->admin && $user->admin->is_active) {
         return redirect()->route('admin.profile');
     }
+    if ($user && $user->staff && $user->staff->status === 'active') {
+        return redirect()->route('staff.profile');
+    }
     return view('profile');
 })->middleware(['auth'])->name('profile');
 
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/impersonate/stop', [App\Http\Controllers\ImpersonateController::class, 'stop'])->name('impersonate.stop');
+    Route::get('/impersonate/{userId}', [App\Http\Controllers\ImpersonateController::class, 'start'])->name('impersonate.start');
+});

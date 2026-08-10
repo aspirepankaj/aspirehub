@@ -14,8 +14,32 @@
                       : 'bg-amber-500/10 text-amber-600 dark:text-amber-400' }}">
                 {{ $report->status }}
             </span>
+            @if($report->last_sent_at)
+                <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-lg uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Emailed: {{ $report->last_sent_at->format('d M, Y H:i') }}
+                </span>
+            @endif
         </div>
         <div class="flex items-center gap-2">
+            <button type="button" 
+                    wire:click="emailReport({{ $report->id }})"
+                    wire:confirm="Send Maintenance Report #{{ $report->id }} to client's email ({{ $report->client->user->email }})?"
+                    wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-95 shadow-sm relative">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>Email Client</span>
+                <span wire:loading wire:target="emailReport({{ $report->id }})" class="absolute inset-0 flex items-center justify-center bg-emerald-600 rounded-xl">
+                    <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </span>
+            </button>
             <a href="{{ route('admin.maintenance.pdf', $report->id) }}" target="_blank"
                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition active:scale-95 shadow-sm">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -193,7 +217,7 @@
             <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
                 <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Security Profile</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-150/40">
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Malware Scan</span>
                     <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mt-1 uppercase">{{ $report->security_malware_scan }}</p>
@@ -209,6 +233,10 @@
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-150/40">
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">SSL Status</span>
                     <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mt-1 uppercase">{{ $report->security_ssl_status }}</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-150/40">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Security Health</span>
+                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mt-1 uppercase">{{ $report->security_health ?: 'Excellent' }}</p>
                 </div>
             </div>
             @if($report->security_notes)

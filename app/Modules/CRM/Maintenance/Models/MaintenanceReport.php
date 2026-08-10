@@ -48,6 +48,7 @@ class MaintenanceReport extends Model
         'security_plugin_status',
         'security_ssl_status',
         'security_notes',
+        'security_health',
 
         // Website Health
         'health_score',
@@ -78,6 +79,7 @@ class MaintenanceReport extends Model
         // Notes
         'developer_notes',
         'client_summary',
+        'last_sent_at',
     ];
 
     protected $casts = [
@@ -88,6 +90,7 @@ class MaintenanceReport extends Model
         'backup_completed' => 'boolean',
         'backup_date' => 'date',
         'support_completion_date' => 'date',
+        'last_sent_at' => 'datetime',
     ];
 
     public function client(): BelongsTo

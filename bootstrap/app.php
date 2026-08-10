@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->name('admin.')
                 ->group(base_path('routes/admin_auth.php'));
 
-            \Illuminate\Support\Facades\Route::middleware(['web'])
+            \Illuminate\Support\Facades\Route::middleware(['web', 'auth', \App\Http\Middleware\StaffAuthenticate::class])
                 ->prefix('staffadspnl')
                 ->name('staff.')
                 ->group(base_path('routes/staff.php'));

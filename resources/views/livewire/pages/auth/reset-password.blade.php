@@ -57,6 +57,19 @@ new #[Layout('layouts.auth')] class extends Component
             return;
         }
 
+        $user = \App\Models\User::where('email', $this->email)->first();
+        if ($user) {
+            \App\Modules\Core\Activity\Models\ActivityLog::create([
+                'user_id' => $user->id,
+                'action' => 'password_reset_completed',
+                'description' => "Successfully reset password for: {$this->email}",
+                'meta' => [
+                    'ip' => request()->ip(),
+                    'agent' => request()->userAgent(),
+                ],
+            ]);
+        }
+
         Session::flash('status', __($status));
 
         $this->redirectRoute('login', navigate: true);

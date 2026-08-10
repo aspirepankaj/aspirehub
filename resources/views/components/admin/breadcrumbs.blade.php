@@ -1,8 +1,27 @@
 @props(['items' => []])
 @php
-    $isClient = request()->routeIs('client.*') || request()->routeIs('websites');
-    $rootUrl = $isClient ? route('client.dashboard') : route('admin.dashboard');
-    $rootLabel = $isClient ? 'Client' : 'Admin';
+    $referer = request()->headers->get('referer', '');
+    $refererPath = parse_url($referer, PHP_URL_PATH) ?: '';
+    
+    $isClient = request()->is('client*') || 
+                \Illuminate\Support\Str::startsWith($refererPath, '/client/') || 
+                $refererPath === '/client' || 
+                request()->routeIs('websites');
+                
+    $isStaff = request()->is('staffadspnl*') || 
+               \Illuminate\Support\Str::startsWith($refererPath, '/staffadspnl') || 
+               request()->routeIs('staff.*');
+    
+    if ($isClient) {
+        $rootUrl = route('client.dashboard');
+        $rootLabel = 'Client';
+    } elseif ($isStaff) {
+        $rootUrl = route('staff.dashboard');
+        $rootLabel = 'Staff';
+    } else {
+        $rootUrl = route('admin.dashboard');
+        $rootLabel = 'Admin';
+    }
 @endphp
 <nav class="flex text-sm text-slate-500 dark:text-slate-400 font-semibold mb-4">
     <ol class="inline-flex items-center space-x-1.5 md:space-x-2">

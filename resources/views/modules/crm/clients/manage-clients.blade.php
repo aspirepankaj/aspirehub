@@ -189,6 +189,7 @@
                                 <th class="px-6 py-4">Score</th>
                                 <th class="px-6 py-4">Status</th>
                                 <th class="px-6 py-4">Author</th>
+                                <th class="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
@@ -198,13 +199,46 @@
                                     <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ $report->maintenance_month }}</td>
                                     <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-350">{{ $report->health_score }}%</td>
                                     <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">Completed</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {{ $report->status === 'completed' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400' }} tracking-wider">
+                                            {{ $report->status }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-semibold">{{ $report->developer->name ?? 'System' }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="inline-flex items-center justify-end gap-1">
+                                            {{-- View button --}}
+                                            <a href="{{ route('admin.maintenance.view', $report->id) }}"
+                                               class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="View Report">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </a>
+
+                                            {{-- Edit button --}}
+                                            <a href="{{ route('admin.maintenance.edit', $report->id) }}"
+                                               class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="Edit Report">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </a>
+
+                                            {{-- PDF button --}}
+                                            <a href="{{ route('admin.maintenance.pdf', $report->id) }}" target="_blank"
+                                               class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="Generate PDF">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    <div class="mt-4 p-4 border-t border-slate-200/50 dark:border-slate-800/40">
+                        {{ $clientMaintenanceReports->links() }}
+                    </div>
                 @endif
             </div>
 
@@ -237,6 +271,9 @@
                             @endforeach
                         </tbody>
                     </table>
+                    <div class="mt-4 p-4 border-t border-slate-200/50 dark:border-slate-800/40">
+                        {{ $clientDocuments->links() }}
+                    </div>
                 @endif
             </div>
 
@@ -290,7 +327,7 @@
                         Edit Full Profile Settings
                     </button>
                     @if ($clientDetails->status === 'active')
-                        <button type="button" wire:click="toggleClientStatus({{ $clientDetails->id }}, 'inactive')" class="px-4 py-2.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/30 font-bold text-xs rounded-xl active:scale-95 transition">
+                        <button type="button" wire:click="toggleClientStatus({{ $clientDetails->id }}, 'inactive')" wire:confirm="Are you sure you want to deactivate this account?" class="px-4 py-2.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/30 font-bold text-xs rounded-xl active:scale-95 transition">
                             Deactivate Account
                         </button>
                     @else

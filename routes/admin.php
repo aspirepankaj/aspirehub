@@ -79,3 +79,4 @@ Route::get('/profile', function () {
 })->name('profile');
 
 Route::get('/activity-logs', ManageActivityLogs::class)->name('activity-logs');
+Route::get('/email-logs', \App\Modules\Core\Activity\Livewire\ManageEmailLogs::class)->name('email-logs');

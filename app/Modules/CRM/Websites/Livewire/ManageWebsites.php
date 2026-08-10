@@ -254,7 +254,8 @@ class ManageWebsites extends Component
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->serviceTypeFilter, fn($q) => $q->whereHas('serviceTypes', fn($sq) => $sq->where('service_type_id', $this->serviceTypeFilter)))
             ->latest()
-            ->paginate(12);
+            ->paginate(12)
+            ->onEachSide(1);
 
         $hasActiveFilters = $this->search || $this->statusFilter || $this->serviceTypeFilter;
         $pageIds = $websites->pluck('id')->toArray();
