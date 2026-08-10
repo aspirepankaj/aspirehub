@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Modules\Core\Activity\Traits\LogsActivity;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 class Staff extends Model
 {
     use LogsActivity;
@@ -17,8 +19,8 @@ class Staff extends Model
     protected $fillable = [
         'user_id',
         'company_name',
-        'role',
         'department',
+        'profile_image',
         'status',
         'notes',
         'added_by',
@@ -28,6 +30,11 @@ class Staff extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function designations(): BelongsToMany
+    {
+        return $this->belongsToMany(Designation::class, 'adspv_staff_designation', 'staff_id', 'designation_id');
     }
 
     public function addedBy(): BelongsTo
@@ -45,6 +52,11 @@ class Staff extends Model
         return $this->hasMany(StaffPhone::class, 'staff_id');
     }
 
+    public function clients(): HasMany
+    {
+        return $this->hasMany(\App\Modules\CRM\Clients\Models\Client::class, 'assigned_staff_id');
+    }
+
     protected function getActivityDescription(string $action): string
     {
         $userName = auth()->user()->name ?? 'System';
@@ -60,5 +72,16 @@ class Staff extends Model
             default:
                 return "{$userName} {$action} staff member: '{$staffName}'";
         }
+    }
+
+    public function getInitials(): string
+    {
+        $name = $this->user->name ?? '';
+        $words = preg_split("/\s+/", trim($name));
+        $initials = "";
+        foreach ($words as $w) {
+            $initials .= mb_substr($w, 0, 1);
+        }
+        return mb_strtoupper(mb_substr($initials, 0, 2));
     }
 }

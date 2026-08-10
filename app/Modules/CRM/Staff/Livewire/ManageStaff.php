@@ -8,20 +8,24 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.admin')]
 class ManageStaff extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     // Form inputs
     public string $name = '';
     public string $email = '';
     public string $password = '';
     public string $company_name = '';
-    public string $role = '';
+    public array $designation_ids = [];
     public string $department = '';
+    public $profile_image;
+    public ?string $existing_profile_image = null;
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
     public string $status = 'active';
     public string $notes = '';
@@ -29,7 +33,7 @@ class ManageStaff extends Component
     // Search & Filter
     public string $search = '';
     public string $statusFilter = '';
-    public string $roleFilter = '';
+    public string $designationFilter = '';
     public string $departmentFilter = '';
 
     // Bulk selection
@@ -41,12 +45,6 @@ class ManageStaff extends Component
     public ?int $editingUserId = null;
 
     // Dropdown options
-    public array $roles = [
-        'Account Manager', 'SEO Specialist', 'Developer', 'Designer',
-        'Support Lead', 'Marketing Manager', 'DevOps', 'Content Writer',
-        'Sales Executive', 'HR Manager', 'Project Manager', 'Quality Analyst',
-    ];
-
     public array $departments = [
         'Client Success', 'Marketing', 'Engineering', 'Design',
         'Support', 'Operations', 'Sales', 'HR', 'Finance',
@@ -66,7 +64,7 @@ class ManageStaff extends Component
         $this->resetPage();
     }
 
-    public function updatingRoleFilter(): void
+    public function updatingDesignationFilter(): void
     {
         $this->selectedStaff = [];
         $this->selectAll = false;
@@ -84,7 +82,7 @@ class ManageStaff extends Component
     {
         $this->search = '';
         $this->statusFilter = '';
-        $this->roleFilter = '';
+        $this->designationFilter = '';
         $this->departmentFilter = '';
         $this->selectedStaff = [];
         $this->selectAll = false;
@@ -129,8 +127,10 @@ class ManageStaff extends Component
             'email',
             'password',
             'company_name',
-            'role',
+            'designation_ids',
             'department',
+            'profile_image',
+            'existing_profile_image',
             'phones',
             'notes',
             'editingStaffId',
@@ -180,8 +180,10 @@ class ManageStaff extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'company_name' => 'nullable|string|max:255',
-            'role' => 'nullable|string|max:100',
+            'designation_ids' => 'array',
+            'designation_ids.*' => 'exists:adspv_designations,id',
             'department' => 'nullable|string|max:100',
+            'profile_image' => 'nullable|image|max:1024',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -192,7 +194,12 @@ class ManageStaff extends Component
             'phones.*.label' => 'phone label',
         ]);
 
-        DB::transaction(function () {
+        $profileImagePath = null;
+        if ($this->profile_image) {
+            $profileImagePath = $this->profile_image->store('profile_images', 'public');
+        }
+
+        DB::transaction(function () use ($profileImagePath) {
             // 1. Create standard User
             $user = User::create([
                 'name' => $this->name,
@@ -204,12 +211,15 @@ class ManageStaff extends Component
             $staffRecord = Staff::create([
                 'user_id' => $user->id,
                 'company_name' => $this->company_name,
-                'role' => $this->role,
                 'department' => $this->department,
+                'profile_image' => $profileImagePath,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'added_by' => auth()->id(),
             ]);
+
+            // Sync multiple designations
+            $staffRecord->designations()->sync($this->designation_ids);
 
             // 3. Create multiple Staff phones
             foreach ($this->phones as $phoneData) {
@@ -229,7 +239,7 @@ class ManageStaff extends Component
 
     public function editStaff($id)
     {
-        $staffRecord = Staff::with(['user', 'phones'])->findOrFail($id);
+        $staffRecord = Staff::with(['user', 'phones', 'designations'])->findOrFail($id);
 
         $this->editingStaffId = $staffRecord->id;
         $this->editingUserId = $staffRecord->user_id;
@@ -238,8 +248,9 @@ class ManageStaff extends Component
         $this->email = $staffRecord->user->email;
         $this->password = ''; // Leave password blank on edit unless updating
         $this->company_name = $staffRecord->company_name ?? '';
-        $this->role = $staffRecord->role ?? '';
+        $this->designation_ids = $staffRecord->designations->pluck('id')->toArray();
         $this->department = $staffRecord->department ?? '';
+        $this->existing_profile_image = $staffRecord->profile_image;
 
         $this->phones = [];
         foreach ($staffRecord->phones as $phoneRecord) {
@@ -266,8 +277,10 @@ class ManageStaff extends Component
             'email' => 'required|email|max:255|unique:users,email,' . $this->editingUserId,
             'password' => 'nullable|string|min:8',
             'company_name' => 'nullable|string|max:255',
-            'role' => 'nullable|string|max:100',
+            'designation_ids' => 'array',
+            'designation_ids.*' => 'exists:adspv_designations,id',
             'department' => 'nullable|string|max:100',
+            'profile_image' => 'nullable|image|max:1024',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -278,7 +291,12 @@ class ManageStaff extends Component
             'phones.*.label' => 'phone label',
         ]);
 
-        DB::transaction(function () {
+        $profileImagePath = $this->existing_profile_image;
+        if ($this->profile_image) {
+            $profileImagePath = $this->profile_image->store('profile_images', 'public');
+        }
+
+        DB::transaction(function () use ($profileImagePath) {
             // 1. Update standard User
             $user = User::findOrFail($this->editingUserId);
             $userUpdateData = [
@@ -294,12 +312,15 @@ class ManageStaff extends Component
             $staffRecord = Staff::findOrFail($this->editingStaffId);
             $staffRecord->update([
                 'company_name' => $this->company_name,
-                'role' => $this->role,
                 'department' => $this->department,
+                'profile_image' => $profileImagePath,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'edited_by' => auth()->id(),
             ]);
+
+            // Sync multiple designations
+            $staffRecord->designations()->sync($this->designation_ids);
 
             // 3. Sync Staff phones
             $staffRecord->phones()->delete();
@@ -322,27 +343,32 @@ class ManageStaff extends Component
     {
         $searchTerm = trim($this->search);
 
-        $Staff = Staff::with(['user', 'phones'])
+        $Staff = Staff::with(['user', 'phones', 'designations'])
             ->where(function ($query) use ($searchTerm) {
                 $query->where('company_name', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('role', 'like', '%' . $searchTerm . '%')
                     ->orWhere('department', 'like', '%' . $searchTerm . '%')
+                    ->orWhereHas('designations', function ($dq) use ($searchTerm) {
+                        $dq->where('name', 'like', '%' . $searchTerm . '%');
+                    })
                     ->orWhereHas('user', function ($uQuery) use ($searchTerm) {
                         $uQuery->where('name', 'like', '%' . $searchTerm . '%')
                             ->orWhere('email', 'like', '%' . $searchTerm . '%');
                     });
             })
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
-            ->when($this->roleFilter, fn($q) => $q->where('role', $this->roleFilter))
+            ->when($this->designationFilter, fn($q) => $q->whereHas('designations', fn($dq) => $dq->where('adspv_designations.id', $this->designationFilter)))
             ->when($this->departmentFilter, fn($q) => $q->where('department', $this->departmentFilter))
             ->latest()
             ->paginate(10);
 
-        $hasActiveFilters = $this->search || $this->statusFilter || $this->roleFilter || $this->departmentFilter;
+        $hasActiveFilters = $this->search || $this->statusFilter || $this->designationFilter || $this->departmentFilter;
         $pageIds = $Staff->pluck('id')->toArray();
+
+        $designations = \App\Modules\CRM\Staff\Models\Designation::orderBy('name')->get();
 
         return view('modules.crm.staff.manage-staff', [
             'Staff'            => $Staff,
+            'designations'     => $designations,
             'hasActiveFilters' => $hasActiveFilters,
             'pageIds'          => $pageIds,
         ])->layoutData(['title' => 'Staff Management - Aspire Hub']);

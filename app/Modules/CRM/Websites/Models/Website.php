@@ -60,6 +60,16 @@ class Website extends Model
 
     // ─── Relationships ──────────────────────────────────────────────────────────
 
+    public function maintenanceReports(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Modules\CRM\Maintenance\Models\MaintenanceReport::class, 'website_id');
+    }
+
+    public function latestMaintenanceReport(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Modules\CRM\Maintenance\Models\MaintenanceReport::class, 'website_id')->latestOfMany();
+    }
+
     public function serviceTypes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(ServiceType::class, 'adspv_website_service_type', 'website_id', 'service_type_id')->withTimestamps();

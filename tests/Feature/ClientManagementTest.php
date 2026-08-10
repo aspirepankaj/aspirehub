@@ -224,4 +224,36 @@ class ClientManagementTest extends TestCase
             ->call('updateClient')
             ->assertHasNoErrors();
     }
+
+    public function test_admin_can_assign_staff_to_client()
+    {
+        $this->actingAs($this->adminUser);
+
+        // Pre-create staff member
+        $staffUser = User::factory()->create(['name' => 'John Developer']);
+        $designation = \App\Modules\CRM\Staff\Models\Designation::where('name', 'Developer')->first()
+            ?? \App\Modules\CRM\Staff\Models\Designation::create(['name' => 'Developer']);
+        $staff = \App\Modules\CRM\Staff\Models\Staff::create([
+            'user_id' => $staffUser->id,
+            'company_name' => 'Aspire Staffing',
+            'department' => 'Engineering',
+            'status' => 'active',
+        ]);
+        $staff->designations()->sync([$designation->id]);
+
+        Livewire::test(ManageClients::class)
+            ->set('name', 'Acme Client')
+            ->set('email', 'acme@client.com')
+            ->set('password', 'password123')
+            ->set('company_name', 'Acme Corporation')
+            ->set('phones', [['phone' => '1111111111', 'label' => 'Work']])
+            ->set('assigned_staff_id', $staff->id)
+            ->call('saveClient')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('adspv_clients', [
+            'company_name' => 'Acme Corporation',
+            'assigned_staff_id' => $staff->id,
+        ]);
+    }
 }

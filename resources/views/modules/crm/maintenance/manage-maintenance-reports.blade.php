@@ -113,7 +113,7 @@
             <div x-data="{ 
                     open: false, 
                     search: '',
-                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name])) }},
+                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name ?? 'Deleted', 'email' => $c->user->email ?? ''])) }},
                     select(id, name) {
                         this.search = name;
                         $wire.set('clientFilter', id);
@@ -166,27 +166,91 @@
                 <div x-show="open" 
                      x-transition
                      class="absolute z-50 w-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto scrollbar-thin">
-                    <div x-on:click="clear()" class="px-4 py-2 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors font-medium">
+                    <div x-on:click="clear()" class="px-4 py-2 text-sm text-slate-505 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors font-medium">
                         All Clients
                     </div>
                     <template x-for="c in clients" :key="c.id">
-                        <div x-show="search === '' || c.name.toLowerCase().includes(search.toLowerCase())"
+                        <div x-show="search === '' || c.name.toLowerCase().includes(search.toLowerCase()) || (c.email && c.email.toLowerCase().includes(search.toLowerCase()))"
                              x-on:click="select(c.id, c.name)"
-                             class="px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-indigo-500 hover:text-white cursor-pointer transition-colors font-medium"
-                             x-text="c.name">
+                             class="px-4 py-2 text-sm text-slate-705 dark:text-slate-200 hover:bg-indigo-500 hover:text-white cursor-pointer transition-colors font-medium flex justify-between items-center"
+                             wire:key="client-opt-${c.id}">
+                            <span x-text="c.name"></span>
+                            <span x-text="c.email" class="text-[10px] text-slate-400 dark:text-slate-500 ml-2 font-normal truncate max-w-[150px]"></span>
                         </div>
                     </template>
                 </div>
             </div>
 
-            {{-- Website Filter --}}
-            <div class="relative flex items-center">
-                <select wire:model.live="websiteFilter" class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition duration-150">
-                    <option value="">All Websites</option>
-                    @foreach($websites as $web)
-                        <option value="{{ $web->id }}">{{ $web->site_name }}</option>
-                    @endforeach
-                </select>
+            {{-- Website Searchable Filter Dropdown --}}
+            <div x-data="{ 
+                    open: false, 
+                    search: '',
+                    websites: {{ Js::from($websites->map(fn($w) => ['id' => $w->id, 'name' => $w->site_name, 'url' => $w->url])) }},
+                    select(id, name) {
+                        this.search = name;
+                        $wire.set('websiteFilter', id);
+                        this.open = false;
+                    },
+                    clear() {
+                        this.search = '';
+                        $wire.set('websiteFilter', '');
+                        this.open = false;
+                    },
+                    syncSearch() {
+                        const val = $wire.get('websiteFilter');
+                        if (!val) {
+                            this.search = '';
+                        } else {
+                            const found = this.websites.find(w => w.id == val);
+                            this.search = found ? found.name : '';
+                        }
+                    },
+                    init() {
+                        this.syncSearch();
+                        this.$watch('$wire.websiteFilter', () => this.syncSearch());
+                    }
+                 }" 
+                 class="relative col-span-1 sm:col-span-2 lg:col-span-1">
+                <div class="relative">
+                    <input type="text" 
+                           x-model="search"
+                           x-on:focus="open = true"
+                           x-on:click.outside="open = false"
+                           placeholder="Filter by Website..."
+                           class="block w-full pl-3 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150" />
+                    
+                    <template x-if="$wire.websiteFilter">
+                        <button type="button" x-on:click="clear()" class="absolute right-8 top-3 text-slate-400 hover:text-slate-600">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </template>
+                    
+                    <button type="button" x-on:click="open = !open" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Dropdown Options -->
+                <div x-show="open" 
+                     x-transition
+                     class="absolute z-50 w-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-h-60 overflow-y-auto scrollbar-thin">
+                    <div x-on:click="clear()" class="px-4 py-2 text-sm text-slate-505 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors font-medium">
+                        All Websites
+                    </div>
+                    <template x-for="w in websites" :key="w.id">
+                        <div x-show="search === '' || w.name.toLowerCase().includes(search.toLowerCase()) || (w.url && w.url.toLowerCase().includes(search.toLowerCase()))"
+                             x-on:click="select(w.id, w.name)"
+                             class="px-4 py-2 text-sm text-slate-750 dark:text-slate-200 hover:bg-indigo-500 hover:text-white cursor-pointer transition-colors font-medium flex justify-between items-center"
+                             wire:key="web-opt-${w.id}">
+                            <span x-text="w.name"></span>
+                            <span x-text="w.url" class="text-[10px] text-slate-400 dark:text-slate-500 ml-2 font-normal truncate max-w-[180px]"></span>
+                        </div>
+                    </template>
+                </div>
             </div>
 
             {{-- Status Filter --}}

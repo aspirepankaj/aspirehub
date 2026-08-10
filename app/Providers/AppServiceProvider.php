@@ -29,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('create-maintenance-report', \App\Modules\CRM\Maintenance\Livewire\CreateMaintenanceReport::class);
         \Livewire\Livewire::component('edit-maintenance-report', \App\Modules\CRM\Maintenance\Livewire\EditMaintenanceReport::class);
         \Livewire\Livewire::component('view-maintenance-report', \App\Modules\CRM\Maintenance\Livewire\ViewMaintenanceReport::class);
+        \Livewire\Livewire::component('manage-designations', \App\Modules\CRM\Staff\Livewire\ManageDesignations::class);
+        \Livewire\Livewire::component('manage-admins', \App\Modules\Core\Authentication\Livewire\ManageAdmins::class);
         \Livewire\Livewire::component('manage-documents', \App\Modules\CRM\Documents\Livewire\ManageDocuments::class);
     }
 }

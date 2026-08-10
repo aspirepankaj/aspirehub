@@ -5,19 +5,28 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
 new class extends Component
 {
+    use WithFileUploads;
+
     public string $name = '';
     public string $email = '';
+    public string $phone = '';
+    public $profile_image;
+    public ?string $existing_profile_image = null;
 
     /**
      * Mount the component.
      */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $user = Auth::user();
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->phone = $user->admin?->phone ?? '';
+        $this->existing_profile_image = $user->admin?->profile_image;
     }
 
     /**
@@ -30,15 +39,31 @@ new class extends Component
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'profile_image' => ['nullable', 'image', 'max:1024'],
         ]);
 
-        $user->fill($validated);
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
         $user->save();
+
+        if ($user->admin) {
+            $adminData = ['phone' => $validated['phone']];
+            if ($this->profile_image) {
+                $path = $this->profile_image->store('profile_images', 'public');
+                $adminData['profile_image'] = $path;
+                $this->existing_profile_image = $path;
+                $this->reset('profile_image');
+            }
+            $user->admin->update($adminData);
+        }
 
         $this->dispatch('profile-updated', name: $user->name);
     }
@@ -69,11 +94,31 @@ new class extends Component
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __("Update your account's profile information, email address and profile picture.") }}
         </p>
     </header>
 
     <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
+        <!-- Profile Image Field -->
+        <div>
+            <x-input-label :value="__('Profile Picture')" />
+            <div class="mt-2 flex items-center gap-4">
+                @if ($profile_image)
+                    <img src="{{ $profile_image->temporaryUrl() }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" />
+                @else
+                    @if ($existing_profile_image)
+                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" />
+                    @else
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20">
+                            {{ strtoupper(substr($name, 0, 2)) }}
+                        </div>
+                    @endif
+                @endif
+                <input type="file" wire:model="profile_image" class="text-xs text-slate-550 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/30 dark:file:text-indigo-400 cursor-pointer" />
+            </div>
+            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+        </div>
+
         <div>
             <x-input-label for="name" :value="__('Name')" />
             <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />
@@ -102,6 +147,12 @@ new class extends Component
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div>
+            <x-input-label for="phone" :value="__('Phone Number')" />
+            <x-text-input wire:model="phone" id="phone" name="phone" type="text" class="mt-1 block w-full" placeholder="e.g. +1 (555) 000-0000" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
         <div class="flex items-center gap-4">

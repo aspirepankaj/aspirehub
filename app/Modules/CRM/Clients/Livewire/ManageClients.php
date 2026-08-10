@@ -8,22 +8,27 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.admin')]
 class ManageClients extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     // Form inputs
     public string $name = '';
     public string $email = '';
     public string $password = '';
     public string $company_name = '';
+    public $profile_image;
+    public ?string $existing_profile_image = null;
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
     public string $status = 'active';
     public string $notes = '';
     public array $plan_ids = [];
+    public ?int $assigned_staff_id = null;
 
     // Search & Filter
     public string $search = '';
@@ -37,6 +42,32 @@ class ManageClients extends Component
     // Edit state tracking
     public ?int $editingClientId = null;
     public ?int $editingUserId = null;
+
+    // Detail view state
+    public ?int $selectedClientDetailId = null;
+    public string $activeTab = 'overview';
+
+    public function mount($id = null): void
+    {
+        if ($id) {
+            $this->selectedClientDetailId = (int) $id;
+        }
+    }
+
+    public function viewClientDetail(int $id)
+    {
+        return $this->redirect(route('admin.clients.detail', ['id' => $id]), navigate: true);
+    }
+
+    public function closeClientDetail()
+    {
+        return $this->redirect(route('admin.clients'), navigate: true);
+    }
+
+    public function setTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
 
     public function updatingSearch(): void
     {
@@ -78,6 +109,19 @@ class ManageClients extends Component
         }
     }
 
+    public function clearSelection(): void
+    {
+        $this->selectedClients = [];
+        $this->selectAll = false;
+    }
+
+    public function toggleClientStatus(int $id, string $status): void
+    {
+        $client = Client::findOrFail($id);
+        $client->update(['status' => $status]);
+        session()->flash('success', 'Client status updated to ' . $status . ' successfully.');
+    }
+
     public function bulkActivate(): void
     {
         if (empty($this->selectedClients)) return;
@@ -102,7 +146,7 @@ class ManageClients extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'company_name', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids']);
+        $this->reset(['name', 'email', 'password', 'company_name', 'profile_image', 'existing_profile_image', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids', 'assigned_staff_id']);
         $this->phones = [['phone' => '', 'label' => 'Work']];
         $this->plan_ids = [];
         $this->resetValidation();
@@ -141,6 +185,7 @@ class ManageClients extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'company_name' => 'nullable|string|max:255',
+            'profile_image' => 'nullable|image|max:1024',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -148,12 +193,18 @@ class ManageClients extends Component
             'notes' => 'nullable|string',
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
+            'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
         ]);
 
-        DB::transaction(function () {
+        $profileImagePath = null;
+        if ($this->profile_image) {
+            $profileImagePath = $this->profile_image->store('profile_images', 'public');
+        }
+
+        DB::transaction(function () use ($profileImagePath) {
             // 1. Create standard User
             $user = User::create([
                 'name' => $this->name,
@@ -164,7 +215,9 @@ class ManageClients extends Component
             // 2. Create associated Client details
             $client = Client::create([
                 'user_id' => $user->id,
+                'assigned_staff_id' => $this->assigned_staff_id,
                 'company_name' => $this->company_name,
+                'profile_image' => $profileImagePath,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'added_by' => auth()->id(),
@@ -196,11 +249,13 @@ class ManageClients extends Component
         $this->editingClientId = $client->id;
         $this->editingUserId = $client->user_id;
         $this->plan_ids = $client->plans->pluck('id')->toArray();
+        $this->assigned_staff_id = $client->assigned_staff_id;
 
         $this->name = $client->user->name;
         $this->email = $client->user->email;
         $this->password = ''; // Leave password blank on edit unless updating
         $this->company_name = $client->company_name ?? '';
+        $this->existing_profile_image = $client->profile_image;
         
         $this->phones = [];
         foreach ($client->phones as $phoneRecord) {
@@ -227,6 +282,7 @@ class ManageClients extends Component
             'email' => 'required|email|max:255|unique:users,email,' . $this->editingUserId,
             'password' => 'nullable|string|min:8',
             'company_name' => 'nullable|string|max:255',
+            'profile_image' => 'nullable|image|max:1024',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -234,12 +290,18 @@ class ManageClients extends Component
             'notes' => 'nullable|string',
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
+            'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
         ]);
 
-        DB::transaction(function () {
+        $profileImagePath = $this->existing_profile_image;
+        if ($this->profile_image) {
+            $profileImagePath = $this->profile_image->store('profile_images', 'public');
+        }
+
+        DB::transaction(function () use ($profileImagePath) {
             // 1. Update standard User
             $user = User::findOrFail($this->editingUserId);
             $userUpdateData = [
@@ -255,6 +317,8 @@ class ManageClients extends Component
             $client = Client::findOrFail($this->editingClientId);
             $client->update([
                 'company_name' => $this->company_name,
+                'profile_image' => $profileImagePath,
+                'assigned_staff_id' => $this->assigned_staff_id,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'edited_by' => auth()->id(),
@@ -280,32 +344,122 @@ class ManageClients extends Component
         session()->flash('success', 'Client updated successfully!');
     }
 
+    public function getQueryString()
+    {
+        return [];
+    }
+
+    public function queryStringHandlesPagination()
+    {
+        return [];
+    }
+
     public function render()
     {
-        $clients = Client::with(['user', 'phones', 'plans'])
-            ->withCount('websites')
-            ->where(function ($query) {
-                $query->where('company_name', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('user', function ($uQuery) {
-                        $uQuery->where('name', 'like', '%' . $this->search . '%')
-                            ->orWhere('email', 'like', '%' . $this->search . '%');
-                    });
-            })
-            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
-            ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)))
-            ->latest()
-            ->paginate(10);
+        $clientDetails = null;
+        $clientWebsites = collect();
+        $clientMaintenanceReports = collect();
+        $clientDocuments = collect();
+        $clientActivityLogs = collect();
 
-        $hasActiveFilters = $this->search || $this->statusFilter || $this->planFilter;
-        $pageIds = $clients->pluck('id')->toArray();
+        if ($this->selectedClientDetailId) {
+            $clients = collect();
+            $hasActiveFilters = false;
+            $pageIds = [];
+
+            $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])->findOrFail($this->selectedClientDetailId);
+            
+            $clientWebsites = \App\Modules\CRM\Websites\Models\Website::with('latestMaintenanceReport')
+                ->where('client_id', $this->selectedClientDetailId)
+                ->latest()
+                ->get();
+                
+            $clientMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'website'])
+                ->where('client_id', $this->selectedClientDetailId)
+                ->latest()
+                ->get();
+                
+            $clientDocuments = \App\Modules\CRM\Documents\Models\Document::with('addedBy')
+                ->where('client_id', $this->selectedClientDetailId)
+                ->latest()
+                ->get();
+
+            $websiteIds = $clientWebsites->pluck('id')->toArray();
+            $reportIds = $clientMaintenanceReports->pluck('id')->toArray();
+            $docIds = $clientDocuments->pluck('id')->toArray();
+
+            $clientActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+                ->where(function ($query) use ($websiteIds, $reportIds, $docIds) {
+                    $query->where(function ($q) {
+                        $q->where('loggable_type', \App\Modules\CRM\Clients\Models\Client::class)
+                          ->where('loggable_id', $this->selectedClientDetailId);
+                    })
+                    ->orWhere(function ($q) {
+                        $q->where('user_id', $this->selectedClientDetailId);
+                    })
+                    ->when(!empty($websiteIds), function ($q) use ($websiteIds) {
+                        $q->orWhere(function ($sq) use ($websiteIds) {
+                            $sq->where('loggable_type', \App\Modules\CRM\Websites\Models\Website::class)
+                              ->whereIn('loggable_id', $websiteIds);
+                        });
+                    })
+                    ->when(!empty($reportIds), function ($q) use ($reportIds) {
+                        $q->orWhere(function ($sq) use ($reportIds) {
+                            $sq->where('loggable_type', \App\Modules\CRM\Maintenance\Models\MaintenanceReport::class)
+                              ->whereIn('loggable_id', $reportIds);
+                        });
+                    })
+                    ->when(!empty($docIds), function ($q) use ($docIds) {
+                        $q->orWhere(function ($sq) use ($docIds) {
+                            $sq->where('loggable_type', \App\Modules\CRM\Documents\Models\Document::class)
+                              ->whereIn('loggable_id', $docIds);
+                        });
+                    });
+                })
+                ->latest()
+                ->paginate(10, ['*'], 'activityPage');
+        } else {
+            $clients = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
+                ->withCount('websites')
+                ->where(function ($query) {
+                    $query->where('company_name', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('user', function ($uQuery) {
+                            $uQuery->where('name', 'like', '%' . $this->search . '%')
+                                ->orWhere('email', 'like', '%' . $this->search . '%');
+                        });
+                })
+                ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+                ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)))
+                ->latest()
+                ->paginate(10);
+
+            $hasActiveFilters = $this->search || $this->statusFilter || $this->planFilter;
+            $pageIds = $clients->pluck('id')->toArray();
+        }
 
         $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
+        $staffMembers = \App\Modules\CRM\Staff\Models\Staff::with(['user', 'designations'])
+            ->where('status', 'active')
+            ->get()
+            ->sortBy(fn($s) => $s->user?->name)
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'name' => $s->user?->name ?? 'Unknown Staff',
+                'role' => $s->designations->pluck('name')->implode(', ')
+            ])
+            ->values();
 
         return view('modules.crm.clients.manage-clients', [
-            'clients'          => $clients,
-            'plans'            => $plans,
-            'hasActiveFilters' => $hasActiveFilters,
-            'pageIds'          => $pageIds,
+            'clients'                  => $clients,
+            'plans'                    => $plans,
+            'staffMembers'             => $staffMembers,
+            'hasActiveFilters'         => $hasActiveFilters,
+            'pageIds'                  => $pageIds,
+            'clientDetails'            => $clientDetails,
+            'clientWebsites'           => $clientWebsites,
+            'clientMaintenanceReports' => $clientMaintenanceReports,
+            'clientDocuments'          => $clientDocuments,
+            'clientActivityLogs'       => $clientActivityLogs,
         ])->layoutData(['title' => 'Clients Management - Aspire Hub']);
     }
 }

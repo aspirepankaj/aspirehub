@@ -17,9 +17,15 @@ Route::get('/', function () {
 
 // Clients page using custom Livewire component
 Route::get('/clients', ManageClients::class)->name('clients');
+Route::get('/clients/ADSCL-{id}', ManageClients::class)->name('clients.detail');
 Route::get('/clients/plans', \App\Modules\CRM\Clients\Livewire\ManagePlans::class)->name('clients.plans');
 
+use App\Modules\CRM\Staff\Livewire\ManageDesignations;
+use App\Modules\Core\Authentication\Livewire\ManageAdmins;
+
 Route::get('/staff', ManageStaff::class)->name('staff');
+Route::get('/staff/designations', ManageDesignations::class)->name('staff.designations');
+Route::get('/admins', ManageAdmins::class)->name('admins');
 
 Route::get('/websites/service-types', \App\Modules\CRM\Websites\Livewire\ManageServiceTypes::class)->name('websites.service-types');
 Route::get('/websites', ManageWebsites::class)->name('websites');

@@ -18,7 +18,9 @@ class Client extends Model
 
     protected $fillable = [
         'user_id',
+        'assigned_staff_id',
         'company_name',
+        'profile_image',
         'status',
         'notes',
         'added_by',
@@ -28,6 +30,11 @@ class Client extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function assignedStaff(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\CRM\Staff\Models\Staff::class, 'assigned_staff_id');
     }
 
     public function addedBy(): BelongsTo
@@ -70,5 +77,16 @@ class Client extends Model
             default:
                 return "{$userName} performed action '{$action}' on client: '{$clientName}'";
         }
+    }
+
+    public function getInitials(): string
+    {
+        $name = $this->user->name ?? '';
+        $words = preg_split("/\s+/", trim($name));
+        $initials = "";
+        foreach ($words as $w) {
+            $initials .= mb_substr($w, 0, 1);
+        }
+        return mb_strtoupper(mb_substr($initials, 0, 2));
     }
 }

@@ -19,12 +19,12 @@ class AdminDashboard extends Component
     {
         // Total Clients, Active, Inactive, New, Staff, Websites, Revenue, Tickets
         $this->stats = [
-            'total_clients' => 1240,
-            'active_clients' => 1180,
-            'inactive_clients' => 60,
-            'new_clients' => 45,
-            'total_staff' => 38,
-            'total_websites' => 312,
+            'total_clients' => \App\Modules\CRM\Clients\Models\Client::count(),
+            'active_clients' => \App\Modules\CRM\Clients\Models\Client::where('status', 'active')->count(),
+            'inactive_clients' => \App\Modules\CRM\Clients\Models\Client::where('status', 'inactive')->count(),
+            'new_clients' => \App\Modules\CRM\Clients\Models\Client::where('created_at', '>=', now()->subDays(30))->count(),
+            'total_staff' => \App\Modules\CRM\Staff\Models\Staff::count(),
+            'total_websites' => \App\Modules\CRM\Websites\Models\Website::count(),
             'monthly_revenue' => 145200,
             'open_tickets' => 14,
         ];
@@ -41,12 +41,18 @@ class AdminDashboard extends Component
         ];
 
         // Recent client signups
-        $this->recentClients = [
-            ['name' => 'Acme Corporation', 'email' => 'contact@acme.com', 'status' => 'Active', 'plan' => 'Enterprise', 'date' => '2 hours ago'],
-            ['name' => 'Nova Technologies', 'email' => 'billing@novatech.io', 'status' => 'Active', 'plan' => 'Growth', 'date' => '5 hours ago'],
-            ['name' => 'Stellar Design Studio', 'email' => 'hello@stellardesign.co', 'status' => 'Inactive', 'plan' => 'Basic', 'date' => '1 day ago'],
-            ['name' => 'Apex Retail Group', 'email' => 'operations@apexretail.com', 'status' => 'Active', 'plan' => 'Growth', 'date' => '2 days ago'],
-        ];
+        $dbRecentClients = \App\Modules\CRM\Clients\Models\Client::with(['user', 'plans'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $this->recentClients = $dbRecentClients->map(fn($c) => [
+            'name' => $c->user->name ?? 'Deleted User',
+            'email' => $c->user->email ?? 'N/A',
+            'status' => ucfirst($c->status),
+            'plan' => $c->plans->pluck('name')->implode(', ') ?: 'No Plan',
+            'date' => $c->created_at->diffForHumans()
+        ])->toArray();
 
         // Recent notifications
         $this->recentNotifications = [

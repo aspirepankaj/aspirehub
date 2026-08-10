@@ -48,9 +48,13 @@
             <span class="hidden sm:inline-block px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg">
                 Administrator
             </span>
-            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300">
-                A
-            </div>
+            @if(auth()->user()->admin?->profile_image)
+                <img src="{{ asset('storage/' . auth()->user()->admin->profile_image) }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-sm" />
+            @else
+                <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300">
+                    {{ auth()->user()->admin ? auth()->user()->admin->getInitials() : strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                </div>
+            @endif
         </div>
     </div>
 </header>

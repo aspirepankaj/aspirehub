@@ -18,9 +18,13 @@ new class extends Component
 
 <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-800/30">
     <div class="flex items-center space-x-2.5 min-w-0">
-        <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
-            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-        </div>
+        @if(auth()->user()->admin?->profile_image)
+            <img src="{{ asset('storage/' . auth()->user()->admin->profile_image) }}" alt="{{ auth()->user()->name }}" class="flex-shrink-0 w-9 h-9 rounded-xl object-cover border border-slate-200/50 dark:border-slate-800/50 shadow-sm" />
+        @else
+            <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+            </div>
+        @endif
         <div class="min-w-0">
             <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ auth()->user()->name }}</p>
             <p class="text-[10px] font-medium text-slate-400 dark:text-slate-500 truncate">{{ auth()->user()->email }}</p>
