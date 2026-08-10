@@ -36,12 +36,19 @@
                 <div class="flex flex-col sm:flex-row items-center gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
                     <div class="relative shrink-0">
                         @if ($profile_image)
-                            <img src="{{ $profile_image->temporaryUrl() }}" class="w-20 h-20 rounded-2xl object-cover border-2 border-indigo-500/30 shadow-md" />
-                        @elseif ($existing_profile_image)
-                            <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-20 h-20 rounded-2xl object-cover border-2 border-indigo-500/30 shadow-md" />
+                            <img src="{{ $profile_image->temporaryUrl() }}" class="w-20 h-20 rounded-full object-cover border-2 border-indigo-500/30 shadow-md" />
+                        @elseif ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image)))
+                            <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-20 h-20 rounded-full object-cover border-2 border-indigo-500/30 shadow-md" />
                         @else
-                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-black text-3xl shadow-lg">
-                                {{ strtoupper(substr($name, 0, 2)) }}
+                            <div class="w-20 h-20 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold text-2xl text-indigo-600 dark:text-indigo-400">
+                                @php
+                                    $words = explode(' ', $name);
+                                    $initials = '';
+                                    foreach ($words as $w) {
+                                        $initials .= strtoupper(substr($w, 0, 1));
+                                    }
+                                    echo substr($initials, 0, 2);
+                                @endphp
                             </div>
                         @endif
                     </div>
@@ -142,11 +149,18 @@
                 @if ($accountManager)
                     <div class="flex items-center gap-3">
                         <div class="shrink-0">
-                            @if ($accountManager->profile_image)
+                            @if ($accountManager->profile_image && file_exists(public_path('storage/' . $accountManager->profile_image)))
                                 <img src="{{ asset('storage/' . $accountManager->profile_image) }}" class="w-10 h-10 rounded-full object-cover" />
                             @else
-                                <div class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm">
-                                    {{ strtoupper(substr($accountManager->name, 0, 2)) }}
+                                <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold text-sm text-indigo-600 dark:text-indigo-400">
+                                    @php
+                                        $words = explode(' ', $accountManager->name);
+                                        $initials = '';
+                                        foreach ($words as $w) {
+                                            $initials .= strtoupper(substr($w, 0, 1));
+                                        }
+                                        echo substr($initials, 0, 2);
+                                    @endphp
                                 </div>
                             @endif
                         </div>
@@ -178,20 +192,28 @@
             <!-- Subscribed Plan Card -->
             <div class="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm space-y-4">
                 <div class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                    Plan
+                    Subscribed Plans
                 </div>
-                <div>
-                    <h3 class="text-2xl font-black text-slate-900 dark:text-white">
-                        {{ $plan->name ?? 'Standard Plan' }}
-                    </h3>
-                    <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">
-                        Member since {{ $plan->created_at ? \Carbon\Carbon::parse($plan->created_at)->format('F Y') : 'April 2023' }}
-                    </p>
-                </div>
-                <div class="pt-2">
-                    <span class="inline-flex px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                        {{ ucfirst($client->status) }}
-                    </span>
+                <div class="space-y-4 divide-y divide-slate-100 dark:divide-slate-800">
+                    @forelse ($plans as $p)
+                        <div class="pt-3 first:pt-0">
+                            <h3 class="text-xl font-black text-slate-900 dark:text-white">
+                                {{ $p->name }}
+                            </h3>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">
+                                Member since {{ \Carbon\Carbon::parse($p->created_at)->format('F Y') }}
+                            </p>
+                            <div class="pt-2">
+                                <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                    {{ ucfirst($client->status) }}
+                                </span>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-sm font-semibold text-slate-450 dark:text-slate-550 italic">
+                            No active plans.
+                        </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -203,7 +225,7 @@
     <div class="mt-6 bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm space-y-4">
         <div>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white">Active services</h3>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-semibold">Included with your {{ $plan->name ?? 'subscribed' }} plan.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-semibold">Included with your subscribed plans.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
@@ -220,7 +242,7 @@
             @foreach ($allServices as $service)
                 @php
                     // Check if this service name is in websiteServiceTypes or check dynamically
-                    $isActive = in_array($service, $websiteServiceTypes) || (isset($plan) && str_contains(strtolower($plan->name), 'growth'));
+                    $isActive = in_array($service, $websiteServiceTypes) || (isset($plans) && $plans->contains(fn($p) => str_contains(strtolower($p->name), 'growth')));
                 @endphp
                 <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800/40 bg-slate-50/50 dark:bg-slate-900/30">
                     <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $isActive ? 'bg-emerald-500/15 text-emerald-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-350' }}">

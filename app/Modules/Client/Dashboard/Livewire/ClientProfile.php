@@ -35,9 +35,15 @@ class ClientProfile extends Component
 
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->phone = $client->phone ?? '';
         $this->company_name = $client->company_name ?? '';
         $this->existing_profile_image = $client->profile_image ?? null;
+
+        if ($client) {
+            $phoneRecord = DB::table('adspv_client_phones')
+                ->where('client_id', $client->id)
+                ->first();
+            $this->phone = $phoneRecord->phone ?? '';
+        }
     }
 
     public function updateProfile()
@@ -65,13 +71,42 @@ class ClientProfile extends Component
             $imagePath = $this->profile_image->store('profile-photos', 'public');
         }
 
-        // Update Client
+        // Update Client details
         DB::table('adspv_clients')->where('user_id', $user->id)->update([
-            'phone' => $this->phone,
             'company_name' => $this->company_name,
             'profile_image' => $imagePath,
             'updated_at' => now(),
         ]);
+
+        // Update Client phone number
+        if ($client) {
+            $phoneRecord = DB::table('adspv_client_phones')
+                ->where('client_id', $client->id)
+                ->first();
+
+            if ($this->phone) {
+                if ($phoneRecord) {
+                    DB::table('adspv_client_phones')
+                        ->where('id', $phoneRecord->id)
+                        ->update([
+                            'phone' => $this->phone,
+                            'updated_at' => now(),
+                        ]);
+                } else {
+                    DB::table('adspv_client_phones')->insert([
+                        'client_id' => $client->id,
+                        'phone' => $this->phone,
+                        'label' => 'Work',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            } else {
+                if ($phoneRecord) {
+                    DB::table('adspv_client_phones')->where('id', $phoneRecord->id)->delete();
+                }
+            }
+        }
 
         $this->existing_profile_image = $imagePath;
         $this->profile_image = null;
@@ -113,11 +148,11 @@ class ClientProfile extends Component
         }
 
         // 2. Subscribed Plan Info
-        $plan = DB::table('adspv_client_plan as cp')
+        $plans = DB::table('adspv_client_plan as cp')
             ->join('adspv_plans as p', 'p.id', '=', 'cp.plan_id')
             ->where('cp.client_id', $client->id)
             ->select('p.name', 'cp.created_at')
-            ->first();
+            ->get();
 
         // 3. Active Services (Retrieve website service types)
         $websiteServiceTypes = DB::table('adspv_websites as w')
@@ -130,7 +165,7 @@ class ClientProfile extends Component
 
         return view('modules.client.dashboard.client-profile', [
             'accountManager' => $accountManager,
-            'plan' => $plan,
+            'plans' => $plans,
             'websiteServiceTypes' => $websiteServiceTypes,
             'client' => $client,
         ]);

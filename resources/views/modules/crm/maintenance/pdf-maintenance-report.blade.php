@@ -160,7 +160,7 @@
                 <div class="header-subtitle">Monthly site security, performance & health optimization audit</div>
             </td>
             <td width="30%" align="right" style="vertical-align: middle; padding: 15px 20px 15px 0;">
-                <img src="{{ public_path('aspire_logo.webp') }}" style="height: 30px; width: auto; display: block; margin-bottom: 4px;" />
+                <img src="{{ public_path('aspire_logo.png') }}" style="height: 30px; width: auto; display: block; margin-bottom: 4px;" />
                 <div style="font-size: 10px; font-weight: bold; color: #a5b4fc;">REPORT ID: #{{ $report->id }}</div>
             </td>
         </tr>
