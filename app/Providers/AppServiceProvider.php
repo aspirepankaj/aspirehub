@@ -32,5 +32,9 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('manage-designations', \App\Modules\CRM\Staff\Livewire\ManageDesignations::class);
         \Livewire\Livewire::component('manage-admins', \App\Modules\Core\Authentication\Livewire\ManageAdmins::class);
         \Livewire\Livewire::component('manage-documents', \App\Modules\CRM\Documents\Livewire\ManageDocuments::class);
+        \Livewire\Livewire::component('client-dashboard', \App\Modules\Client\Dashboard\Livewire\ClientDashboard::class);
+        \Livewire\Livewire::component('client-websites', \App\Modules\Client\Dashboard\Livewire\ClientMyWebsites::class);
+
+
     }
 }

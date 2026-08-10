@@ -34,6 +34,7 @@
                 <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+<<<<<<< Updated upstream
                 <input wire:model.live.debounce.300ms="search"
                        type="text"
                        autocomplete="off"
@@ -93,6 +94,17 @@
         </div>
 
         {{-- Clear Filters row — only shown when a filter is active --}}
+=======
+            </span>
+            <select wire:model.live="statusFilter"
+                    class="block w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
+>>>>>>> Stashed changes
         @if($hasActiveFilters)
             <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
                 <span class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
@@ -151,6 +163,7 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Try refining your search keyword or create a new staff profile above.</p>
             </div>
         @else
+<<<<<<< Updated upstream
             {{-- Custom table with checkbox column --}}
             <div class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
                 <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
@@ -259,6 +272,86 @@
                         @endforeach
                     </tbody>
                 </table>
+=======
+            <div class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+            <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
+                <thead>
+                    <tr class="border-b border-slate-100 dark:border-slate-800/50">
+                        <th class="px-6 py-3 w-10">
+                            <input type="checkbox" wire:model.live="selectAll" wire:change="toggleSelectAll({{ json_encode($pageIds) }})"
+                                   class="rounded-md border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/50" />
+                        </th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Staff Details</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company Name</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Role</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Department</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Phone Numbers</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-3 text-left text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Registered</th>
+                        <th class="px-6 py-3 text-right text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                @foreach($Staff as $staff)
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors" wire:key="staff-row-{{ $staff->id }}">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" wire:model.live="selectedStaff" value="{{ $staff->id }}"
+                                   class="rounded-md border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/50" />
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900 dark:text-white">{{ $staff->user->name ?? 'Deleted User' }}</div>
+                            <div class="text-xs text-slate-400 dark:text-slate-500">{{ $staff->user->email ?? 'N/A' }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-700 dark:text-slate-300 font-semibold">
+                            {{ $staff->company_name ?: '—' }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300 text-sm font-medium">
+                            {{ $staff->role ?: '—' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($staff->department)
+                                <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                    {{ $staff->department }}
+                                </span>
+                            @else
+                                <span class="text-slate-400 dark:text-slate-500">—</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs">
+                            @if($staff->phones->isEmpty())
+                                {{ $staff->phone ?: '—' }}
+                            @else
+                                <div class="space-y-1">
+                                    @foreach($staff->phones as $phoneRec)
+                                        <div><span class="font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest text-[9px] mr-1">{{ $phoneRec->label }}:</span> {{ $phoneRec->phone }}</div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg 
+                                  {{ $staff->status === 'active' 
+                                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                                      : 'bg-slate-500/10 text-slate-500 dark:text-slate-400' }}">
+                                {{ ucfirst($staff->status) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                            {{ $staff->created_at->diffForHumans() }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button type="button" wire:click="editStaff({{ $staff->id }})" 
+                                    class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+>>>>>>> Stashed changes
             </div>
 
             <div class="mt-4">

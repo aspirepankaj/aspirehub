@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ dark: localStorage.getItem('client-theme') === 'dark' }" x-init="$watch('dark', v => localStorage.setItem('client-theme', v ? 'dark' : 'light'))" :class="{ 'dark': dark }">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title ?? 'Client Portal' }} - {{ config('app.name', 'Aspire Hub') }}</title>
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    @livewireStyles
+</head>
+<body class="font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+
+<div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between">
+        <div>
+            <div class="flex items-center gap-3 px-6 py-6">
+                <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-extrabold text-sm">A</div>
+                <div>
+                    <div class="font-extrabold text-sm leading-tight">Aspire Hub</div>
+                    <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase">Client Portal</div>
+                </div>
+            </div>
+
+            <div class="px-4 mb-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
+                    <input type="text" placeholder="Quick search..." class="w-full pl-9 pr-10 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-[10px] font-bold text-slate-400 border-l border-slate-200 dark:border-slate-700 pl-2">⌘K</span>
+                </div>
+            </div>
+
+            <div class="px-6 mb-2 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Portal</div>
+
+            <nav class="px-3 space-y-1">
+                @php
+                    $navItems = [
+                        ['label' => 'Dashboard', 'route' => 'client.dashboard', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
+                        ['label' => 'My Websites', 'route' => 'client.websites', 'icon' => 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['label' => 'Marketing Reports', 'route' => null, 'icon' => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
+                        ['label' => 'Maintenance Reports', 'route' => null, 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z'],
+                        ['label' => 'Support Center', 'route' => null, 'icon' => 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['label' => 'Documents', 'route' => null, 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                        ['label' => 'Notifications', 'route' => null, 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
+                        ['label' => 'My Profile', 'route' => null, 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
+                    ];
+                    $currentRoute = request()->route()?->getName();
+                @endphp
+
+                @foreach($navItems as $item)
+                    @php
+                        $isActive = $item['route'] && $currentRoute === $item['route'];
+                        $href = $item['route'] ? route($item['route']) : '#';
+                    @endphp
+                    <a href="{{ $href }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition
+                              {{ $isActive
+                                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
+                        </svg>
+                        <span>{{ $item['label'] }}</span>
+                    </a>
+                @endforeach
+            </nav>
+        </div>
+
+        <!-- User footer -->
+        <div class="p-4 border-t border-slate-100 dark:border-slate-800/60">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300 overflow-hidden">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </div>
+                <div class="min-w-0">
+                    <div class="text-xs font-bold truncate">{{ auth()->user()->name ?? 'Guest' }}</div>
+                    <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">{{ $clientCompanyName ?? '' }}</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" @click="dark = !dark" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <span x-text="dark ? 'Light' : 'Dark'"></span>
+                </button>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- Topbar -->
+        <header class="h-16 flex items-center justify-between px-8 border-b border-slate-100 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/40 backdrop-blur">
+            <div class="text-sm font-semibold text-slate-400 dark:text-slate-500">{{ now()->format('l, F j') }}</div>
+            <div class="flex items-center gap-3">
+                <button class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition relative">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </button>
+                <button class="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Support
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 p-8 overflow-y-auto">
+            {{ $slot }}
+        </main>
+    </div>
+</div>
+
+@livewireScripts
+</body>
+</html>

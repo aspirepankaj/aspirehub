@@ -1,6 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
-// Prepared for Phase 2 - Client Portal Routing
-// Route::get('/dashboard', ...);
+use App\Modules\Client\Dashboard\Livewire\ClientDashboard;
+use App\Modules\Client\Dashboard\Livewire\ClientMyWebsites;
+// Client Portal Routing
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', ClientDashboard::class)->name('dashboard');
+       Route::get('/websites', ClientMyWebsites::class)
+        ->name('websites');
+});
