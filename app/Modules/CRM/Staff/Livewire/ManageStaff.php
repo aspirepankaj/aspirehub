@@ -22,15 +22,10 @@ class ManageStaff extends Component
     public string $email = '';
     public string $password = '';
     public string $company_name = '';
-<<<<<<< Updated upstream
     public array $designation_ids = [];
     public string $department = '';
     public $profile_image;
     public ?string $existing_profile_image = null;
-=======
-    public string $role = '';
-    public string $department = '';
->>>>>>> Stashed changes
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
     public string $status = 'active';
     public string $notes = '';
@@ -38,11 +33,8 @@ class ManageStaff extends Component
     // Search & Filter
     public string $search = '';
     public string $statusFilter = '';
-<<<<<<< Updated upstream
     public string $designationFilter = '';
     public string $departmentFilter = '';
-=======
->>>>>>> Stashed changes
 
     // Bulk selection
     public array $selectedStaff = [];
@@ -53,15 +45,6 @@ class ManageStaff extends Component
     public ?int $editingUserId = null;
 
     // Dropdown options
-<<<<<<< Updated upstream
-=======
-    public array $roles = [
-        'Account Manager', 'SEO Specialist', 'Developer', 'Designer',
-        'Support Lead', 'Marketing Manager', 'DevOps', 'Content Writer',
-        'Sales Executive', 'HR Manager', 'Project Manager', 'Quality Analyst',
-    ];
-
->>>>>>> Stashed changes
     public array $departments = [
         'Client Success', 'Marketing', 'Engineering', 'Design',
         'Support', 'Operations', 'Sales', 'HR', 'Finance',
@@ -81,7 +64,6 @@ class ManageStaff extends Component
         $this->resetPage();
     }
 
-<<<<<<< Updated upstream
     public function updatingDesignationFilter(): void
     {
         $this->selectedStaff = [];
@@ -95,17 +77,12 @@ class ManageStaff extends Component
         $this->selectAll = false;
         $this->resetPage();
     }
-=======
->>>>>>> Stashed changes
     public function clearFilters(): void
     {
         $this->search = '';
         $this->statusFilter = '';
-<<<<<<< Updated upstream
         $this->designationFilter = '';
         $this->departmentFilter = '';
-=======
->>>>>>> Stashed changes
         $this->selectedStaff = [];
         $this->selectAll = false;
         $this->resetPage();
@@ -149,15 +126,10 @@ class ManageStaff extends Component
             'email',
             'password',
             'company_name',
-<<<<<<< Updated upstream
             'designation_ids',
             'department',
             'profile_image',
             'existing_profile_image',
-=======
-            'role',
-            'department',
->>>>>>> Stashed changes
             'phones',
             'notes',
             'editingStaffId',
@@ -207,15 +179,10 @@ class ManageStaff extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'company_name' => 'nullable|string|max:255',
-<<<<<<< Updated upstream
             'designation_ids' => 'array',
             'designation_ids.*' => 'exists:adspv_designations,id',
             'department' => 'nullable|string|max:100',
             'profile_image' => 'nullable|image|max:1024',
-=======
-            'role' => 'nullable|string|max:100',
-            'department' => 'nullable|string|max:100',
->>>>>>> Stashed changes
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -243,13 +210,8 @@ class ManageStaff extends Component
             $staffRecord = Staff::create([
                 'user_id' => $user->id,
                 'company_name' => $this->company_name,
-<<<<<<< Updated upstream
                 'department' => $this->department,
                 'profile_image' => $profileImagePath,
-=======
-                'role' => $this->role,
-                'department' => $this->department,
->>>>>>> Stashed changes
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'added_by' => auth()->id(),
@@ -276,11 +238,7 @@ class ManageStaff extends Component
 
     public function editStaff($id)
     {
-<<<<<<< Updated upstream
         $staffRecord = Staff::with(['user', 'phones', 'designations'])->findOrFail($id);
-=======
-        $staffRecord = Staff::with(['user', 'phones'])->findOrFail($id);
->>>>>>> Stashed changes
 
         $this->editingStaffId = $staffRecord->id;
         $this->editingUserId = $staffRecord->user_id;
@@ -289,14 +247,9 @@ class ManageStaff extends Component
         $this->email = $staffRecord->user->email;
         $this->password = ''; // Leave password blank on edit unless updating
         $this->company_name = $staffRecord->company_name ?? '';
-<<<<<<< Updated upstream
         $this->designation_ids = $staffRecord->designations->pluck('id')->toArray();
         $this->department = $staffRecord->department ?? '';
         $this->existing_profile_image = $staffRecord->profile_image;
-=======
-        $this->role = $staffRecord->role ?? '';
-        $this->department = $staffRecord->department ?? '';
->>>>>>> Stashed changes
 
         $this->phones = [];
         foreach ($staffRecord->phones as $phoneRecord) {
@@ -358,13 +311,8 @@ class ManageStaff extends Component
             $staffRecord = Staff::findOrFail($this->editingStaffId);
             $staffRecord->update([
                 'company_name' => $this->company_name,
-<<<<<<< Updated upstream
                 'department' => $this->department,
                 'profile_image' => $profileImagePath,
-=======
-                'role' => $this->role,
-                'department' => $this->department,
->>>>>>> Stashed changes
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'edited_by' => auth()->id(),
@@ -392,7 +340,6 @@ class ManageStaff extends Component
 
     public function render()
     {
-<<<<<<< Updated upstream
         $searchTerm = trim($this->search);
 
         $Staff = Staff::with(['user', 'phones', 'designations'])
@@ -410,19 +357,6 @@ class ManageStaff extends Component
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->designationFilter, fn($q) => $q->whereHas('designations', fn($dq) => $dq->where('adspv_designations.id', $this->designationFilter)))
             ->when($this->departmentFilter, fn($q) => $q->where('department', $this->departmentFilter))
-=======
-        $Staff = Staff::with(['user', 'phones'])
-            ->where(function ($query) {
-                $query->where('company_name', 'like', '%' . $this->search . '%')
-                    ->orWhere('role', 'like', '%' . $this->search . '%')
-                    ->orWhere('department', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('user', function ($uQuery) {
-                        $uQuery->where('name', 'like', '%' . $this->search . '%')
-                            ->orWhere('email', 'like', '%' . $this->search . '%');
-                    });
-            })
-            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
->>>>>>> Stashed changes
             ->latest()
             ->paginate(10)
             ->onEachSide(1);
@@ -437,10 +371,7 @@ class ManageStaff extends Component
 
         return view('modules.crm.staff.manage-staff', [
             'Staff'            => $Staff,
-<<<<<<< Updated upstream
             'designations'     => $designations,
-=======
->>>>>>> Stashed changes
             'hasActiveFilters' => $hasActiveFilters,
             'pageIds'          => $pageIds,
         ])->layoutData(['title' => 'Staff Management - Aspire Hub']);
