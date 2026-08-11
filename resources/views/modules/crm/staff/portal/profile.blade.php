@@ -8,7 +8,7 @@
     <div class="glass-card p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-xl relative overflow-hidden bg-white/60 dark:bg-slate-900/40 backdrop-blur-md">
         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-pink-500/5 rounded-full blur-2xl pointer-events-none"></div>
         <div class="flex items-center space-x-4">
-            @if(auth()->user()->staff?->profile_image)
+            @if(auth()->user()->staff?->profile_image && file_exists(public_path('storage/' . auth()->user()->staff->profile_image)))
                 <img src="{{ asset('storage/' . auth()->user()->staff->profile_image) }}" alt="{{ auth()->user()->name }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800 shadow-lg shadow-pink-500/10" />
             @else
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-500 to-indigo-500 text-white flex items-center justify-center font-bold text-2xl shadow-lg shadow-pink-500/20">

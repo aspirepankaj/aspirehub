@@ -132,7 +132,7 @@ new class extends Component
                 @if ($profile_image)
                     <img src="{{ $profile_image->temporaryUrl() }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" />
                 @else
-                    @if ($existing_profile_image)
+                    @if ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image)))
                         <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" />
                     @else
                         <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20">

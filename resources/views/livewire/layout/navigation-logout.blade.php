@@ -18,8 +18,18 @@ new class extends Component
 
 <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-800/30">
     <div class="flex items-center space-x-2.5 min-w-0">
-        @if(auth()->user()->admin?->profile_image)
-            <img src="{{ asset('storage/' . auth()->user()->admin->profile_image) }}" alt="{{ auth()->user()->name }}" class="flex-shrink-0 w-9 h-9 rounded-xl object-cover border border-slate-200/50 dark:border-slate-800/50 shadow-sm" />
+        @php
+            $profileImage = null;
+            if (auth()->user()->admin?->profile_image) {
+                $profileImage = auth()->user()->admin->profile_image;
+            } elseif (auth()->user()->staff?->profile_image) {
+                $profileImage = auth()->user()->staff->profile_image;
+            } elseif (auth()->user()->client?->profile_image) {
+                $profileImage = auth()->user()->client->profile_image;
+            }
+        @endphp
+        @if($profileImage && file_exists(public_path('storage/' . $profileImage)))
+            <img src="{{ asset('storage/' . $profileImage) }}" alt="{{ auth()->user()->name }}" class="flex-shrink-0 w-9 h-9 rounded-xl object-cover border border-slate-200/50 dark:border-slate-800/50 shadow-sm" />
         @else
             <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
                 {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}

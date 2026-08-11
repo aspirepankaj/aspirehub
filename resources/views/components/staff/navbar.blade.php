@@ -48,7 +48,7 @@
             <span class="hidden sm:inline-block px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase bg-pink-500/10 text-pink-600 dark:text-pink-400 rounded-lg">
                 Staff Member
             </span>
-            @if(auth()->user()->staff?->profile_image)
+            @if(auth()->user()->staff?->profile_image && file_exists(public_path('storage/' . auth()->user()->staff->profile_image)))
                 <img src="{{ asset('storage/' . auth()->user()->staff->profile_image) }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-sm" />
             @else
                 <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300">
