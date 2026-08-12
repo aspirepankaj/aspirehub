@@ -198,8 +198,8 @@
                     <div class="header-title">Website Maintenance Report</div>
                     <div class="header-subtitle">Monthly site security, performance & health optimization audit</div>
                 </td>
-                <td align="right" style="width: 120px;">
-                    <img src="{{ public_path('aspire_logo.png') }}" style="height: 24px; width: auto; display: block; margin-bottom: 4px;" />
+                <td align="right" style="width: 120px; display:flex; align-items:center; gap:10px; flex-direction:column;">
+                    <img src="{{ public_path('aspire-hub-pdf-white.svg') }}" style="height: auto; width: 60px; display: block; margin-bottom: 4px;" />
                     <div style="font-size: 13px; font-weight: bold; color: #ffffff;">#{{ $report->id }}</div>
                 </td>
             </tr>

@@ -74,9 +74,6 @@
                 <button type="button" wire:click="editClient({{ $clientDetails->id }})" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl active:scale-95 transition">
                     Edit
                 </button>
-                <button type="button" class="px-4 py-2 rounded-xl text-white font-bold text-xs active:scale-95 transition" style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);">
-                    Message
-                </button>
             </div>
         </div>
 

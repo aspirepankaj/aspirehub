@@ -2,8 +2,380 @@
 
 <div>
     <!-- Breadcrumbs -->
-    <x-admin.breadcrumbs :items="['Staff' => null]" />
+    @if ($selectedStaffDetailId && $staffDetails)
+        <x-admin.breadcrumbs :items="['Staff' => route('admin.staff'), $staffDetails->user->name ?? 'Detail' => null]" />
+    @else
+        <x-admin.breadcrumbs :items="['Staff' => null]" />
+    @endif
 
+    @if ($selectedStaffDetailId && $staffDetails)
+    {{-- ==========================================
+         STAFF DETAIL VIEW
+         ========================================== --}}
+
+        <!-- Back Button -->
+        <div class="mb-4">
+            <button type="button" wire:click="closeStaffDetail" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to staff
+            </button>
+        </div>
+
+        <!-- Staff Header Card -->
+        <div class="bg-white/93 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="flex items-center gap-4">
+                <div class="relative shrink-0">
+                    @if($staffDetails->profile_image)
+                        <img src="{{ asset('storage/' . $staffDetails->profile_image) }}" alt="{{ $staffDetails->user->name }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800" />
+                    @else
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                            {{ $staffDetails->getInitials() }}
+                        </div>
+                    @endif
+                </div>
+                <div>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ $staffDetails->user->name }}</h1>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {{ $staffDetails->status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400' }} tracking-wider">
+                            {{ $staffDetails->status }}
+                        </span>
+                        @foreach($staffDetails->designations as $desg)
+                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 tracking-wider">
+                                {{ $desg->name }}
+                            </span>
+                        @endforeach
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        @if($staffDetails->company_name)
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            {{ $staffDetails->company_name }}
+                        </span>
+                        @endif
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            {{ $staffDetails->user->email }}
+                        </span>
+                        @if($staffDetails->phones->isNotEmpty())
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                                {{ $staffDetails->phones->first()->phone }}
+                            </span>
+                        @endif
+                        @if($staffDetails->department)
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4.674 1.29a3 3 0 00-4.674 0M3 20h18" />
+                                </svg>
+                                {{ $staffDetails->department }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" wire:click="editStaff({{ $staffDetails->id }})" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl active:scale-95 transition">
+                    Edit
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6">
+            <nav class="flex space-x-8" aria-label="Tabs">
+                @foreach(['overview' => 'Overview', 'clients' => 'Clients', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'activity log' => 'Activity Log'] as $tabKey => $tabLabel)
+                    <button type="button" wire:click="setTab('{{ $tabKey }}')" class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                        {{ $tabLabel }}
+                        @if($tabKey === 'clients')
+                            <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ $staffDetails->clients->count() }}</span>
+                        @elseif($tabKey === 'websites')
+                            <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ $staffWebsites->count() }}</span>
+                        @endif
+                    </button>
+                @endforeach
+            </nav>
+        </div>
+
+        <!-- Tab Contents -->
+        @if ($activeTab === 'overview')
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">About</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                            {{ $staffDetails->notes ?: 'No additional notes provided for this staff member.' }}
+                        </p>
+                    </div>
+                    @if($staffDetails->phones->isNotEmpty())
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Phone Numbers</h3>
+                        <div class="space-y-2">
+                            @foreach($staffDetails->phones as $phoneRec)
+                                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl">
+                                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <span class="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 w-14">{{ $phoneRec->label }}</span>
+                                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ $phoneRec->phone }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Account Info</h3>
+                        <dl class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <dt class="text-xs font-extrabold uppercase tracking-widest text-slate-400">Staff ID</dt>
+                                <dd class="font-bold text-slate-800 dark:text-slate-200">ADSTM-{{ $staffDetails->id }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-xs font-extrabold uppercase tracking-widest text-slate-400">Department</dt>
+                                <dd class="font-semibold text-slate-700 dark:text-slate-300">{{ $staffDetails->department ?: '—' }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-xs font-extrabold uppercase tracking-widest text-slate-400">Status</dt>
+                                <dd>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {{ $staffDetails->status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-500' }} tracking-wider">
+                                        {{ $staffDetails->status }}
+                                    </span>
+                                </dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-xs font-extrabold uppercase tracking-widest text-slate-400">Last Login</dt>
+                                <dd class="font-semibold text-slate-700 dark:text-slate-300">
+                                    {{ $staffDetails->last_login_at ? $staffDetails->last_login_at->diffForHumans() : 'Never' }}
+                                </dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-xs font-extrabold uppercase tracking-widest text-slate-400">Joined</dt>
+                                <dd class="font-semibold text-slate-700 dark:text-slate-300">{{ $staffDetails->created_at->format('d M Y') }}</dd>
+                            </div>
+                            @if($staffDetails->addedBy)
+                            <div class="flex justify-between">
+                                <dt class="text-xs font-extrabold uppercase tracking-widest text-slate-400">Added By</dt>
+                                <dd class="font-semibold text-slate-700 dark:text-slate-300">{{ $staffDetails->addedBy->name }}</dd>
+                            </div>
+                            @endif
+                        </dl>
+                    </div>
+                    @if($staffDetails->designations->isNotEmpty())
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3">Designations</h3>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($staffDetails->designations as $desg)
+                                <span class="px-3 py-1 text-xs font-bold rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200/40 dark:border-indigo-800/30">
+                                    {{ $desg->name }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+        @elseif ($activeTab === 'clients')
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm">
+                @if ($staffDetails->clients->isEmpty())
+                    <div class="text-center py-12 text-slate-500 dark:text-slate-400">
+                        <svg class="w-10 h-10 mx-auto mb-3 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <p class="text-sm font-medium">No clients assigned to this staff member.</p>
+                    </div>
+                @else
+                    <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
+                        <thead>
+                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-4">Client</th>
+                                <th class="px-6 py-4">Company</th>
+                                <th class="px-6 py-4">Plans</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Email</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                            @foreach($staffDetails->clients as $client)
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            @if($client->profile_image)
+                                                <img src="{{ asset('storage/' . $client->profile_image) }}" class="w-8 h-8 rounded-full object-cover" alt="" />
+                                            @else
+                                                <div class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                                                    {{ $client->getInitials() }}
+                                                </div>
+                                            @endif
+                                            <a href="{{ route('admin.clients.detail', $client->id) }}" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                                {{ $client->user->name ?? 'Deleted User' }}
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium">{{ $client->company_name ?: '—' }}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-wrap gap-1">
+                                            @forelse($client->plans as $plan)
+                                                <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md bg-{{ $plan->color }}-500/10 text-{{ $plan->color }}-600 dark:text-{{ $plan->color }}-400">{{ $plan->name }}</span>
+                                            @empty
+                                                <span class="text-slate-400 text-xs">—</span>
+                                            @endforelse
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md {{ $client->status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-500' }}">
+                                            {{ $client->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-medium">{{ $client->user->email ?? '—' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+
+        @elseif ($activeTab === 'websites')
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm">
+                @if ($staffWebsites->isEmpty())
+                    <div class="text-center py-12 text-slate-500 dark:text-slate-400">
+                        <svg class="w-10 h-10 mx-auto mb-3 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
+                        </svg>
+                        <p class="text-sm font-medium">No websites found for this staff member's assigned clients.</p>
+                    </div>
+                @else
+                    <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
+                        <thead>
+                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-4">Domain</th>
+                                <th class="px-6 py-4">Client</th>
+                                <th class="px-6 py-4">Hosting</th>
+                                <th class="px-6 py-4">SSL</th>
+                                <th class="px-6 py-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                            @foreach($staffWebsites as $website)
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-slate-900 dark:text-white">{{ $website->site_name }}</div>
+                                        @if($website->url)
+                                            <a href="{{ $website->url }}" target="_blank" class="text-xs text-indigo-500 hover:text-indigo-600 transition">{{ $website->url }}</a>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium text-xs">{{ $website->client->user->name ?? '—' }}</td>
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-xs font-medium">{{ $website->hosting_provider ?? '—' }}</td>
+                                    <td class="px-6 py-4">
+                                        @php $ssl = $website->ssl_status ?? ''; @endphp
+                                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md {{ $ssl === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ($ssl === 'expiring' ? 'bg-amber-500/10 text-amber-600' : 'bg-slate-500/10 text-slate-500') }}">
+                                            {{ $ssl ?: '—' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md {{ ($website->status ?? '') === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-500' }}">
+                                            {{ $website->status ?: '—' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+
+        @elseif ($activeTab === 'maintenance')
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm">
+                @if ($staffMaintenanceReports->isEmpty())
+                    <div class="text-center py-12 text-slate-500 dark:text-slate-400">
+                        <svg class="w-10 h-10 mx-auto mb-3 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p class="text-sm font-medium">No maintenance reports where this staff was developer.</p>
+                    </div>
+                @else
+                    <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
+                        <thead>
+                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-4">Report</th>
+                                <th class="px-6 py-4">Client</th>
+                                <th class="px-6 py-4">Website</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                            @foreach($staffMaintenanceReports as $report)
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('admin.maintenance.view', $report->id) }}" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-sm">
+                                            {{ $report->title ?? 'Report #' . $report->id }}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium text-xs">{{ $report->client->user->name ?? '—' }}</td>
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-xs font-medium">{{ $report->website->site_name ?? '—' }}</td>
+                                    <td class="px-6 py-4">
+                                        @php
+                                            $statusColor = match($report->status ?? '') {
+                                                'completed' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                                                'in_progress' => 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+                                                'pending' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                                                default => 'bg-slate-500/10 text-slate-500',
+                                            };
+                                        @endphp
+                                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md {{ $statusColor }}">
+                                            {{ ucfirst(str_replace('_', ' ', $report->status ?? '—')) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs text-slate-400 font-semibold">{{ $report->created_at->format('d M Y') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div class="mt-4 px-6 pb-4">{{ $staffMaintenanceReports->links() }}</div>
+                @endif
+            </div>
+
+        @elseif ($activeTab === 'activity log')
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm">
+                @if ($staffActivityLogs->isEmpty())
+                    <div class="text-center py-12 text-slate-500 dark:text-slate-400">
+                        <svg class="w-10 h-10 mx-auto mb-3 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-sm font-medium">No activity found for this staff member.</p>
+                    </div>
+                @else
+                    <div class="divide-y divide-slate-100 dark:divide-slate-900/50">
+                        @foreach($staffActivityLogs as $log)
+                            <div class="px-6 py-4 flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-slate-700 dark:text-slate-300 font-medium">{{ $log->description }}</p>
+                                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ $log->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="px-6 py-4">{{ $staffActivityLogs->links() }}</div>
+                @endif
+            </div>
+        @endif
+
+    @else
     {{-- ══════════════════════════════════════════════
          PAGE HEADER — Title + Add Staff button
     ══════════════════════════════════════════════ --}}
@@ -195,7 +567,7 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <div class="font-bold text-slate-900 dark:text-white">{{ $staff->user->name ?? 'Deleted User' }}</div>
+                                            <button type="button" wire:click="viewStaffDetail({{ $staff->id }})" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left">{{ $staff->user->name ?? 'Deleted User' }}</button>
                                             <div class="text-xs text-slate-400 dark:text-slate-500">{{ $staff->user->email ?? 'N/A' }}</div>
                                         </div>
                                     </div>
@@ -250,12 +622,10 @@
                                 <td class="px-4 py-4 text-right">
                                     <div class="inline-flex items-center gap-1">
                                         <a href="{{ route('impersonate.start', $staff->user_id) }}"
-                                           class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90"
+                                           class="inline-flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90"
                                            title="Login as this Staff Member"
                                            onclick="return confirm('Are you sure you want to login as {{ $staff->user->name ?? 'this staff member' }}?')">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                                            </svg>
+                                            <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-7 h-7 opacity-60 hover:opacity-100 transition-opacity" alt="Switch Account" />
                                         </a>
                                         <button type="button" wire:click="editStaff({{ $staff->id }})"
                                                 class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
@@ -612,4 +982,6 @@
             </div>
         </div>
     </x-admin.modal>
+
+    @endif {{-- end @else (list view) --}}
 </div>

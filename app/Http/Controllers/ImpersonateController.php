@@ -29,6 +29,11 @@ class ImpersonateController extends Controller
         // Log in as target user
         auth()->login($targetUser);
 
+        // Update last_login_at on the staff record (if this is a staff user)
+        if ($targetUser->staff) {
+            $targetUser->staff->update(['last_login_at' => now()]);
+        }
+
         // Redirect to dashboard (routes/web.php handles role redirection)
         return redirect()->route('dashboard')->with('success', "Logged in as {$targetUser->name}");
     }

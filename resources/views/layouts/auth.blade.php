@@ -57,13 +57,8 @@
 
         <div class="relative min-h-screen flex flex-col justify-center items-center p-4 z-10">
             <!-- Brand Logo / Title -->
-            <div class="mb-8 text-center">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/20 text-white font-extrabold text-2xl tracking-wider mb-3">
-                    AH
-                </div>
-                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent dark:from-indigo-400 dark:to-pink-400">
-                    Aspire Hub
-                </h1>
+            <div class="mb-8 text-center flex flex-col items-center">
+                <img src="{{ asset('aspire-hub-1.svg') }}" class="h-12 w-auto mb-2" alt="Aspire Hub" />
                 <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest font-semibold">Enterprise SaaS Platform</p>
             </div>
 
@@ -74,7 +69,7 @@
 
             <!-- Footer -->
             <div class="mt-8 text-xs text-slate-400 dark:text-slate-600 font-medium">
-                &copy; {{ date('Y') }} Aspire Hub &bull; Phase 1 Development Setup
+                &copy; {{ date('Y') }} Aspire Hub &bull; Enterprise CRM Platform
             </div>
         </div>
     </body>

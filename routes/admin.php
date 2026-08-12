@@ -24,6 +24,7 @@ use App\Modules\CRM\Staff\Livewire\ManageDesignations;
 use App\Modules\Core\Authentication\Livewire\ManageAdmins;
 
 Route::get('/staff', ManageStaff::class)->name('staff');
+Route::get('/staff/ADSTM-{id}', ManageStaff::class)->name('staff.detail');
 Route::get('/staff/designations', ManageDesignations::class)->name('staff.designations');
 Route::get('/admins', ManageAdmins::class)->name('admins');
 
