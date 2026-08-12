@@ -130,7 +130,9 @@ class StaffDocuments extends Component
     public function editDocument(int $id): void
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $doc = Document::whereIn('client_id', $assignedClientIds)->findOrFail($id);
         $this->editingDocId = $doc->id;
@@ -160,7 +162,9 @@ class StaffDocuments extends Component
         $this->validate($rules);
 
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $doc = Document::whereIn('client_id', $assignedClientIds)->findOrFail($this->editingDocId);
         $updateData = [
@@ -191,7 +195,9 @@ class StaffDocuments extends Component
     public function deleteDocument(int $id): void
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $doc = Document::whereIn('client_id', $assignedClientIds)->findOrFail($id);
 
@@ -206,7 +212,9 @@ class StaffDocuments extends Component
     public function downloadDocument(int $id)
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $doc = Document::whereIn('client_id', $assignedClientIds)->findOrFail($id);
         
@@ -221,7 +229,9 @@ class StaffDocuments extends Component
     public function previewDocument(int $id): void
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $doc = Document::whereIn('client_id', $assignedClientIds)->findOrFail($id);
         $this->previewingDocId = $doc->id;
@@ -248,7 +258,9 @@ class StaffDocuments extends Component
         if (empty($this->selectedDocs)) return;
 
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $docs = Document::whereIn('client_id', $assignedClientIds)->whereIn('id', $this->selectedDocs)->get();
         foreach ($docs as $doc) {
@@ -276,7 +288,9 @@ class StaffDocuments extends Component
     public function render()
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $query = Document::with(['client.user', 'website', 'addedBy'])->whereIn('client_id', $assignedClientIds);
 
@@ -309,7 +323,12 @@ class StaffDocuments extends Component
         $documents = $query->latest()->paginate(10);
         $pageIds = $documents->pluck('id')->toArray();
 
-        $clients = Client::with('user')->where('assigned_staff_id', $staffId)->orderBy('company_name')->get();
+        $clients = Client::with('user')
+            ->whereHas('assignedStaff', function ($q) use ($staffId) {
+                $q->where('staff_id', $staffId);
+            })
+            ->orderBy('company_name')
+            ->get();
 
         $websites = collect();
         if ($this->client_id) {

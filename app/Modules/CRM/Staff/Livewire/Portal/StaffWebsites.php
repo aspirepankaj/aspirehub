@@ -48,7 +48,9 @@ class StaffWebsites extends Component
     protected function rules(): array
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         return [
             'client_id'          => 'required|exists:adspv_clients,id|in:' . implode(',', $assignedClientIds),
@@ -158,7 +160,9 @@ class StaffWebsites extends Component
     public function editWebsite(int $id): void
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $website = Website::with('serviceTypes')
             ->whereIn('client_id', $assignedClientIds)
@@ -191,7 +195,9 @@ class StaffWebsites extends Component
         $this->validate($rules);
 
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         DB::transaction(function () use ($assignedClientIds) {
             $website = Website::whereIn('client_id', $assignedClientIds)->findOrFail($this->editingWebsiteId);
@@ -225,7 +231,9 @@ class StaffWebsites extends Component
     public function render()
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $websites = Website::with(['client', 'latestMaintenanceReport', 'serviceTypes'])
             ->whereIn('client_id', $assignedClientIds)
@@ -242,7 +250,9 @@ class StaffWebsites extends Component
         $pageIds = $websites->pluck('id')->toArray();
 
         $clients = Client::with('user')
-            ->where('assigned_staff_id', $staffId)
+            ->whereHas('assignedStaff', function ($q) use ($staffId) {
+                $q->where('staff_id', $staffId);
+            })
             ->orderBy('company_name')
             ->get();
 

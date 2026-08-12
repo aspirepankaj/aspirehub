@@ -108,7 +108,9 @@ class StaffEditMaintenanceReport extends Component
     public function mount(int $id)
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $report = MaintenanceReport::with(['plugins', 'attachments'])
             ->whereIn('client_id', $assignedClientIds)
@@ -389,7 +391,9 @@ class StaffEditMaintenanceReport extends Component
     public function render()
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $clients = Client::with('user')->where('assigned_staff_id', $staffId)->orderBy('company_name')->get();
+        $clients = Client::with('user')->whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->orderBy('company_name')->get();
         $websites = [];
         if ($this->client_id) {
             $websites = Website::where('client_id', $this->client_id)->orderBy('site_name')->get();

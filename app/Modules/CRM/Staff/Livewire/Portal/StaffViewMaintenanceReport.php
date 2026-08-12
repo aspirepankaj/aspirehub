@@ -16,7 +16,9 @@ class StaffViewMaintenanceReport extends Component
     public function mount(int $id)
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $this->reportId = $id;
         $this->report = MaintenanceReport::with(['client.user', 'website', 'developer', 'plugins', 'attachments'])
@@ -27,7 +29,9 @@ class StaffViewMaintenanceReport extends Component
     public function emailReport(int $id): void
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $report = MaintenanceReport::with(['client.user', 'website'])
             ->whereIn('client_id', $assignedClientIds)

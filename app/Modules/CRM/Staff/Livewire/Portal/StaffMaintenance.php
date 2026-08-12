@@ -44,7 +44,9 @@ class StaffMaintenance extends Component
     public static function downloadPdf($id)
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $report = MaintenanceReport::with(['client.user', 'website', 'developer', 'plugins', 'attachments'])
             ->whereIn('client_id', $assignedClientIds)
@@ -57,7 +59,9 @@ class StaffMaintenance extends Component
     public function emailReport(int $id): void
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $report = MaintenanceReport::with(['client.user', 'website'])
             ->whereIn('client_id', $assignedClientIds)
@@ -110,7 +114,9 @@ class StaffMaintenance extends Component
     public function render()
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
 
         $reports = MaintenanceReport::with(['client.user', 'website', 'developer'])
             ->whereIn('client_id', $assignedClientIds)
@@ -131,7 +137,12 @@ class StaffMaintenance extends Component
             ->latest()
             ->paginate(12);
 
-        $clients = Client::with('user')->where('assigned_staff_id', $staffId)->orderBy('company_name')->get();
+        $clients = Client::with('user')
+            ->whereHas('assignedStaff', function ($q) use ($staffId) {
+                $q->where('staff_id', $staffId);
+            })
+            ->orderBy('company_name')
+            ->get();
         
         $websites = Website::whereIn('client_id', $assignedClientIds)
             ->orderBy('site_name')

@@ -16,7 +16,9 @@ class StaffDashboard extends Component
     {
         $staffId = auth()->user()->staff->id ?? 0;
         
-        $assignedClientIds = Client::where('assigned_staff_id', $staffId)->pluck('id')->toArray();
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
         
         $clientsCount = count($assignedClientIds);
         $websitesCount = Website::whereIn('client_id', $assignedClientIds)->count();

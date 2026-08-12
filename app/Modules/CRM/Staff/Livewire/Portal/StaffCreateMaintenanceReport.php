@@ -410,7 +410,9 @@ class StaffCreateMaintenanceReport extends Component
     public function render()
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $clients = Client::with('user')->where('assigned_staff_id', $staffId)->orderBy('company_name')->get();
+        $clients = Client::with('user')->whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->orderBy('company_name')->get();
         
         $websites = [];
         if ($this->client_id) {
