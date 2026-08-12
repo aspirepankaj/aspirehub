@@ -32,7 +32,7 @@
             <div class="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Report Details</h3>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
                 <div>
                     <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Website</h5>
                     <p class="font-bold text-slate-800 dark:text-white mt-1">{{ $report->website->site_name }}</p>
@@ -41,10 +41,6 @@
                 <div>
                     <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Maintenance Month</h5>
                     <p class="font-bold text-slate-800 dark:text-white mt-1">{{ $report->maintenance_month }}</p>
-                </div>
-                <div>
-                    <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Completed On</h5>
-                    <p class="font-bold text-slate-800 dark:text-white mt-1">{{ \Carbon\Carbon::parse($report->maintenance_date)->format('M d, Y') }}</p>
                 </div>
             </div>
         </div>
@@ -181,14 +177,38 @@
             </div>
         @endif
 
-        <!-- Work Summary -->
-        @if($report->support_work_summary)
+
+        {{-- Attachments --}}
+        @if($report->attachments_visible_to_client && $report->attachments->isNotEmpty())
             <div class="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm">
                 <div class="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Work Summary</h3>
+                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Report Attachments</h3>
                 </div>
-                <div class="text-sm text-slate-700 dark:text-slate-350 leading-relaxed whitespace-pre-line">
-                    {{ $report->support_work_summary }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    @foreach($report->attachments as $att)
+                        @php
+                            $extension = pathinfo($att->file_path, PATHINFO_EXTENSION);
+                            $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
+                        @endphp
+                        <div class="flex flex-col gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50">
+                            @if($isImage)
+                                <div class="relative group rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800 bg-white">
+                                    <img src="{{ asset('storage/' . $att->file_path) }}" class="w-full h-32 object-cover" />
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 text-xs font-bold shadow hover:bg-slate-100">View Full</a>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="text-xs text-slate-700 dark:text-slate-300 font-semibold truncate pr-2" title="{{ $att->file_name }}">{{ $att->file_name }}</span>
+                                <a href="{{ asset('storage/' . $att->file_path) }}" target="_blank" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-indigo-500 transition shrink-0" title="Download">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         @endif

@@ -23,15 +23,14 @@ class ClientMyWebsites extends Component
 
         // Get assigned staff name
         $assignedStaffName = null;
-        if ($client->assigned_staff_id) {
-            $staffUser = DB::table('adspv_staff as s')
-                ->join('users as u', 'u.id', '=', 's.user_id')
-                ->where('s.id', $client->assigned_staff_id)
-                ->select('u.name')
-                ->first();
-            if ($staffUser) {
-                $assignedStaffName = $staffUser->name;
-            }
+        $staffUser = DB::table('adspv_client_staff as cs')
+            ->join('adspv_staff as s', 's.id', '=', 'cs.staff_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')
+            ->where('cs.client_id', $client->id)
+            ->select('u.name')
+            ->first();
+        if ($staffUser) {
+            $assignedStaffName = $staffUser->name;
         }
 
         // Websites + Latest Maintenance Report

@@ -32,7 +32,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {{-- Client Searchable Input Dropdown --}}
                 <div x-data="{ 
                         open: false, 
@@ -142,14 +142,6 @@
                         </select>
                     </div>
                     <input type="hidden" wire:model="maintenance_month" />
-                </div>
-
-                {{-- Date --}}
-                <div>
-                    <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Maintenance Date</label>
-                    <input wire:model="maintenance_date" type="date"
-                           class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
-                    <x-input-error :messages="$errors->get('maintenance_date')" class="mt-1" />
                 </div>
             </div>
         </x-admin.card>
@@ -417,64 +409,7 @@
             </x-admin.card>
         </div>
 
-        {{-- Section 9: Backup & Section 10: Support Summary --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {{-- Backup --}}
-            <x-admin.card>
-                <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
-                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">9. System Backups</h3>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50">
-                        <span class="text-xs font-bold text-slate-600 dark:text-slate-400">Backup Successfully Completed?</span>
-                        <input type="checkbox" wire:model="backup_completed" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Backup Date</label>
-                        <input wire:model="backup_date" type="date" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Backup Remote Location</label>
-                        <input wire:model="backup_location" type="text" placeholder="e.g. AWS S3, Google Drive" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Backup Notes</label>
-                        <textarea wire:model="backup_notes" rows="2" placeholder="Backup size and verification notes..." class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs w-full"></textarea>
-                    </div>
-                </div>
-            </x-admin.card>
 
-            {{-- Support Summary --}}
-            <x-admin.card>
-                <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
-                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">10. Support Summary</h3>
-                </div>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tickets Completed</label>
-                            <input wire:model="support_tickets_completed" type="number" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tickets Pending</label>
-                            <input wire:model="support_tickets_pending" type="number" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Time Spent</label>
-                        <input wire:model="support_time_spent" type="text" placeholder="e.g. 4.5 hours" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Completion Date</label>
-                        <input wire:model="support_completion_date" type="date" class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Summary of Work Completed</label>
-                        <textarea wire:model="support_work_summary" rows="2" placeholder="Describe the manual fixes, improvements or changes completed..." class="block mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs w-full"></textarea>
-                    </div>
-                </div>
-            </x-admin.card>
-        </div>
 
         {{-- Section 11 & 12: Internal Notes vs Client Summary --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -497,8 +432,18 @@
 
         {{-- Section 13: Attachments --}}
         <x-admin.card>
-            <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
-                <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">13. Attachments</h3>
+            <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">13. Attachments</h3>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">Share attachments with client?</span>
+                    <button type="button" 
+                            wire:click="toggleAttachmentsVisibility"
+                            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $attachments_visible_to_client ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700' }}">
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $attachments_visible_to_client ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    </button>
+                </div>
             </div>
 
             {{-- Existing Attachments list --}}

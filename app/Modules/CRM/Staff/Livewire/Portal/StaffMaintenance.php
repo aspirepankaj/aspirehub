@@ -20,6 +20,7 @@ class StaffMaintenance extends Component
     public string $websiteFilter = '';
     public string $statusFilter = '';
     public string $monthFilter = '';
+    public string $sendFilter = '';
 
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingClientFilter(): void
@@ -30,11 +31,12 @@ class StaffMaintenance extends Component
     public function updatingWebsiteFilter(): void { $this->resetPage(); }
     public function updatingStatusFilter(): void { $this->resetPage(); }
     public function updatingMonthFilter(): void { $this->resetPage(); }
+    public function updatingSendFilter(): void { $this->resetPage(); }
 
     public function clearFilters(): void
     {
         $this->reset([
-            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'monthFilter'
+            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'monthFilter', 'sendFilter'
         ]);
         $this->resetPage();
     }
@@ -124,6 +126,8 @@ class StaffMaintenance extends Component
             ->when($this->websiteFilter, fn($q) => $q->where('website_id', $this->websiteFilter))
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->monthFilter, fn($q) => $q->where('maintenance_month', $this->monthFilter))
+            ->when($this->sendFilter === 'sent', fn($q) => $q->whereNotNull('last_sent_at'))
+            ->when($this->sendFilter === 'unsent', fn($q) => $q->whereNull('last_sent_at'))
             ->latest()
             ->paginate(12);
 
@@ -143,7 +147,7 @@ class StaffMaintenance extends Component
         $completedReportsCount = MaintenanceReport::whereIn('client_id', $assignedClientIds)->where('status', 'completed')->count();
         $pendingReportsCount = MaintenanceReport::whereIn('client_id', $assignedClientIds)->where('status', 'draft')->count();
 
-        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->monthFilter;
+        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->monthFilter || $this->sendFilter;
 
         return view('modules.crm.staff.portal.maintenance', [
             'reports' => $reports,

@@ -103,6 +103,7 @@ class EditMaintenanceReport extends Component
     // 12. Attachments
     public array $existingAttachments = [];
     public array $newAttachments = []; // uploads
+    public bool $attachments_visible_to_client = false;
 
     public function mount(int $id)
     {
@@ -112,6 +113,7 @@ class EditMaintenanceReport extends Component
         $this->client_id = $report->client_id;
         $this->website_id = $report->website_id;
         $this->developer_id = $report->developer_id;
+        $this->attachments_visible_to_client = (bool) $report->attachments_visible_to_client;
         try {
             $parsedDate = \Carbon\Carbon::parse($report->maintenance_month);
             $this->maintenance_month = $parsedDate->format('Y-m');
@@ -249,6 +251,7 @@ class EditMaintenanceReport extends Component
 
             'developer_notes' => 'nullable|string',
             'client_summary' => 'nullable|string',
+            'attachments_visible_to_client' => 'boolean',
             'newAttachments.*' => 'nullable|file|max:10240',
         ];
     }
@@ -348,6 +351,7 @@ class EditMaintenanceReport extends Component
 
                 'developer_notes' => $this->developer_notes,
                 'client_summary' => $this->client_summary,
+                'attachments_visible_to_client' => $this->attachments_visible_to_client,
             ]);
 
             // Sync plugins
@@ -372,6 +376,11 @@ class EditMaintenanceReport extends Component
 
         session()->flash('success', 'Maintenance Report Updated Successfully');
         return redirect()->route('admin.maintenance');
+    }
+
+    public function toggleAttachmentsVisibility()
+    {
+        $this->attachments_visible_to_client = !$this->attachments_visible_to_client;
     }
 
     public function render()

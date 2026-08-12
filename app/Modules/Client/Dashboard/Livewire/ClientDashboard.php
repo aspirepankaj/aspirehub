@@ -69,7 +69,7 @@ class ClientDashboard extends Component
             'marketing_reports'    => $marketingReports,
             'maintenance_reports'  => $maintenanceReports,
             'last_report_month'    => $lastReport
-                ? date('F Y', strtotime($lastReport->maintenance_date))
+                ? $lastReport->maintenance_month
                 : '-',
         ];
 

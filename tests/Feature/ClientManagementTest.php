@@ -247,13 +247,16 @@ class ClientManagementTest extends TestCase
             ->set('password', 'password123')
             ->set('company_name', 'Acme Corporation')
             ->set('phones', [['phone' => '1111111111', 'label' => 'Work']])
-            ->set('assigned_staff_id', $staff->id)
+            ->set('assigned_staff_ids', [$staff->id])
             ->call('saveClient')
             ->assertHasNoErrors();
 
-        $this->assertDatabaseHas('adspv_clients', [
-            'company_name' => 'Acme Corporation',
-            'assigned_staff_id' => $staff->id,
+        $client = Client::where('company_name', 'Acme Corporation')->first();
+        $this->assertNotNull($client);
+
+        $this->assertDatabaseHas('adspv_client_staff', [
+            'client_id' => $client->id,
+            'staff_id' => $staff->id,
         ]);
     }
 }

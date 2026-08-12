@@ -125,18 +125,6 @@
                         <span>Plugins: {{ $report->updates_count > 0 ? $report->updates_count . ' plugins updated successfully' : 'All plugins up to date' }}</span>
                     </div>
                     <div class="flex items-center gap-2.5">
-                        <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $report->backup_completed ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-650' }}">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                @if($report->backup_completed)
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                @else
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                @endif
-                            </svg>
-                        </span>
-                        <span>Backups: {{ $report->backup_completed ? 'Daily backup verified & confirmed (' . ($report->backup_location ?? 'Cloud') . ')' : 'No backup completed' }}</span>
-                    </div>
-                    <div class="flex items-center gap-2.5">
                         <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $report->security_ssl_status === 'Active' || $report->security_ssl_status === 'active' || $report->security_ssl_status === 'Enabled' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-500/10 text-slate-500' }}">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -254,9 +242,7 @@
                             </div>
 
                             <div class="space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold pt-2">
-                                <div>Backups: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $compareCurrent['backups_count'] }}</span></div>
                                 <div>Updates: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $compareCurrent['updates_count'] }}</span></div>
-                                <div>Support Tickets: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $compareCurrent['support_tickets_completed'] }} completed</span></div>
                             </div>
                         </div>
 
@@ -314,9 +300,7 @@
                                 </div>
 
                                 <div class="space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold pt-2">
-                                    <div>Backups: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $comparePrevious['backups_count'] }}</span></div>
                                     <div>Updates: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $comparePrevious['updates_count'] }}</span></div>
-                                    <div>Support Tickets: <span class="font-bold text-slate-850 dark:text-slate-200">{{ $comparePrevious['support_tickets_completed'] }} completed</span></div>
                                 </div>
                             @else
                                 <div class="h-full flex items-center justify-center text-xs text-slate-400 italic">

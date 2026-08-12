@@ -138,14 +138,12 @@ class ClientProfile extends Component
         $client = DB::table('adspv_clients')->where('user_id', $user->id)->first();
 
         // 1. Account Manager Info
-        $accountManager = null;
-        if ($client->assigned_staff_id) {
-            $accountManager = DB::table('adspv_staff as s')
-                ->join('users as u', 'u.id', '=', 's.user_id')
-                ->where('s.id', $client->assigned_staff_id)
-                ->select('u.name', 'u.email', 's.phone', 's.department', 's.profile_image')
-                ->first();
-        }
+        $accountManager = DB::table('adspv_client_staff as cs')
+            ->join('adspv_staff as s', 's.id', '=', 'cs.staff_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')
+            ->where('cs.client_id', $client->id)
+            ->select('u.name', 'u.email', 's.profile_image')
+            ->first();
 
         // 2. Subscribed Plan Info
         $plans = DB::table('adspv_client_plan as cp')

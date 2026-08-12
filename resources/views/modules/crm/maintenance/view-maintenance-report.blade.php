@@ -64,7 +64,7 @@
             <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
                 <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Basic Context</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Client</h5>
                     <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ $report->client->company_name ?: $report->client->user->name }}</p>
@@ -78,10 +78,6 @@
                 <div>
                     <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Maintenance Month</h5>
                     <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ $report->maintenance_month }}</p>
-                </div>
-                <div>
-                    <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Maintenance Date</h5>
-                    <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ $report->maintenance_date->format('d M, Y') }}</p>
                 </div>
             </div>
         </x-admin.card>
@@ -308,76 +304,7 @@
             </x-admin.card>
         </div>
 
-        {{-- Backups & Support Logs --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {{-- Backup Status --}}
-            <x-admin.card>
-                <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
-                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Scheduled Backups</h3>
-                </div>
-                <div class="space-y-4">
-                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-500">Backup Status:</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {{ $report->backup_completed ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600' }}">
-                            {{ $report->backup_completed ? 'Completed' : 'Failed' }}
-                        </span>
-                    </div>
-                    @if($report->backup_date)
-                        <div>
-                            <span class="text-[9px] font-bold uppercase text-slate-400">Backup Date</span>
-                            <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">{{ $report->backup_date->format('d M, Y') }}</p>
-                        </div>
-                    @endif
-                    <div>
-                        <span class="text-[9px] font-bold uppercase text-slate-400">Remote Cloud Location</span>
-                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">{{ $report->backup_location ?: 'N/A' }}</p>
-                    </div>
-                    @if($report->backup_notes)
-                        <div>
-                            <span class="text-[9px] font-bold uppercase text-slate-400">Backup Notes</span>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 whitespace-pre-line">{{ $report->backup_notes }}</p>
-                        </div>
-                    @endif
-                </div>
-            </x-admin.card>
 
-            {{-- Support Tickets --}}
-            <x-admin.card>
-                <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
-                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Manual Work Support Log</h3>
-                </div>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100">
-                            <span class="text-[8px] font-bold uppercase text-slate-400">Completed Tickets</span>
-                            <p class="text-lg font-black text-slate-700 dark:text-slate-300">{{ $report->support_tickets_completed }}</p>
-                        </div>
-                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100">
-                            <span class="text-[8px] font-bold uppercase text-slate-400">Pending Tickets</span>
-                            <p class="text-lg font-black text-slate-700 dark:text-slate-300">{{ $report->support_tickets_pending }}</p>
-                        </div>
-                    </div>
-                    @if($report->support_time_spent)
-                        <div>
-                            <span class="text-[9px] font-bold uppercase text-slate-400">Total Hours Invested</span>
-                            <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">{{ $report->support_time_spent }}</p>
-                        </div>
-                    @endif
-                    @if($report->support_completion_date)
-                        <div>
-                            <span class="text-[9px] font-bold uppercase text-slate-400">Support Cycle Completion Date</span>
-                            <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">{{ $report->support_completion_date->format('d M, Y') }}</p>
-                        </div>
-                    @endif
-                    @if($report->support_work_summary)
-                        <div>
-                            <span class="text-[9px] font-bold uppercase text-slate-400">Summary of Support Tasks</span>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 whitespace-pre-line">{{ $report->support_work_summary }}</p>
-                        </div>
-                    @endif
-                </div>
-            </x-admin.card>
-        </div>
 
         {{-- Notes section --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -399,8 +326,11 @@
         {{-- Attachments --}}
         @if($report->attachments->isNotEmpty())
             <x-admin.card>
-                <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4">
+                <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4 flex items-center justify-between">
                     <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Attachments Library</h3>
+                    <span class="px-2.5 py-1 rounded-xl text-[9px] font-extrabold uppercase tracking-wider {{ $report->attachments_visible_to_client ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-400 dark:bg-slate-850 dark:text-slate-500' }}">
+                        {{ $report->attachments_visible_to_client ? 'Shared with Client' : 'Internal Only' }}
+                    </span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     @foreach($report->attachments as $att)

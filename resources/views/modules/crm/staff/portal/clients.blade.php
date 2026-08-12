@@ -104,23 +104,27 @@
                     <!-- Assigned Team Card -->
                     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
                         <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Assigned team</h3>
-                        @if ($clientDetails->assignedStaff)
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl">
-                                <div class="shrink-0">
-                                    @if($clientDetails->assignedStaff->profile_image)
-                                        <img src="{{ asset('storage/' . $clientDetails->assignedStaff->profile_image) }}" alt="Staff Avatar" class="w-10 h-10 rounded-full object-cover" />
-                                    @else
-                                        <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                                            {{ $clientDetails->assignedStaff->getInitials() }}
+                        @if ($clientDetails->assignedStaff->isNotEmpty())
+                            <div class="space-y-3">
+                                @foreach($clientDetails->assignedStaff as $staff)
+                                    <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl">
+                                        <div class="shrink-0">
+                                            @if($staff->profile_image)
+                                                <img src="{{ asset('storage/' . $staff->profile_image) }}" alt="Staff Avatar" class="w-10 h-10 rounded-full object-cover" />
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                                                    {{ $staff->getInitials() }}
+                                                </div>
+                                            @endif
                                         </div>
-                                    @endif
-                                </div>
-                                <div>
-                                    <div class="font-bold text-sm text-slate-900 dark:text-white">{{ $clientDetails->assignedStaff->user->name ?? 'Deleted Staff' }}</div>
-                                    <div class="text-[10px] font-extrabold uppercase text-slate-450 dark:text-slate-500 tracking-wider">
-                                        {{ $clientDetails->assignedStaff->designations->pluck('name')->implode(', ') ?: 'Staff Member' }}
+                                        <div>
+                                            <div class="font-bold text-sm text-slate-900 dark:text-white">{{ $staff->user->name ?? 'Deleted Staff' }}</div>
+                                            <div class="text-[10px] font-extrabold uppercase text-slate-450 dark:text-slate-500 tracking-wider">
+                                                {{ $staff->designations->pluck('name')->implode(', ') ?: 'Staff Member' }}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
                         @else
                             <div class="text-center py-6 text-sm text-slate-450 dark:text-slate-500 italic">
@@ -311,8 +315,20 @@
     @else
         {{-- Clients List view --}}
 
+        <!-- View Tabs -->
+        <div class="flex border-b border-slate-200/60 dark:border-slate-800/40 mb-4 mt-2">
+            <button type="button" wire:click="setViewTab('my_clients')"
+                    class="py-3 px-6 border-b-2 font-bold text-sm transition-all duration-150 {{ $activeViewTab === 'my_clients' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                Clients
+            </button>
+            <button type="button" wire:click="setViewTab('all_clients')"
+                    class="py-3 px-6 border-b-2 font-bold text-sm transition-all duration-150 {{ $activeViewTab === 'all_clients' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                All Clients
+            </button>
+        </div>
+
         {{-- Filters --}}
-        <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm relative z-30 mt-4">
+        <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm relative z-30">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
                 {{-- Search --}}
@@ -386,8 +402,13 @@
                 <svg class="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                <h3 class="text-base font-bold text-slate-800 dark:text-slate-300 mb-1">No Assigned Clients</h3>
-                <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">You do not have any clients assigned to you yet.</p>
+                @if ($activeViewTab === 'my_clients')
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-300 mb-1">No Assigned Clients</h3>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">You do not have any clients assigned to you yet.</p>
+                @else
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-300 mb-1">No Clients Found</h3>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">There are no clients matching the current filter criteria.</p>
+                @endif
             </div>
         @else
             <x-admin.card>

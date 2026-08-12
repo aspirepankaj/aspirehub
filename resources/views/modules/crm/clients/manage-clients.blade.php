@@ -95,33 +95,88 @@
         @if ($activeTab === 'overview')
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
                 <!-- About Card -->
-                <div class="lg:col-span-2 bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">About</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                        {{ $clientDetails->notes ?: 'No additional notes provided for this client.' }}
-                    </p>
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">About</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                            {{ $clientDetails->notes ?: 'No additional notes provided for this client.' }}
+                        </p>
+                    </div>
+
+                    <!-- Address Card -->
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Address details</h3>
+                        @if ($clientDetails->address || $clientDetails->landmark || $clientDetails->state || $clientDetails->country || $clientDetails->region || $clientDetails->zip_code)
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-400">
+                                @if($clientDetails->address)
+                                    <div class="md:col-span-2">
+                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Address</span>
+                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->address }}</p>
+                                    </div>
+                                @endif
+                                @if($clientDetails->landmark)
+                                    <div>
+                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Landmark</span>
+                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->landmark }}</p>
+                                    </div>
+                                @endif
+                                @if($clientDetails->state)
+                                    <div>
+                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">State</span>
+                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->state }}</p>
+                                    </div>
+                                @endif
+                                @if($clientDetails->country)
+                                    <div>
+                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Country</span>
+                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->country }}</p>
+                                    </div>
+                                @endif
+                                @if($clientDetails->region)
+                                    <div>
+                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Region</span>
+                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->region }}</p>
+                                    </div>
+                                @endif
+                                @if($clientDetails->zip_code)
+                                    <div>
+                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Zip Code</span>
+                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->zip_code }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <div class="text-center py-6 text-sm text-slate-450 dark:text-slate-500 italic">
+                                No address details provided for this client yet.
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Assigned Team Card -->
                 <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Assigned team</h3>
-                    @if ($clientDetails->assignedStaff)
-                        <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl">
-                            <div class="shrink-0">
-                                @if($clientDetails->assignedStaff->profile_image)
-                                    <img src="{{ asset('storage/' . $clientDetails->assignedStaff->profile_image) }}" alt="Staff Avatar" class="w-10 h-10 rounded-full object-cover" />
-                                @else
-                                    <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                                        {{ $clientDetails->assignedStaff->getInitials() }}
+                    @if ($clientDetails->assignedStaff->isNotEmpty())
+                        <div class="space-y-3">
+                            @foreach($clientDetails->assignedStaff as $staff)
+                                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl">
+                                    <div class="shrink-0">
+                                        @if($staff->profile_image)
+                                            <img src="{{ asset('storage/' . $staff->profile_image) }}" alt="Staff Avatar" class="w-10 h-10 rounded-full object-cover" />
+                                        @else
+                                            <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                                                {{ $staff->getInitials() }}
+                                            </div>
+                                        @endif
                                     </div>
-                                @endif
-                            </div>
-                            <div>
-                                <div class="font-bold text-sm text-slate-900 dark:text-white">{{ $clientDetails->assignedStaff->user->name ?? 'Deleted Staff' }}</div>
-                                <div class="text-[10px] font-extrabold uppercase text-slate-450 dark:text-slate-500 tracking-wider">
-                                    {{ $clientDetails->assignedStaff->designations->pluck('name')->implode(', ') ?: 'Staff Member' }}
+                                    <div>
+                                        <div class="font-bold text-sm text-slate-900 dark:text-white">{{ $staff->user->name ?? 'Deleted Staff' }}</div>
+                                        <div class="text-[10px] font-extrabold uppercase text-slate-450 dark:text-slate-500 tracking-wider">
+                                            {{ $staff->designations->pluck('name')->implode(', ') ?: 'Staff Member' }}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
                     @else
                         <div class="text-center py-6 text-sm text-slate-450 dark:text-slate-500 italic">
@@ -558,13 +613,15 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
-                                    @if($client->assignedStaff)
-                                        <div class="font-bold text-slate-800 dark:text-slate-200">
-                                            {{ $client->assignedStaff->user->name }}
-                                        </div>
-                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-semibold">
-                                            {{ $client->assignedStaff->role }}
-                                        </div>
+                                    @if($client->assignedStaff->isNotEmpty())
+                                        @foreach($client->assignedStaff as $staff)
+                                            <div class="font-bold text-slate-800 dark:text-slate-200">
+                                                {{ $staff->user->name }}
+                                            </div>
+                                            <div class="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-semibold mb-1">
+                                                {{ $staff->designations->pluck('name')->implode(', ') ?: 'Staff Member' }}
+                                            </div>
+                                        @endforeach
                                     @else
                                         <span class="text-xs text-slate-400 dark:text-slate-650 italic">Unassigned</span>
                                     @endif
@@ -710,81 +767,65 @@
                 </div>
             </div>
 
-            {{-- Assign Staff Searchable Input Dropdown --}}
+            {{-- Assign Staff - Checkbox Grid for multiple staff --}}
             <div>
-                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Staff Member</label>
-                <div x-data="{ 
-                        open: false, 
-                        search: '',
-                        staff: {{ Js::from($staffMembers) }},
-                        select(id, name) {
-                            this.search = name;
-                            $wire.set('assigned_staff_id', id);
-                            this.open = false;
-                        },
-                        clear() {
-                            this.search = '';
-                            $wire.set('assigned_staff_id', null);
-                            this.open = false;
-                        },
-                        syncSearch() {
-                            const val = $wire.get('assigned_staff_id');
-                            if (!val) {
-                                this.search = '';
-                            } else {
-                                const found = this.staff.find(s => s.id == val);
-                                this.search = found ? found.name : '';
-                            }
-                        },
-                        init() {
-                            this.syncSearch();
-                            this.$watch('$wire.assigned_staff_id', () => this.syncSearch());
-                        }
-                     }" 
-                     @click.outside="open = false"
-                     class="relative mt-1.5">
-                    <div class="relative">
-                        <input type="text" 
-                               x-model="search"
-                               x-on:focus="open = true"
-                               placeholder="Type to search staff members..."
-                               class="block w-full pl-3 pr-8 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition duration-150" />
-                        
-                        <template x-if="$wire.assigned_staff_id">
-                            <button type="button" x-on:click="clear()" class="absolute right-8 top-3.5 text-slate-400 hover:text-slate-650">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </template>
+                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Staff Members</label>
+                <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-40 overflow-y-auto scrollbar-thin">
+                    @foreach($staffMembers as $staffOpt)
+                        <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
+                            <input type="checkbox" wire:model="assigned_staff_ids" value="{{ $staffOpt['id'] }}"
+                                   class="rounded border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
+                            <div class="flex flex-col truncate">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
+                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+                <x-input-error :messages="$errors->get('assigned_staff_ids')" class="mt-1" />
+            </div>
 
-                        <button type="button" x-on:click="open = !open" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-605">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+            <!-- Address Details -->
+            <div class="border-t border-slate-100 dark:border-slate-800/50 pt-4 mt-2">
+                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest mb-3">Address Details</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div class="md:col-span-2">
+                        <label for="address" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Address</label>
+                        <textarea wire:model="address" id="address" rows="2" placeholder="Street Address"
+                                  class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150"></textarea>
+                        <x-input-error :messages="$errors->get('address')" class="mt-1" />
                     </div>
-
-                    {{-- Dropdown options list - non-absolute to avoid modal clipping --}}
-                    <div x-show="open" 
-                         x-transition 
-                         class="w-full mt-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl max-h-40 overflow-y-auto scrollbar-thin">
-                        <div class="p-1 space-y-0.5">
-                            <template x-for="s in staff.filter(s => s.name.toLowerCase().includes(search.toLowerCase()))" :key="s.id">
-                                <button type="button" 
-                                        x-on:click="select(s.id, s.name)"
-                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition flex justify-between items-center">
-                                    <span x-text="s.name"></span>
-                                    <span x-text="s.role" class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider"></span>
-                                </button>
-                            </template>
-                            <template x-if="staff.filter(s => s.name.toLowerCase().includes(search.toLowerCase())).length === 0">
-                                <div class="px-3 py-2 text-xs text-slate-400 dark:text-slate-500 italic">No staff members found</div>
-                            </template>
-                        </div>
+                    <div>
+                        <label for="landmark" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Landmark</label>
+                        <input wire:model="landmark" id="landmark" type="text" placeholder="Near Hospital, Mall etc."
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('landmark')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="state" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">State</label>
+                        <input wire:model="state" id="state" type="text" placeholder="State/Province"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('state')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="country" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Country</label>
+                        <input wire:model="country" id="country" type="text" placeholder="Country"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('country')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="region" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Region</label>
+                        <input wire:model="region" id="region" type="text" placeholder="Region"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('region')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="zip_code" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-550 uppercase tracking-widest">Zip Code</label>
+                        <input wire:model="zip_code" id="zip_code" type="text" placeholder="Postal Code"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('zip_code')" class="mt-1" />
                     </div>
                 </div>
-                <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
             </div>
 
             <!-- Plans Selection -->
@@ -941,81 +982,65 @@
                 </div>
             </div>
 
-            {{-- Assign Staff Searchable Input Dropdown --}}
+            {{-- Assign Staff - Checkbox Grid for multiple staff --}}
             <div>
-                <label class="block text-[10px] font-extrabold text-slate-605 dark:text-slate-500 uppercase tracking-widest">Assign Staff Member</label>
-                <div x-data="{ 
-                        open: false, 
-                        search: '',
-                        staff: {{ Js::from($staffMembers) }},
-                        select(id, name) {
-                            this.search = name;
-                            $wire.set('assigned_staff_id', id);
-                            this.open = false;
-                        },
-                        clear() {
-                            this.search = '';
-                            $wire.set('assigned_staff_id', null);
-                            this.open = false;
-                        },
-                        syncSearch() {
-                            const val = $wire.get('assigned_staff_id');
-                            if (!val) {
-                                this.search = '';
-                            } else {
-                                const found = this.staff.find(s => s.id == val);
-                                this.search = found ? found.name : '';
-                            }
-                        },
-                        init() {
-                            this.syncSearch();
-                            this.$watch('$wire.assigned_staff_id', () => this.syncSearch());
-                        }
-                     }" 
-                     @click.outside="open = false"
-                     class="relative mt-1.5">
-                    <div class="relative">
-                        <input type="text" 
-                               x-model="search"
-                               x-on:focus="open = true"
-                               placeholder="Type to search staff members..."
-                               class="block w-full pl-3 pr-8 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm transition duration-150" />
-                        
-                        <template x-if="$wire.assigned_staff_id">
-                            <button type="button" x-on:click="clear()" class="absolute right-8 top-3.5 text-slate-400 hover:text-slate-650">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </template>
+                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Staff Members</label>
+                <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-40 overflow-y-auto scrollbar-thin">
+                    @foreach($staffMembers as $staffOpt)
+                        <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
+                            <input type="checkbox" wire:model="assigned_staff_ids" value="{{ $staffOpt['id'] }}"
+                                   class="rounded border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
+                            <div class="flex flex-col truncate">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
+                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+                <x-input-error :messages="$errors->get('assigned_staff_ids')" class="mt-1" />
+            </div>
 
-                        <button type="button" x-on:click="open = !open" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-605">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+            <!-- Address Details -->
+            <div class="border-t border-slate-100 dark:border-slate-800/50 pt-4 mt-2">
+                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest mb-3">Address Details</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div class="md:col-span-2">
+                        <label for="edit_address" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Address</label>
+                        <textarea wire:model="address" id="edit_address" rows="2" placeholder="Street Address"
+                                  class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150"></textarea>
+                        <x-input-error :messages="$errors->get('address')" class="mt-1" />
                     </div>
-
-                    {{-- Dropdown options list - non-absolute to avoid modal clipping --}}
-                    <div x-show="open" 
-                         x-transition 
-                         class="w-full mt-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl max-h-40 overflow-y-auto scrollbar-thin">
-                        <div class="p-1 space-y-0.5">
-                            <template x-for="s in staff.filter(s => s.name.toLowerCase().includes(search.toLowerCase()))" :key="s.id">
-                                <button type="button" 
-                                        x-on:click="select(s.id, s.name)"
-                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition flex justify-between items-center">
-                                    <span x-text="s.name"></span>
-                                    <span x-text="s.role" class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider"></span>
-                                </button>
-                            </template>
-                            <template x-if="staff.filter(s => s.name.toLowerCase().includes(search.toLowerCase())).length === 0">
-                                <div class="px-3 py-2 text-xs text-slate-400 dark:text-slate-500 italic">No staff members found</div>
-                            </template>
-                        </div>
+                    <div>
+                        <label for="edit_landmark" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Landmark</label>
+                        <input wire:model="landmark" id="edit_landmark" type="text" placeholder="Near Hospital, Mall etc."
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('landmark')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="edit_state" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">State</label>
+                        <input wire:model="state" id="edit_state" type="text" placeholder="State/Province"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('state')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="edit_country" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Country</label>
+                        <input wire:model="country" id="edit_country" type="text" placeholder="Country"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('country')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="edit_region" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Region</label>
+                        <input wire:model="region" id="edit_region" type="text" placeholder="Region"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('region')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="edit_zip_code" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-555 uppercase tracking-widest">Zip Code</label>
+                        <input wire:model="zip_code" id="edit_zip_code" type="text" placeholder="Postal Code"
+                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                        <x-input-error :messages="$errors->get('zip_code')" class="mt-1" />
                     </div>
                 </div>
-                <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
             </div>
 
             <!-- Plans Selection -->

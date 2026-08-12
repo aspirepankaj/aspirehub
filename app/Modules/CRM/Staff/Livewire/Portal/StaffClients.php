@@ -19,6 +19,13 @@ class StaffClients extends Component
     // Client Detail modal or view tracking
     public ?int $selectedClientId = null;
     public string $activeTab = 'overview';
+    public string $activeViewTab = 'my_clients'; // 'my_clients' or 'all_clients'
+
+    public function setViewTab(string $tab): void
+    {
+        $this->activeViewTab = $tab;
+        $this->resetPage();
+    }
 
     // Page numbers for sub-tabs
     public int $activitypage = 1;
@@ -104,7 +111,6 @@ class StaffClients extends Component
             $clients = collect();
             
             $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
-                ->where('assigned_staff_id', $staffId)
                 ->findOrFail($this->selectedClientId);
             
             $clientWebsites = \App\Modules\CRM\Websites\Models\Website::with('latestMaintenanceReport')
@@ -166,7 +172,11 @@ class StaffClients extends Component
         } else {
             $clients = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
                 ->withCount('websites')
-                ->where('assigned_staff_id', $staffId)
+                ->when($this->activeViewTab === 'my_clients', function ($query) use ($staffId) {
+                    $query->whereHas('assignedStaff', function ($q) use ($staffId) {
+                        $q->where('staff_id', $staffId);
+                    });
+                })
                 ->where(function ($query) {
                     $query->where('company_name', 'like', '%' . $this->search . '%')
                         ->orWhereHas('user', function ($uQuery) {

@@ -80,6 +80,7 @@ class MaintenanceReport extends Model
         'developer_notes',
         'client_summary',
         'last_sent_at',
+        'attachments_visible_to_client',
     ];
 
     protected $casts = [
@@ -91,6 +92,7 @@ class MaintenanceReport extends Model
         'backup_date' => 'date',
         'support_completion_date' => 'date',
         'last_sent_at' => 'datetime',
+        'attachments_visible_to_client' => 'boolean',
     ];
 
     public function client(): BelongsTo

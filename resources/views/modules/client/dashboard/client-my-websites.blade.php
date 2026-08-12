@@ -159,15 +159,13 @@
 
                             <div class="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">
 
-                                Last Maintenance
+                                Maintenance Cycle
 
                             </div>
 
                             <div class="mt-2 text-sm font-medium text-slate-900">
 
-                                {{ $website->maintenance_date
-                                    ? \Carbon\Carbon::parse($website->maintenance_date)->format('M j, Y')
-                                    : '-' }}
+                                {{ $website->maintenance_month ?: '-' }}
 
                             </div>
 

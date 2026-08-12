@@ -100,6 +100,7 @@ class CreateMaintenanceReport extends Component
 
     // 12. Attachments
     public array $attachments = []; // uploaded files
+    public bool $attachments_visible_to_client = false;
 
     public function mount()
     {
@@ -297,6 +298,7 @@ class CreateMaintenanceReport extends Component
 
             'developer_notes' => 'nullable|string',
             'client_summary' => 'nullable|string',
+            'attachments_visible_to_client' => 'boolean',
             'attachments.*' => 'nullable|file|max:10240', // Max 10MB per file
         ];
     }
@@ -386,6 +388,7 @@ class CreateMaintenanceReport extends Component
 
                 'developer_notes' => $this->developer_notes,
                 'client_summary' => $this->client_summary,
+                'attachments_visible_to_client' => $this->attachments_visible_to_client,
             ]);
 
             // Save plugins
@@ -409,6 +412,11 @@ class CreateMaintenanceReport extends Component
 
         session()->flash('success', 'Maintenance Report Created Successfully');
         return redirect()->route('admin.maintenance');
+    }
+
+    public function toggleAttachmentsVisibility()
+    {
+        $this->attachments_visible_to_client = !$this->attachments_visible_to_client;
     }
 
     public function render()

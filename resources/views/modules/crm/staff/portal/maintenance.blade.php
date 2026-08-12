@@ -60,9 +60,9 @@
 
     {{-- Filter panel --}}
     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {{-- Search input --}}
-            <div class="relative flex items-center col-span-1 sm:col-span-2 lg:col-span-1">
+            <div class="relative flex items-center col-span-1">
                 <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -98,6 +98,15 @@
                     @endforeach
                 </select>
             </div>
+
+            {{-- Send Status Filter --}}
+            <div class="relative flex items-center">
+                <select wire:model.live="sendFilter" class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition duration-150">
+                    <option value="">All Send Status</option>
+                    <option value="sent">Sent</option>
+                    <option value="unsent">Unsent</option>
+                </select>
+            </div>
         </div>
 
         @if($hasActiveFilters)
@@ -127,7 +136,7 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Create a monthly audit report for your assigned client sites.</p>
             </div>
         @else
-            <x-admin.table :headers="['Report ID', 'Client', 'Website', 'Month', 'Date', 'Developer', 'Status', 'Actions']">
+            <x-admin.table :headers="['Report ID', 'Client', 'Website', 'Month', 'Developer', 'Status', 'Actions']">
                 @foreach($reports as $report)
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                         <td class="px-4 py-4 font-bold text-slate-900 dark:text-white text-sm">
@@ -151,9 +160,6 @@
                         </td>
                         <td class="px-4 py-4 text-slate-550 dark:text-slate-400 font-semibold text-xs">
                             {{ $report->maintenance_month }}
-                        </td>
-                        <td class="px-4 py-4 text-slate-500 dark:text-slate-400 text-xs">
-                            {{ $report->maintenance_date->format('d M, Y') }}
                         </td>
                         <td class="px-4 py-4 text-slate-600 dark:text-slate-300 text-xs">
                             {{ $report->developer->name }}

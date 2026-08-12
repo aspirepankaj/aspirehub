@@ -28,7 +28,13 @@ class ManageClients extends Component
     public string $status = 'active';
     public string $notes = '';
     public array $plan_ids = [];
-    public ?int $assigned_staff_id = null;
+    public array $assigned_staff_ids = [];
+    public string $address = '';
+    public string $landmark = '';
+    public string $state = '';
+    public string $country = '';
+    public string $region = '';
+    public string $zip_code = '';
 
     // Search & Filter
     public string $search = '';
@@ -152,9 +158,16 @@ class ManageClients extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'company_name', 'profile_image', 'existing_profile_image', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids', 'assigned_staff_id']);
+        $this->reset(['name', 'email', 'password', 'company_name', 'profile_image', 'existing_profile_image', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids', 'assigned_staff_ids', 'address', 'landmark', 'state', 'country', 'region', 'zip_code']);
         $this->phones = [['phone' => '', 'label' => 'Work']];
         $this->plan_ids = [];
+        $this->assigned_staff_ids = [];
+        $this->address = '';
+        $this->landmark = '';
+        $this->state = '';
+        $this->country = '';
+        $this->region = '';
+        $this->zip_code = '';
         $this->resetValidation();
     }
 
@@ -199,7 +212,14 @@ class ManageClients extends Component
             'notes' => 'nullable|string',
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
-            'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
+            'assigned_staff_ids' => 'nullable|array',
+            'assigned_staff_ids.*' => 'exists:adspv_staff,id',
+            'address' => 'nullable|string|max:1000',
+            'landmark' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'region' => 'nullable|string|max:255',
+            'zip_code' => 'nullable|string|max:20',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
@@ -221,12 +241,17 @@ class ManageClients extends Component
             // 2. Create associated Client details
             $client = Client::create([
                 'user_id' => $user->id,
-                'assigned_staff_id' => $this->assigned_staff_id,
                 'company_name' => $this->company_name,
                 'profile_image' => $profileImagePath,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'added_by' => auth()->id(),
+                'address' => $this->address,
+                'landmark' => $this->landmark,
+                'state' => $this->state,
+                'country' => $this->country,
+                'region' => $this->region,
+                'zip_code' => $this->zip_code,
             ]);
 
             // 3. Create multiple client phones
@@ -241,6 +266,9 @@ class ManageClients extends Component
 
             // 4. Sync plans
             $client->plans()->sync($this->plan_ids);
+
+            // 5. Sync assigned staff
+            $client->assignedStaff()->sync($this->assigned_staff_ids);
         });
 
         $this->dispatch('close-modal', name: 'add-client-modal');
@@ -250,12 +278,12 @@ class ManageClients extends Component
 
     public function editClient($id)
     {
-        $client = Client::with(['user', 'phones', 'plans'])->findOrFail($id);
+        $client = Client::with(['user', 'phones', 'plans', 'assignedStaff'])->findOrFail($id);
 
         $this->editingClientId = $client->id;
         $this->editingUserId = $client->user_id;
         $this->plan_ids = $client->plans->pluck('id')->toArray();
-        $this->assigned_staff_id = $client->assigned_staff_id;
+        $this->assigned_staff_ids = $client->assignedStaff->pluck('id')->toArray();
 
         $this->name = $client->user->name;
         $this->email = $client->user->email;
@@ -276,6 +304,12 @@ class ManageClients extends Component
 
         $this->status = $client->status;
         $this->notes = $client->notes ?? '';
+        $this->address = $client->address ?? '';
+        $this->landmark = $client->landmark ?? '';
+        $this->state = $client->state ?? '';
+        $this->country = $client->country ?? '';
+        $this->region = $client->region ?? '';
+        $this->zip_code = $client->zip_code ?? '';
 
         $this->resetValidation();
         $this->dispatch('open-modal', name: 'edit-client-modal');
@@ -296,7 +330,14 @@ class ManageClients extends Component
             'notes' => 'nullable|string',
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
-            'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
+            'assigned_staff_ids' => 'nullable|array',
+            'assigned_staff_ids.*' => 'exists:adspv_staff,id',
+            'address' => 'nullable|string|max:1000',
+            'landmark' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'region' => 'nullable|string|max:255',
+            'zip_code' => 'nullable|string|max:20',
         ], [], [
             'phones.*.phone' => 'phone number',
             'phones.*.label' => 'phone label',
@@ -324,10 +365,15 @@ class ManageClients extends Component
             $client->update([
                 'company_name' => $this->company_name,
                 'profile_image' => $profileImagePath,
-                'assigned_staff_id' => $this->assigned_staff_id,
                 'status' => $this->status,
                 'notes' => $this->notes,
                 'edited_by' => auth()->id(),
+                'address' => $this->address,
+                'landmark' => $this->landmark,
+                'state' => $this->state,
+                'country' => $this->country,
+                'region' => $this->region,
+                'zip_code' => $this->zip_code,
             ]);
 
             // 3. Sync client phones
@@ -343,6 +389,9 @@ class ManageClients extends Component
 
             // 4. Sync plans
             $client->plans()->sync($this->plan_ids);
+
+            // 5. Sync assigned staff
+            $client->assignedStaff()->sync($this->assigned_staff_ids);
         });
 
         $this->dispatch('close-modal', name: 'edit-client-modal');

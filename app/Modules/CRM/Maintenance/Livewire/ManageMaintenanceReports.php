@@ -22,6 +22,7 @@ class ManageMaintenanceReports extends Component
     public string $statusFilter = '';
     public string $developerFilter = '';
     public string $monthFilter = '';
+    public string $sendFilter = '';
 
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingClientFilter(): void
@@ -33,11 +34,12 @@ class ManageMaintenanceReports extends Component
     public function updatingStatusFilter(): void { $this->resetPage(); }
     public function updatingDeveloperFilter(): void { $this->resetPage(); }
     public function updatingMonthFilter(): void { $this->resetPage(); }
+    public function updatingSendFilter(): void { $this->resetPage(); }
 
     public function clearFilters(): void
     {
         $this->reset([
-            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'developerFilter', 'monthFilter'
+            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'developerFilter', 'monthFilter', 'sendFilter'
         ]);
         $this->resetPage();
     }
@@ -120,6 +122,8 @@ class ManageMaintenanceReports extends Component
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->developerFilter, fn($q) => $q->where('developer_id', $this->developerFilter))
             ->when($this->monthFilter, fn($q) => $q->where('maintenance_month', $this->monthFilter))
+            ->when($this->sendFilter === 'sent', fn($q) => $q->whereNotNull('last_sent_at'))
+            ->when($this->sendFilter === 'unsent', fn($q) => $q->whereNull('last_sent_at'))
             ->latest()
             ->paginate(12)
             ->onEachSide(1);
@@ -156,7 +160,7 @@ class ManageMaintenanceReports extends Component
 
         $scoreChange = ($avgLastMonth > 0) ? ($avgThisMonth - $avgLastMonth) : 0;
 
-        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->developerFilter || $this->monthFilter;
+        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->developerFilter || $this->monthFilter || $this->sendFilter;
 
         return view('modules.crm.maintenance.manage-maintenance-reports', [
             'reports' => $reports,

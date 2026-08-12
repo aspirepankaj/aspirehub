@@ -18,13 +18,18 @@ class Client extends Model
 
     protected $fillable = [
         'user_id',
-        'assigned_staff_id',
         'company_name',
         'profile_image',
         'status',
         'notes',
         'added_by',
         'edited_by',
+        'address',
+        'landmark',
+        'state',
+        'country',
+        'region',
+        'zip_code',
     ];
 
     public function user(): BelongsTo
@@ -32,9 +37,9 @@ class Client extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function assignedStaff(): BelongsTo
+    public function assignedStaff(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(\App\Modules\CRM\Staff\Models\Staff::class, 'assigned_staff_id');
+        return $this->belongsToMany(\App\Modules\CRM\Staff\Models\Staff::class, 'adspv_client_staff', 'client_id', 'staff_id')->withTimestamps();
     }
 
     public function addedBy(): BelongsTo

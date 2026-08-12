@@ -52,9 +52,9 @@ class Staff extends Model
         return $this->hasMany(StaffPhone::class, 'staff_id');
     }
 
-    public function clients(): HasMany
+    public function clients(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(\App\Modules\CRM\Clients\Models\Client::class, 'assigned_staff_id');
+        return $this->belongsToMany(\App\Modules\CRM\Clients\Models\Client::class, 'adspv_client_staff', 'staff_id', 'client_id')->withTimestamps();
     }
 
     protected function getActivityDescription(string $action): string

@@ -100,6 +100,7 @@ class StaffCreateMaintenanceReport extends Component
 
     // 12. Attachments
     public array $attachments = [];
+    public bool $attachments_visible_to_client = false;
 
     public function mount()
     {
@@ -287,6 +288,7 @@ class StaffCreateMaintenanceReport extends Component
 
             'developer_notes' => 'nullable|string',
             'client_summary' => 'nullable|string',
+            'attachments_visible_to_client' => 'boolean',
             'attachments.*' => 'nullable|file|max:10240',
         ];
     }
@@ -376,6 +378,7 @@ class StaffCreateMaintenanceReport extends Component
 
                 'developer_notes' => $this->developer_notes,
                 'client_summary' => $this->client_summary,
+                'attachments_visible_to_client' => $this->attachments_visible_to_client,
             ]);
 
             foreach ($this->plugins as $pluginData) {
@@ -397,6 +400,11 @@ class StaffCreateMaintenanceReport extends Component
 
         session()->flash('success', 'Maintenance Report Created Successfully');
         return redirect()->route('staff.maintenance');
+    }
+
+    public function toggleAttachmentsVisibility()
+    {
+        $this->attachments_visible_to_client = !$this->attachments_visible_to_client;
     }
 
     public function render()

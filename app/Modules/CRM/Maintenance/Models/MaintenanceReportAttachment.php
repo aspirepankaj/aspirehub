@@ -13,6 +13,11 @@ class MaintenanceReportAttachment extends Model
         'report_id',
         'file_path',
         'file_name',
+        'is_visible_to_client',
+    ];
+
+    protected $casts = [
+        'is_visible_to_client' => 'boolean',
     ];
 
     public function report(): BelongsTo

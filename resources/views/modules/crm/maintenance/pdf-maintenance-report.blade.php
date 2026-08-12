@@ -6,67 +6,101 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #333333;
-            font-size: 13px;
+            color: #1e293b;
+            font-size: 11px;
             line-height: 1.5;
             margin: 0;
             padding: 0;
+            background-color: #ffffff;
         }
-        .watermark {
-            position: fixed;
-            top: 40%;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            opacity: 0.07;
-            z-index: -1000;
-            transform: rotate(-30deg);
-            font-size: 75px;
-            font-weight: bold;
-            color: #4f46e5;
-            letter-spacing: 8px;
+        
+        /* Header Block - Solid dark background for reliable DomPDF rendering */
+        .header-container {
+            background-color: #0f172a;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px 24px;
         }
         .header-table {
             width: 100%;
-            background-color: #1e1b4b; /* Solid dark navy background */
-            margin-bottom: 25px;
-            border-radius: 6px;
+            border-collapse: collapse;
+            border: 0;
+        }
+        .header-table td {
+            padding: 0;
+            border: 0;
+            vertical-align: middle;
         }
         .header-title {
             font-size: 20px;
             font-weight: bold;
-            color: #ffffff; /* White title */
+            color: #ffffff;
             margin: 0;
             letter-spacing: -0.5px;
         }
         .header-subtitle {
             font-size: 10px;
-            color: #a5b4fc; /* Light indigo subtitle */
-            margin-top: 3px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        /* Meta Data Grid Container */
+        .meta-container {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            margin-bottom: 20px;
+            padding: 12px 16px;
         }
         .meta-table {
             width: 100%;
-            margin-bottom: 20px;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px;
+            border-collapse: collapse;
+            border: 0;
+        }
+        .meta-table td {
+            padding: 4px 8px;
+            border: 0;
+            vertical-align: top;
         }
         .meta-label {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
             text-transform: uppercase;
             color: #64748b;
             letter-spacing: 0.5px;
         }
         .meta-value {
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: bold;
-            color: #1e293b;
+            color: #0f172a;
             margin-top: 2px;
         }
+        
+        /* Executive Summary block */
+        .summary-box {
+            background-color: #f5f3ff;
+            border-left: 4px solid #6d28d9;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .summary-title {
+            font-weight: bold;
+            color: #6d28d9;
+            margin-bottom: 6px;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-content {
+            font-size: 11.5px;
+            color: #4c1d95;
+            line-height: 1.6;
+        }
+
+        /* Section Headings */
         .section-title {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
             color: #4f46e5;
@@ -76,43 +110,55 @@
             margin-bottom: 12px;
             letter-spacing: 0.5px;
         }
+        
+        /* Grid Tables */
         .card-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
         }
         .card-table td {
-            padding: 8px 10px;
+            padding: 10px 12px;
             border: 1px solid #e2e8f0;
             vertical-align: top;
+            background-color: #ffffff;
+        }
+        .card-table td strong {
+            color: #475569;
+            font-weight: 600;
         }
         .bg-gray {
-            background-color: #f8fafc;
+            background-color: #f8fafc !important;
         }
+        
+        /* Plugin list style */
         .plugin-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 20px;
+            margin-top: 8px;
+            margin-bottom: 15px;
         }
         .plugin-table th, .plugin-table td {
             border: 1px solid #e2e8f0;
-            padding: 8px;
+            padding: 8px 10px;
             text-align: left;
+            vertical-align: middle;
         }
         .plugin-table th {
             background-color: #f1f5f9;
-            font-size: 9px;
+            font-size: 8.5px;
             font-weight: bold;
             text-transform: uppercase;
             color: #475569;
             letter-spacing: 0.5px;
         }
+        
+        /* Status Badges */
         .badge {
             font-size: 8px;
             font-weight: bold;
             text-transform: uppercase;
-            padding: 2.5px 5px;
+            padding: 2px 6px;
             border-radius: 4px;
         }
         .badge-success {
@@ -127,81 +173,63 @@
             background-color: #fef3c7;
             color: #b45309;
         }
-        .summary-box {
-            background-color: #eff6ff;
-            border-left: 4px solid #3b82f6;
-            padding: 12px 15px;
-            margin-top: 15px;
-            border-radius: 4px;
-        }
-        .summary-title {
-            font-weight: bold;
-            color: #1d4ed8;
-            margin-bottom: 5px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        
         .page-break {
             page-break-after: always;
+        }
+        
+        .footer-note {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 9px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 12px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Background Watermark -->
-    <div class="watermark">ASPIRE HUB</div>
-
-    <!-- Header Section -->
-    <table class="header-table" cellpadding="0" cellspacing="0">
-        <tr>
-            <td width="70%" style="vertical-align: middle; padding: 15px 0 15px 20px;">
-                <div class="header-title">Website Maintenance Report</div>
-                <div class="header-subtitle">Monthly site security, performance & health optimization audit</div>
-            </td>
-            <td width="30%" align="right" style="vertical-align: middle; padding: 15px 20px 15px 0;">
-                <img src="{{ public_path('aspire_logo.png') }}" style="height: 30px; width: auto; display: block; margin-bottom: 4px;" />
-                <div style="font-size: 10px; font-weight: bold; color: #a5b4fc;">REPORT ID: #{{ $report->id }}</div>
-            </td>
-        </tr>
-    </table>
+    <!-- Header Block -->
+    <div class="header-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                    <div class="header-title">Website Maintenance Report</div>
+                    <div class="header-subtitle">Monthly site security, performance & health optimization audit</div>
+                </td>
+                <td align="right" style="width: 120px;">
+                    <img src="{{ public_path('aspire_logo.png') }}" style="height: 24px; width: auto; display: block; margin-bottom: 4px;" />
+                    <div style="font-size: 13px; font-weight: bold; color: #ffffff;">#{{ $report->id }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
     <!-- Meta Details -->
-    <table class="meta-table" cellpadding="0" cellspacing="0">
-        <tr>
-            <td width="33%">
-                <div class="meta-label">Client Name</div>
-                <div class="meta-value">{{ $report->client->user->name }}</div>
-            </td>
-            <td width="33%">
-                <div class="meta-label">Website Domain</div>
-                <div class="meta-value">{{ $report->website->url }}</div>
-            </td>
-            <td width="33%">
-                <div class="meta-label">Reporting Period</div>
-                <div class="meta-value">{{ $report->maintenance_month }}</div>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding-top: 10px;">
-                <div class="meta-label">Audit Date</div>
-                <div class="meta-value">{{ $report->maintenance_date->format('d M, Y') }}</div>
-            </td>
-            <td style="padding-top: 10px;">
-                <div class="meta-label">Engineer Assigned</div>
-                <div class="meta-value">{{ $report->developer->name }}</div>
-            </td>
-            <td style="padding-top: 10px;">
-                <div class="meta-label">Status</div>
-                <div class="meta-value" style="color: #15803d; text-transform: uppercase;">{{ $report->status }}</div>
-            </td>
-        </tr>
-    </table>
+    <div class="meta-container">
+        <table class="meta-table">
+            <tr>
+                <td width="33%">
+                    <div class="meta-label">Name</div>
+                    <div class="meta-value">{{ $report->client->user->name }}</div>
+                </td>
+                <td width="33%">
+                    <div class="meta-label">Website Domain</div>
+                    <div class="meta-value">{{ $report->website->url }}</div>
+                </td>
+                <td width="33%">
+                    <div class="meta-label">Reporting Month</div>
+                    <div class="meta-value">{{ $report->maintenance_month }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
     <!-- Client Facing Summary -->
     <div class="summary-box">
         <div class="summary-title">Executive Summary & Work Completed</div>
-        <div style="font-size: 12px; color: #1e3a8a; line-height: 1.6;">
+        <div class="summary-content">
             {!! nl2br(e($report->client_summary ?: 'Website is running normally. All security and platform cores verified successfully.')) !!}
         </div>
     </div>
@@ -233,9 +261,9 @@
         </tr>
         @if($report->wp_notes || $report->php_notes || $report->theme_notes)
         <tr>
-            <td><small style="font-size: 10px; color: #64748b;">{{ $report->wp_notes }}</small></td>
-            <td><small style="font-size: 10px; color: #64748b;">{{ $report->php_notes }}</small></td>
-            <td><small style="font-size: 10px; color: #64748b;">{{ $report->theme_notes }}</small></td>
+            <td><small style="font-size: 9.5px; color: #64748b; line-height: 1.3;">{{ $report->wp_notes }}</small></td>
+            <td><small style="font-size: 9.5px; color: #64748b; line-height: 1.3;">{{ $report->php_notes }}</small></td>
+            <td><small style="font-size: 9.5px; color: #64748b; line-height: 1.3;">{{ $report->theme_notes }}</small></td>
         </tr>
         @endif
     </table>
@@ -263,12 +291,11 @@
 
     <div class="page-break"></div>
 
-    <!-- Security & Backups -->
-    <div class="section-title">3. Security Profile & Backups</div>
+    <!-- Security Profile -->
+    <div class="section-title">3. Security Profile</div>
     <table class="card-table">
         <tr>
-            <td width="50%" class="bg-gray"><span class="meta-label">Security Shield Checks</span></td>
-            <td width="50%" class="bg-gray"><span class="meta-label">Disaster Recovery Backups</span></td>
+            <td class="bg-gray"><span class="meta-label">Security Shield Checks</span></td>
         </tr>
         <tr>
             <td>
@@ -277,24 +304,18 @@
                 <strong>SSL Certificate:</strong> <span style="text-transform: uppercase;">{{ $report->security_ssl_status }}</span><br>
                 <strong>Security Health:</strong> <span style="text-transform: uppercase;">{{ $report->security_health ?: 'Excellent' }}</span>
             </td>
-            <td>
-                <strong>Backup Status:</strong> {{ $report->backup_completed ? 'Completed' : 'Failed' }}<br>
-                <strong>Backup Date:</strong> {{ $report->backup_date ? $report->backup_date->format('d M, Y') : '—' }}<br>
-                <strong>Cloud Destination:</strong> {{ $report->backup_location }}
-            </td>
         </tr>
-        @if($report->security_notes || $report->backup_notes)
+        @if($report->security_notes)
         <tr>
-            <td><small style="font-size: 10px; color: #64748b;">{{ $report->security_notes }}</small></td>
-            <td><small style="font-size: 10px; color: #64748b;">{{ $report->backup_notes }}</small></td>
+            <td><small style="font-size: 9.5px; color: #64748b; line-height: 1.3;">{{ $report->security_notes }}</small></td>
         </tr>
         @endif
     </table>
 
     <!-- Plugin list -->
-    <div class="section-title">4. Core Plugins Update Log</div>
+    <div class="section-title">4. Plugins Update Log</div>
     @if($report->plugins->isEmpty())
-        <p style="color: #777777;">No plugin updates performed during this cycle.</p>
+        <p style="color: #64748b; font-style: italic; padding-left: 5px;">No plugin updates performed during this cycle.</p>
     @else
         <table class="plugin-table" cellpadding="0" cellspacing="0">
             <thead>
@@ -309,7 +330,7 @@
             <tbody>
                 @foreach($report->plugins as $plugin)
                     <tr>
-                        <td style="font-weight: bold;">{{ $plugin->plugin_name }}</td>
+                        <td style="font-weight: bold; color: #0f172a;">{{ $plugin->plugin_name }}</td>
                         <td>{{ $plugin->old_version ?: '—' }}</td>
                         <td>{{ $plugin->new_version ?: '—' }}</td>
                         <td>
@@ -317,47 +338,43 @@
                                 {{ $plugin->status }}
                             </span>
                         </td>
-                        <td style="font-size: 11px; color: #555555;">{{ $plugin->notes ?: 'Upgraded successfully.' }}</td>
+                        <td style="font-size: 10px; color: #475569;">{{ $plugin->notes ?: 'Upgraded successfully.' }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     @endif
 
-    <!-- Support Cycle Summary -->
-    <div class="section-title">5. Support Cycle Activity</div>
-    <table class="card-table">
-        <tr>
-            <td width="33%" class="bg-gray"><span class="meta-label">Support Tickets Resolved</span></td>
-            <td width="33%" class="bg-gray"><span class="meta-label">Time Logged</span></td>
-            <td width="33%" class="bg-gray"><span class="meta-label">Cycle Completion</span></td>
-        </tr>
-        <tr>
-            <td>
-                <strong>Resolved:</strong> {{ $report->support_tickets_completed }}<br>
-                <strong>Pending:</strong> {{ $report->support_tickets_pending }}
-            </td>
-            <td>
-                <strong>Hours spent:</strong> {{ $report->support_time_spent ?: '—' }}
-            </td>
-            <td>
-                <strong>Date:</strong> {{ $report->support_completion_date ? $report->support_completion_date->format('d M, Y') : '—' }}
-            </td>
-        </tr>
-        @if($report->support_work_summary)
-        <tr>
-            <td colspan="3">
-                <div class="meta-label">Activity Summary</div>
-                <div style="font-size: 11px; color: #475569; margin-top: 4px;">
-                    {!! nl2br(e($report->support_work_summary)) !!}
+    @if($report->attachments_visible_to_client && $report->attachments->isNotEmpty())
+        <div class="page-break"></div>
+        <div class="section-title">5. Report Attachments</div>
+        <div style="margin-top: 15px;">
+            @foreach($report->attachments as $att)
+                @php
+                    $extension = pathinfo($att->file_path, PATHINFO_EXTENSION);
+                    $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
+                    $fullPath = storage_path('app/public/' . $att->file_path);
+                @endphp
+                <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                    <div style="font-size: 12px; font-weight: bold; color: #1e293b; margin-bottom: 8px;">
+                        {{ $att->file_name }}
+                    </div>
+                    @if($isImage && file_exists($fullPath))
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #ffffff; text-align: center; padding: 10px;">
+                            <img src="{{ $fullPath }}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;" />
+                        </div>
+                    @else
+                        <div style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; color: #475569;">
+                            Attachment: <strong>{{ $att->file_name }}</strong> (Available for download in Aspire Hub portal)
+                        </div>
+                    @endif
                 </div>
-            </td>
-        </tr>
-        @endif
-    </table>
+            @endforeach
+        </div>
+    @endif
 
-    <div style="margin-top: 50px; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-        This report is generated dynamically by Aspire Hub Maintenance portal. For any enquiries, please email support.
+    <div class="footer-note">
+        For any enquiries, please email support@aspiredigitalsolutions.com
     </div>
 
 </body>
