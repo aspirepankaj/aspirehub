@@ -369,6 +369,9 @@ class ManageStaff extends Component
         $hasActiveFilters = $this->search || $this->statusFilter;
         $pageIds = $Staff->pluck('id')->toArray();
 
+        $hasActiveFilters = $this->search || $this->statusFilter;
+        $pageIds = $Staff->pluck('id')->toArray();
+
         return view('modules.crm.staff.manage-staff', [
             'Staff'            => $Staff,
             'designations'     => $designations,

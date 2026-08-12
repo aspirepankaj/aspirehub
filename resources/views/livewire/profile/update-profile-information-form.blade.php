@@ -95,6 +95,32 @@ new class extends Component
     }
 
     /**
+     * Remove the current user's profile image.
+     */
+    public function removeProfileImage(): void
+    {
+        $user = Auth::user();
+        if ($user->admin && $user->admin->profile_image) {
+            $filePath = public_path('storage/' . $user->admin->profile_image);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            $user->admin->update(['profile_image' => null]);
+        } elseif ($user->staff && $user->staff->profile_image) {
+            $filePath = public_path('storage/' . $user->staff->profile_image);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            $user->staff->update(['profile_image' => null]);
+        }
+
+        $this->profile_image = null;
+        $this->existing_profile_image = null;
+
+        $this->dispatch('profile-updated', name: $user->name);
+    }
+
+    /**
      * Send an email verification notification to the current user.
      */
     public function sendVerification(): void
@@ -140,7 +166,14 @@ new class extends Component
                         </div>
                     @endif
                 @endif
-                <input type="file" wire:model="profile_image" class="text-xs text-slate-550 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/30 dark:file:text-indigo-400 cursor-pointer" />
+                <div class="flex items-center gap-2">
+                    <input type="file" wire:model="profile_image" class="text-xs text-slate-550 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/30 dark:file:text-indigo-400 cursor-pointer" />
+                    @if ($profile_image || ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image))))
+                        <button type="button" wire:click="removeProfileImage" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800/50 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition">
+                            {{ __('Remove') }}
+                        </button>
+                    @endif
+                </div>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
         </div>

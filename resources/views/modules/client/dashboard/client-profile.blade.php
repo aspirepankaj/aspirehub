@@ -58,11 +58,18 @@
                         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-semibold">{{ $company_name ?: 'Meridian Wellness Group' }}</p>
                     </div>
 
-                    <div>
-                        <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                            Change photo
-                            <input type="file" wire:model="profile_image" class="hidden" />
-                        </label>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                                Change photo
+                                <input type="file" wire:model="profile_image" class="hidden" />
+                            </label>
+                            @if ($profile_image || ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image))))
+                                <button type="button" wire:click="removeProfileImage" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800/50 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition">
+                                    Remove photo
+                                </button>
+                            @endif
+                        </div>
                         @error('profile_image')
                             <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
                         @enderror

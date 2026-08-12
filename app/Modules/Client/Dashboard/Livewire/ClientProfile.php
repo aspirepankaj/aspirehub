@@ -114,6 +114,26 @@ class ClientProfile extends Component
         session()->flash('success', 'Profile updated successfully!');
     }
 
+    public function removeProfileImage()
+    {
+        $user = Auth::user();
+        $client = DB::table('adspv_clients')->where('user_id', $user->id)->first();
+        if ($client && $client->profile_image) {
+            $filePath = public_path('storage/' . $client->profile_image);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            DB::table('adspv_clients')->where('user_id', $user->id)->update([
+                'profile_image' => null,
+                'updated_at' => now(),
+            ]);
+        }
+        $this->profile_image = null;
+        $this->existing_profile_image = null;
+
+        session()->flash('success', 'Profile image removed successfully!');
+    }
+
     public function updatePassword()
     {
         $user = Auth::user();
@@ -141,8 +161,9 @@ class ClientProfile extends Component
         $accountManager = DB::table('adspv_client_staff as cs')
             ->join('adspv_staff as s', 's.id', '=', 'cs.staff_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
+            ->leftJoin('adspv_staff_phones as sp', 'sp.staff_id', '=', 's.id')
             ->where('cs.client_id', $client->id)
-            ->select('u.name', 'u.email', 's.profile_image')
+            ->select('u.name', 'u.email', 's.profile_image', 's.department', 'sp.phone')
             ->first();
 
         // 2. Subscribed Plan Info

@@ -146,6 +146,42 @@
         @endif
     </div>
 
+    <!-- Status Filter Row -->
+    <div class="flex flex-col sm:flex-row items-center gap-3 mb-6">
+        <div class="relative w-full sm:w-56">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400 dark:text-slate-500">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+            </span>
+            <select wire:model.live="statusFilter"
+                    class="block w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
+        @if($hasActiveFilters)
+            <button type="button" wire:click="clearFilters" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition">
+                Clear Filters
+            </button>
+        @endif
+
+        <!-- Bulk Actions (shown only when rows are selected) -->
+        @if(count($selectedStaff) > 0)
+            <div class="flex items-center gap-2 ml-auto">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ count($selectedStaff) }} selected</span>
+                <button type="button" wire:click="bulkActivate" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition">
+                    Activate
+                </button>
+                <button type="button" wire:click="bulkDeactivate" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-500/10 text-slate-500 dark:text-slate-400 hover:bg-slate-500/20 transition">
+                    Deactivate
+                </button>
+            </div>
+        @endif
+    </div>
+
     <!-- Success Message Alert -->
     @if (session('success'))
         <x-admin.alert type="success" class="mb-6" :message="session('success')" />
