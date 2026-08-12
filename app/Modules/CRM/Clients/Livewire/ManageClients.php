@@ -504,7 +504,7 @@ class ManageClients extends Component
                 })
                 ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
                 ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)))
-                ->latest()
+                ->latest('id')
                 ->paginate(10)
                 ->onEachSide(1);
 

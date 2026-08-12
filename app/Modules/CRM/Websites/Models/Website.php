@@ -75,6 +75,11 @@ class Website extends Model
         return $this->belongsToMany(ServiceType::class, 'adspv_website_service_type', 'website_id', 'service_type_id')->withTimestamps();
     }
 
+    public function plans(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Modules\CRM\Clients\Models\Plan::class, 'adspv_website_plan', 'website_id', 'plan_id')->withTimestamps();
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'client_id');

@@ -19,6 +19,7 @@ class ManageWebsites extends Component
     public string $site_name = '';
     public string $url = '';
     public array $service_type_ids = [];
+    public array $plan_ids = [];
     public string $status = 'active';
     public string $admin_url = '';
     public string $admin_username = '';
@@ -31,6 +32,7 @@ class ManageWebsites extends Component
     public string $search = '';
     public string $statusFilter = '';
     public string $serviceTypeFilter = '';
+    public string $planFilter = '';
 
     // ─── Bulk Selection ──────────────────────────────────────────────────────────
     public array $selectedWebsites = [];
@@ -53,6 +55,8 @@ class ManageWebsites extends Component
             'url'                => 'required|url|max:255',
             'service_type_ids'   => 'required|array|min:1',
             'service_type_ids.*' => 'exists:adspv_service_types,id',
+            'plan_ids'           => 'nullable|array',
+            'plan_ids.*'         => 'exists:adspv_plans,id',
             'status'             => 'required|in:active,inactive,suspended',
             'admin_url'          => 'nullable|url|max:255',
             'admin_username'     => 'nullable|string|max:255',
@@ -84,11 +88,19 @@ class ManageWebsites extends Component
         $this->resetPage();
     }
 
+    public function updatingPlanFilter(): void
+    {
+        $this->selectedWebsites = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
         $this->statusFilter = '';
         $this->serviceTypeFilter = '';
+        $this->planFilter = '';
         $this->selectedWebsites = [];
         $this->selectAll = false;
         $this->resetPage();
@@ -128,7 +140,7 @@ class ManageWebsites extends Component
     public function resetForm(): void
     {
         $this->reset([
-            'client_id', 'site_name', 'url', 'service_type_ids', 'status',
+            'client_id', 'site_name', 'url', 'service_type_ids', 'plan_ids', 'status',
             'admin_url', 'admin_username', 'admin_password',
             'hosting_provider', 'server_ip', 'notes',
             'editingWebsiteId', 'passwordIsSet',
@@ -136,6 +148,7 @@ class ManageWebsites extends Component
         ]);
         $this->status    = 'active';
         $this->service_type_ids = [];
+        $this->plan_ids = [];
         $this->resetValidation();
     }
 
@@ -166,6 +179,7 @@ class ManageWebsites extends Component
             ]);
 
             $website->serviceTypes()->sync($this->service_type_ids);
+            $website->plans()->sync($this->plan_ids);
         });
 
         $this->dispatch('close-modal', name: 'add-website-modal');
@@ -176,13 +190,14 @@ class ManageWebsites extends Component
     // ─── Load for Edit ──────────────────────────────────────────────────────────
     public function editWebsite(int $id): void
     {
-        $website = Website::with('serviceTypes')->findOrFail($id);
+        $website = Website::with(['serviceTypes', 'plans'])->findOrFail($id);
 
         $this->editingWebsiteId = $website->id;
         $this->client_id        = $website->client_id;
         $this->site_name        = $website->site_name;
         $this->url              = $website->url;
         $this->service_type_ids = $website->serviceTypes->pluck('id')->toArray();
+        $this->plan_ids         = $website->plans->pluck('id')->toArray();
         $this->status           = $website->status;
         $this->admin_url        = $website->admin_url ?? '';
         $this->admin_username   = $website->admin_username ?? '';
@@ -228,6 +243,7 @@ class ManageWebsites extends Component
 
             $website->update($data);
             $website->serviceTypes()->sync($this->service_type_ids);
+            $website->plans()->sync($this->plan_ids);
         });
 
         $this->dispatch('close-modal', name: 'edit-website-modal');
@@ -253,11 +269,12 @@ class ManageWebsites extends Component
             })
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->serviceTypeFilter, fn($q) => $q->whereHas('serviceTypes', fn($sq) => $sq->where('service_type_id', $this->serviceTypeFilter)))
+            ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('adspv_plans.id', $this->planFilter)))
             ->latest()
             ->paginate(12)
             ->onEachSide(1);
 
-        $hasActiveFilters = $this->search || $this->statusFilter || $this->serviceTypeFilter;
+        $hasActiveFilters = $this->search || $this->statusFilter || $this->serviceTypeFilter || $this->planFilter;
         $pageIds = $websites->pluck('id')->toArray();
 
         $clients = Client::with('user')
@@ -265,11 +282,13 @@ class ManageWebsites extends Component
             ->get();
 
         $serviceTypes = \App\Modules\CRM\Websites\Models\ServiceType::orderBy('name')->get();
+        $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
 
         return view('modules.crm.websites.manage-websites', [
             'websites'         => $websites,
             'clients'          => $clients,
             'serviceTypes'     => $serviceTypes,
+            'plans'            => $plans,
             'hasActiveFilters' => $hasActiveFilters,
             'pageIds'          => $pageIds,
         ])->layoutData(['title' => 'Websites Management - Aspire Hub']);

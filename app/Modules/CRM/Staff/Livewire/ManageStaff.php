@@ -243,8 +243,8 @@ class ManageStaff extends Component
         $this->editingStaffId = $staffRecord->id;
         $this->editingUserId = $staffRecord->user_id;
 
-        $this->name = $staffRecord->user->name;
-        $this->email = $staffRecord->user->email;
+        $this->name = $staffRecord->user->name ?? 'Deleted User';
+        $this->email = $staffRecord->user->email ?? '';
         $this->password = ''; // Leave password blank on edit unless updating
         $this->company_name = $staffRecord->company_name ?? '';
         $this->designation_ids = $staffRecord->designations->pluck('id')->toArray();

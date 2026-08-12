@@ -552,10 +552,10 @@
                                 <th class="px-4 py-4">Company Name</th>
                                 <th class="px-4 py-4">Plans</th>
                                 <th class="px-4 py-4">Websites</th>
-                                <th class="px-4 py-4">Assigned Staff</th>
                                 <th class="px-4 py-4">Phone Numbers</th>
                                 <th class="px-4 py-4">Status</th>
                                 <th class="px-4 py-4">Registered</th>
+                                <th class="px-4 py-4">Last Login</th>
                                 <th class="px-4 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -612,20 +612,7 @@
                                         {{ $client->websites_count }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4">
-                                    @if($client->assignedStaff->isNotEmpty())
-                                        @foreach($client->assignedStaff as $staff)
-                                            <div class="font-bold text-slate-800 dark:text-slate-200">
-                                                {{ $staff->user->name }}
-                                            </div>
-                                            <div class="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-semibold mb-1">
-                                                {{ $staff->designations->pluck('name')->implode(', ') ?: 'Staff Member' }}
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <span class="text-xs text-slate-400 dark:text-slate-650 italic">Unassigned</span>
-                                    @endif
-                                </td>
+
                                 <td class="px-4 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs">
                                     @if($client->phones->isEmpty())
                                         {{ $client->phone ?: '—' }}
@@ -647,6 +634,9 @@
                                 </td>
                                 <td class="px-4 py-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
                                     {{ $client->created_at->diffForHumans() }}
+                                </td>
+                                <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                                    {{ $client->last_login_at ? $client->last_login_at->diffForHumans() : 'Never' }}
                                 </td>
                                 <td class="px-4 py-4 text-right">
                                     <button type="button" wire:click="editClient({{ $client->id }})"

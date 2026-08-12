@@ -12,6 +12,7 @@ class ManagePlans extends Component
     public string $name = '';
     public string $price = '0.00';
     public string $color = 'indigo';
+    public string $duration = 'monthly';
     public ?int $editingPlanId = null;
 
     public function rules(): array
@@ -21,15 +22,16 @@ class ManagePlans extends Component
             $uniqueRule .= ',' . $this->editingPlanId;
         }
         return [
-            'name'  => $uniqueRule,
-            'price' => 'required|numeric|min:0',
-            'color' => 'required|string|in:indigo,emerald,pink,amber,slate,red,sky,violet,rose',
+            'name'     => $uniqueRule,
+            'price'    => 'required|numeric|min:0',
+            'color'    => 'required|string|in:indigo,emerald,pink,amber,slate,red,sky,violet,rose',
+            'duration' => 'required|string|in:monthly,quarterly,yearly',
         ];
     }
 
     public function resetForm(): void
     {
-        $this->reset(['name', 'price', 'color', 'editingPlanId']);
+        $this->reset(['name', 'price', 'color', 'duration', 'editingPlanId']);
         $this->resetValidation();
     }
 
@@ -44,9 +46,10 @@ class ManagePlans extends Component
         $this->validate();
 
         Plan::create([
-            'name'  => $this->name,
-            'price' => $this->price,
-            'color' => $this->color,
+            'name'     => $this->name,
+            'price'    => $this->price,
+            'color'    => $this->color,
+            'duration' => $this->duration,
         ]);
 
         $this->dispatch('close-modal', name: 'add-plan-modal');
@@ -61,6 +64,7 @@ class ManagePlans extends Component
         $this->name          = $plan->name;
         $this->price         = $plan->price;
         $this->color         = $plan->color;
+        $this->duration      = $plan->duration ?? 'monthly';
 
         $this->resetValidation();
         $this->dispatch('open-modal', name: 'edit-plan-modal');
@@ -72,9 +76,10 @@ class ManagePlans extends Component
 
         $plan = Plan::findOrFail($this->editingPlanId);
         $plan->update([
-            'name'  => $this->name,
-            'price' => $this->price,
-            'color' => $this->color,
+            'name'     => $this->name,
+            'price'    => $this->price,
+            'color'    => $this->color,
+            'duration' => $this->duration,
         ]);
 
         $this->dispatch('close-modal', name: 'edit-plan-modal');

@@ -76,12 +76,18 @@
                 </div>
             </div>
             <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">${{ number_format($stats['monthly_revenue']) }}</h2>
-            <p class="text-xs text-emerald-500 mt-2 font-semibold flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                +12.4% from last month
-            </p>
+            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                <p class="text-xs text-emerald-500 font-semibold flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    +12.4% from last month
+                </p>
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-450 border border-amber-500/20 tracking-wider">
+                    <span class="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span>
+                    Under Development
+                </span>
+            </div>
         </x-admin.card>
     </div>
 
@@ -89,11 +95,23 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Revenue Growth Card -->
         <x-admin.card class="lg:col-span-2" title="Revenue History" subtitle="SaaS platform revenue metrics for the current calendar year">
+            <x-slot:actions>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-450 border border-amber-500/20 tracking-wider">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    Under Development
+                </span>
+            </x-slot:actions>
             <x-admin.chart type="line" />
         </x-admin.card>
 
         <!-- Growth breakdown bar chart -->
         <x-admin.card title="Monthly Sales Pipeline" subtitle="Detailed sales trends by month">
+            <x-slot:actions>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-450 border border-amber-500/20 tracking-wider">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    Under Development
+                </span>
+            </x-slot:actions>
             <x-admin.chart type="bar" :data="$revenueData" />
         </x-admin.card>
     </div>
@@ -120,7 +138,7 @@
                                       {{ $client['status'] === 'Active' 
                                           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
                                           : 'bg-slate-500/10 text-slate-500' }}">
-                                    {{ $client['status'] }}
+                                      {{ $client['status'] }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
@@ -147,6 +165,12 @@
         <div class="space-y-6">
             <!-- Recent Notifications -->
             <x-admin.card title="System Alerts" subtitle="Recent automated platform notices">
+                <x-slot:actions>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-450 border border-amber-500/20 tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        Under Development
+                    </span>
+                </x-slot:actions>
                 <div class="space-y-3.5 mt-2">
                     @foreach($recentNotifications as $notif)
                         <div class="flex items-start space-x-3 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/30 bg-slate-50/40 dark:bg-slate-900/10">

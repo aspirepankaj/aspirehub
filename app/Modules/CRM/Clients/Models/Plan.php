@@ -15,6 +15,7 @@ class Plan extends Model
         'name',
         'price',
         'color',
+        'duration',
     ];
 
     public function clients(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

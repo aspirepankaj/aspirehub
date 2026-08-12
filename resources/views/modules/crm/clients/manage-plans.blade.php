@@ -39,7 +39,7 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Create client tier plans like Starter, Growth, or Enterprise.</p>
             </div>
         @else
-            <x-admin.table :headers="['Plan Name', 'Price', 'Badge Preview', 'Color Code', 'Actions']">
+            <x-admin.table :headers="['Plan Name', 'Price', 'Duration', 'Badge Preview', 'Color Code', 'Actions']">
                 @foreach($plans as $plan)
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-900 dark:text-white text-sm">
@@ -47,6 +47,9 @@
                         </td>
                         <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 text-sm">
                             ${{ number_format($plan->price, 2) }}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-600 dark:text-slate-400 text-sm capitalize">
+                            {{ $plan->duration }}
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-{{ $plan->color }}-500/10 text-{{ $plan->color }}-600 dark:text-{{ $plan->color }}-400 uppercase tracking-wider">
@@ -113,6 +116,17 @@
                 <x-input-error :messages="$errors->get('color')" class="mt-1" />
             </div>
 
+            <div>
+                <label for="duration" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Duration</label>
+                <select wire:model="duration" id="duration"
+                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <x-input-error :messages="$errors->get('duration')" class="mt-1" />
+            </div>
+
             <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">
                 <button type="button" @click="$dispatch('close-modal', { name: 'add-plan-modal' })"
                         class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
@@ -161,6 +175,17 @@
                     <option value="rose">Rose (Deep Red)</option>
                 </select>
                 <x-input-error :messages="$errors->get('color')" class="mt-1" />
+            </div>
+
+            <div>
+                <label for="edit_duration" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Duration</label>
+                <select wire:model="duration" id="edit_duration"
+                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+                <x-input-error :messages="$errors->get('duration')" class="mt-1" />
             </div>
 
             <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">

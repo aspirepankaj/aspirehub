@@ -34,6 +34,9 @@
         @livewireStyles
 
         <style>
+            html {
+                scrollbar-gutter: stable;
+            }
             body {
                 font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
             }

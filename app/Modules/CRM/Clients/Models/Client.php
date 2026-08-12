@@ -30,6 +30,11 @@ class Client extends Model
         'country',
         'region',
         'zip_code',
+        'last_login_at',
+    ];
+
+    protected $casts = [
+        'last_login_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
