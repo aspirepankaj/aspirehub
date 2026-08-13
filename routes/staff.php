@@ -15,6 +15,7 @@ Route::get('/', StaffDashboard::class)->name('dashboard');
 Route::get('/clients', StaffClients::class)->name('clients');
 Route::get('/clients/ADSCL-{id}', StaffClients::class)->name('clients.detail');
 Route::get('/websites', StaffWebsites::class)->name('websites');
+Route::get('/websites/ADSWS-{id}', StaffWebsites::class)->name('websites.detail');
 
 Route::get('/maintenance', StaffMaintenance::class)->name('maintenance');
 Route::get('/maintenance/create', StaffCreateMaintenanceReport::class)->name('maintenance.create');

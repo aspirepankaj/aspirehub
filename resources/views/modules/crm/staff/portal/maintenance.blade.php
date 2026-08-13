@@ -153,8 +153,10 @@
                             </a>
                         </td>
                         <td class="px-4 py-4">
-                            <div class="font-semibold text-slate-800 dark:text-slate-200">
-                                {{ $report->website->site_name }}
+                            <div class="font-semibold">
+                                <a href="{{ route('staff.websites.detail', ['id' => $report->website_id]) }}" class="text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                    {{ $report->website->site_name }}
+                                </a>
                             </div>
                             <div class="text-[11px] mt-0.5 text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium underline">
                                 <a href="{{ $report->website->url }}" target="_blank">{{ $report->website->url }}</a>

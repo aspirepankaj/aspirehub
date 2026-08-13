@@ -48,6 +48,44 @@ class StaffWebsites extends Component
     // ─── Password reveal toggle ──────────────────────────────────────────────────
     public bool $revealAddPassword = false;
     public bool $revealEditPassword = false;
+    public bool $revealDetailPassword = false;
+
+    // ─── Detail View State ──────────────────────────────────────────────────────
+    public ?int $selectedWebsiteDetailId = null;
+    public string $activeTab = 'overview';
+
+    public function mount($id = null): void
+    {
+        if ($id) {
+            $this->selectedWebsiteDetailId = (int) $id;
+        }
+    }
+
+    public function viewWebsiteDetail(int $id): void
+    {
+        $currentPage = $this->paginators['page'] ?? 1;
+        session()->put('staff_websites_list_page', $currentPage);
+
+        $this->redirect(route('staff.websites.detail', ['id' => $id]), navigate: true);
+    }
+
+    public function closeWebsiteDetail(): void
+    {
+        $page = session()->get('staff_websites_list_page', 1);
+        session()->forget('staff_websites_list_page');
+
+        $this->redirect(route('staff.websites', ['page' => $page]), navigate: true);
+    }
+
+    public function setTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
+
+    public function toggleDetailPassword(): void
+    {
+        $this->revealDetailPassword = !$this->revealDetailPassword;
+    }
 
     // ─── Validation Rules ───────────────────────────────────────────────────────
     protected function rules(): array
@@ -283,6 +321,63 @@ class StaffWebsites extends Component
             $q->where('staff_id', $staffId);
         })->pluck('id')->toArray();
 
+        $clients = collect();
+        $serviceTypes = collect();
+        $plans = collect();
+
+        // ── Detail View Mode ──────────────────────────────────────────────────
+        if ($this->selectedWebsiteDetailId) {
+            $websiteDetails = Website::with(['client.user', 'serviceTypes', 'plans', 'addedBy', 'editedBy'])
+                ->whereIn('client_id', $assignedClientIds)
+                ->findOrFail($this->selectedWebsiteDetailId);
+
+            if ($this->editingWebsiteId) {
+                $clients = Client::with('user')
+                    ->whereHas('assignedStaff', function ($q) use ($staffId) {
+                        $q->where('staff_id', $staffId);
+                    })
+                    ->orderBy('company_name')
+                    ->get();
+                $serviceTypes = \App\Modules\CRM\Websites\Models\ServiceType::orderBy('name')->get();
+                $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
+            }
+
+            $websiteMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'client.user'])
+                ->where('website_id', $this->selectedWebsiteDetailId)
+                ->latest()
+                ->paginate(10, ['*'], 'maintenancepage')
+                ->onEachSide(1);
+
+            $websiteActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+                ->where('loggable_type', Website::class)
+                ->where('loggable_id', $this->selectedWebsiteDetailId)
+                ->latest()
+                ->paginate(10, ['*'], 'activitypage')
+                ->onEachSide(1);
+
+            return view('modules.crm.staff.portal.websites', [
+                'websites'                  => collect(),
+                'clients'                   => $clients,
+                'serviceTypes'              => $serviceTypes,
+                'plans'                     => $plans,
+                'hasActiveFilters'          => false,
+                'pageIds'                   => [],
+                'websiteDetails'            => $websiteDetails,
+                'websiteMaintenanceReports' => $websiteMaintenanceReports,
+                'websiteActivityLogs'       => $websiteActivityLogs,
+            ])->layoutData(['title' => $websiteDetails->site_name . ' — Website Detail']);
+        }
+
+        // ── List View Mode ────────────────────────────────────────────────────
+        $clients = Client::with('user')
+            ->whereHas('assignedStaff', function ($q) use ($staffId) {
+                $q->where('staff_id', $staffId);
+            })
+            ->orderBy('company_name')
+            ->get();
+        $serviceTypes = \App\Modules\CRM\Websites\Models\ServiceType::orderBy('name')->get();
+        $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
+
         $websites = Website::with(['client', 'latestMaintenanceReport', 'serviceTypes'])
             ->whereIn('client_id', $assignedClientIds)
             ->where(function ($query) {
@@ -298,23 +393,16 @@ class StaffWebsites extends Component
         $hasActiveFilters = $this->search || $this->statusFilter || $this->serviceTypeFilter || $this->planFilter;
         $pageIds = $websites->pluck('id')->toArray();
 
-        $clients = Client::with('user')
-            ->whereHas('assignedStaff', function ($q) use ($staffId) {
-                $q->where('staff_id', $staffId);
-            })
-            ->orderBy('company_name')
-            ->get();
-
-        $serviceTypes = \App\Modules\CRM\Websites\Models\ServiceType::orderBy('name')->get();
-        $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
-
         return view('modules.crm.staff.portal.websites', [
-            'websites'         => $websites,
-            'clients'          => $clients,
-            'serviceTypes'     => $serviceTypes,
-            'plans'            => $plans,
-            'hasActiveFilters' => $hasActiveFilters,
-            'pageIds'          => $pageIds,
+            'websites'                  => $websites,
+            'clients'                   => $clients,
+            'serviceTypes'              => $serviceTypes,
+            'plans'                     => $plans,
+            'hasActiveFilters'          => $hasActiveFilters,
+            'pageIds'                   => $pageIds,
+            'websiteDetails'            => null,
+            'websiteMaintenanceReports' => collect(),
+            'websiteActivityLogs'       => collect(),
         ])->layoutData(['title' => 'Monitored Websites - Staff Portal']);
     }
 }

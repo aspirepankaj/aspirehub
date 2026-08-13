@@ -67,7 +67,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Client</h5>
-                    <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ $report->client->company_name ?: $report->client->user->name }}</p>
+                    <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ $report->client->user->name ?? ($report->client->company_name ?? '—') }}</p>
                 </div>
                 <div>
                     <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Website</h5>

@@ -80,8 +80,16 @@
                                 @foreach($recentReports as $rep)
                                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                                         <td class="px-6 py-4">
-                                            <div class="font-bold text-slate-800 dark:text-slate-200">{{ $rep->client->company_name }}</div>
-                                            <div class="text-[10px] text-slate-400 mt-0.5">{{ $rep->website->site_name }}</div>
+                                            <div class="font-bold">
+                                                <a href="{{ route('staff.clients.detail', ['id' => $rep->client_id]) }}" class="text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                                    {{ $rep->client->user->name ?? ($rep->client->company_name ?? '—') }}
+                                                </a>
+                                            </div>
+                                            <div class="text-[10px] mt-0.5">
+                                                <a href="{{ route('staff.websites.detail', ['id' => $rep->website_id]) }}" class="text-slate-400 hover:text-indigo-650 dark:hover:text-indigo-450 transition">
+                                                    {{ $rep->website->site_name }}
+                                                </a>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ $rep->maintenance_month }}</td>
                                         <td class="px-6 py-4 font-bold text-slate-850 dark:text-slate-300">{{ $rep->health_score }}%</td>

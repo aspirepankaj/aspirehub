@@ -20,6 +20,7 @@ class Staff extends Model
         'user_id',
         'company_name',
         'department',
+        'departments',
         'profile_image',
         'status',
         'last_login_at',
@@ -30,6 +31,7 @@ class Staff extends Model
 
     protected $casts = [
         'last_login_at' => 'datetime',
+        'departments'   => 'array',
     ];
 
     public function user(): BelongsTo

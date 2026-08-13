@@ -30,6 +30,7 @@ Route::get('/admins', ManageAdmins::class)->name('admins');
 
 Route::get('/websites/service-types', \App\Modules\CRM\Websites\Livewire\ManageServiceTypes::class)->name('websites.service-types');
 Route::get('/websites', ManageWebsites::class)->name('websites');
+Route::get('/websites/ADSWS-{id}', ManageWebsites::class)->name('websites.detail');
 
 Route::get('/marketing-reports', function () {
     return view('modules.core.placeholder', ['title' => 'Marketing Reports']);

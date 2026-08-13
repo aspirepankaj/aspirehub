@@ -22,6 +22,7 @@ class ManageStaff extends Component
     public string $password = '';
     public string $company_name = '';
     public array $designation_ids = [];
+    public array $departments_list = [];
     public string $department = '';
     public $profile_image;
     public ?string $existing_profile_image = null;
@@ -159,6 +160,7 @@ class ManageStaff extends Component
             'password',
             'company_name',
             'designation_ids',
+            'departments_list',
             'department',
             'profile_image',
             'existing_profile_image',
@@ -213,8 +215,8 @@ class ManageStaff extends Component
             'company_name' => 'nullable|string|max:255',
             'designation_ids' => 'array',
             'designation_ids.*' => 'exists:adspv_designations,id',
-            'department' => 'nullable|string|max:100',
-            'profile_image' => 'nullable|string',
+            'departments_list' => 'nullable|array',
+            'profile_image' => 'nullable|image|max:1024',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -235,11 +237,15 @@ class ManageStaff extends Component
                 'password' => Hash::make($this->password),
             ]);
 
+            $depts = array_values(array_filter($this->departments_list));
+            $primaryDept = !empty($depts) ? $depts[0] : null;
+
             // 2. Create associated Staff details
             $staffRecord = Staff::create([
                 'user_id' => $user->id,
                 'company_name' => $this->company_name,
-                'department' => $this->department,
+                'department' => $primaryDept,
+                'departments' => $depts,
                 'profile_image' => $profileImagePath,
                 'status' => $this->status,
                 'notes' => $this->notes,
@@ -277,7 +283,7 @@ class ManageStaff extends Component
         $this->password = ''; // Leave password blank on edit unless updating
         $this->company_name = $staffRecord->company_name ?? '';
         $this->designation_ids = $staffRecord->designations->pluck('id')->toArray();
-        $this->department = $staffRecord->department ?? '';
+        $this->departments_list = $staffRecord->departments ?? ($staffRecord->department ? [$staffRecord->department] : []);
         $this->existing_profile_image = $staffRecord->profile_image;
 
         $this->phones = [];
@@ -307,8 +313,8 @@ class ManageStaff extends Component
             'company_name' => 'nullable|string|max:255',
             'designation_ids' => 'array',
             'designation_ids.*' => 'exists:adspv_designations,id',
-            'department' => 'nullable|string|max:100',
-            'profile_image' => 'nullable|string',
+            'departments_list' => 'nullable|array',
+            'profile_image' => 'nullable|image|max:1024',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -338,11 +344,15 @@ class ManageStaff extends Component
             }
             $user->update($userUpdateData);
 
+            $depts = array_values(array_filter($this->departments_list));
+            $primaryDept = !empty($depts) ? $depts[0] : null;
+
             // 2. Update associated Staff details
             $staffRecord = Staff::findOrFail($this->editingStaffId);
             $staffRecord->update([
                 'company_name' => $this->company_name,
-                'department' => $this->department,
+                'department' => $primaryDept,
+                'departments' => $depts,
                 'profile_image' => $profileImagePath,
                 'status' => $this->status,
                 'notes' => $this->notes,
@@ -448,6 +458,7 @@ class ManageStaff extends Component
             ->where(function ($query) use ($searchTerm) {
                 $query->where('company_name', 'like', '%' . $searchTerm . '%')
                     ->orWhere('department', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('departments', 'like', '%' . $searchTerm . '%')
                     ->orWhereHas('designations', function ($dq) use ($searchTerm) {
                         $dq->where('name', 'like', '%' . $searchTerm . '%');
                     })
@@ -458,7 +469,13 @@ class ManageStaff extends Component
             })
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->designationFilter, fn($q) => $q->whereHas('designations', fn($dq) => $dq->where('adspv_designations.id', $this->designationFilter)))
-            ->when($this->departmentFilter, fn($q) => $q->where('department', $this->departmentFilter))
+            ->when($this->departmentFilter, function ($q) {
+                $dept = $this->departmentFilter;
+                $q->where(function ($sq) use ($dept) {
+                    $sq->where('departments', 'like', '%' . $dept . '%')
+                       ->orWhere('department', $dept);
+                });
+            })
             ->latest()
             ->paginate(10)
             ->onEachSide(1);
@@ -480,4 +497,5 @@ class ManageStaff extends Component
             'staffActivityLogs'       => collect(),
         ])->layoutData(['title' => 'Staff Management - Aspire Hub']);
     }
+
 }
