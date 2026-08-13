@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.staff')]
 class StaffWebsites extends Component
@@ -18,6 +19,8 @@ class StaffWebsites extends Component
     public int|string $client_id = '';
     public string $site_name = '';
     public string $url = '';
+    public $image;
+    public ?string $existing_image = null;
     public array $service_type_ids = [];
     public array $plan_ids = [];
     public string $status = 'active';
@@ -58,6 +61,7 @@ class StaffWebsites extends Component
             'client_id'          => 'required|exists:adspv_clients,id|in:' . implode(',', $assignedClientIds),
             'site_name'          => 'required|string|max:255',
             'url'                => 'required|url|max:255',
+            'image'              => 'nullable|string',
             'service_type_ids'   => 'required|array|min:1',
             'service_type_ids.*' => 'exists:adspv_service_types,id',
             'plan_ids'           => 'nullable|array',
@@ -123,7 +127,7 @@ class StaffWebsites extends Component
     public function resetForm(): void
     {
         $this->reset([
-            'client_id', 'site_name', 'url', 'service_type_ids', 'plan_ids', 'status',
+            'client_id', 'site_name', 'url', 'image', 'existing_image', 'service_type_ids', 'plan_ids', 'status',
             'admin_url', 'admin_username', 'admin_password',
             'hosting_provider', 'server_ip', 'notes',
             'editingWebsiteId', 'passwordIsSet',
@@ -147,10 +151,13 @@ class StaffWebsites extends Component
         $this->validate();
 
         DB::transaction(function () {
+            $imagePath = $this->image ?: null;
+
             $website = Website::create([
                 'client_id'        => $this->client_id,
                 'site_name'        => $this->site_name,
                 'url'              => $this->url,
+                'image'            => $imagePath,
                 'status'           => $this->status,
                 'admin_url'        => $this->admin_url ?: null,
                 'admin_username'   => $this->admin_username ?: null,
@@ -186,6 +193,8 @@ class StaffWebsites extends Component
         $this->client_id        = $website->client_id;
         $this->site_name        = $website->site_name;
         $this->url              = $website->url;
+        $this->existing_image   = $website->image;
+        $this->image            = null;
         $this->service_type_ids = $website->serviceTypes->pluck('id')->toArray();
         $this->plan_ids         = $website->plans->pluck('id')->toArray();
         $this->status           = $website->status;
@@ -230,6 +239,12 @@ class StaffWebsites extends Component
                 'edited_by'        => auth()->id(),
             ];
 
+            if ($this->image && $this->image !== $website->image) {
+                $data['image'] = $this->image;
+            } else if (empty($this->existing_image) && empty($this->image) && $website->image) {
+                $data['image'] = null;
+            }
+
             if (!empty($this->admin_password)) {
                 $data['admin_password'] = $this->admin_password;
             }
@@ -242,6 +257,23 @@ class StaffWebsites extends Component
         $this->dispatch('close-modal', name: 'edit-website-modal');
         $this->resetForm();
         session()->flash('success', 'Website updated successfully!');
+    }
+
+    public function removeImage(): void
+    {
+        $this->image = null;
+        $this->existing_image = null;
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field): void
+    {
+        if (property_exists($this, $field)) {
+            $this->$field = $path;
+            if ($field === 'image') {
+                $this->existing_image = $path;
+            }
+        }
     }
 
     public function render()

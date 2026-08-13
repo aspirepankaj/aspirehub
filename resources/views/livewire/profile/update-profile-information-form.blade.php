@@ -5,11 +5,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
-use Livewire\WithFileUploads;
+use Livewire\Attributes\On;
 
 new class extends Component
 {
-    use WithFileUploads;
 
     public string $name = '';
     public string $email = '';
@@ -45,7 +44,7 @@ new class extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:30'],
-            'profile_image' => ['nullable', 'image', 'max:1024'],
+            'profile_image' => ['nullable', 'string'],
         ]);
 
         $user->fill([
@@ -61,20 +60,18 @@ new class extends Component
 
         if ($user->admin) {
             $adminData = ['phone' => $validated['phone']];
-            if ($this->profile_image) {
-                $path = $this->profile_image->store('profile_images', 'public');
-                $adminData['profile_image'] = $path;
-                $this->existing_profile_image = $path;
-                $this->reset('profile_image');
+            if ($this->profile_image !== null && $this->profile_image !== $this->existing_profile_image) {
+                $adminData['profile_image'] = $this->profile_image;
+                $this->existing_profile_image = $this->profile_image;
+                $this->profile_image = null;
             }
             $user->admin->update($adminData);
         } elseif ($user->staff) {
             $staffData = [];
-            if ($this->profile_image) {
-                $path = $this->profile_image->store('profile_images', 'public');
-                $staffData['profile_image'] = $path;
-                $this->existing_profile_image = $path;
-                $this->reset('profile_image');
+            if ($this->profile_image !== null && $this->profile_image !== $this->existing_profile_image) {
+                $staffData['profile_image'] = $this->profile_image;
+                $this->existing_profile_image = $this->profile_image;
+                $this->profile_image = null;
             }
             $user->staff->update($staffData);
 
@@ -101,16 +98,8 @@ new class extends Component
     {
         $user = Auth::user();
         if ($user->admin && $user->admin->profile_image) {
-            $filePath = public_path('storage/' . $user->admin->profile_image);
-            if (file_exists($filePath)) {
-                @unlink($filePath);
-            }
             $user->admin->update(['profile_image' => null]);
         } elseif ($user->staff && $user->staff->profile_image) {
-            $filePath = public_path('storage/' . $user->staff->profile_image);
-            if (file_exists($filePath)) {
-                @unlink($filePath);
-            }
             $user->staff->update(['profile_image' => null]);
         }
 
@@ -118,6 +107,14 @@ new class extends Component
         $this->existing_profile_image = null;
 
         $this->dispatch('profile-updated', name: $user->name);
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field): void
+    {
+        if (property_exists($this, $field)) {
+            $this->$field = $path;
+        }
     }
 
     /**
@@ -156,19 +153,21 @@ new class extends Component
             <x-input-label :value="__('Profile Picture')" />
             <div class="mt-2 flex items-center gap-4">
                 @if ($profile_image)
-                    <img src="{{ $profile_image->temporaryUrl() }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" />
+                    <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" onerror="this.outerHTML=`<div class='w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20'>{{ auth()->user()->getInitials() }}</div>`" />
                 @else
-                    @if ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image)))
-                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" />
+                    @if ($existing_profile_image)
+                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" onerror="this.outerHTML=`<div class='w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20'>{{ auth()->user()->getInitials() }}</div>`" />
                     @else
                         <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20">
-                            {{ strtoupper(substr($name, 0, 2)) }}
+                            {{ auth()->user()->getInitials() }}
                         </div>
                     @endif
                 @endif
                 <div class="flex items-center gap-2">
-                    <input type="file" wire:model="profile_image" class="text-xs text-slate-550 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/30 dark:file:text-indigo-400 cursor-pointer" />
-                    @if ($profile_image || ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image))))
+                    <button type="button" @click="$dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                        Choose from Media Library
+                    </button>
+                    @if ($profile_image || $existing_profile_image)
                         <button type="button" wire:click="removeProfileImage" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800/50 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition">
                             {{ __('Remove') }}
                         </button>

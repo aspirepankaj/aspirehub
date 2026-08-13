@@ -114,6 +114,7 @@ border: 1px solid rgba(255, 255, 255, 0.43);
             </div>
         </div>
 
+        <livewire:media-picker />
         @livewireScripts
     </body>
 </html>

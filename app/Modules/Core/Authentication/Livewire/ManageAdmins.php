@@ -8,15 +8,14 @@ use App\Modules\Core\Authentication\Models\Role;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.admin')]
 class ManageAdmins extends Component
 {
     use WithPagination;
-    use WithFileUploads;
 
     // Form fields
     public string $name = '';
@@ -97,13 +96,9 @@ class ManageAdmins extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'phone' => 'nullable|string|max:30',
-            'profile_image' => 'nullable|image|max:1024',
         ]);
 
-        $profileImagePath = null;
-        if ($this->profile_image) {
-            $profileImagePath = $this->profile_image->store('profile_images', 'public');
-        }
+        $profileImagePath = $this->profile_image ?: null;
 
         $adminRole = Role::where('slug', 'admin')->first() ?? Role::where('name', 'Administrator')->first();
         $roleId = $adminRole ? $adminRole->id : null;
@@ -154,12 +149,14 @@ class ManageAdmins extends Component
             'email' => 'required|email|max:255|unique:users,email,' . $this->editingUserId,
             'password' => 'nullable|string|min:8',
             'phone' => 'nullable|string|max:30',
-            'profile_image' => 'nullable|image|max:1024',
+            'profile_image' => 'nullable|string',
         ]);
 
         $profileImagePath = $this->existing_profile_image;
-        if ($this->profile_image) {
-            $profileImagePath = $this->profile_image->store('profile_images', 'public');
+        if ($this->profile_image && $this->profile_image !== $this->existing_profile_image) {
+            $profileImagePath = $this->profile_image;
+        } elseif (empty($this->profile_image) && empty($this->existing_profile_image)) {
+            $profileImagePath = null;
         }
 
         $adminRole = Role::where('slug', 'admin')->first() ?? Role::where('name', 'Administrator')->first();
@@ -233,6 +230,20 @@ class ManageAdmins extends Component
         $this->selectedAdmins = [];
         $this->selectAll = false;
         session()->flash('success', "{$count} admin(s) deleted successfully.");
+    }
+
+    public function removeProfileImage(): void
+    {
+        $this->profile_image = null;
+        $this->existing_profile_image = null;
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field): void
+    {
+        if (property_exists($this, $field)) {
+            $this->$field = $path;
+        }
     }
 
     public function render()

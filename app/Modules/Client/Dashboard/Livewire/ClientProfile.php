@@ -158,13 +158,13 @@ class ClientProfile extends Component
         $client = DB::table('adspv_clients')->where('user_id', $user->id)->first();
 
         // 1. Account Manager Info
-        $accountManager = DB::table('adspv_client_staff as cs')
+        $accountManagers = DB::table('adspv_client_staff as cs')
             ->join('adspv_staff as s', 's.id', '=', 'cs.staff_id')
             ->join('users as u', 'u.id', '=', 's.user_id')
             ->leftJoin('adspv_staff_phones as sp', 'sp.staff_id', '=', 's.id')
             ->where('cs.client_id', $client->id)
             ->select('u.name', 'u.email', 's.profile_image', 's.department', 'sp.phone')
-            ->first();
+            ->get();
 
         // 2. Subscribed Plan Info
         $plans = DB::table('adspv_client_plan as cp')
@@ -183,7 +183,7 @@ class ClientProfile extends Component
             ->toArray();
 
         return view('modules.client.dashboard.client-profile', [
-            'accountManager' => $accountManager,
+            'accountManagers' => $accountManagers,
             'plans' => $plans,
             'websiteServiceTypes' => $websiteServiceTypes,
             'client' => $client,

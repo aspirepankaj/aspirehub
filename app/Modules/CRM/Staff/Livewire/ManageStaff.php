@@ -8,14 +8,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.admin')]
 class ManageStaff extends Component
 {
     use WithPagination;
-    use WithFileUploads;
 
     // Form inputs
     public string $name = '';
@@ -182,7 +181,7 @@ class ManageStaff extends Component
             'designation_ids' => 'array',
             'designation_ids.*' => 'exists:adspv_designations,id',
             'department' => 'nullable|string|max:100',
-            'profile_image' => 'nullable|image|max:1024',
+            'profile_image' => 'nullable|string',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -193,10 +192,7 @@ class ManageStaff extends Component
             'phones.*.label' => 'phone label',
         ]);
 
-        $profileImagePath = null;
-        if ($this->profile_image) {
-            $profileImagePath = $this->profile_image->store('profile_images', 'public');
-        }
+        $profileImagePath = $this->profile_image ?: null;
 
         DB::transaction(function () use ($profileImagePath) {
             // 1. Create standard User
@@ -279,7 +275,7 @@ class ManageStaff extends Component
             'designation_ids' => 'array',
             'designation_ids.*' => 'exists:adspv_designations,id',
             'department' => 'nullable|string|max:100',
-            'profile_image' => 'nullable|image|max:1024',
+            'profile_image' => 'nullable|string',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -291,8 +287,10 @@ class ManageStaff extends Component
         ]);
 
         $profileImagePath = $this->existing_profile_image;
-        if ($this->profile_image) {
-            $profileImagePath = $this->profile_image->store('profile_images', 'public');
+        if ($this->profile_image && $this->profile_image !== $this->existing_profile_image) {
+            $profileImagePath = $this->profile_image;
+        } elseif (empty($this->profile_image) && empty($this->existing_profile_image)) {
+            $profileImagePath = null;
         }
 
         DB::transaction(function () use ($profileImagePath) {
@@ -338,6 +336,20 @@ class ManageStaff extends Component
         session()->flash('success', 'Staff updated successfully!');
     }
 
+    public function removeProfileImage(): void
+    {
+        $this->profile_image = null;
+        $this->existing_profile_image = null;
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field): void
+    {
+        if (property_exists($this, $field)) {
+            $this->$field = $path;
+        }
+    }
+
     public function render()
     {
         $searchTerm = trim($this->search);
@@ -365,6 +377,9 @@ class ManageStaff extends Component
         $pageIds = $Staff->pluck('id')->toArray();
 
         $designations = \App\Modules\CRM\Staff\Models\Designation::orderBy('name')->get();
+
+        $hasActiveFilters = $this->search || $this->statusFilter;
+        $pageIds = $Staff->pluck('id')->toArray();
 
         $hasActiveFilters = $this->search || $this->statusFilter;
         $pageIds = $Staff->pluck('id')->toArray();

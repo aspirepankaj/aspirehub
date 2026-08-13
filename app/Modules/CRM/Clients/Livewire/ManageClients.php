@@ -8,14 +8,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.admin')]
 class ManageClients extends Component
 {
     use WithPagination;
-    use WithFileUploads;
 
     // Form inputs
     public string $name = '';
@@ -204,7 +203,7 @@ class ManageClients extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'company_name' => 'nullable|string|max:255',
-            'profile_image' => 'nullable|image|max:1024',
+            'profile_image' => 'nullable|string',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -225,10 +224,7 @@ class ManageClients extends Component
             'phones.*.label' => 'phone label',
         ]);
 
-        $profileImagePath = null;
-        if ($this->profile_image) {
-            $profileImagePath = $this->profile_image->store('profile_images', 'public');
-        }
+        $profileImagePath = $this->profile_image ?: null;
 
         DB::transaction(function () use ($profileImagePath) {
             // 1. Create standard User
@@ -322,7 +318,7 @@ class ManageClients extends Component
             'email' => 'required|email|max:255|unique:users,email,' . $this->editingUserId,
             'password' => 'nullable|string|min:8',
             'company_name' => 'nullable|string|max:255',
-            'profile_image' => 'nullable|image|max:1024',
+            'profile_image' => 'nullable|string',
             'phones' => 'array|min:1',
             'phones.*.phone' => 'required|string|max:30',
             'phones.*.label' => 'required|string|max:50',
@@ -344,8 +340,10 @@ class ManageClients extends Component
         ]);
 
         $profileImagePath = $this->existing_profile_image;
-        if ($this->profile_image) {
-            $profileImagePath = $this->profile_image->store('profile_images', 'public');
+        if ($this->profile_image && $this->profile_image !== $this->existing_profile_image) {
+            $profileImagePath = $this->profile_image;
+        } elseif (empty($this->profile_image) && empty($this->existing_profile_image)) {
+            $profileImagePath = null;
         }
 
         DB::transaction(function () use ($profileImagePath) {
@@ -419,6 +417,20 @@ class ManageClients extends Component
                 })->toArray();
         }
         return [];
+    }
+
+    public function removeProfileImage(): void
+    {
+        $this->profile_image = null;
+        $this->existing_profile_image = null;
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field): void
+    {
+        if (property_exists($this, $field)) {
+            $this->$field = $path;
+        }
     }
 
     public function render()

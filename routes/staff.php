@@ -22,5 +22,8 @@ Route::get('/maintenance/{id}/edit', StaffEditMaintenanceReport::class)->name('m
 Route::get('/maintenance/{id}', StaffViewMaintenanceReport::class)->name('maintenance.view');
 Route::get('/maintenance/{id}/pdf', [StaffMaintenance::class, 'downloadPdf'])->name('maintenance.pdf');
 
+use App\Modules\CRM\Media\Livewire\ManageMedia;
+
 Route::get('/documents', StaffDocuments::class)->name('documents');
+Route::get('/media', ManageMedia::class)->name('media');
 Route::get('/profile', StaffProfile::class)->name('profile');

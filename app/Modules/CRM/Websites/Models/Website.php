@@ -20,6 +20,7 @@ class Website extends Model
         'client_id',
         'site_name',
         'url',
+        'image',
         'status',
         'admin_url',
         'admin_username',

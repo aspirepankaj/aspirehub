@@ -112,6 +112,7 @@
             </div>
         </div>
 
+        <livewire:media-picker />
         @livewireScripts
     </body>
 </html>

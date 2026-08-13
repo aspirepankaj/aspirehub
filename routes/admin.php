@@ -61,8 +61,10 @@ Route::get('/notifications', function () {
 })->name('notifications');
 
 use App\Modules\CRM\Documents\Livewire\ManageDocuments;
+use App\Modules\CRM\Media\Livewire\ManageMedia;
 
 Route::get('/documents', ManageDocuments::class)->name('documents');
+Route::get('/media', ManageMedia::class)->name('media');
 
 use App\Modules\Core\Activity\Livewire\ManageActivityLogs;
 

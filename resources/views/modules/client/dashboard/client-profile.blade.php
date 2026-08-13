@@ -153,41 +153,49 @@
                     Your Account Manager
                 </div>
                 
-                @if ($accountManager)
-                    <div class="flex items-center gap-3">
-                        <div class="shrink-0">
-                            @if ($accountManager->profile_image && file_exists(public_path('storage/' . $accountManager->profile_image)))
-                                <img src="{{ asset('storage/' . $accountManager->profile_image) }}" class="w-10 h-10 rounded-full object-cover" />
-                            @else
-                                <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold text-sm text-indigo-600 dark:text-indigo-400">
-                                    @php
-                                        $words = explode(' ', $accountManager->name);
-                                        $initials = '';
-                                        foreach ($words as $w) {
-                                            $initials .= strtoupper(substr($w, 0, 1));
-                                        }
-                                        echo substr($initials, 0, 2);
-                                    @endphp
+                @if ($accountManagers->isNotEmpty())
+                    <div class="divide-y divide-slate-100 dark:divide-slate-800/60 -mx-6 px-6">
+                        @foreach ($accountManagers as $manager)
+                            <div class="py-4 first:pt-2 last:pb-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="shrink-0">
+                                        @if ($manager->profile_image)
+                                            <img src="{{ Str::startsWith($manager->profile_image, 'http') ? $manager->profile_image : asset('storage/' . $manager->profile_image) }}" class="w-10 h-10 rounded-full object-cover shadow-sm" onerror="this.outerHTML=`<div class='w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold text-sm text-indigo-600 dark:text-indigo-400 shadow-sm'>@php $words = explode(' ', $manager->name); $initials = ''; foreach ($words as $w) { if (!empty($w)) { $initials .= strtoupper(substr($w, 0, 1)); } } echo substr($initials, 0, 2); @endphp</div>`" />
+                                        @else
+                                            <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold text-sm text-indigo-600 dark:text-indigo-400 shadow-sm">
+                                                @php
+                                                    $words = explode(' ', $manager->name);
+                                                    $initials = '';
+                                                    foreach ($words as $w) {
+                                                        if (!empty($w)) {
+                                                            $initials .= strtoupper(substr($w, 0, 1));
+                                                        }
+                                                    }
+                                                    echo substr($initials, 0, 2);
+                                                @endphp
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ $manager->name }}</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ $manager->department ?: 'Account Manager' }}</p>
+                                    </div>
                                 </div>
-                            @endif
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ $accountManager->name }}</h4>
-                            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ $accountManager->department ?: 'Senior Account Manager' }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs font-medium text-slate-650 dark:text-slate-350">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <a href="mailto:{{ $accountManager->email }}" class="hover:text-indigo-500 transition">{{ $accountManager->email }}</a>
-                        </div>
-                        @if ($accountManager->phone)
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                                <span>{{ $accountManager->phone }}</span>
+                                
+                                <div class="space-y-2 mt-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3 text-xs font-medium text-slate-650 dark:text-slate-350 border border-slate-100 dark:border-slate-800/50">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        <a href="mailto:{{ $manager->email }}" class="hover:text-indigo-500 transition">{{ $manager->email }}</a>
+                                    </div>
+                                    @if ($manager->phone)
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                            <span>{{ $manager->phone }}</span>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                        @endif
+                        @endforeach
                     </div>
                 @else
                     <div class="text-sm font-semibold text-slate-450 dark:text-slate-550 italic">
@@ -228,46 +236,4 @@
 
     </div>
 
-    <!-- Active Services Card (Col span full at bottom) -->
-    <div class="mt-6 bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm space-y-4">
-        <div>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Active services</h3>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-semibold">Included with your subscribed plans.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
-            @php
-                $allServices = [
-                    'WordPress Maintenance',
-                    'Google Ads Management',
-                    'Website Hosting',
-                    'SEO & Content',
-                    'Meta Ads Management',
-                    'Priority Support'
-                ];
-            @endphp
-            @foreach ($allServices as $service)
-                @php
-                    // Check if this service name is in websiteServiceTypes or check dynamically
-                    $isActive = in_array($service, $websiteServiceTypes) || (isset($plans) && $plans->contains(fn($p) => str_contains(strtolower($p->name), 'growth')));
-                @endphp
-                <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800/40 bg-slate-50/50 dark:bg-slate-900/30">
-                    <span class="w-5 h-5 shrink-0 flex items-center justify-center rounded-full {{ $isActive ? 'bg-emerald-500/15 text-emerald-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-350' }}">
-                        @if ($isActive)
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                        @else
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        @endif
-                    </span>
-                    <span class="text-sm font-bold {{ $isActive ? 'text-slate-850 dark:text-slate-205' : 'text-slate-400 line-through' }}">
-                        {{ $service }}
-                    </span>
-                </div>
-            @endforeach
-        </div>
-    </div>
 </div>

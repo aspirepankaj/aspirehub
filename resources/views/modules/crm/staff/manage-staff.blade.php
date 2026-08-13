@@ -187,7 +187,7 @@
                                     <div class="flex items-center gap-3">
                                         <div class="shrink-0">
                                             @if($staff->profile_image)
-                                                <img src="{{ asset('storage/' . $staff->profile_image) }}" alt="{{ $staff->user->name ?? 'Staff' }}" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+                                                <img src="{{ asset('storage/' . $staff->profile_image) }}" alt="{{ $staff->user->name ?? 'Staff' }}" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400'>{{ $staff->getInitials() }}</div>`" />
                                             @else
                                                 <div class="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
                                                     {{ $staff->getInitials() }}
@@ -289,7 +289,7 @@
                 <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Profile Image') }}</label>
                 <div class="mt-1.5 flex items-center gap-3">
                     @if ($profile_image)
-                        <img src="{{ $profile_image->temporaryUrl() }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+                        <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'S', 0, 2)) }}</div>`" />
                     @else
                         <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -297,7 +297,16 @@
                             </svg>
                         </div>
                     @endif
-                    <input type="file" wire:model="profile_image" class="text-xs text-slate-550 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/30 dark:file:text-indigo-400 cursor-pointer" />
+                    
+                    <button type="button" @click="$dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                        Choose from Media Library
+                    </button>
+
+                    @if ($profile_image)
+                        <button type="button" wire:click="removeProfileImage" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
+                            Remove
+                        </button>
+                    @endif
                 </div>
                 <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
             </div>
@@ -454,19 +463,26 @@
                 <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Profile Image') }}</label>
                 <div class="mt-1.5 flex items-center gap-3">
                     @if ($profile_image)
-                        <img src="{{ $profile_image->temporaryUrl() }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+                        <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'S', 0, 2)) }}</div>`" />
+                    @elseif ($existing_profile_image)
+                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'S', 0, 2)) }}</div>`" />
                     @else
-                        @if ($existing_profile_image)
-                            <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
-                        @else
-                            <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                        @endif
+                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
                     @endif
-                    <input type="file" wire:model="profile_image" class="text-xs text-slate-550 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/30 dark:file:text-indigo-400 cursor-pointer" />
+                    
+                    <button type="button" @click="$dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                        Choose from Media Library
+                    </button>
+
+                    @if ($profile_image || $existing_profile_image)
+                        <button type="button" wire:click="removeProfileImage" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
+                            Remove
+                        </button>
+                    @endif
                 </div>
                 <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
             </div>

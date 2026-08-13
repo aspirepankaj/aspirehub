@@ -116,10 +116,10 @@
         <div class="p-4 border-t border-slate-100 dark:border-slate-800/60">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300 overflow-hidden shrink-0 border border-slate-200/60 dark:border-slate-800">
-                    @if(auth()->user()->client?->profile_image && file_exists(public_path('storage/' . auth()->user()->client->profile_image)))
-                        <img src="{{ asset('storage/' . auth()->user()->client->profile_image) }}" class="w-full h-full object-cover" />
+                    @if(auth()->user()->client?->profile_image)
+                        <img src="{{ Str::startsWith(auth()->user()->client->profile_image, 'http') ? auth()->user()->client->profile_image : asset('storage/' . auth()->user()->client->profile_image) }}" class="w-full h-full object-cover" onerror="this.outerHTML=`{{ auth()->user()->getInitials() }}`" />
                     @else
-                        {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                        {{ auth()->user()->getInitials() }}
                     @endif
                 </div>
                 <div class="min-w-0">

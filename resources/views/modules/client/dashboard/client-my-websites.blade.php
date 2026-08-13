@@ -32,7 +32,35 @@
             @php
                 $health = min((int)($website->health_score ?? 0), 100);
                 $performance = min((int)($website->performance_desktop ?? 0), 100);
-                $security = is_numeric($website->security_health ?? null) ? min((int)$website->security_health, 100) : 100;
+                
+                $securityText = $website->security_health ?: 'Excellent';
+                $securityScore = 100;
+                $securityColor = 'bg-emerald-500';
+                
+                if (strcasecmp($securityText, 'excellent') === 0 || strcasecmp($securityText, 'clean') === 0) {
+                    $securityScore = 95;
+                    $securityColor = 'bg-emerald-500';
+                    $securityText = 'Excellent';
+                } elseif (strcasecmp($securityText, 'good') === 0) {
+                    $securityScore = 75;
+                    $securityColor = 'bg-blue-500';
+                    $securityText = 'Good';
+                } elseif (strcasecmp($securityText, 'action required') === 0) {
+                    $securityScore = 50;
+                    $securityColor = 'bg-amber-500';
+                    $securityText = 'Action Required';
+                } elseif (strcasecmp($securityText, 'critical') === 0) {
+                    $securityScore = 25;
+                    $securityColor = 'bg-rose-500';
+                    $securityText = 'Critical';
+                } elseif (is_numeric($securityText)) {
+                    $securityScore = min((int)$securityText, 100);
+                    if ($securityScore >= 90) { $securityText = 'Excellent'; $securityColor = 'bg-emerald-500'; }
+                    elseif ($securityScore >= 75) { $securityText = 'Good'; $securityColor = 'bg-blue-500'; }
+                    elseif ($securityScore >= 50) { $securityText = 'Action Required'; $securityColor = 'bg-amber-500'; }
+                    else { $securityText = 'Critical'; $securityColor = 'bg-rose-500'; }
+                }
+
                 $status = $website->maintenance_status ?: 'Operational';
             @endphp
 
@@ -42,7 +70,7 @@
                 <div class="relative h-64 overflow-hidden">
 
                     <img
-                        src="http://127.0.0.1:8000/desk-office-computer-imac.avif"
+                        src="{{ $website->image ? asset('storage/' . $website->image) : asset('default-website.svg') }}"
                         alt="{{ $website->site_name }}"
                         class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105">
 
@@ -91,7 +119,7 @@
 
                                 <span>Health</span>
 
-                                <span>{{ $health }}</span>
+                                <span>{{ $health }}%</span>
 
                             </div>
 
@@ -113,7 +141,7 @@
 
                                 <span>Performance</span>
 
-                                <span>{{ $performance }}</span>
+                                <span>{{ $performance }}%</span>
 
                             </div>
 
@@ -135,15 +163,15 @@
 
                                 <span>Security</span>
 
-                                <span>{{ $security }}</span>
+                                <span>{{ $securityScore }}%</span>
 
                             </div>
 
                             <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
 
                                 <div
-                                    class="h-2 rounded-full {{ $security >= 90 ? 'bg-emerald-500' : ($security >= 50 ? 'bg-amber-500' : 'bg-rose-500') }}"
-                                    style="width: {{ $security }}%">
+                                    class="h-2 rounded-full {{ $securityColor }}"
+                                    style="width: {{ $securityScore }}%">
                                 </div>
 
                             </div>

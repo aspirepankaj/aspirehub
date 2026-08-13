@@ -28,11 +28,11 @@ new class extends Component
                 $profileImage = auth()->user()->client->profile_image;
             }
         @endphp
-        @if($profileImage && file_exists(public_path('storage/' . $profileImage)))
-            <img src="{{ asset('storage/' . $profileImage) }}" alt="{{ auth()->user()->name }}" class="flex-shrink-0 w-9 h-9 rounded-xl object-cover border border-slate-200/50 dark:border-slate-800/50 shadow-sm" />
+        @if($profileImage)
+            <img src="{{ Str::startsWith($profileImage, 'http') ? $profileImage : asset('storage/' . $profileImage) }}" alt="{{ auth()->user()->name }}" class="flex-shrink-0 w-9 h-9 rounded-xl object-cover border border-slate-200/50 dark:border-slate-800/50 shadow-sm" onerror="this.outerHTML=`<div class='flex-shrink-0 w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm'>{{ auth()->user()->getInitials() }}</div>`" />
         @else
             <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
-                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                {{ auth()->user()->getInitials() }}
             </div>
         @endif
         <div class="min-w-0">

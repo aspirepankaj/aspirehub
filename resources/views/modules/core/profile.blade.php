@@ -10,10 +10,10 @@
             <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none"></div>
             <div class="flex items-center space-x-4">
                 @if(auth()->user()->admin?->profile_image)
-                    <img src="{{ asset('storage/' . auth()->user()->admin->profile_image) }}" alt="{{ auth()->user()->name }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800 shadow-lg shadow-indigo-500/10" />
+                    <img src="{{ Str::startsWith(auth()->user()->admin->profile_image, 'http') ? auth()->user()->admin->profile_image : asset('storage/' . auth()->user()->admin->profile_image) }}" alt="{{ auth()->user()->name }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800 shadow-lg shadow-indigo-500/10" onerror="this.outerHTML=`<div class='w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-2xl shadow-lg shadow-indigo-500/20'>{{ auth()->user()->getInitials() }}</div>`" />
                 @else
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-2xl shadow-lg shadow-indigo-500/20">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                        {{ auth()->user()->getInitials() }}
                     </div>
                 @endif
                 <div>

@@ -56,6 +56,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get initials of the user's name.
+     */
+    public function getInitials(): string
+    {
+        $name = $this->name ?? '';
+        $words = preg_split("/\s+/", trim($name));
+        $initials = "";
+        foreach ($words as $w) {
+            if (!empty($w)) {
+                $initials .= mb_substr($w, 0, 1);
+            }
+        }
+        return mb_strtoupper(mb_substr($initials, 0, 2));
+    }
+
+    /**
      * Get the staff profile associated with the user.
      */
     public function staff(): \Illuminate\Database\Eloquent\Relations\HasOne
