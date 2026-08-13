@@ -44,12 +44,6 @@
                 </div>
             </div>
 
-            <!-- Account Deletion Form -->
-            <div class="glass-card p-6 rounded-3xl border border-red-200/50 dark:border-red-950/20 shadow-xl bg-red-500/[0.01]">
-                <div class="max-w-xl">
-                    <livewire:profile.delete-user-form />
-                </div>
-            </div>
         </div>
     </div>
 </x-admin-layout>

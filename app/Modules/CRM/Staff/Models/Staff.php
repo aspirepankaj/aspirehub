@@ -22,9 +22,14 @@ class Staff extends Model
         'department',
         'profile_image',
         'status',
+        'last_login_at',
         'notes',
         'added_by',
         'edited_by',
+    ];
+
+    protected $casts = [
+        'last_login_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

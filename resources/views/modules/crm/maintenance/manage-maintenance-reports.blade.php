@@ -316,12 +316,14 @@
                             #{{ $report->id }}
                         </td>
                         <td class="px-4 py-4">
-                            <div class="font-semibold text-slate-800 dark:text-slate-200">
-                                {{ $report->client->user->name }}
-                            </div>
-                            <div class="text-xs text-slate-400 dark:text-slate-500">
-                                {{ $report->client->company_name }}
-                            </div>
+                            <a href="{{ route('admin.clients.detail', ['id' => $report->client->id]) }}" class="no-underline group">
+                                <div class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                    {{ $report->client->user->name }}
+                                </div>
+                                <div class="text-xs text-slate-400 dark:text-slate-500">
+                                    {{ $report->client->company_name }}
+                                </div>
+                            </a>
                         </td>
                         <td class="px-4 py-4">
                             <div class="font-semibold text-slate-800 dark:text-slate-200">

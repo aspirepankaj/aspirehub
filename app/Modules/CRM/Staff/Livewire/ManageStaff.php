@@ -43,11 +43,43 @@ class ManageStaff extends Component
     public ?int $editingStaffId = null;
     public ?int $editingUserId = null;
 
+    // Detail view state
+    public ?int $selectedStaffDetailId = null;
+    public string $activeTab = 'overview';
+
     // Dropdown options
     public array $departments = [
         'Client Success', 'Marketing', 'Engineering', 'Design',
         'Support', 'Operations', 'Sales', 'HR', 'Finance',
     ];
+
+    public function mount($id = null): void
+    {
+        if ($id) {
+            $this->selectedStaffDetailId = (int) $id;
+        }
+    }
+
+    public function viewStaffDetail(int $id): void
+    {
+        $currentPage = $this->paginators['page'] ?? 1;
+        session()->put('staff_list_page', $currentPage);
+
+        $this->redirect(route('admin.staff.detail', ['id' => $id]), navigate: true);
+    }
+
+    public function closeStaffDetail(): void
+    {
+        $page = session()->get('staff_list_page', 1);
+        session()->forget('staff_list_page');
+
+        $this->redirect(route('admin.staff', ['page' => $page]), navigate: true);
+    }
+
+    public function setTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
 
     public function updatingSearch(): void
     {
@@ -76,6 +108,7 @@ class ManageStaff extends Component
         $this->selectAll = false;
         $this->resetPage();
     }
+
     public function clearFilters(): void
     {
         $this->search = '';
@@ -352,6 +385,63 @@ class ManageStaff extends Component
 
     public function render()
     {
+        // — Detail view mode —
+        if ($this->selectedStaffDetailId) {
+            $staffDetails = Staff::with([
+                'user',
+                'phones',
+                'designations',
+                'clients.user',
+                'clients.plans',
+                'clients.phones',
+                'addedBy',
+                'editedBy',
+            ])->findOrFail($this->selectedStaffDetailId);
+
+            // Websites of assigned clients
+            $clientIds = $staffDetails->clients->pluck('id')->toArray();
+
+            $staffWebsites = \App\Modules\CRM\Websites\Models\Website::with(['client.user', 'latestMaintenanceReport'])
+                ->whereIn('client_id', $clientIds)
+                ->latest()
+                ->get();
+
+            // Maintenance reports where this staff was developer
+            $staffMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['client.user', 'website'])
+                ->where('developer_id', $staffDetails->user_id)
+                ->latest()
+                ->paginate(10, ['*'], 'maintenancepage')
+                ->onEachSide(1);
+
+            // Activity logs for this staff user
+            $staffActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+                ->where(function ($query) use ($staffDetails) {
+                    $query->where(function ($q) use ($staffDetails) {
+                        $q->where('loggable_type', Staff::class)
+                          ->where('loggable_id', $staffDetails->id);
+                    })->orWhere(function ($q) use ($staffDetails) {
+                        $q->where('user_id', $staffDetails->user_id);
+                    });
+                })
+                ->latest()
+                ->paginate(10, ['*'], 'activitypage')
+                ->onEachSide(1);
+
+            $designations = \App\Modules\CRM\Staff\Models\Designation::orderBy('name')->get();
+
+            return view('modules.crm.staff.manage-staff', [
+                'Staff'                   => collect(),
+                'designations'            => $designations,
+                'hasActiveFilters'        => false,
+                'pageIds'                 => [],
+                'staffDetails'            => $staffDetails,
+                'staffWebsites'           => $staffWebsites,
+                'staffMaintenanceReports' => $staffMaintenanceReports,
+                'staffActivityLogs'       => $staffActivityLogs,
+            ])->layoutData(['title' => ($staffDetails->user->name ?? 'Staff') . ' — Staff Detail']);
+        }
+
+        // — List view mode —
         $searchTerm = trim($this->search);
 
         $Staff = Staff::with(['user', 'phones', 'designations'])
@@ -378,20 +468,16 @@ class ManageStaff extends Component
 
         $designations = \App\Modules\CRM\Staff\Models\Designation::orderBy('name')->get();
 
-        $hasActiveFilters = $this->search || $this->statusFilter;
-        $pageIds = $Staff->pluck('id')->toArray();
-
-        $hasActiveFilters = $this->search || $this->statusFilter;
-        $pageIds = $Staff->pluck('id')->toArray();
-
-        $hasActiveFilters = $this->search || $this->statusFilter;
-        $pageIds = $Staff->pluck('id')->toArray();
 
         return view('modules.crm.staff.manage-staff', [
-            'Staff'            => $Staff,
-            'designations'     => $designations,
-            'hasActiveFilters' => $hasActiveFilters,
-            'pageIds'          => $pageIds,
+            'Staff'                   => $Staff,
+            'designations'            => $designations,
+            'hasActiveFilters'        => $hasActiveFilters,
+            'pageIds'                 => $pageIds,
+            'staffDetails'            => null,
+            'staffWebsites'           => collect(),
+            'staffMaintenanceReports' => collect(),
+            'staffActivityLogs'       => collect(),
         ])->layoutData(['title' => 'Staff Management - Aspire Hub']);
     }
 }

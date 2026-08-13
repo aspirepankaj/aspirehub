@@ -90,6 +90,9 @@ new #[Layout('layouts.auth')] class extends Component
             ],
         ]);
 
+        // Update last login timestamp on staff record
+        $user->staff->update(['last_login_at' => now()]);
+
         $this->redirectIntended(default: '/staffadspnl', navigate: true);
     }
 }; ?>

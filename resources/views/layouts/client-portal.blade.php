@@ -60,12 +60,9 @@
     <!-- Sidebar -->
     <aside class="w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between">
         <div>
-            <div class="flex items-center gap-3 px-6 py-6">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md shadow-indigo-500/20">A</div>
-                <div>
-                    <div class="font-extrabold text-sm leading-tight text-slate-900 dark:text-white">Aspire Hub</div>
-                    <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase">Client Portal</div>
-                </div>
+            <div class="px-6 py-6 flex flex-col gap-1">
+                <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start" alt="Aspire Hub" />
+                <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase pl-1 mt-0.5">Client Portal</div>
             </div>
 
             <div class="px-4 mb-4">

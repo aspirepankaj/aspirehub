@@ -11,6 +11,9 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
+        <!-- Alpine.js -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
         <!-- Scripts & Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -62,13 +65,8 @@ border: 1px solid rgba(255, 255, 255, 0.43);
             <header class="sticky top-0 z-50 glass border-b border-slate-200/40 dark:border-slate-800/40">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <!-- Brand -->
-                    <a href="/" class="flex items-center space-x-2.5">
-                        <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 text-white font-extrabold text-lg shadow-md shadow-indigo-500/10">
-                            A
-                        </div>
-                        <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                            Aspire Hub
-                        </span>
+                    <a href="/" class="flex items-center">
+                        <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto" alt="Aspire Hub" />
                     </a>
 
                     <!-- Center Navigation Links -->

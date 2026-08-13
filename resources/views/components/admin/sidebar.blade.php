@@ -6,13 +6,8 @@
 <aside :class="mobileSidebar ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 w-64 glass border-r border-slate-200/50 dark:border-slate-800/50 z-40 transition-transform duration-300 lg:translate-x-0 flex flex-col">
     <!-- Brand / Title -->
     <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200/50 dark:border-slate-800/50">
-        <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-2.5">
-            <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 text-white font-extrabold text-lg shadow-md shadow-indigo-500/10">
-                A
-            </div>
-            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                Aspire Hub
-            </span>
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center py-1">
+            <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto" alt="Aspire Hub" />
         </a>
         <button @click="mobileSidebar = false" class="lg:hidden p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

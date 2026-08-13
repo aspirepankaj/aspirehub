@@ -70,11 +70,6 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button type="button" class="px-4 py-2 rounded-xl text-white font-bold text-xs active:scale-95 transition" style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);">
-                    Message
-                </button>
-            </div>
         </div>
 
         <!-- Tabs Navigation -->
