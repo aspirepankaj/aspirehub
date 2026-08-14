@@ -348,8 +348,8 @@
                                       : 'bg-amber-500/10 text-amber-600 dark:text-amber-400' }}">
                                 {{ $report->status }}
                             </span>
-                        <td class="px-4 py-4 text-right">
-                            <div class="inline-flex items-center gap-1">
+                        <td class="px-4 py-4 text-center">
+                            <div class="inline-flex items-center gap-1 justify-center">
                                 {{-- View button --}}
                                 <a href="{{ route('admin.maintenance.view', $report->id) }}"
                                    class="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="View Report">

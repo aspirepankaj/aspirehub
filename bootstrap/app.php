@@ -48,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(\App\Http\Middleware\NoIndexMiddleware::class);
         $middleware->redirectTo(
             guests: function (Request $request) {
                 if ($request->is('adminadspnl*')) {

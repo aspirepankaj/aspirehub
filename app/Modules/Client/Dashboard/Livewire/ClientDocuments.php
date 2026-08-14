@@ -96,6 +96,6 @@ class ClientDocuments extends Component
 
         return view('modules.client.dashboard.client-documents', [
             'documents' => $filteredDocs,
-        ]);
+        ])->layoutData(['title' => 'Documents']);
     }
 }

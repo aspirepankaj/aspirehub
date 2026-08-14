@@ -120,6 +120,6 @@ class ClientDashboard extends Component
             'clientCompanyName' => $clientCompanyName,
             'stats'             => $stats,
             'statCards'         => $statCards,
-        ]);
+        ])->layoutData(['title' => 'Dashboard']);
     }
 }

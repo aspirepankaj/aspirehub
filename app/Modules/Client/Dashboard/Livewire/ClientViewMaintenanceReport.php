@@ -30,6 +30,6 @@ class ClientViewMaintenanceReport extends Component
     {
         return view('modules.client.dashboard.client-view-maintenance-report', [
             'report' => $this->report,
-        ]);
+        ])->layoutData(['title' => 'View Maintenance Report']);
     }
 }

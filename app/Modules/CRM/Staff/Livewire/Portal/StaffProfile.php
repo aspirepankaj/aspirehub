@@ -10,6 +10,6 @@ class StaffProfile extends Component
 {
     public function render()
     {
-        return view('modules.crm.staff.portal.profile');
+        return view('modules.crm.staff.portal.profile')->layoutData(['title' => 'My Profile - Staff Portal']);
     }
 }

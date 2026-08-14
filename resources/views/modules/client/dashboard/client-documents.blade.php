@@ -38,21 +38,6 @@
                 class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
         </div>
 
-        <!-- Filter Categories Tabs -->
-        <div class="flex flex-wrap items-center gap-1.5 bg-slate-50 dark:bg-slate-950/20 p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/40">
-            @php
-                $categories = ['All', 'Reports', 'Invoices', 'Contracts', 'Guides', 'Training', 'Downloads'];
-            @endphp
-            @foreach ($categories as $cat)
-                <button type="button" wire:click="selectCategory('{{ $cat }}')"
-                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all
-                           {{ $selectedCategory === $cat
-                                 ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
-                                 : 'text-slate-500 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-800 dark:hover:text-white' }}">
-                    {{ $cat }}
-                </button>
-            @endforeach
-        </div>
     </div>
 
     <!-- Documents Grid -->

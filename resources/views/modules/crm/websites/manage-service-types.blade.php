@@ -53,8 +53,8 @@
                         <td class="px-6 py-4 text-xs font-mono text-slate-500 dark:text-slate-400">
                             {{ $type->color }}
                         </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="inline-flex items-center gap-1">
+                        <td class="px-6 py-4 text-center">
+                            <div class="inline-flex items-center gap-1 justify-center">
                                 <button type="button" wire:click="editType({{ $type->id }})"
                                         class="p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

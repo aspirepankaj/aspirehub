@@ -187,6 +187,6 @@ class ClientProfile extends Component
             'plans' => $plans,
             'websiteServiceTypes' => $websiteServiceTypes,
             'client' => $client,
-        ]);
+        ])->layoutData(['title' => 'My Profile']);
     }
 }

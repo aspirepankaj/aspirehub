@@ -52,7 +52,7 @@ class ClientMaintenanceReports extends Component
 
         return view('modules.client.dashboard.client-maintenance-reports', [
             'reports' => $reports,
-        ]);
+        ])->layoutData(['title' => 'Maintenance Reports']);
     }
 
     public function downloadPdf($id)

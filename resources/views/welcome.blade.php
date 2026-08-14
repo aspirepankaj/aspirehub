@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Aspire Hub - Custom Enterprise SaaS Platform</title>
+        <title>Aspire Hub</title>
 
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,209 +60,45 @@ border: 1px solid rgba(255, 255, 255, 0.43);
             <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-pink-500/10 dark:bg-pink-500/5 rounded-full blur-3xl"></div>
         </div>
 
-        <div class="relative min-h-screen flex flex-col z-10">
-            <!-- Navigation Header -->
-            <header class="sticky top-0 z-50 glass border-b border-slate-200/40 dark:border-slate-800/40">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <!-- Brand -->
-                    <a href="/" class="flex items-center">
-                        <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto" alt="Aspire Hub" />
+        <div class="relative min-h-screen flex flex-col z-10 justify-center items-center">
+            
+            <main class="flex flex-col items-center justify-center p-6 text-center w-full max-w-2xl mx-auto mt-[-10vh]">
+                <!-- Logo -->
+                <div class="mb-14 sm:mb-20">
+                    <img src="{{ asset('aspire-hub-1.svg') }}" class="h-32 sm:h-56 w-auto mx-auto drop-shadow-xl hover:scale-105 transition-transform duration-300" alt="Aspire Hub" />
+                </div>
+
+                <!-- Admin Button -->
+                <div class="mb-8 w-full px-4 sm:px-8">
+                    <a href="{{ route('admin.login') }}" class="flex items-center justify-center gap-4 w-full px-8 py-6 sm:py-8 text-2xl sm:text-3xl font-extrabold text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 rounded-[2rem] shadow-2xl shadow-indigo-500/25 active:scale-[0.98] transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 sm:w-10 sm:h-10">
+                          <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd" />
+                        </svg>
+                        Super Admin Login
                     </a>
-
-                    <!-- Center Navigation Links -->
-                    <nav class="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-600 dark:text-slate-400">
-                        <a href="#features" class="hover:text-slate-900 dark:hover:text-white transition-colors">Features</a>
-                        <a href="#pricing" class="hover:text-slate-900 dark:hover:text-white transition-colors">Pricing</a>
-                        <a href="#system" class="hover:text-slate-900 dark:hover:text-white transition-colors">Status</a>
-                    </nav>
-
-                    <!-- Right Controls / CTAs -->
-                    <div class="flex items-center space-x-3">
-                        <!-- Theme Toggle -->
-                        <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-900/40 border border-transparent hover:border-slate-200/30 dark:hover:border-slate-800/30 transition-all duration-200" title="Toggle Theme">
-                            <!-- Sun Icon -->
-                            <svg x-show="darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m2.828 0l-.707-.707m2.828-11.314l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
-                            </svg>
-                            <!-- Moon Icon -->
-                            <svg x-show="!darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                            </svg>
-                        </button>
-
-                        <a href="{{ route('login') }}" class="inline-flex items-center px-3 py-1.5 border border-slate-200/60 dark:border-slate-800/60 text-slate-700 dark:text-slate-350 hover:bg-slate-100/60 dark:hover:bg-slate-900/40 text-xs font-bold rounded-xl active:scale-95 transition-all duration-150">
-                            Client Login
-                        </a>
-                        <a href="{{ route('staff.login') }}" class="inline-flex items-center px-3 py-1.5 border border-slate-200/60 dark:border-slate-800/60 text-slate-700 dark:text-slate-350 hover:bg-slate-100/60 dark:hover:bg-slate-900/40 text-xs font-bold rounded-xl active:scale-95 transition-all duration-150">
-                            Staff Login
-                        </a>
-                        <a href="{{ route('admin.login') }}" class="inline-flex items-center px-3.5 py-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm active:scale-95 transition-all duration-150">
-                            Admin Login
-                        </a>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Hero Section -->
-            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 text-center relative">
-                <!-- Decorative background radial blob -->
-                <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-                <div class="relative max-w-4xl mx-auto">
-                    <span class="inline-flex items-center px-3 py-1 text-xs font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-500/10 rounded-full dark:text-indigo-400 mb-6">
-                        Custom Enterprise Platform
-                    </span>
-                    <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] text-slate-900 dark:text-white">
-                        Empowering Enterprise Operations, 
-                        <span class="bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent dark:from-indigo-400 dark:to-pink-400">Elevated.</span>
-                    </h1>
-                    <p class="mt-6 text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium">
-                        A completely customized, domain-driven modular SaaS environment built using Laravel, Livewire, Tailwind CSS, and Alpine.js.
-                    </p>
-
-                    <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-3xl mx-auto">
-                        <a href="{{ route('login') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 active:scale-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition duration-150">
-                            Client Portal
-                        </a>
-                        <a href="{{ route('staff.login') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 active:scale-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 transition duration-150">
-                            Staff Portal
-                        </a>
-                        <a href="{{ route('admin.login') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-pink-500 hover:from-indigo-700 hover:to-pink-600 active:scale-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-pink-500/10 hover:shadow-pink-500/20 transition duration-150">
-                            Admin Portal
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Features Grid Section -->
-            <section id="features" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/30 dark:border-slate-800/30">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Modular Domain Architecture</h2>
-                    <p class="mt-3 text-slate-500 dark:text-slate-400 text-sm font-medium">Engineered to scale with decoupled, module-oriented namespaces.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Feature Card 1 -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <div class="w-10 h-10 bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-xl flex items-center justify-center mb-5">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Advanced CRM</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">Complete control over Client profiles, Staff assignments, and dynamic domains.</p>
-                    </div>
-
-                    <!-- Feature Card 2 -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <div class="w-10 h-10 bg-pink-500/10 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400 rounded-xl flex items-center justify-center mb-5">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2M8 21.75a2 2 0 002-2v-1.5h4v1.5a2 2 0 002 2h3a2 2 0 002-2v-11a2 2 0 00-2-2h-3a2 2 0 00-2 2v1.5h-4v-1.5a2 2 0 00-2-2H8a2 2 0 00-2 2v11a2 2 0 002 2h2z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Analytics & Revenue</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">Real-time revenue monitoring, invoice pipelines, and growth timelines.</p>
-                    </div>
-
-                    <!-- Feature Card 3 -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <div class="w-10 h-10 bg-sky-500/10 text-sky-500 dark:bg-sky-500/20 dark:text-sky-400 rounded-xl flex items-center justify-center mb-5">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Automations</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">Create and trigger background workflow recipes, status alerts, and cron updates.</p>
-                    </div>
-
-                    <!-- Feature Card 4 -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <div class="w-10 h-10 bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl flex items-center justify-center mb-5">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Integrations Core</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">Engineered to hook directly into ClickUp, Google Cloud, Meta Ads, and Stripe.</p>
-                    </div>
+                <!-- Staff and Client Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-6 w-full px-4 sm:px-8">
+                    <a href="{{ route('login') }}" class="flex-1 flex items-center justify-center gap-3 w-full px-6 py-5 sm:py-6 border-2 border-slate-200/80 dark:border-slate-700/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-500 text-xl font-bold rounded-2xl shadow-md active:scale-95 transition-all duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7 text-indigo-500">
+                          <path fill-rule="evenodd" d="M3 2.25a.75.75 0 000 1.5v16.5h-.75a.75.75 0 000 1.5H21a.75.75 0 000-1.5h-.75V9a.75.75 0 00-.75-.75h-6V2.25a.75.75 0 00-.75-.75H3zm3.75 4.5a.75.75 0 00-.75.75v1.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75v-1.5a.75.75 0 00-.75-.75h-1.5zm.75 4.5a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v1.5a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75v-1.5zm-.75 4.5a.75.75 0 00-.75.75v1.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75v-1.5a.75.75 0 00-.75-.75h-1.5zm6-7.5a.75.75 0 00-.75.75v1.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75v-1.5a.75.75 0 00-.75-.75h-1.5zm.75 4.5a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v1.5a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75v-1.5zm-.75 4.5a.75.75 0 00-.75.75v1.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75v-1.5a.75.75 0 00-.75-.75h-1.5z" clip-rule="evenodd" />
+                        </svg>
+                        Client Login
+                    </a>
+                    <a href="{{ route('staff.login') }}" class="flex-1 flex items-center justify-center gap-3 w-full px-6 py-5 sm:py-6 border-2 border-slate-200/80 dark:border-slate-700/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-500 text-xl font-bold rounded-2xl shadow-md active:scale-95 transition-all duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7 text-pink-500">
+                          <path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z" clip-rule="evenodd" />
+                          <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 016.576-1.994 8.27 8.27 0 00-3.006-2.053zM18.918 14.254a8.27 8.27 0 00-3.006 2.053 3.75 3.75 0 016.576 1.994l-.01.121a.563.563 0 01-.373.487l-.115.04a9.687 9.687 0 01-1.764.44 8.287 8.287 0 00-1.308-5.135z" />
+                        </svg>
+                        Staff Login
+                    </a>
                 </div>
-            </section>
-
-            <!-- Pricing section mock -->
-            <section id="pricing" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/30 dark:border-slate-800/30">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Simple Enterprise Licensing</h2>
-                    <p class="mt-3 text-slate-500 dark:text-slate-400 text-sm font-medium">Deploy on your own infrastructure or cloud environment.</p>
-                </div>
-
-                <div class="max-w-md mx-auto glass-card p-8 rounded-3xl relative overflow-hidden shadow-xl">
-                    <div class="absolute -right-8 -top-8 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl"></div>
-                    <span class="px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-500/10 dark:text-indigo-400 rounded-lg">
-                        All Inclusive
-                    </span>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-4">Enterprise Access</h3>
-                    <p class="text-xs text-slate-500 mt-1">Full self-hosted modular code package.</p>
-                    <div class="mt-6 flex items-baseline">
-                        <span class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">$499</span>
-                        <span class="text-slate-400 dark:text-slate-500 text-sm font-semibold ml-2">/ month</span>
-                    </div>
-
-                    <ul class="mt-8 space-y-3 text-xs text-slate-600 dark:text-slate-400 font-semibold">
-                        <li class="flex items-center space-x-2.5">
-                            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Unlimited admin, staff, and client seats</span>
-                        </li>
-                        <li class="flex items-center space-x-2.5">
-                            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>All modules included (CRM, Integrations)</span>
-                        </li>
-                        <li class="flex items-center space-x-2.5">
-                            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Complete source code modification rights</span>
-                        </li>
-                    </ul>
-
-                    <div class="mt-8">
-                        @if (Route::has('admin.login'))
-                            <a href="{{ route('admin.login') }}" class="w-full inline-flex items-center justify-center py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/10 transition-all duration-150">
-                                Sign In & Get Started
-                            </a>
-                        @endif
-                    </div>
-                </div>
-            </section>
-
-            <!-- System status section mock -->
-            <section id="system" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/30 dark:border-slate-800/30">
-                <div class="glass-card p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div class="flex items-center space-x-3.5">
-                        <span class="relative flex h-3.5 w-3.5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
-                        </span>
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-900 dark:text-white leading-tight">All Operations Normal</h3>
-                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Checked 2 mins ago &bull; 99.98% overall system uptime</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center space-x-6 text-xs font-bold text-slate-500 dark:text-slate-400">
-                        <div>
-                            CRM Service: <span class="text-emerald-500">Online</span>
-                        </div>
-                        <div>
-                            Billing Engine: <span class="text-emerald-500">Online</span>
-                        </div>
-                        <div>
-                            Web Monitoring: <span class="text-emerald-500">Active</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </main>
 
             <!-- Footer -->
-            <footer class="mt-auto py-8 border-t border-slate-200/40 dark:border-slate-800/40 text-center text-xs text-slate-400 dark:text-slate-600 font-semibold">
-                &copy; {{ date('Y') }} Aspire Hub &bull; Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
+            <footer class="absolute bottom-6 w-full text-center text-xs text-slate-400 dark:text-slate-500 font-semibold px-4">
+                &copy; {{ date('Y') }} Aspire Hub &bull; Custom Enterprise System
             </footer>
         </div>
     </body>

@@ -279,7 +279,7 @@
                             <th class="px-4 py-4">File Specs</th>
                             <th class="px-4 py-4">Uploaded</th>
                             <th class="px-4 py-4">Added By</th>
-                            <th class="px-4 py-4 text-right">Actions</th>
+                            <th class="px-4 py-4 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
@@ -336,8 +336,8 @@
                                 <td class="px-4 py-4 text-xs text-slate-550 dark:text-slate-450">
                                     {{ $doc->addedBy->name }}
                                 </td>
-                                <td class="px-4 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
+                                <td class="px-4 py-4 text-center">
+                                    <div class="flex items-center justify-center gap-1.5">
                                         {{-- Preview button --}}
                                         <button type="button" 
                                                 wire:click="previewDocument({{ $doc->id }})"

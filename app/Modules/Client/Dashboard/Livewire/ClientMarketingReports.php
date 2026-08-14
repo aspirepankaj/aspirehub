@@ -10,6 +10,6 @@ class ClientMarketingReports extends Component
 {
     public function render()
     {
-        return view('modules.client.dashboard.client-marketing-reports');
+        return view('modules.client.dashboard.client-marketing-reports')->layoutData(['title' => 'Marketing Reports']);
     }
 }

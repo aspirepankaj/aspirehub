@@ -116,6 +116,6 @@ class ClientMyWebsites extends Component
             'client'            => $client,
             'websites'          => $websites,
             'assignedStaffName' => $assignedStaffName,
-        ]);
+        ])->layoutData(['title' => 'My Websites']);
     }
 }

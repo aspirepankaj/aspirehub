@@ -60,6 +60,6 @@ class ManageMedia extends Component
 
         return view('modules.crm.media.manage-media', [
             'mediaFiles' => $mediaFiles,
-        ])->layout($layout);
+        ])->layout($layout)->layoutData(['title' => 'Media Library - Aspire Hub']);
     }
 }
