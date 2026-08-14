@@ -486,6 +486,9 @@ class ManageStaff extends Component
         $designations = \App\Modules\CRM\Staff\Models\Designation::orderBy('name')->get();
 
 
+        $hasActiveFilters = $this->search || $this->statusFilter;
+        $pageIds = $Staff->pluck('id')->toArray();
+
         return view('modules.crm.staff.manage-staff', [
             'Staff'                   => $Staff,
             'designations'            => $designations,
