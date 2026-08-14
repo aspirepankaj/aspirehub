@@ -71,20 +71,6 @@ border: 1px solid rgba(255, 255, 255, 0.43);
 
     <body class="font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
         
-        @if(session()->has('impersonator_id'))
-            <div class="bg-amber-500 text-slate-950 font-bold px-4 py-2.5 text-center text-xs sm:text-sm flex items-center justify-center gap-3 shadow-md relative z-50">
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    You are currently impersonating <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->email }}).
-                </span>
-                <a href="{{ route('impersonate.stop') }}" class="underline hover:text-slate-900 bg-slate-950/10 hover:bg-slate-950/20 px-2.5 py-1 rounded-lg transition-all duration-150">
-                    Switch Back to Admin
-                </a>
-            </div>
-        @endif
-
         <!-- Background decorative blobs -->
         <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
             <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl"></div>

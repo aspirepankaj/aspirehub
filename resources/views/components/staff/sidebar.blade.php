@@ -57,6 +57,14 @@
 
     <!-- User / Logout Area -->
     <div class="p-4 border-t border-slate-200/50 dark:border-slate-800/50">
+        @if(session()->has('impersonator_id'))
+            <a href="{{ route('impersonate.stop') }}" class="mb-3 flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow transition duration-150 w-full">
+                <svg class="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Switch Back to Admin
+            </a>
+        @endif
         <livewire:layout.navigation-logout />
     </div>
 </aside>
