@@ -16,6 +16,8 @@ class Document extends Model
     protected $table = 'adspv_documents';
 
     protected $fillable = [
+        'resource_type',
+        'url',
         'client_id',
         'website_id',
         'title',

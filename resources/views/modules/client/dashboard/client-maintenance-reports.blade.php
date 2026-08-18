@@ -17,15 +17,61 @@
         </p>
     </div>
 
+    <!-- Header Actions (Tabs + Filter) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200 dark:border-slate-800/60 pb-3 pt-2">
+        <!-- Tabs -->
+        <div class="flex items-center gap-6">
+            <button type="button" wire:click="$set('viewMode', 'recent')" 
+                    class="pb-1 text-sm font-bold transition-all relative {{ $viewMode === 'recent' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                Recent Reports
+                @if($viewMode === 'recent')
+                    <div class="absolute -bottom-3.5 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full"></div>
+                @endif
+            </button>
+            <button type="button" wire:click="$set('viewMode', 'archive')" 
+                    class="pb-1 text-sm font-bold transition-all relative flex items-center gap-2 {{ $viewMode === 'archive' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                Archive
+                @if($viewMode === 'archive')
+                    <div class="absolute -bottom-3.5 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full"></div>
+                @endif
+            </button>
+        </div>
+
+        <!-- Filter -->
+        @if($viewMode === 'archive')
+        <div class="flex items-center">
+            <select wire:model.live="filterMonth" 
+                    class="block w-full sm:w-48 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                <option value="">All Months</option>
+                @foreach($availableMonths as $month)
+                    <option value="{{ $month['value'] }}">{{ $month['label'] }}</option>
+                @endforeach
+            </select>
+        </div>
+        @endif
+    </div>
+
     <!-- Reports Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        @forelse ($reports as $report)
+        @forelse ($paginatedReports as $report)
             @php
                 $formattedMonth = \Carbon\Carbon::parse($report->maintenance_date)->format('F Y');
                 $formattedDate = \Carbon\Carbon::parse($report->maintenance_date)->format('M j, Y');
                 $healthScore = $report->health_score ?? 100;
                 $perfScore = $report->performance_desktop ?? 100;
-                $securityScore = is_numeric($report->security_health) ? (int)$report->security_health : 100;
+                $securityText = $report->security_health ?: 'Excellent';
+                $securityScore = 100;
+                if (strcasecmp($securityText, 'excellent') === 0 || strcasecmp($securityText, 'clean') === 0) {
+                    $securityScore = 95;
+                } elseif (strcasecmp($securityText, 'good') === 0) {
+                    $securityScore = 75;
+                } elseif (strcasecmp($securityText, 'action required') === 0) {
+                    $securityScore = 50;
+                } elseif (strcasecmp($securityText, 'critical') === 0) {
+                    $securityScore = 25;
+                } elseif (is_numeric($securityText)) {
+                    $securityScore = min((int)$securityText, 100);
+                }
             @endphp
             <div class="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm hover:border-slate-350 dark:hover:border-slate-750 transition duration-150 flex flex-col justify-between max-w-2xl">
                 
@@ -164,11 +210,22 @@
                 <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <h3 class="mt-4 text-sm font-bold text-slate-850 dark:text-slate-300">No Maintenance Reports</h3>
-                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">There are currently no maintenance cycles completed for your websites.</p>
+                <h3 class="mt-4 text-sm font-bold text-slate-850 dark:text-slate-300">
+                    {{ $viewMode === 'recent' ? 'No Recent Reports' : 'No Archived Reports' }}
+                </h3>
+                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                    {{ $viewMode === 'recent' ? 'There are currently no maintenance cycles completed for your websites.' : 'Older maintenance reports will appear here.' }}
+                </p>
             </div>
         @endforelse
     </div>
+
+    <!-- Pagination -->
+    @if ($paginatedReports->hasPages())
+        <div class="mt-8">
+            {{ $paginatedReports->links() }}
+        </div>
+    @endif
 
     <!-- Compare Modal -->
     @if ($showCompareModal)

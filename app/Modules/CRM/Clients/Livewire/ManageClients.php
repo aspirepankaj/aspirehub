@@ -27,7 +27,7 @@ class ManageClients extends Component
     public string $status = 'active';
     public string $notes = '';
     public array $plan_ids = [];
-    public array $assigned_staff_ids = [];
+    public ?int $assigned_staff_id = null;
     public string $address = '';
     public string $landmark = '';
     public string $state = '';
@@ -157,10 +157,10 @@ class ManageClients extends Component
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'company_name', 'profile_image', 'existing_profile_image', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids', 'assigned_staff_ids', 'address', 'landmark', 'state', 'country', 'region', 'zip_code']);
+        $this->reset(['name', 'email', 'password', 'company_name', 'profile_image', 'existing_profile_image', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids', 'assigned_staff_id', 'address', 'landmark', 'state', 'country', 'region', 'zip_code']);
         $this->phones = [['phone' => '', 'label' => 'Work']];
         $this->plan_ids = [];
-        $this->assigned_staff_ids = [];
+        $this->assigned_staff_id = null;
         $this->address = '';
         $this->landmark = '';
         $this->state = '';
@@ -211,8 +211,7 @@ class ManageClients extends Component
             'notes' => 'nullable|string',
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
-            'assigned_staff_ids' => 'nullable|array',
-            'assigned_staff_ids.*' => 'exists:adspv_staff,id',
+            'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
             'address' => 'nullable|string|max:1000',
             'landmark' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
@@ -264,7 +263,7 @@ class ManageClients extends Component
             $client->plans()->sync($this->plan_ids);
 
             // 5. Sync assigned staff
-            $client->assignedStaff()->sync($this->assigned_staff_ids);
+            $client->assignedStaff()->sync($this->assigned_staff_id ? [$this->assigned_staff_id] : []);
         });
 
         $this->dispatch('close-modal', name: 'add-client-modal');
@@ -279,7 +278,7 @@ class ManageClients extends Component
         $this->editingClientId = $client->id;
         $this->editingUserId = $client->user_id;
         $this->plan_ids = $client->plans->pluck('id')->toArray();
-        $this->assigned_staff_ids = $client->assignedStaff->pluck('id')->toArray();
+        $this->assigned_staff_id = $client->assignedStaff->first()?->id;
 
         $this->name = $client->user->name;
         $this->email = $client->user->email;
@@ -326,8 +325,7 @@ class ManageClients extends Component
             'notes' => 'nullable|string',
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
-            'assigned_staff_ids' => 'nullable|array',
-            'assigned_staff_ids.*' => 'exists:adspv_staff,id',
+            'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
             'address' => 'nullable|string|max:1000',
             'landmark' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
@@ -389,7 +387,7 @@ class ManageClients extends Component
             $client->plans()->sync($this->plan_ids);
 
             // 5. Sync assigned staff
-            $client->assignedStaff()->sync($this->assigned_staff_ids);
+            $client->assignedStaff()->sync($this->assigned_staff_id ? [$this->assigned_staff_id] : []);
         });
 
         $this->dispatch('close-modal', name: 'edit-client-modal');
@@ -426,7 +424,7 @@ class ManageClients extends Component
     }
 
     #[On('media-selected')]
-    public function setMedia($path, $field): void
+    public function setMedia($path, $field, $name = null, $mime_type = null, $size = null): void
     {
         if (property_exists($this, $field)) {
             $this->$field = $path;

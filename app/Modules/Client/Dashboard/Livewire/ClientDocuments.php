@@ -39,7 +39,7 @@ class ClientDocuments extends Component
 
     public function getCategory($doc)
     {
-        $name = strtolower($doc->file_name . ' ' . $doc->title);
+        $name = strtolower(($doc->file_name ?? $doc->url) . ' ' . $doc->title);
         
         if (str_contains($name, 'report') || str_contains($name, 'maintenance') || str_contains($name, 'marketing') || str_contains($name, 'analytics')) {
             return 'Reports';
@@ -96,6 +96,6 @@ class ClientDocuments extends Component
 
         return view('modules.client.dashboard.client-documents', [
             'documents' => $filteredDocs,
-        ])->layoutData(['title' => 'Documents']);
+        ])->layoutData(['title' => 'Resources']);
     }
 }

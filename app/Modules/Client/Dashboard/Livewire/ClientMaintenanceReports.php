@@ -7,6 +7,8 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Carbon\Carbon;
 
 #[Layout('layouts.client-portal')]
 class ClientMaintenanceReports extends Component
@@ -16,6 +18,19 @@ class ClientMaintenanceReports extends Component
     public $compareCurrent = null;
     public $comparePrevious = null;
     public bool $showCompareModal = false;
+    public string $viewMode = 'recent';
+    public string $filterMonth = '';
+
+    public function updatingFilterMonth()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingViewMode()
+    {
+        $this->resetPage();
+        $this->filterMonth = ''; // Reset filter when changing tabs
+    }
 
     public function render()
     {
@@ -25,33 +40,71 @@ class ClientMaintenanceReports extends Component
         abort_if(!$client, 404, 'Client not found.');
 
         // Get all completed maintenance reports for client's websites
-        $reports = DB::table('adspv_maintenance_reports as r')
+        $query = DB::table('adspv_maintenance_reports as r')
             ->join('adspv_websites as w', 'w.id', '=', 'r.website_id')
             ->where('r.client_id', $client->id)
-            ->where('r.status', 'completed')
-            ->select('r.*', 'w.site_name', 'w.url')
+            ->where('r.status', 'completed');
+
+        $reports = $query->select('r.*', 'w.site_name', 'w.url')
             ->orderByDesc('r.maintenance_date')
             ->get();
 
         // Dynamically add plugin counts, issues found, etc.
         $reports = $reports->map(function ($report) {
-            // Count plugins updated in this maintenance report
             $report->updates_count = DB::table('adspv_maintenance_report_plugins')
                 ->where('report_id', $report->id)
                 ->count();
-
-            // Calculate issues found and fixed from critical issues and warnings
             $report->issues_found = ($report->health_critical_issues ?? 0) + ($report->health_warnings ?? 0);
-            $report->issues_fixed = $report->issues_found; // assuming all issues found were resolved
-
-            // Backups count: default to 30 if backup was completed, else 0
+            $report->issues_fixed = $report->issues_found; 
             $report->backups_count = $report->backup_completed ? 30 : 0;
-
             return $report;
         });
 
+        // Group by website_id and separate into recent (first 3) and archive (rest)
+        $grouped = $reports->groupBy('website_id');
+        $recentReports = collect();
+        $archivedReports = collect();
+
+        foreach ($grouped as $websiteId => $siteReports) {
+            $recentReports = $recentReports->merge($siteReports->take(3));
+            $archivedReports = $archivedReports->merge($siteReports->skip(3));
+        }
+
+        // Re-sort globally by date descending
+        $recentReports = $recentReports->sortByDesc('maintenance_date')->values();
+        $archivedReports = $archivedReports->sortByDesc('maintenance_date')->values();
+
+        $activeReports = $this->viewMode === 'recent' ? $recentReports : $archivedReports;
+
+        // Get unique months for the current tab
+        $availableMonths = $activeReports->pluck('maintenance_date')->map(function ($date) {
+            $d = Carbon::parse($date);
+            return ['value' => $d->format('Y-m'), 'label' => $d->format('F Y')];
+        })->unique('value')->values();
+
+        // Apply Month Filter locally
+        if (!empty($this->filterMonth)) {
+            $activeReports = $activeReports->filter(function ($report) {
+                return Carbon::parse($report->maintenance_date)->format('Y-m') === $this->filterMonth;
+            })->values();
+        }
+
+        // Manual Pagination for the collection
+        $page = $this->getPage();
+        $perPage = 6;
+        $paginatedReports = new LengthAwarePaginator(
+            $activeReports->forPage($page, $perPage),
+            $activeReports->count(),
+            $perPage,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'pageName' => 'page']
+        );
+
         return view('modules.client.dashboard.client-maintenance-reports', [
-            'reports' => $reports,
+            'paginatedReports' => $paginatedReports,
+            'availableMonths' => $availableMonths,
+            'recentCount' => $recentReports->count(),
+            'archiveCount' => $archivedReports->count(),
         ])->layoutData(['title' => 'Maintenance Reports']);
     }
 

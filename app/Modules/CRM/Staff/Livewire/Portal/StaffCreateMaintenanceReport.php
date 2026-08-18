@@ -11,6 +11,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,6 +29,10 @@ class StaffCreateMaintenanceReport extends Component
     public string $year_select = '';
     public string $maintenance_date = '';
     public string $status = 'draft';
+
+
+
+
 
     public function updatedMonthSelect($value)
     {
@@ -289,8 +294,24 @@ class StaffCreateMaintenanceReport extends Component
             'developer_notes' => 'nullable|string',
             'client_summary' => 'nullable|string',
             'attachments_visible_to_client' => 'boolean',
-            'attachments.*' => 'nullable|file|max:10240',
         ];
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field, $name = null, $mime_type = null, $size = null): void
+    {
+        if ($field === 'attachments') {
+            $this->attachments[] = [
+                'path' => $path,
+                'name' => $name ?? basename($path)
+            ];
+        }
+    }
+
+    public function removeAttachment($index)
+    {
+        unset($this->attachments[$index]);
+        $this->attachments = array_values($this->attachments);
     }
 
     public function addPluginField()
@@ -389,10 +410,9 @@ class StaffCreateMaintenanceReport extends Component
 
             if (!empty($this->attachments)) {
                 foreach ($this->attachments as $file) {
-                    $path = $file->store('maintenance_attachments', 'public');
                     $report->attachments()->create([
-                        'file_path' => $path,
-                        'file_name' => $file->getClientOriginalName(),
+                        'file_path' => $file['path'],
+                        'file_name' => $file['name'],
                     ]);
                 }
             }

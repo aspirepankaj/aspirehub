@@ -10,6 +10,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.admin')]
 class ManageDocuments extends Component
@@ -24,7 +25,12 @@ class ManageDocuments extends Component
     public string $title = '';
     public ?int $client_id = null;
     public ?int $website_id = null;
-    public $file; // temporary uploaded file
+    public string $resource_type = 'file'; // 'file' or 'link'
+    public ?string $url = null;
+    public ?string $file_path = null;
+    public ?string $file_name = null;
+    public ?string $file_type = null;
+    public ?int $file_size = null;
 
     // Search and filters
     public string $search = '';
@@ -75,8 +81,20 @@ class ManageDocuments extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editingDocId', 'title', 'client_id', 'website_id', 'file']);
+        $this->reset(['editingDocId', 'title', 'client_id', 'website_id', 'file_path', 'file_name', 'file_type', 'file_size', 'resource_type', 'url']);
         $this->resetValidation();
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field, $name = null, $mime_type = null, $size = null)
+    {
+        if($field === 'document_file') {
+            $this->file_path = $path;
+            $this->file_name = $name ?? basename($path);
+            $this->file_size = $size ?? 0;
+            $extension = pathinfo($this->file_name, PATHINFO_EXTENSION);
+            $this->file_type = strtolower($extension);
+        }
     }
 
     public function openAddModal(): void
@@ -95,8 +113,14 @@ class ManageDocuments extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'client_id' => 'required|exists:adspv_clients,id',
-            'file' => 'required|file|max:10240', // 10MB max
+            'resource_type' => 'required|in:file,link',
         ];
+
+        if ($this->resource_type === 'file') {
+            $rules['file_path'] = 'required|string'; // updated for MediaPicker
+        } else {
+            $rules['url'] = 'required|url|max:1000';
+        }
 
         if ($this->activeTab === 'website') {
             $rules['website_id'] = 'required|exists:adspv_websites,id';
@@ -106,15 +130,24 @@ class ManageDocuments extends Component
 
         $this->validate($rules);
 
-        $path = $this->file->store('documents', 'public');
-        $fileName = $this->file->getClientOriginalName();
-        $fileType = strtolower($this->file->getClientOriginalExtension());
-        $fileSize = $this->file->getSize();
+        $path = null;
+        $fileName = null;
+        $fileType = null;
+        $fileSize = null;
+
+        if ($this->resource_type === 'file' && $this->file_path) {
+            $path = $this->file_path;
+            $fileName = $this->file_name;
+            $fileType = $this->file_type;
+            $fileSize = $this->file_size;
+        }
 
         Document::create([
             'client_id' => $this->client_id,
             'website_id' => $this->website_id,
             'title' => $this->title,
+            'resource_type' => $this->resource_type,
+            'url' => $this->resource_type === 'link' ? $this->url : null,
             'file_path' => $path,
             'file_name' => $fileName,
             'file_type' => $fileType,
@@ -134,7 +167,12 @@ class ManageDocuments extends Component
         $this->title = $doc->title;
         $this->client_id = $doc->client_id;
         $this->website_id = $doc->website_id;
-        $this->file = null; // Clear file input (keep existing file unless replaced)
+        $this->resource_type = $doc->resource_type ?? 'file';
+        $this->url = $doc->url;
+        $this->file_path = null;
+        $this->file_name = null;
+        $this->file_type = null;
+        $this->file_size = null;
 
         $this->resetValidation();
         $this->dispatch('open-modal', name: 'edit-doc-modal');
@@ -145,8 +183,14 @@ class ManageDocuments extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'client_id' => 'required|exists:adspv_clients,id',
-            'file' => 'nullable|file|max:10240',
+            'resource_type' => 'required|in:file,link',
         ];
+
+        if ($this->resource_type === 'file') {
+            $rules['file_path'] = 'nullable|string';
+        } else {
+            $rules['url'] = 'required|url|max:1000';
+        }
 
         if ($this->activeTab === 'website') {
             $rules['website_id'] = 'required|exists:adspv_websites,id';
@@ -161,19 +205,32 @@ class ManageDocuments extends Component
             'title' => $this->title,
             'client_id' => $this->client_id,
             'website_id' => $this->website_id,
+            'resource_type' => $this->resource_type,
         ];
 
-        if ($this->file) {
-            // Delete old file
+        if ($this->resource_type === 'link') {
+            $updateData['url'] = $this->url;
+            $updateData['file_path'] = null;
+            $updateData['file_name'] = null;
+            $updateData['file_type'] = null;
+            $updateData['file_size'] = null;
+
             if ($doc->file_path && Storage::disk('public')->exists($doc->file_path)) {
                 Storage::disk('public')->delete($doc->file_path);
             }
+        } elseif ($this->resource_type === 'file') {
+            $updateData['url'] = null;
+            if ($this->file_path) {
+                // Delete old file
+                if ($doc->file_path && Storage::disk('public')->exists($doc->file_path)) {
+                    Storage::disk('public')->delete($doc->file_path);
+                }
 
-            $path = $this->file->store('documents', 'public');
-            $updateData['file_path'] = $path;
-            $updateData['file_name'] = $this->file->getClientOriginalName();
-            $updateData['file_type'] = strtolower($this->file->getClientOriginalExtension());
-            $updateData['file_size'] = $this->file->getSize();
+                $updateData['file_path'] = $this->file_path;
+                $updateData['file_name'] = $this->file_name;
+                $updateData['file_type'] = $this->file_type;
+                $updateData['file_size'] = $this->file_size;
+            }
         }
 
         $doc->update($updateData);
@@ -212,8 +269,8 @@ class ManageDocuments extends Component
         $doc = Document::findOrFail($id);
         $this->previewingDocId = $doc->id;
         $this->previewTitle = $doc->title;
-        $this->previewType = strtolower($doc->file_type);
-        $this->previewUrl = asset('storage/' . $doc->file_path);
+        $this->previewType = $doc->resource_type === 'link' ? 'link' : strtolower($doc->file_type);
+        $this->previewUrl = $doc->resource_type === 'link' ? $doc->url : asset('storage/' . $doc->file_path);
 
         if (in_array($this->previewType, ['txt', 'csv', 'log'])) {
             if (Storage::disk('public')->exists($doc->file_path)) {
@@ -321,6 +378,6 @@ class ManageDocuments extends Component
             'allWebsites' => $allWebsites,
             'pageIds' => $pageIds,
             'hasActiveFilters' => $hasActiveFilters,
-        ])->layoutData(['title' => 'Documents Library - Aspire Hub']);
+        ])->layoutData(['title' => 'Resources Library - Aspire Hub']);
     }
 }

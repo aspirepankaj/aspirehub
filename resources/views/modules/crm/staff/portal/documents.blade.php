@@ -532,9 +532,20 @@
             {{-- File Uploader --}}
             <div>
                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Upload</label>
-                <input type="file" wire:model="file" class="block text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950/20 file:text-indigo-600 dark:file:text-indigo-400 file:cursor-pointer" />
-                <div wire:loading wire:target="file" class="text-xs text-indigo-500 font-bold mt-2">Uploading file...</div>
-                <x-input-error :messages="$errors->get('file')" class="mt-1" />
+                <div class="flex items-center gap-3">
+                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Choose from Media Library
+                    </button>
+                    @if($file_name)
+                        <span class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title="{{ $file_name }}">
+                            {{ $file_name }}
+                        </span>
+                    @endif
+                </div>
+                <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-2">
@@ -689,9 +700,20 @@
             {{-- File Uploader --}}
             <div>
                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Replace File (Optional)</label>
-                <input type="file" wire:model="file" class="block text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950/20 file:text-indigo-600 dark:file:text-indigo-400 file:cursor-pointer" />
-                <div wire:loading wire:target="file" class="text-xs text-indigo-500 font-bold mt-2">Uploading file...</div>
-                <x-input-error :messages="$errors->get('file')" class="mt-1" />
+                <div class="flex items-center gap-3">
+                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Choose from Media Library
+                    </button>
+                    @if($file_name)
+                        <span class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title="{{ $file_name }}">
+                            {{ $file_name }}
+                        </span>
+                    @endif
+                </div>
+                <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-2">

@@ -80,7 +80,7 @@
         <!-- Tabs Navigation -->
         <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6">
             <nav class="flex space-x-8" aria-label="Tabs">
-                @foreach(['overview' => 'Overview', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'documents' => 'Documents', 'activity log' => 'Activity Log', 'settings' => 'Settings'] as $tabKey => $tabLabel)
+                @foreach(['overview' => 'Overview', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'documents' => 'Resources', 'activity log' => 'Activity Log', 'settings' => 'Settings'] as $tabKey => $tabLabel)
                     <button type="button" wire:click="setTab('{{ $tabKey }}')" class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
                         {{ $tabLabel }}
                     </button>
@@ -297,7 +297,7 @@
         @elseif ($activeTab === 'documents')
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm animate-fadeIn">
                 @if ($clientDocuments->isEmpty())
-                    <div class="text-center py-12 text-slate-500">No documents uploaded yet.</div>
+                    <div class="text-center py-12 text-slate-500">No resources or links added yet.</div>
                 @else
                     <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                         <thead>
@@ -673,7 +673,7 @@
                         </div>
                     @endif
                     
-                    <button type="button" @click="$dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
                         Choose from Media Library
                     </button>
 
@@ -765,12 +765,12 @@
 
             {{-- Assign Staff - Checkbox Grid for multiple staff --}}
             <div>
-                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Staff Members</label>
+                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Account Manager</label>
                 <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-40 overflow-y-auto scrollbar-thin">
                     @foreach($staffMembers as $staffOpt)
                         <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
-                            <input type="checkbox" wire:model="assigned_staff_ids" value="{{ $staffOpt['id'] }}"
-                                   class="rounded border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
+                            <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
+                                   class="rounded-full border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
                             <div class="flex flex-col truncate">
                                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
                                 <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
@@ -778,7 +778,7 @@
                         </label>
                     @endforeach
                 </div>
-                <x-input-error :messages="$errors->get('assigned_staff_ids')" class="mt-1" />
+                <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
             </div>
 
             <!-- Address Details -->
@@ -895,7 +895,7 @@
                         </div>
                     @endif
                     
-                    <button type="button" @click="$dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
                         Choose from Media Library
                     </button>
 
@@ -987,12 +987,12 @@
 
             {{-- Assign Staff - Checkbox Grid for multiple staff --}}
             <div>
-                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Staff Members</label>
+                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Account Manager</label>
                 <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-40 overflow-y-auto scrollbar-thin">
                     @foreach($staffMembers as $staffOpt)
                         <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
-                            <input type="checkbox" wire:model="assigned_staff_ids" value="{{ $staffOpt['id'] }}"
-                                   class="rounded border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
+                            <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
+                                   class="rounded-full border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
                             <div class="flex flex-col truncate">
                                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
                                 <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
@@ -1000,7 +1000,7 @@
                         </label>
                     @endforeach
                 </div>
-                <x-input-error :messages="$errors->get('assigned_staff_ids')" class="mt-1" />
+                <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
             </div>
 
             <!-- Address Details -->

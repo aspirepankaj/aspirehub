@@ -8,6 +8,8 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.client-portal')]
 class ClientMarketingReports extends Component
 {
+    public string $viewMode = 'recent';
+
     public function render()
     {
         return view('modules.client.dashboard.client-marketing-reports')->layoutData(['title' => 'Marketing Reports']);

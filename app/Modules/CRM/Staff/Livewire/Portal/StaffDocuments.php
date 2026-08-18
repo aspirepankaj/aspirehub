@@ -10,6 +10,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.staff')]
 class StaffDocuments extends Component
@@ -24,7 +25,10 @@ class StaffDocuments extends Component
     public string $title = '';
     public ?int $client_id = null;
     public ?int $website_id = null;
-    public $file; // temporary uploaded file
+    public ?string $file_path = null;
+    public ?string $file_name = null;
+    public ?string $file_type = null;
+    public ?int $file_size = null;
 
     // Search and filters
     public string $search = '';
@@ -75,8 +79,20 @@ class StaffDocuments extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editingDocId', 'title', 'client_id', 'website_id', 'file']);
+        $this->reset(['editingDocId', 'title', 'client_id', 'website_id', 'file_path', 'file_name', 'file_type', 'file_size']);
         $this->resetValidation();
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field, $name = null, $mime_type = null, $size = null)
+    {
+        if($field === 'document_file') {
+            $this->file_path = $path;
+            $this->file_name = $name ?? basename($path);
+            $this->file_size = $size ?? 0;
+            $extension = pathinfo($this->file_name, PATHINFO_EXTENSION);
+            $this->file_type = strtolower($extension);
+        }
     }
 
     public function openAddModal(): void
@@ -95,7 +111,7 @@ class StaffDocuments extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'client_id' => 'required|exists:adspv_clients,id',
-            'file' => 'required|file|max:10240', // 10MB max
+            'file_path' => 'required|string',
         ];
 
         if ($this->activeTab === 'website') {
@@ -106,19 +122,14 @@ class StaffDocuments extends Component
 
         $this->validate($rules);
 
-        $path = $this->file->store('documents', 'public');
-        $fileName = $this->file->getClientOriginalName();
-        $fileType = strtolower($this->file->getClientOriginalExtension());
-        $fileSize = $this->file->getSize();
-
         Document::create([
             'client_id' => $this->client_id,
             'website_id' => $this->website_id,
             'title' => $this->title,
-            'file_path' => $path,
-            'file_name' => $fileName,
-            'file_type' => $fileType,
-            'file_size' => $fileSize,
+            'file_path' => $this->file_path,
+            'file_name' => $this->file_name,
+            'file_type' => $this->file_type,
+            'file_size' => $this->file_size,
             'added_by' => auth()->id(),
         ]);
 
@@ -139,7 +150,10 @@ class StaffDocuments extends Component
         $this->title = $doc->title;
         $this->client_id = $doc->client_id;
         $this->website_id = $doc->website_id;
-        $this->file = null; 
+        $this->file_path = null;
+        $this->file_name = null;
+        $this->file_type = null;
+        $this->file_size = null; 
 
         $this->resetValidation();
         $this->dispatch('open-modal', name: 'edit-doc-modal');
@@ -150,7 +164,7 @@ class StaffDocuments extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'client_id' => 'required|exists:adspv_clients,id',
-            'file' => 'nullable|file|max:10240',
+            'file_path' => 'nullable|string',
         ];
 
         if ($this->activeTab === 'website') {
@@ -173,16 +187,15 @@ class StaffDocuments extends Component
             'website_id' => $this->website_id,
         ];
 
-        if ($this->file) {
+        if ($this->file_path) {
             if ($doc->file_path && Storage::disk('public')->exists($doc->file_path)) {
                 Storage::disk('public')->delete($doc->file_path);
             }
 
-            $path = $this->file->store('documents', 'public');
-            $updateData['file_path'] = $path;
-            $updateData['file_name'] = $this->file->getClientOriginalName();
-            $updateData['file_type'] = strtolower($this->file->getClientOriginalExtension());
-            $updateData['file_size'] = $this->file->getSize();
+            $updateData['file_path'] = $this->file_path;
+            $updateData['file_name'] = $this->file_name;
+            $updateData['file_type'] = $this->file_type;
+            $updateData['file_size'] = $this->file_size;
         }
 
         $doc->update($updateData);

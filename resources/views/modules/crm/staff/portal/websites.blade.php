@@ -515,7 +515,7 @@
                         </div>
                     @endif
                     
-                    <button type="button" @click="$dispatch('open-media-picker', { field: 'image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
                         Choose from Media Library
                     </button>
                     
@@ -676,7 +676,7 @@
                         </div>
                     @endif
                     
-                    <button type="button" @click="$dispatch('open-media-picker', { field: 'image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
                         Choose from Media Library
                     </button>
                     

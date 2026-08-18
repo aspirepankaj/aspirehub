@@ -11,6 +11,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -243,8 +244,7 @@ class CreateMaintenanceReport extends Component
         return [
             'client_id' => 'required|exists:adspv_clients,id',
             'website_id' => 'required|exists:adspv_websites,id',
-            'developer_id' => 'required|exists:users,id',
-            'maintenance_month' => 'required|string',
+            'maintenance_month' => 'required|string|max:255',
             'maintenance_date' => 'required|date',
             'status' => 'required|in:draft,completed',
 
@@ -299,8 +299,26 @@ class CreateMaintenanceReport extends Component
             'developer_notes' => 'nullable|string',
             'client_summary' => 'nullable|string',
             'attachments_visible_to_client' => 'boolean',
-            'attachments.*' => 'nullable|file|max:10240', // Max 10MB per file
         ];
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field, $name = null, $mime_type = null, $size = null): void
+    {
+        \Log::info('setMedia called in CreateMaintenanceReport', ['path' => $path, 'field' => $field, 'name' => $name]);
+        if ($field === 'attachments') {
+            $this->attachments[] = [
+                'path' => $path,
+                'name' => $name ?? basename($path)
+            ];
+            \Log::info('Attachment added', $this->attachments);
+        }
+    }
+
+    public function removeAttachment($index)
+    {
+        unset($this->attachments[$index]);
+        $this->attachments = array_values($this->attachments);
     }
 
     public function addPluginField()
@@ -401,10 +419,9 @@ class CreateMaintenanceReport extends Component
             // Save attachments
             if (!empty($this->attachments)) {
                 foreach ($this->attachments as $file) {
-                    $path = $file->store('maintenance_attachments', 'public');
                     $report->attachments()->create([
-                        'file_path' => $path,
-                        'file_name' => $file->getClientOriginalName(),
+                        'file_path' => $file['path'],
+                        'file_name' => $file['name'],
                     ]);
                 }
             }

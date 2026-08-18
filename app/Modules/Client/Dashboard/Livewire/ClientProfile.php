@@ -164,6 +164,7 @@ class ClientProfile extends Component
             ->leftJoin('adspv_staff_phones as sp', 'sp.staff_id', '=', 's.id')
             ->where('cs.client_id', $client->id)
             ->select('u.name', 'u.email', 's.profile_image', 's.department', 'sp.phone')
+            ->take(1)
             ->get();
 
         // 2. Subscribed Plan Info

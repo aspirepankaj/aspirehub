@@ -11,6 +11,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -258,8 +259,25 @@ class StaffEditMaintenanceReport extends Component
             'developer_notes' => 'nullable|string',
             'client_summary' => 'nullable|string',
             'attachments_visible_to_client' => 'boolean',
-            'newAttachments.*' => 'nullable|file|max:10240',
+            'newAttachments' => 'nullable|array',
         ];
+    }
+
+    #[On('media-selected')]
+    public function setMedia($path, $field, $name = null, $mime_type = null, $size = null): void
+    {
+        if ($field === 'attachments') {
+            $this->newAttachments[] = [
+                'path' => $path,
+                'name' => $name ?? basename($path)
+            ];
+        }
+    }
+
+    public function removeNewAttachment($index)
+    {
+        unset($this->newAttachments[$index]);
+        $this->newAttachments = array_values($this->newAttachments);
     }
 
     public function addPluginField()
@@ -370,10 +388,9 @@ class StaffEditMaintenanceReport extends Component
             // Save new attachments
             if (!empty($this->newAttachments)) {
                 foreach ($this->newAttachments as $file) {
-                    $path = $file->store('maintenance_attachments', 'public');
                     $report->attachments()->create([
-                        'file_path' => $path,
-                        'file_name' => $file->getClientOriginalName(),
+                        'file_path' => $file['path'],
+                        'file_name' => $file['name'],
                     ]);
                 }
             }

@@ -312,7 +312,7 @@ class ManageWebsites extends Component
     }
 
     #[On('media-selected')]
-    public function setMedia($path, $field): void
+    public function setMedia($path, $field, $name = null, $mime_type = null, $size = null): void
     {
         if (property_exists($this, $field)) {
             $this->$field = $path;

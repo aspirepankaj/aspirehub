@@ -447,28 +447,35 @@
                     </button>
                 </div>
             </div>
-            <input type="file" wire:model="attachments" multiple class="block text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950/20 file:text-indigo-600 dark:file:text-indigo-400 file:cursor-pointer" />
-            <div wire:loading wire:target="attachments" class="text-xs text-indigo-500 font-bold mt-2">Uploading attachments...</div>
+            <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'attachments' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Choose from Media Library
+            </button>
             <x-input-error :messages="$errors->get('attachments.*')" class="mt-1" />
 
             @if(!empty($attachments))
                 <div class="mt-4 space-y-2">
                     <h4 class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Selected Files to Upload:</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        @foreach($attachments as $file)
-                            @php
-                                $isImg = in_array(strtolower($file->getClientOriginalExtension()), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
-                            @endphp
-                            <div class="flex flex-col gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50">
-                                @if($isImg)
-                                    <div class="rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800 bg-white">
-                                        <img src="{{ $file->temporaryUrl() }}" class="w-full h-32 object-cover" />
+                        @foreach($attachments as $index => $file)
+                            <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm shrink-0 text-slate-400">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                        </svg>
                                     </div>
-                                @endif
-                                <div class="flex items-center justify-between gap-2 mt-1">
-                                    <span class="text-xs text-slate-700 dark:text-slate-300 font-semibold truncate pr-2" title="{{ $file->getClientOriginalName() }}">{{ $file->getClientOriginalName() }}</span>
-                                    <span class="text-[10px] text-slate-400 shrink-0">({{ round($file->getSize() / 1024, 1) }} KB)</span>
+                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate" title="{{ $file['name'] }}">
+                                        {{ $file['name'] }}
+                                    </span>
                                 </div>
+                                <button type="button" wire:click="removeAttachment({{ $index }})" class="text-slate-400 hover:text-red-500 transition-colors p-1 shrink-0">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
                         @endforeach
                     </div>

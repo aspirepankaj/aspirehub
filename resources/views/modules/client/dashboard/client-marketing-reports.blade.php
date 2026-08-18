@@ -5,7 +5,9 @@
         ]"
     />
 
-    <div class="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 relative overflow-hidden">
+
+
+    <div class="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 relative overflow-hidden">
         <!-- Decorative subtle background shapes -->
         <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-72 bg-gradient-to-tr from-indigo-500/10 to-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
 

@@ -20,7 +20,7 @@ class MediaPicker extends Component
     public function updatedFiles()
     {
         $this->validate([
-            'files.*' => 'image|max:2048', // 2MB Max
+            'files.*' => 'file|max:10240', // 10MB Max
         ]);
 
         foreach ($this->files as $file) {
@@ -54,7 +54,14 @@ class MediaPicker extends Component
 
     public function selectMedia($path)
     {
-        $this->dispatch('media-selected', path: $path, field: $this->targetField);
+        $media = Media::where('file_path', $path)->first();
+        $this->dispatch('media-selected', 
+            path: $path, 
+            field: $this->targetField,
+            name: $media ? $media->file_name : basename($path),
+            mime_type: $media ? $media->mime_type : '',
+            size: $media ? $media->size : 0
+        );
         $this->close();
     }
 
