@@ -75,7 +75,7 @@
         <!-- Tabs Navigation -->
         <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6">
             <nav class="flex space-x-8" aria-label="Tabs">
-                @foreach(['overview' => 'Overview', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'documents' => 'Documents', 'activity log' => 'Activity Log'] as $tabKey => $tabLabel)
+                @foreach(['overview' => 'Overview', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'documents' => 'Resources', 'activity log' => 'Activity Log'] as $tabKey => $tabLabel)
                     <button type="button" wire:click="$set('activeTab', '{{ $tabKey }}')" class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
                         {{ $tabLabel }}
                     </button>
@@ -232,7 +232,7 @@
             @elseif ($activeTab === 'documents')
                 <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm animate-fadeIn">
                     @if ($clientDocuments->isEmpty())
-                        <div class="text-center py-12 text-slate-500">No documents uploaded yet.</div>
+                        <div class="text-center py-12 text-slate-500">No resources uploaded yet.</div>
                     @else
                         <table class="w-full text-left border-collapse">
                             <thead>

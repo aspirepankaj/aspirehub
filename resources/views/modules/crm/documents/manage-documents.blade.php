@@ -418,7 +418,7 @@
         <form wire:submit.prevent="saveDocument" class="space-y-4 p-1">
             {{-- Document Title --}}
             <div>
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Document Title</label>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Resource Title</label>
                 <input wire:model="title" type="text" placeholder="e.g. Website speed audit / Client Contract" class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
                 <x-input-error :messages="$errors->get('title')" class="mt-1" />
             </div>
@@ -552,41 +552,43 @@
             @endif
 
             {{-- Resource Type --}}
-            <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'file' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
-                    <input type="radio" wire:model.live="resource_type" value="file" class="text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-xs font-bold uppercase tracking-wider">File Upload</span>
-                </label>
-                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'link' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
-                    <input type="radio" wire:model.live="resource_type" value="link" class="text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-xs font-bold uppercase tracking-wider">External Link</span>
-                </label>
-            </div>
-
-            {{-- File Uploader --}}
-            <div x-show="$wire.resource_type === 'file'">
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Upload</label>
-                <div class="flex items-center gap-3">
-                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Choose from Media Library
-                    </button>
-                    @if($file_name)
-                        <span class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title="{{ $file_name }}">
-                            {{ $file_name }}
-                        </span>
-                    @endif
+            <div x-data="{ resType: @entangle('resource_type') }">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="resType === 'file' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                        <input type="radio" x-model="resType" value="file" class="text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-xs font-bold uppercase tracking-wider">File Upload</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="resType === 'link' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                        <input type="radio" x-model="resType" value="link" class="text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-xs font-bold uppercase tracking-wider">External Link</span>
+                    </label>
                 </div>
-                <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
-            </div>
 
-            {{-- External Link --}}
-            <div x-show="$wire.resource_type === 'link'">
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">URL</label>
-                <input wire:model="url" type="url" placeholder="https://..." class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                <x-input-error :messages="$errors->get('url')" class="mt-1" />
+                {{-- File Uploader --}}
+                <div x-show="resType === 'file'">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Upload</label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Choose from Media Library
+                        </button>
+                        @if($file_name)
+                            <span class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title="{{ $file_name }}">
+                                {{ $file_name }}
+                            </span>
+                        @endif
+                    </div>
+                    <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
+                </div>
+
+                {{-- External Link --}}
+                <div x-show="resType === 'link'">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">URL</label>
+                    <input wire:model="url" type="url" placeholder="https://..." class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
+                    <x-input-error :messages="$errors->get('url')" class="mt-1" />
+                </div>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-2">
@@ -594,7 +596,7 @@
                     Cancel
                 </button>
                 <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow active:scale-95 transition-all">
-                    Upload Document
+                    Save Resource
                 </button>
             </div>
         </form>
@@ -605,7 +607,7 @@
         <form wire:submit.prevent="updateDocument" class="space-y-4 p-1">
             {{-- Document Title --}}
             <div>
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Document Title</label>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Resource Title</label>
                 <input wire:model="title" type="text" placeholder="e.g. Website speed audit" class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-sm" />
                 <x-input-error :messages="$errors->get('title')" class="mt-1" />
             </div>
@@ -739,41 +741,43 @@
             @endif
 
             {{-- Resource Type --}}
-            <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'file' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
-                    <input type="radio" wire:model.live="resource_type" value="file" class="text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-xs font-bold uppercase tracking-wider">File Upload</span>
-                </label>
-                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'link' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
-                    <input type="radio" wire:model.live="resource_type" value="link" class="text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-xs font-bold uppercase tracking-wider">External Link</span>
-                </label>
-            </div>
-
-            {{-- Replace File --}}
-            <div x-show="$wire.resource_type === 'file'">
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Replace File (Optional)</label>
-                <div class="flex items-center gap-3">
-                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Choose from Media Library
-                    </button>
-                    @if($file_name)
-                        <span class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title="{{ $file_name }}">
-                            {{ $file_name }}
-                        </span>
-                    @endif
+            <div x-data="{ resType: @entangle('resource_type') }">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="resType === 'file' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                        <input type="radio" x-model="resType" value="file" class="text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-xs font-bold uppercase tracking-wider">File Upload</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="resType === 'link' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                        <input type="radio" x-model="resType" value="link" class="text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-xs font-bold uppercase tracking-wider">External Link</span>
+                    </label>
                 </div>
-                <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
-            </div>
 
-            {{-- External Link --}}
-            <div x-show="$wire.resource_type === 'link'">
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">URL</label>
-                <input wire:model="url" type="url" placeholder="https://..." class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
-                <x-input-error :messages="$errors->get('url')" class="mt-1" />
+                {{-- Replace File --}}
+                <div x-show="resType === 'file'">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Replace File (Optional)</label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Choose from Media Library
+                        </button>
+                        @if($file_name)
+                            <span class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title="{{ $file_name }}">
+                                {{ $file_name }}
+                            </span>
+                        @endif
+                    </div>
+                    <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
+                </div>
+
+                {{-- External Link --}}
+                <div x-show="resType === 'link'">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">URL</label>
+                    <input wire:model="url" type="url" placeholder="https://..." class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
+                    <x-input-error :messages="$errors->get('url')" class="mt-1" />
+                </div>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-2">
@@ -788,7 +792,7 @@
     </x-admin.modal>
 
     {{-- Modal 3: Preview Document --}}
-    <x-admin.modal name="preview-doc-modal" title="Document Preview" maxWidth="max-w-4xl">
+    <x-admin.modal name="preview-doc-modal" title="Resource Preview" maxWidth="max-w-4xl">
         <div class="p-2 space-y-4">
             @if($previewingDocId)
                 <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">

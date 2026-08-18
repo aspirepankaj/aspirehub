@@ -25,6 +25,8 @@ class StaffDocuments extends Component
     public string $title = '';
     public ?int $client_id = null;
     public ?int $website_id = null;
+    public string $resource_type = 'file';
+    public ?string $url = null;
     public ?string $file_path = null;
     public ?string $file_name = null;
     public ?string $file_type = null;
@@ -79,7 +81,7 @@ class StaffDocuments extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editingDocId', 'title', 'client_id', 'website_id', 'file_path', 'file_name', 'file_type', 'file_size']);
+        $this->reset(['editingDocId', 'title', 'client_id', 'website_id', 'file_path', 'file_name', 'file_type', 'file_size', 'resource_type', 'url']);
         $this->resetValidation();
     }
 
@@ -111,31 +113,47 @@ class StaffDocuments extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'client_id' => 'required|exists:adspv_clients,id',
-            'file_path' => 'required|string',
+            'resource_type' => 'required|in:file,link',
         ];
+
+        if ($this->resource_type === 'file') {
+            $rules['file_path'] = 'required|string';
+        } else {
+            $rules['url'] = 'required|url|max:1000';
+        }
 
         if ($this->activeTab === 'website') {
             $rules['website_id'] = 'required|exists:adspv_websites,id';
-        } else {
-            $this->website_id = null;
         }
 
         $this->validate($rules);
 
+        $staffId = auth()->user()->staff->id ?? 0;
+        $assignedClientIds = Client::whereHas('assignedStaff', function ($q) use ($staffId) {
+            $q->where('staff_id', $staffId);
+        })->pluck('id')->toArray();
+
+        if (!in_array($this->client_id, $assignedClientIds)) {
+            session()->flash('error', 'You do not have permission to add documents for this client.');
+            return;
+        }
+
         Document::create([
-            'client_id' => $this->client_id,
-            'website_id' => $this->website_id,
             'title' => $this->title,
-            'file_path' => $this->file_path,
-            'file_name' => $this->file_name,
-            'file_type' => $this->file_type,
-            'file_size' => $this->file_size,
+            'client_id' => $this->client_id,
+            'website_id' => $this->activeTab === 'website' ? $this->website_id : null,
+            'resource_type' => $this->resource_type,
+            'url' => $this->resource_type === 'link' ? $this->url : null,
+            'file_path' => $this->resource_type === 'file' ? $this->file_path : null,
+            'file_name' => $this->resource_type === 'file' ? $this->file_name : null,
+            'file_type' => $this->resource_type === 'file' ? $this->file_type : null,
+            'file_size' => $this->resource_type === 'file' ? $this->file_size : null,
             'added_by' => auth()->id(),
         ]);
 
         $this->dispatch('close-modal', name: 'add-doc-modal');
         $this->resetForm();
-        session()->flash('success', 'Document uploaded successfully!');
+        session()->flash('success', 'Resource added successfully!');
     }
 
     public function editDocument(int $id): void
@@ -150,6 +168,8 @@ class StaffDocuments extends Component
         $this->title = $doc->title;
         $this->client_id = $doc->client_id;
         $this->website_id = $doc->website_id;
+        $this->resource_type = $doc->resource_type ?? 'file';
+        $this->url = $doc->url;
         $this->file_path = null;
         $this->file_name = null;
         $this->file_type = null;
@@ -164,8 +184,14 @@ class StaffDocuments extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'client_id' => 'required|exists:adspv_clients,id',
-            'file_path' => 'nullable|string',
+            'resource_type' => 'required|in:file,link',
         ];
+
+        if ($this->resource_type === 'file') {
+            $rules['file_path'] = 'nullable|string';
+        } else {
+            $rules['url'] = 'required|url|max:1000';
+        }
 
         if ($this->activeTab === 'website') {
             $rules['website_id'] = 'required|exists:adspv_websites,id';
@@ -185,24 +211,39 @@ class StaffDocuments extends Component
             'title' => $this->title,
             'client_id' => $this->client_id,
             'website_id' => $this->website_id,
+            'resource_type' => $this->resource_type,
         ];
 
-        if ($this->file_path) {
+        if ($this->resource_type === 'link') {
+            $updateData['url'] = $this->url;
+            $updateData['file_path'] = null;
+            $updateData['file_name'] = null;
+            $updateData['file_type'] = null;
+            $updateData['file_size'] = null;
+
             if ($doc->file_path && Storage::disk('public')->exists($doc->file_path)) {
                 Storage::disk('public')->delete($doc->file_path);
             }
+        } elseif ($this->resource_type === 'file') {
+            $updateData['url'] = null;
+            if ($this->file_path) {
+                // Delete old file
+                if ($doc->file_path && Storage::disk('public')->exists($doc->file_path)) {
+                    Storage::disk('public')->delete($doc->file_path);
+                }
 
-            $updateData['file_path'] = $this->file_path;
-            $updateData['file_name'] = $this->file_name;
-            $updateData['file_type'] = $this->file_type;
-            $updateData['file_size'] = $this->file_size;
+                $updateData['file_path'] = $this->file_path;
+                $updateData['file_name'] = $this->file_name;
+                $updateData['file_type'] = $this->file_type;
+                $updateData['file_size'] = $this->file_size;
+            }
         }
 
         $doc->update($updateData);
 
         $this->dispatch('close-modal', name: 'edit-doc-modal');
         $this->resetForm();
-        session()->flash('success', 'Document updated successfully!');
+        session()->flash('success', 'Resource updated successfully!');
     }
 
     public function deleteDocument(int $id): void

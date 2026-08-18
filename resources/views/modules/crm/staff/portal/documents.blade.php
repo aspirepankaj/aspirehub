@@ -298,9 +298,15 @@
                                     <div class="font-semibold text-slate-800 dark:text-slate-200">
                                         {{ $doc->title }}
                                     </div>
-                                    <div class="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-xs" title="{{ $doc->file_name }}">
-                                        {{ $doc->file_name }}
-                                    </div>
+                                    @if($doc->resource_type === 'link')
+                                        <div class="text-[10px] text-blue-500 hover:text-blue-600 dark:text-blue-400 truncate max-w-xs" title="{{ $doc->url }}">
+                                            <a href="{{ $doc->url }}" target="_blank">{{ $doc->url }}</a>
+                                        </div>
+                                    @else
+                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-xs" title="{{ $doc->file_name }}">
+                                            {{ $doc->file_name }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="font-semibold text-slate-800 dark:text-slate-200">
@@ -322,12 +328,18 @@
                                 @endif
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-2">
-                                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/40 dark:border-slate-700/50">
-                                            {{ $doc->file_type }}
-                                        </span>
-                                        <span class="text-xs text-slate-400 font-medium">
-                                            {{ round($doc->file_size / 1024, 1) }} KB
-                                        </span>
+                                        @if($doc->resource_type === 'link')
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200/40 dark:border-blue-800/50">
+                                                LINK
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/40 dark:border-slate-700/50">
+                                                {{ $doc->file_type }}
+                                            </span>
+                                            <span class="text-xs text-slate-400 font-medium">
+                                                {{ round($doc->file_size / 1024, 1) }} KB
+                                            </span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 text-xs text-slate-550 dark:text-slate-450">
@@ -338,25 +350,35 @@
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        {{-- Preview button --}}
-                                        <button type="button" 
-                                                wire:click="previewDocument({{ $doc->id }})"
-                                                class="p-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-500 transition active:scale-90"
-                                                title="Preview File">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </button>
-                                        {{-- Download button --}}
-                                        <button type="button" 
-                                                wire:click="downloadDocument({{ $doc->id }})"
-                                                class="p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-indigo-500 transition active:scale-90"
-                                                title="Download">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                            </svg>
-                                        </button>
+                                        @if($doc->resource_type === 'link')
+                                            <a href="{{ $doc->url }}" target="_blank"
+                                               class="p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/20 text-blue-500 transition active:scale-90"
+                                               title="Open Link">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        @else
+                                            {{-- Preview button --}}
+                                            <button type="button" 
+                                                    wire:click="previewDocument({{ $doc->id }})"
+                                                    class="p-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-500 transition active:scale-90"
+                                                    title="Preview File">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
+                                            {{-- Download button --}}
+                                            <button type="button" 
+                                                    wire:click="downloadDocument({{ $doc->id }})"
+                                                    class="p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-indigo-500 transition active:scale-90"
+                                                    title="Download">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                            </button>
+                                        @endif
                                         {{-- Edit details --}}
                                         <button type="button" 
                                                 wire:click="editDocument({{ $doc->id }})"
@@ -394,9 +416,9 @@
     {{-- Modal 1: Add Document --}}
     <x-admin.modal name="add-doc-modal" title="Upload New Document" maxWidth="max-w-2xl">
         <form wire:submit.prevent="saveDocument" class="space-y-4 p-1">
-            {{-- Document Title --}}
+            {{-- Resource Title --}}
             <div>
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Document Title</label>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Resource Title</label>
                 <input wire:model="title" type="text" placeholder="e.g. Website speed audit / Client Contract" class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
                 <x-input-error :messages="$errors->get('title')" class="mt-1" />
             </div>
@@ -529,8 +551,20 @@
                 </div>
             @endif
 
+            {{-- Resource Type --}}
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'file' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                    <input type="radio" wire:model.live="resource_type" value="file" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-xs font-bold uppercase tracking-wider">File Upload</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'link' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                    <input type="radio" wire:model.live="resource_type" value="link" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-xs font-bold uppercase tracking-wider">External Link</span>
+                </label>
+            </div>
+
             {{-- File Uploader --}}
-            <div>
+            <div x-show="$wire.resource_type === 'file'">
                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">File Upload</label>
                 <div class="flex items-center gap-3">
                     <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
@@ -548,23 +582,30 @@
                 <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
             </div>
 
+            {{-- External Link --}}
+            <div x-show="$wire.resource_type === 'link'">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">URL</label>
+                <input wire:model="url" type="url" placeholder="https://..." class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
+                <x-input-error :messages="$errors->get('url')" class="mt-1" />
+            </div>
+
             <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" @click="show = false" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all">
                     Cancel
                 </button>
                 <button type="submit" class="px-4 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold shadow active:scale-95 transition-all">
-                    Upload Document
+                    Save Resource
                 </button>
             </div>
         </form>
     </x-admin.modal>
 
-    {{-- Modal 2: Edit Document --}}
-    <x-admin.modal name="edit-doc-modal" title="Edit Document Details" maxWidth="max-w-2xl">
+    {{-- Modal 2: Edit Resource --}}
+    <x-admin.modal name="edit-doc-modal" title="Edit Resource Details" maxWidth="max-w-2xl">
         <form wire:submit.prevent="updateDocument" class="space-y-4 p-1">
-            {{-- Document Title --}}
+            {{-- Resource Title --}}
             <div>
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Document Title</label>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Resource Title</label>
                 <input wire:model="title" type="text" placeholder="e.g. Website speed audit" class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-sm" />
                 <x-input-error :messages="$errors->get('title')" class="mt-1" />
             </div>
@@ -697,8 +738,20 @@
                 </div>
             @endif
 
-            {{-- File Uploader --}}
-            <div>
+            {{-- Resource Type --}}
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'file' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                    <input type="radio" wire:model.live="resource_type" value="file" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-xs font-bold uppercase tracking-wider">File Upload</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all" :class="$wire.resource_type === 'link' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                    <input type="radio" wire:model.live="resource_type" value="link" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-xs font-bold uppercase tracking-wider">External Link</span>
+                </label>
+            </div>
+
+            {{-- Replace File --}}
+            <div x-show="$wire.resource_type === 'file'">
                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Replace File (Optional)</label>
                 <div class="flex items-center gap-3">
                     <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'document_file' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
@@ -716,6 +769,13 @@
                 <x-input-error :messages="$errors->get('file_path')" class="mt-1" />
             </div>
 
+            {{-- External Link --}}
+            <div x-show="$wire.resource_type === 'link'">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">URL</label>
+                <input wire:model="url" type="url" placeholder="https://..." class="block w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
+                <x-input-error :messages="$errors->get('url')" class="mt-1" />
+            </div>
+
             <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" @click="show = false" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all">
                     Cancel
@@ -727,8 +787,8 @@
         </form>
     </x-admin.modal>
 
-    {{-- Modal 3: Preview Document --}}
-    <x-admin.modal name="preview-doc-modal" title="Document Preview: {{ $previewTitle }}" maxWidth="max-w-4xl">
+    {{-- Modal 3: Preview Resource --}}
+    <x-admin.modal name="preview-doc-modal" title="Resource Preview: {{ $previewTitle }}" maxWidth="max-w-4xl">
         <div class="p-2 space-y-4">
             @if($previewType)
                 @if(in_array($previewType, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']))

@@ -20,7 +20,7 @@ class MediaPicker extends Component
     public function updatedFiles()
     {
         $this->validate([
-            'files.*' => 'file|max:10240', // 10MB Max
+            'files.*' => 'file|max:51200', // 50MB Max
         ]);
 
         foreach ($this->files as $file) {
