@@ -1,6 +1,5 @@
-@section('page_title', 'Clients Management')
-
 <div>
+    @section('page_title', 'Clients Management')
     <!-- Breadcrumbs -->
     @if ($selectedClientDetailId && $clientDetails)
         <x-admin.breadcrumbs :items="['Clients' => route('admin.clients'), $clientDetails->user->name ?? 'Detail' => null]" />
@@ -23,66 +22,79 @@
         </div>
 
         <!-- Client Header Card -->
-        <div class="bg-white/93 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div class="flex items-center gap-4">
+        <div class="bg-white/93 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 sm:p-6 mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0 w-full md:w-auto">
                 <div class="relative shrink-0">
                     @if($clientDetails->profile_image)
-                        <img src="{{ asset('storage/' . $clientDetails->profile_image) }}" alt="{{ $clientDetails->user->name }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800" />
+                        <img src="{{ asset('storage/' . $clientDetails->profile_image) }}" alt="{{ $clientDetails->user->name }}" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800" />
                     @else
-                        <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400">
                             {{ $clientDetails->getInitials() }}
                         </div>
                     @endif
                 </div>
-                <div>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ $clientDetails->user->name }}</h1>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {{ $clientDetails->status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400' }} tracking-wider">
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white break-words">{{ $clientDetails->user->name }}</h1>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {{ $clientDetails->status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400' }} tracking-wider shrink-0">
                             {{ $clientDetails->status }}
                         </span>
                         @foreach($clientDetails->plans as $pl)
-                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-{{ $pl->color }}-500/10 text-{{ $pl->color }}-600 dark:text-{{ $pl->color }}-400 tracking-wider">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-{{ $pl->color }}-500/10 text-{{ $pl->color }}-600 dark:text-{{ $pl->color }}-400 tracking-wider shrink-0">
                                 {{ $pl->name }}
                             </span>
                         @endforeach
                     </div>
                     <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        <span class="flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <span class="flex items-center gap-1.5 truncate max-w-full">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
-                            {{ $clientDetails->company_name ?: 'No Company' }}
+                            <span class="truncate">{{ $clientDetails->company_name ?: 'No Company' }}</span>
                         </span>
-                        <span class="flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <span class="flex items-center gap-1.5 truncate max-w-full">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            {{ $clientDetails->user->email }}
+                            <span class="truncate">{{ $clientDetails->user->email }}</span>
                         </span>
                         @if($clientDetails->phones->isNotEmpty())
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <span class="flex items-center gap-1.5 shrink-0">
+                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
                                 {{ $clientDetails->phones->first()->phone }}
                             </span>
                         @endif
+                        <span class="flex items-center gap-1.5 shrink-0">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Registered {{ $clientDetails->created_at->format('M d, Y') }} ({{ $clientDetails->created_at->diffForHumans() }})
+                        </span>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button type="button" wire:click="editClient({{ $clientDetails->id }})" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl active:scale-95 transition">
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                <button type="button" wire:click="openClickUpMappingModal({{ $clientDetails->id }})" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded-xl shadow-sm transition active:scale-95">
+                    <span>Map With</span>
+                    <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                </button>
+                <button type="button" wire:click="editClient({{ $clientDetails->id }})" class="flex-1 sm:flex-none px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl active:scale-95 transition">
                     Edit
                 </button>
             </div>
         </div>
 
         <!-- Tabs Navigation -->
-        <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6">
-            <nav class="flex space-x-8" aria-label="Tabs">
-                @foreach(['overview' => 'Overview', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'documents' => 'Resources', 'activity log' => 'Activity Log', 'settings' => 'Settings'] as $tabKey => $tabLabel)
-                    <button type="button" wire:click="setTab('{{ $tabKey }}')" class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
-                        {{ $tabLabel }}
+        <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6 overflow-x-auto no-scrollbar">
+            <nav class="flex space-x-4 sm:space-x-8 min-w-max pb-1" aria-label="Tabs">
+                @foreach(['overview' => 'Overview', 'clickup_tickets' => 'ClickUp Tickets', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'documents' => 'Documents', 'activity log' => 'Activity Log', 'settings' => 'Settings'] as $tabKey => $tabLabel)
+                    <button type="button" wire:click="setTab('{{ $tabKey }}')" class="py-3 sm:py-4 px-1 border-b-2 font-bold text-xs sm:text-sm whitespace-nowrap transition flex items-center gap-1.5 shrink-0 {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                        @if($tabKey === 'hide_clickup_tickets')
+                            <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp" class="h-3.5 w-auto shrink-0" />
+                        @endif
+                        <span>{{ $tabLabel }}</span>
                     </button>
                 @endforeach
             </nav>
@@ -100,87 +112,416 @@
                         </p>
                     </div>
 
-                    <!-- Address Card -->
+                    <!-- Address Section -->
                     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Address details</h3>
-                        @if ($clientDetails->address || $clientDetails->landmark || $clientDetails->state || $clientDetails->country || $clientDetails->region || $clientDetails->zip_code)
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-400">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Address Details</h3>
+                        @if($clientDetails->address || $clientDetails->landmark || $clientDetails->state || $clientDetails->country || $clientDetails->region || $clientDetails->zip_code)
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                                 @if($clientDetails->address)
-                                    <div class="md:col-span-2">
-                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Address</span>
-                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->address }}</p>
+                                    <div class="col-span-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                        <span class="font-bold text-slate-400 uppercase text-[10px] block mb-1">Street Address</span>
+                                        <span class="text-slate-800 dark:text-slate-200 font-semibold">{{ $clientDetails->address }}</span>
                                     </div>
                                 @endif
                                 @if($clientDetails->landmark)
-                                    <div>
-                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Landmark</span>
-                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->landmark }}</p>
-                                    </div>
-                                @endif
-                                @if($clientDetails->state)
-                                    <div>
-                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">State</span>
-                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->state }}</p>
-                                    </div>
-                                @endif
-                                @if($clientDetails->country)
-                                    <div>
-                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Country</span>
-                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->country }}</p>
+                                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                        <span class="font-bold text-slate-400 uppercase text-[10px] block mb-1">Landmark</span>
+                                        <span class="text-slate-800 dark:text-slate-200 font-semibold">{{ $clientDetails->landmark }}</span>
                                     </div>
                                 @endif
                                 @if($clientDetails->region)
-                                    <div>
-                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Region</span>
-                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->region }}</p>
+                                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                        <span class="font-bold text-slate-400 uppercase text-[10px] block mb-1">Region</span>
+                                        <span class="text-slate-800 dark:text-slate-200 font-semibold">{{ $clientDetails->region }}</span>
+                                    </div>
+                                @endif
+                                @if($clientDetails->state)
+                                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                        <span class="font-bold text-slate-400 uppercase text-[10px] block mb-1">State / Province</span>
+                                        <span class="text-slate-800 dark:text-slate-200 font-semibold">{{ $clientDetails->state }}</span>
+                                    </div>
+                                @endif
+                                @if($clientDetails->country)
+                                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                        <span class="font-bold text-slate-400 uppercase text-[10px] block mb-1">Country</span>
+                                        <span class="text-slate-800 dark:text-slate-200 font-semibold">{{ $clientDetails->country }}</span>
                                     </div>
                                 @endif
                                 @if($clientDetails->zip_code)
-                                    <div>
-                                        <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Zip Code</span>
-                                        <p class="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{{ $clientDetails->zip_code }}</p>
+                                    <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                        <span class="font-bold text-slate-400 uppercase text-[10px] block mb-1">ZIP / Postal Code</span>
+                                        <span class="text-slate-800 dark:text-slate-200 font-semibold">{{ $clientDetails->zip_code }}</span>
                                     </div>
                                 @endif
                             </div>
                         @else
-                            <div class="text-center py-6 text-sm text-slate-450 dark:text-slate-500 italic">
-                                No address details provided for this client yet.
-                            </div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400 italic">No address details added.</div>
                         @endif
                     </div>
                 </div>
 
-                <!-- Assigned Team Card -->
-                <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Assigned team</h3>
-                    @if ($clientDetails->assignedStaff->isNotEmpty())
+                <!-- Sidebar Cards -->
+                <div class="space-y-6">
+                    <!-- Assigned Plans -->
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Assigned Plans</h3>
                         <div class="space-y-3">
-                            @foreach($clientDetails->assignedStaff as $staff)
-                                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl">
-                                    <div class="shrink-0">
-                                        @if($staff->profile_image)
-                                            <img src="{{ asset('storage/' . $staff->profile_image) }}" alt="Staff Avatar" class="w-10 h-10 rounded-full object-cover" />
-                                        @else
-                                            <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
-                                                {{ $staff->getInitials() }}
-                                            </div>
-                                        @endif
-                                    </div>
+                            @forelse($clientDetails->plans as $plan)
+                                <div class="p-3 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/40 flex items-center justify-between">
                                     <div>
-                                        <div class="font-bold text-sm text-slate-900 dark:text-white">{{ $staff->user->name ?? 'Deleted Staff' }}</div>
-                                        <div class="text-[10px] font-extrabold uppercase text-slate-450 dark:text-slate-500 tracking-wider">
-                                            {{ $staff->designations->pluck('name')->implode(', ') ?: 'Staff Member' }}
+                                        <h4 class="text-xs font-extrabold text-indigo-900 dark:text-indigo-300">{{ $plan->name }}</h4>
+                                        <p class="text-[10px] text-indigo-700/70 dark:text-indigo-400/70">{{ $plan->description ?: 'No description' }}</p>
+                                    </div>
+                                    <span class="px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-bold">Active</span>
+                                </div>
+                            @empty
+                                <div class="text-sm text-slate-500 dark:text-slate-400 italic">No plans assigned.</div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Assigned Staff Members -->
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Assigned Staff</h3>
+                        <div class="space-y-3">
+                            @forelse($clientDetails->assignedStaff as $staff)
+                                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+                                    @if($staff->user->profile_photo_url)
+                                        <img src="{{ $staff->user->profile_photo_url }}" alt="{{ $staff->user->name }}" class="w-9 h-9 rounded-full object-cover" />
+                                    @else
+                                        <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center">
+                                            {{ strtoupper(substr($staff->user->name, 0, 2)) }}
                                         </div>
+                                    @endif
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ $staff->user->name }}</h4>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ $staff->user->email }}</p>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-sm text-slate-500 dark:text-slate-400 italic">No staff assigned.</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        @elseif ($activeTab === 'clickup_tickets')
+            <div wire:init="loadClickUpTasks" class="space-y-6 animate-fadeIn">
+                <!-- Header Banner -->
+                <div class="bg-white/70 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp" class="h-5 w-auto" />
+                                <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Tickets & Tasks</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Live tickets from ClickUp folders assigned to {{ $clientDetails->company_name ?: ($clientDetails->user->name ?? 'this client') }}.
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <button type="button" wire:click="openClickUpMappingModal({{ $clientDetails->id }})" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <span>Manage Mapped Folders</span>
+                            </button>
+
+                            <button type="button" wire:click="syncClientClickUpTasks" wire:loading.attr="disabled"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-[#135266] hover:bg-[#0f4152] text-white font-bold text-xs rounded-xl shadow transition active:scale-95">
+                                <svg wire:loading.class="animate-spin" wire:target="syncClientClickUpTasks" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                <span wire:loading.remove wire:target="syncClientClickUpTasks">Sync Tickets API</span>
+                                <span wire:loading wire:target="syncClientClickUpTasks">Syncing...</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mapped Folders Badges -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center flex-wrap gap-2 text-xs">
+                        <span class="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">Assigned Folders:</span>
+                        @forelse($clientClickUpFolders as $cFolder)
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/20">
+                                <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                                {{ $cFolder->name }}
+                            </span>
+                        @empty
+                            <span class="text-slate-400 italic">No folders assigned yet.</span>
+                        @endforelse
+                    </div>
+                </div>
+
+                @if(!$clickUpTasksLoaded)
+                    <!-- Livewire Deferred Loading Skeleton Animation (Shown immediately when tab opens) -->
+                    <div class="w-full space-y-4 animate-pulse">
+                        <!-- Skeleton Filter Bar -->
+                        <div class="h-14 bg-slate-200/60 dark:bg-slate-800/50 rounded-2xl w-full"></div>
+
+                        <!-- Skeleton Accordion / Ticket Cards -->
+                        <div class="space-y-4">
+                            @for($i = 0; $i < 3; $i++)
+                                <div class="bg-white/70 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-800"></div>
+                                            <div class="space-y-2">
+                                                <div class="w-44 h-4 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+                                                <div class="w-28 h-3 bg-slate-200/70 dark:bg-slate-800/50 rounded-md"></div>
+                                            </div>
+                                        </div>
+                                        <div class="w-20 h-7 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+                                    </div>
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
+                @else
+                    @if($clientClickUpFolders->isEmpty())
+                        <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-10 text-center">
+                            <svg class="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                            </svg>
+                            <h4 class="font-bold text-slate-800 dark:text-slate-200 text-base mb-1">No ClickUp Folders Assigned</h4>
+                            <p class="text-xs text-slate-400 max-w-sm mx-auto mb-4">Please assign 1 or more ClickUp folders to this client to view their tickets here.</p>
+                            <button type="button" wire:click="openClickUpMappingModal({{ $clientDetails->id }})" class="inline-flex items-center gap-2 px-4 py-2 bg-[#135266] text-white text-xs font-bold rounded-xl shadow">
+                                Map With ClickUp
+                            </button>
+                        </div>
+                    @else
+                    <!-- Status & Folder Filters Bar (Search Removed) -->
+                    @if($clientClickUpFolders->count() > 1 || !empty($clientClickUpTasks))
+                        <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-3.5 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
+                                <svg class="w-4 h-4 text-[#135266]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                                </svg>
+                                Filter Tickets:
+                            </span>
+
+                            <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
+                                <!-- Folder Filter -->
+                                @if($clientClickUpFolders->count() > 1)
+                                    <select wire:model.live="clickUpTaskFolderFilter"
+                                            class="block w-full sm:w-48 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-[#135266]/40 focus:border-[#135266]">
+                                        <option value="">All Folders ({{ $clientClickUpFolders->count() }})</option>
+                                        @foreach($clientClickUpFolders as $cf)
+                                            <option value="{{ $cf->id }}">{{ $cf->name }}</option>
+                                        @endforeach
+                                    </select>
+                                @endif
+
+                                <!-- Status Filter (Dynamic Options from ClickUp) -->
+                                <select wire:model.live="clickUpTaskStatusFilter"
+                                        class="block w-full sm:w-48 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-[#135266]/40 focus:border-[#135266]">
+                                    <option value="">All Statuses ({{ count($clickUpStatuses) }})</option>
+                                    @foreach($clickUpStatuses as $st)
+                                        <option value="{{ $st }}">{{ ucfirst($st) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Tasks List (FAQ/Accordion for Multiple Folders, Flat View for Single Folder) -->
+                    @if($clientClickUpFolders->count() > 1)
+                        <!-- Accordion / FAQ Collapsible View for Multiple Folders (Closed by default) -->
+                        <div class="space-y-4">
+                            @foreach($clientClickUpFolders as $cFolder)
+                                @php
+                                    $folderTasks = collect($filteredClickUpTasks)->where('folder_id', (string)$cFolder->id);
+                                @endphp
+                                <div x-data="{ open: false }" class="bg-white/80 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/70 rounded-2xl overflow-hidden shadow-sm transition">
+                                    <!-- Accordion Header (Click to toggle) -->
+                                    <button type="button" @click="open = !open" 
+                                            class="w-full px-5 py-4 flex items-center justify-between gap-4 bg-slate-50/80 dark:bg-slate-800/50 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition text-left">
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-extrabold text-slate-900 dark:text-white text-base">
+                                                    {{ $cFolder->name }}
+                                                </h4>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                                    {{ count($folderTasks) }} {{ Str::plural('ticket', count($folderTasks)) }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-3">
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-[#135266]/10 text-[#135266] dark:bg-teal-400/10 dark:text-teal-400">
+                                                {{ count($folderTasks) }} {{ Str::plural('Ticket', count($folderTasks)) }}
+                                            </span>
+                                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </button>
+
+                                    <!-- Accordion Body (Tickets inside folder) -->
+                                    <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3 bg-slate-50/30 dark:bg-slate-950/20">
+                                        @forelse($folderTasks as $task)
+                                            <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700 rounded-2xl p-4 shadow-sm transition">
+                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                    <div class="space-y-1.5 flex-1 min-w-0">
+                                                        <div class="flex items-center flex-wrap gap-2">
+                                                            <!-- List Tag -->
+                                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                                                {{ $task['list_name'] }}
+                                                            </span>
+
+                                                            <!-- Status Badge -->
+                                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider" style="background-color: {{ $task['status_color'] }}1a; color: {{ $task['status_color'] }}">
+                                                                <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ $task['status_color'] }}"></span>
+                                                                {{ $task['status'] }}
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Task Title -->
+                                                        <h4 class="font-extrabold text-slate-900 dark:text-white text-base leading-snug">
+                                                            {{ $task['name'] }}
+                                                        </h4>
+
+                                                        @if($task['description'])
+                                                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                                                                {{ $task['description'] }}
+                                                            </p>
+                                                        @endif
+                                                    </div>
+
+                                                    <!-- Right Side Info & Actions -->
+                                                    <div class="flex sm:flex-col items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-slate-800">
+                                                        <!-- Open in ClickUp Link -->
+                                                        <a href="{{ $task['url'] }}" target="_blank"
+                                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-xl transition">
+                                                            <span>Open Ticket</span>
+                                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                            </svg>
+                                                        </a>
+
+                                                        <!-- Assignees & Dates -->
+                                                        <div class="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+                                                            @if(!empty($task['assignees']))
+                                                                <div class="flex items-center -space-x-1.5" title="Assigned To: {{ implode(', ', array_column($task['assignees'], 'username')) }}">
+                                                                    @foreach($task['assignees'] as $assignee)
+                                                                        @if(!empty($assignee['profilePicture']))
+                                                                            <img src="{{ $assignee['profilePicture'] }}" alt="{{ $assignee['username'] }}" class="w-5 h-5 rounded-full object-cover border border-white dark:border-slate-900" />
+                                                                        @else
+                                                                            <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-white dark:border-slate-900 flex items-center justify-center text-[9px] font-bold">
+                                                                                {{ strtoupper(substr($assignee['username'], 0, 2)) }}
+                                                                            </div>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </div>
+                                                            @else
+                                                                <span class="text-[11px] italic">Unassigned</span>
+                                                            @endif
+
+                                                            @if($task['date_created'])
+                                                                <span class="text-[11px] font-mono">{{ $task['date_created'] }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="py-6 text-center text-slate-400 text-xs italic">
+                                                No active tickets found in this folder.
+                                            </div>
+                                        @endforelse
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-6 text-sm text-slate-450 dark:text-slate-500 italic">
-                            No team members assigned to this client yet.
+                        <!-- Single Folder Flat View (No Accordion) -->
+                        <div class="space-y-3">
+                            @forelse($filteredClickUpTasks as $task)
+                                <div class="bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700 rounded-2xl p-4 shadow-sm transition">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="space-y-1.5 flex-1 min-w-0">
+                                            <div class="flex items-center flex-wrap gap-2">
+                                                <!-- Folder Tag -->
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                                    <svg class="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                    </svg>
+                                                    {{ $task['folder_name'] }} / {{ $task['list_name'] }}
+                                                </span>
+
+                                                <!-- Status Badge -->
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider" style="background-color: {{ $task['status_color'] }}1a; color: {{ $task['status_color'] }}">
+                                                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ $task['status_color'] }}"></span>
+                                                    {{ $task['status'] }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Task Title -->
+                                            <h4 class="font-extrabold text-slate-900 dark:text-white text-base leading-snug">
+                                                {{ $task['name'] }}
+                                            </h4>
+
+                                            @if($task['description'])
+                                                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                                                    {{ $task['description'] }}
+                                                </p>
+                                            @endif
+                                        </div>
+
+                                        <!-- Right Side Info & Actions -->
+                                        <div class="flex sm:flex-col items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-slate-800">
+                                            <!-- Open in ClickUp Link -->
+                                            <a href="{{ $task['url'] }}" target="_blank"
+                                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs rounded-xl transition">
+                                                <span>Open Ticket</span>
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+
+                                            <!-- Assignees & Dates -->
+                                            <div class="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+                                                @if(!empty($task['assignees']))
+                                                    <div class="flex items-center -space-x-1.5" title="Assigned To: {{ implode(', ', array_column($task['assignees'], 'username')) }}">
+                                                        @foreach($task['assignees'] as $assignee)
+                                                            @if(!empty($assignee['profilePicture']))
+                                                                <img src="{{ $assignee['profilePicture'] }}" alt="{{ $assignee['username'] }}" class="w-5 h-5 rounded-full object-cover border border-white dark:border-slate-900" />
+                                                            @else
+                                                                <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-white dark:border-slate-900 flex items-center justify-center text-[9px] font-bold">
+                                                                    {{ strtoupper(substr($assignee['username'], 0, 2)) }}
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <span class="text-[11px] italic">Unassigned</span>
+                                                @endif
+
+                                                @if($task['date_created'])
+                                                    <span class="text-[11px] font-mono">{{ $task['date_created'] }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-8 text-center text-slate-400 text-xs">
+                                    No ClickUp tickets found matching your filter criteria.
+                                </div>
+                            @endforelse
                         </div>
                     @endif
-                </div>
+                @endif
+            @endif
             </div>
 
         @elseif ($activeTab === 'websites')
@@ -551,7 +892,6 @@
                                 <th class="px-4 py-4">Websites</th>
                                 <th class="px-4 py-4">Phone Numbers</th>
                                 <th class="px-4 py-4">Status</th>
-                                <th class="px-4 py-4">Registered</th>
                                 <th class="px-4 py-4">Last Login</th>
                                 <th class="px-4 py-4 text-right">Actions</th>
                             </tr>
@@ -629,19 +969,26 @@
                                         {{ ucfirst($client->status) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
-                                    {{ $client->created_at->diffForHumans() }}
-                                </td>
                                 <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400 font-semibold">
                                     {{ $client->last_login_at ? $client->last_login_at->diffForHumans() : 'Never' }}
                                 </td>
-                                <td class="px-4 py-4 text-right">
-                                    <button type="button" wire:click="editClient({{ $client->id }})"
-                                            class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
+                                <td class="px-4 py-4 text-right whitespace-nowrap">
+                                    <div class="inline-flex items-center justify-end gap-1.5">
+                                        <button type="button" wire:click="openClickUpMappingModal({{ $client->id }})"
+                                                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition-all duration-150 active:scale-95"
+                                                title="Map ClickUp Folders to this Client">
+                                                <span>Map With</span>
+                                            <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                                        </button>
+
+                                        <button type="button" wire:click="editClient({{ $client->id }})"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all duration-150 active:scale-95"
+                                                title="Edit Client Profile">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -1096,5 +1443,155 @@
                 </x-admin.button>
             </div>
         </div>
+    </x-admin.modal>
+
+    <!-- ClickUp Folder Mapping Modal -->
+    <x-admin.modal name="clickup-client-mapping-modal" title="Map ClickUp Folders to Client" maxWidth="max-w-3xl">
+        @if($mappingClient)
+            <div class="space-y-5">
+                <!-- Client Header Banner -->
+                <div class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#135266]/10 text-[#135266] dark:bg-[#135266]/30 dark:text-teal-300 flex items-center justify-center font-bold text-sm">
+                            {{ $mappingClient->getInitials() }}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 dark:text-white text-base">
+                                {{ $mappingClient->company_name ?: ($mappingClient->user->name ?? 'Client') }}
+                            </h4>
+                            <p class="text-xs text-slate-400 dark:text-slate-400">
+                                {{ $mappingClient->user->name ?? '' }} ({{ $mappingClient->user->email ?? '' }})
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="button" wire:click="syncClickUpApi" wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-200/70 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
+                        <svg wire:loading.class="animate-spin" wire:target="syncClickUpApi" class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span wire:loading.remove wire:target="syncClickUpApi">Sync ClickUp API</span>
+                        <span wire:loading wire:target="syncClickUpApi">Syncing...</span>
+                    </button>
+                </div>
+
+                <!-- ClickUp Spaces Selection Tabs -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+                        Select ClickUp Space
+                    </label>
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                        @foreach($clickUpSpaces as $space)
+                            <button type="button" 
+                                    wire:click="selectClickUpSpace('{{ $space->id }}')"
+                                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap border {{ $clickUpSpaceId === $space->id ? 'bg-[#135266] text-white border-[#135266] shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50' }}">
+                                @if($space->color)
+                                    <span class="w-2 h-2 rounded-full" style="background-color: {{ $space->color }}"></span>
+                                @endif
+                                {{ $space->name }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Folders Live Search Input -->
+                @if(!empty($clickUpSpaceId))
+                    <div class="relative">
+                        <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input wire:model.live.debounce.200ms="clickUpFolderSearch"
+                               type="text"
+                               placeholder="Search ClickUp folder name in this space..."
+                               class="block w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-[#135266]/40 focus:border-[#135266]" />
+                    </div>
+                @endif
+
+                <!-- Folders List Container with Checkboxes -->
+                <div class="border border-slate-200/80 dark:border-slate-700/80 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+                    <div class="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
+                        @if(empty($clickUpSpaceId))
+                            <div class="px-6 py-10 text-center">
+                                <svg class="w-10 h-10 text-[#135266]/40 dark:text-teal-500/40 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                </svg>
+                                <p class="text-xs font-bold text-slate-700 dark:text-slate-300">No Space Selected</p>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Please click on a ClickUp Space tab above to view and assign folders.</p>
+                            </div>
+                        @else
+                            @forelse($clickUpFolders as $folder)
+                                @php
+                                    $folderIdStr = (string) $folder->id;
+                                    $isSelectedForThisClient = in_array($folderIdStr, $selectedClickUpFolderIds, true);
+                                    $isOtherClientFolder = $folder->client_id && $folder->client_id !== $mappingClient->id;
+                                    $otherClientName = $isOtherClientFolder ? ($folder->client->company_name ?: ($folder->client->user->name ?? 'Client #'.$folder->client_id)) : null;
+                                @endphp
+                                <label wire:key="clickup-folder-{{ $clickUpSpaceId }}-{{ $folder->id }}"
+                                       class="flex items-center justify-between px-4 py-3 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 cursor-pointer transition {{ $isSelectedForThisClient ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : '' }}">
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox"
+                                               wire:click="toggleFolderSelection('{{ $folderIdStr }}')"
+                                               {{ $isSelectedForThisClient ? 'checked' : '' }}
+                                               class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#135266] focus:ring-[#135266]/40 focus:ring-2 cursor-pointer" />
+                                        
+                                        <div>
+                                            <div class="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                </svg>
+                                                <span>{{ $folder->name }}</span>
+                                            </div>
+                                            <div class="text-[11px] text-slate-400 font-mono">ID: {{ $folder->id }}</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Badge -->
+                                    <div>
+                                        @if($isSelectedForThisClient)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                Assigned to this Client
+                                            </span>
+                                        @elseif($isOtherClientFolder)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Assigned to {{ $otherClientName }}">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                Assigned: {{ Str::limit($otherClientName, 18) }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                                Unassigned
+                                            </span>
+                                        @endif
+                                    </div>
+                                </label>
+                            @empty
+                                <div class="px-6 py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
+                                    No ClickUp folders found in this space.
+                                </div>
+                            @endforelse
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Footer Summary & Actions -->
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        Selected <span class="font-extrabold text-[#135266] dark:text-teal-400">{{ count(array_filter($selectedClickUpFolderIds)) }}</span> folder(s) for this client
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button type="button" @click="$dispatch('close-modal', { name: 'clickup-client-mapping-modal' })"
+                                class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition duration-150">
+                            Cancel
+                        </button>
+
+                        <button type="button" wire:click="saveClickUpMapping"
+                                class="px-5 py-2 bg-[#135266] hover:bg-[#0f4152] text-white text-xs font-bold rounded-xl shadow transition duration-150">
+                            Save ClickUp Mapping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
     </x-admin.modal>
 </div>

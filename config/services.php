@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'clickup' => [
+        'api_token' => env('CLICKUP_API_TOKEN'),
+        'team_id'   => env('CLICKUP_TEAM_ID'),
+        'base_url'  => 'https://api.clickup.com/api/v2',
+    ],
+
 ];

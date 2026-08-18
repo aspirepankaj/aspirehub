@@ -4,6 +4,9 @@ namespace App\Modules\CRM\Clients\Livewire;
 
 use App\Models\User;
 use App\Modules\CRM\Clients\Models\Client;
+use App\Modules\CRM\ClickUp\Models\ClickUpFolder;
+use App\Modules\CRM\ClickUp\Models\ClickUpSpace;
+use App\Services\ClickUpService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -51,6 +54,19 @@ class ManageClients extends Component
     // Detail view state
     public ?int $selectedClientDetailId = null;
     public string $activeTab = 'overview';
+
+    // ClickUp Mapping State
+    public ?int $mappingClientId = null;
+    public string $clickUpSpaceId = '';
+    public string $clickUpFolderSearch = '';
+    public array $selectedClickUpFolderIds = [];
+
+    // ClickUp Tickets State in Client Detail View
+    public array $clientClickUpTasks = [];
+    public string $clickUpTaskStatusFilter = '';
+    public string $clickUpTaskFolderFilter = '';
+    public string $clickUpTaskSearch = '';
+    public bool $clickUpTasksLoaded = false;
 
     public function mount($id = null): void
     {
@@ -431,77 +447,223 @@ class ManageClients extends Component
         }
     }
 
-    public function render()
+    /**
+     * Open ClickUp Mapping Modal for a specific Client
+     */
+    public function openClickUpMappingModal(int $clientId): void
+    {
+        $client = Client::with('user')->findOrFail($clientId);
+        $this->mappingClientId = $client->id;
+        $this->clickUpSpaceId = ''; // No space selected by default
+        $this->clickUpFolderSearch = '';
+        $this->selectedClickUpFolderIds = ClickUpFolder::where('client_id', $client->id)->pluck('id')->map(fn($id) => (string)$id)->toArray();
+
+        $this->dispatch('open-modal', name: 'clickup-client-mapping-modal');
+    }
+
+    /**
+     * Select active ClickUp Space in modal
+     */
+    public function selectClickUpSpace(string $spaceId): void
+    {
+        $this->clickUpSpaceId = $spaceId;
+    }
+
+    /**
+     * Toggle individual folder selection in modal
+     */
+    public function toggleFolderSelection(string $folderId): void
+    {
+        $folderId = (string) $folderId;
+        if (in_array($folderId, $this->selectedClickUpFolderIds, true)) {
+            $this->selectedClickUpFolderIds = array_values(array_diff($this->selectedClickUpFolderIds, [$folderId]));
+        } else {
+            $this->selectedClickUpFolderIds[] = $folderId;
+        }
+    }
+
+    /**
+     * Sync ClickUp API in real-time
+     */
+    public function syncClickUpApi(ClickUpService $clickUpService): void
+    {
+        try {
+            $res = $clickUpService->syncAll();
+            if ($this->mappingClientId) {
+                $this->selectedClickUpFolderIds = ClickUpFolder::where('client_id', $this->mappingClientId)->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            }
+            session()->flash('success', "ClickUp API synced successfully! Updated {$res['synced_folders']} folders.");
+        } catch (\Exception $e) {
+            session()->flash('error', "ClickUp API Error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Save folder mappings for active client
+     */
+    public function saveClickUpMapping(): void
+    {
+        if (!$this->mappingClientId) {
+            return;
+        }
+
+        $client = Client::findOrFail($this->mappingClientId);
+        $selectedIds = array_map('strval', array_values(array_filter($this->selectedClickUpFolderIds)));
+
+        // 1. Unmap folders previously assigned to this client that are no longer selected
+        ClickUpFolder::where('client_id', $client->id)
+            ->whereNotIn('id', $selectedIds)
+            ->update(['client_id' => null]);
+
+        // 2. Map selected folders to this client
+        if (!empty($selectedIds)) {
+            ClickUpFolder::whereIn('id', $selectedIds)
+                ->update(['client_id' => $client->id]);
+        }
+
+        $this->dispatch('close-modal', name: 'clickup-client-mapping-modal');
+        $clientName = $client->company_name ?: ($client->user->name ?? 'Client');
+        session()->flash('success', "ClickUp folder mappings saved for '{$clientName}' successfully!");
+    }
+
+    /**
+     * Async background loader for ClickUp tickets
+     */
+    public function loadClickUpTasks(ClickUpService $clickUpService): void
+    {
+        if (!$this->selectedClientDetailId || $this->clickUpTasksLoaded) {
+            return;
+        }
+
+        try {
+            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientDetailId);
+            $this->clickUpTasksLoaded = true;
+        } catch (\Exception $e) {
+            $this->clientClickUpTasks = [];
+            $this->clickUpTasksLoaded = true;
+        }
+    }
+
+    /**
+     * Refresh ClickUp tickets for active client
+     */
+    public function syncClientClickUpTasks(ClickUpService $clickUpService): void
+    {
+        if (!$this->selectedClientDetailId) {
+            return;
+        }
+
+        try {
+            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientDetailId);
+            $this->clickUpTasksLoaded = true;
+            session()->flash('success', "ClickUp tickets refreshed successfully!");
+        } catch (\Exception $e) {
+            session()->flash('error', "Failed to load ClickUp tickets: " . $e->getMessage());
+        }
+    }
+
+    public function render(ClickUpService $clickUpService)
     {
         $clientDetails = null;
         $clientWebsites = collect();
         $clientMaintenanceReports = collect();
         $clientDocuments = collect();
         $clientActivityLogs = collect();
+        $clientClickUpFolders = collect();
+        $filteredClickUpTasks = collect();
 
         if ($this->selectedClientDetailId) {
             $clients = collect();
             $hasActiveFilters = false;
             $pageIds = [];
 
+            // 1. Basic Client Details (header & overview)
             $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])->findOrFail($this->selectedClientDetailId);
             
-            $clientWebsites = \App\Modules\CRM\Websites\Models\Website::with('latestMaintenanceReport')
-                ->where('client_id', $this->selectedClientDetailId)
-                ->latest()
-                ->get();
-                
-            $clientMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'website'])
-                ->where('client_id', $this->selectedClientDetailId)
-                ->latest()
-                ->paginate(10, ['*'], 'maintenancepage')
-                ->onEachSide(1);
-                
-            $clientDocuments = \App\Modules\CRM\Documents\Models\Document::with('addedBy')
-                ->where('client_id', $this->selectedClientDetailId)
-                ->latest()
-                ->paginate(10, ['*'], 'documentspage')
-                ->onEachSide(1);
+            // 2. Strict Tab-Based Data Loading (Only load what the active tab needs!)
+            if ($this->activeTab === 'websites') {
+                $clientWebsites = \App\Modules\CRM\Websites\Models\Website::with('latestMaintenanceReport')
+                    ->where('client_id', $this->selectedClientDetailId)
+                    ->latest()
+                    ->get();
+            }
 
-            $websiteIds = $clientWebsites->pluck('id')->toArray();
-            $reportIds = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::where('client_id', $this->selectedClientDetailId)
-                ->pluck('id')
-                ->toArray();
-            $docIds = \App\Modules\CRM\Documents\Models\Document::where('client_id', $this->selectedClientDetailId)
-                ->pluck('id')
-                ->toArray();
+            if ($this->activeTab === 'clickup_tickets') {
+                $clientClickUpFolders = ClickUpFolder::where('client_id', $this->selectedClientDetailId)->get();
 
-            $clientActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
-                ->where(function ($query) use ($websiteIds, $reportIds, $docIds) {
-                    $query->where(function ($q) {
-                        $q->where('loggable_type', \App\Modules\CRM\Clients\Models\Client::class)
-                          ->where('loggable_id', $this->selectedClientDetailId);
-                    })
-                    ->orWhere(function ($q) {
-                        $q->where('user_id', $this->selectedClientDetailId);
-                    })
-                    ->when(!empty($websiteIds), function ($q) use ($websiteIds) {
-                        $q->orWhere(function ($sq) use ($websiteIds) {
-                            $sq->where('loggable_type', \App\Modules\CRM\Websites\Models\Website::class)
-                              ->whereIn('loggable_id', $websiteIds);
+                $clickUpStatuses = collect($this->clientClickUpTasks)
+                    ->pluck('status')
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values();
+
+                $filteredClickUpTasks = collect($this->clientClickUpTasks);
+
+                if (!empty($this->clickUpTaskStatusFilter)) {
+                    $sf = strtolower(trim($this->clickUpTaskStatusFilter));
+                    $filteredClickUpTasks = $filteredClickUpTasks->filter(fn($t) => strtolower(trim($t['status'])) === $sf);
+                }
+
+                if (!empty($this->clickUpTaskFolderFilter)) {
+                    $ff = (string) $this->clickUpTaskFolderFilter;
+                    $filteredClickUpTasks = $filteredClickUpTasks->filter(fn($t) => (string) $t['folder_id'] === $ff);
+                }
+            }
+
+            if ($this->activeTab === 'maintenance') {
+                $clientMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'website'])
+                    ->where('client_id', $this->selectedClientDetailId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'maintenancepage')
+                    ->onEachSide(1);
+            }
+
+            if ($this->activeTab === 'documents') {
+                $clientDocuments = \App\Modules\CRM\Documents\Models\Document::with('addedBy')
+                    ->where('client_id', $this->selectedClientDetailId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'documentspage')
+                    ->onEachSide(1);
+            }
+
+            if ($this->activeTab === 'activity log' || $this->activeTab === 'activity') {
+                $websiteIds = \App\Modules\CRM\Websites\Models\Website::where('client_id', $this->selectedClientDetailId)->pluck('id')->toArray();
+                $reportIds  = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::where('client_id', $this->selectedClientDetailId)->pluck('id')->toArray();
+                $docIds     = \App\Modules\CRM\Documents\Models\Document::where('client_id', $this->selectedClientDetailId)->pluck('id')->toArray();
+
+                $clientActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+                    ->where(function ($query) use ($websiteIds, $reportIds, $docIds) {
+                        $query->where(function ($q) {
+                            $q->where('loggable_type', \App\Modules\CRM\Clients\Models\Client::class)
+                              ->where('loggable_id', $this->selectedClientDetailId);
+                        })
+                        ->orWhere(function ($q) {
+                            $q->where('user_id', $this->selectedClientDetailId);
+                        })
+                        ->when(!empty($websiteIds), function ($q) use ($websiteIds) {
+                            $q->orWhere(function ($sq) use ($websiteIds) {
+                                $sq->where('loggable_type', \App\Modules\CRM\Websites\Models\Website::class)
+                                  ->whereIn('loggable_id', $websiteIds);
+                            });
+                        })
+                        ->when(!empty($reportIds), function ($q) use ($reportIds) {
+                            $q->orWhere(function ($sq) use ($reportIds) {
+                                $sq->where('loggable_type', \App\Modules\CRM\Maintenance\Models\MaintenanceReport::class)
+                                  ->whereIn('loggable_id', $reportIds);
+                            });
+                        })
+                        ->when(!empty($docIds), function ($q) use ($docIds) {
+                            $q->orWhere(function ($sq) use ($docIds) {
+                                $sq->where('loggable_type', \App\Modules\CRM\Documents\Models\Document::class)
+                                  ->whereIn('loggable_id', $docIds);
+                            });
                         });
                     })
-                    ->when(!empty($reportIds), function ($q) use ($reportIds) {
-                        $q->orWhere(function ($sq) use ($reportIds) {
-                            $sq->where('loggable_type', \App\Modules\CRM\Maintenance\Models\MaintenanceReport::class)
-                              ->whereIn('loggable_id', $reportIds);
-                        });
-                    })
-                    ->when(!empty($docIds), function ($q) use ($docIds) {
-                        $q->orWhere(function ($sq) use ($docIds) {
-                            $sq->where('loggable_type', \App\Modules\CRM\Documents\Models\Document::class)
-                              ->whereIn('loggable_id', $docIds);
-                        });
-                    });
-                })
-                ->latest()
-                ->paginate(10, ['*'], 'activitypage')
-                ->onEachSide(1);
+                    ->latest()
+                    ->paginate(10, ['*'], 'activitypage')
+                    ->onEachSide(1);
+            }
         } else {
             $clients = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
                 ->withCount('websites')
@@ -534,6 +696,29 @@ class ManageClients extends Component
             ])
             ->values();
 
+        // ClickUp Data for Mapping Modal
+        $clickUpSpaces = ClickUpSpace::orderBy('name')->get();
+
+        if (!empty($this->clickUpSpaceId)) {
+            $clickUpFoldersQuery = ClickUpFolder::with('client.user')
+                ->where('clickup_space_id', $this->clickUpSpaceId);
+
+            if (!empty($this->clickUpFolderSearch)) {
+                $searchTerm = '%' . trim($this->clickUpFolderSearch) . '%';
+                $clickUpFoldersQuery->where('name', 'like', $searchTerm);
+            }
+
+            $clickUpFolders = $clickUpFoldersQuery->get()->sortBy(function ($folder) {
+                $isAssigned = ($folder->client_id === $this->mappingClientId) 
+                    || in_array((string) $folder->id, $this->selectedClickUpFolderIds, true);
+                return [$isAssigned ? 0 : 1, strtolower($folder->name)];
+            })->values();
+        } else {
+            $clickUpFolders = collect();
+        }
+
+        $mappingClient = $this->mappingClientId ? Client::with('user')->find($this->mappingClientId) : null;
+
         return view('modules.crm.clients.manage-clients', [
             'clients'                  => $clients,
             'plans'                    => $plans,
@@ -545,6 +730,13 @@ class ManageClients extends Component
             'clientMaintenanceReports' => $clientMaintenanceReports,
             'clientDocuments'          => $clientDocuments,
             'clientActivityLogs'       => $clientActivityLogs,
+            'clientClickUpFolders'     => $clientClickUpFolders,
+            'clientClickUpTasks'       => $filteredClickUpTasks,
+            'filteredClickUpTasks'     => $filteredClickUpTasks->values(),
+            'clickUpStatuses'          => $clickUpStatuses ?? collect(),
+            'clickUpSpaces'            => $clickUpSpaces,
+            'clickUpFolders'           => $clickUpFolders,
+            'mappingClient'            => $mappingClient,
         ])->layoutData(['title' => 'Clients Management - Aspire Hub']);
     }
 }
