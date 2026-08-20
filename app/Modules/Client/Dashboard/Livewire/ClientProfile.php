@@ -68,7 +68,22 @@ class ClientProfile extends Component
         // Handle profile image upload
         $imagePath = $this->existing_profile_image;
         if ($this->profile_image) {
-            $imagePath = $this->profile_image->store('profile-photos', 'public');
+            $year = date('Y');
+            $month = date('m');
+            $folder = "profile-photos/{$year}/{$month}";
+
+            $originalName = pathinfo($this->profile_image->getClientOriginalName(), PATHINFO_FILENAME);
+            $originalName = preg_replace('/[^A-Za-z0-9\-_]/', '-', $originalName);
+            $extension = $this->profile_image->getClientOriginalExtension();
+            $fileName = "{$originalName}.{$extension}";
+
+            $counter = 1;
+            while (\Illuminate\Support\Facades\Storage::disk('public')->exists("{$folder}/{$fileName}")) {
+                $fileName = "{$originalName}-{$counter}.{$extension}";
+                $counter++;
+            }
+
+            $imagePath = $this->profile_image->storeAs($folder, $fileName, 'public');
         }
 
         // Update Client details

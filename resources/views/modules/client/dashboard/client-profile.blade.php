@@ -37,7 +37,7 @@
                     <div class="relative shrink-0">
                         @if ($profile_image)
                             <img src="{{ $profile_image->temporaryUrl() }}" class="w-20 h-20 rounded-full object-cover border-2 border-indigo-500/30 shadow-md" />
-                        @elseif ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image)))
+                        @elseif ($existing_profile_image && file_exists(storage_path('app/public/' . $existing_profile_image)))
                             <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-20 h-20 rounded-full object-cover border-2 border-indigo-500/30 shadow-md" />
                         @else
                             <div class="w-20 h-20 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold text-2xl text-indigo-600 dark:text-indigo-400">
@@ -64,7 +64,7 @@
                                 Change photo
                                 <input type="file" wire:model="profile_image" accept="image/*" class="hidden" />
                             </label>
-                            @if ($profile_image || ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image))))
+                            @if ($profile_image || ($existing_profile_image && file_exists(storage_path('app/public/' . $existing_profile_image))))
                                 <button type="button" wire:click="removeProfileImage" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800/50 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition">
                                     Remove photo
                                 </button>

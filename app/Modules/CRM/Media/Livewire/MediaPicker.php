@@ -33,13 +33,7 @@ class MediaPicker extends Component
         ]);
 
         foreach ($this->files as $file) {
-            $path = $file->store('media', 'public');
-            Media::create([
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $path,
-                'mime_type' => $file->getMimeType(),
-                'size'      => $file->getSize(),
-            ]);
+            Media::uploadFile($file);
         }
 
         $this->files = [];

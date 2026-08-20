@@ -60,19 +60,10 @@ class ClientMaintenanceReports extends Component
             return $report;
         });
 
-        // Group by website_id and separate into recent (first 3) and archive (rest)
-        $grouped = $reports->groupBy('website_id');
-        $recentReports = collect();
-        $archivedReports = collect();
+        $archivedReports = clone $reports;
 
-        foreach ($grouped as $websiteId => $siteReports) {
-            $recentReports = $recentReports->merge($siteReports->take(3));
-            $archivedReports = $archivedReports->merge($siteReports->skip(3));
-        }
-
-        // Re-sort globally by date descending
-        $recentReports = $recentReports->sortByDesc('maintenance_date')->values();
-        $archivedReports = $archivedReports->sortByDesc('maintenance_date')->values();
+        // Recent shows only the latest 4 reports overall
+        $recentReports = $reports->take(4)->values();
 
         $activeReports = $this->viewMode === 'recent' ? $recentReports : $archivedReports;
 
