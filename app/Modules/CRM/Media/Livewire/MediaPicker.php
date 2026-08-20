@@ -19,8 +19,17 @@ class MediaPicker extends Component
 
     public function updatedFiles()
     {
+        $field = strtolower($this->targetField);
+        if (\Illuminate\Support\Str::contains($field, ['image', 'logo', 'avatar', 'photo'])) {
+            $rules = 'file|image|max:102400';
+        } elseif (\Illuminate\Support\Str::contains($field, ['video'])) {
+            $rules = 'file|mimetypes:video/mp4,video/avi,video/mpeg,video/quicktime,video/webm,video/x-matroska,video/x-flv,video/x-ms-wmv|max:102400';
+        } else {
+            $rules = 'file|mimes:pdf,xls,xlsx,txt,mp4,avi,mov,wmv,flv,mkv,webm,doc,docx,zip,csv,ppt,pptx,jpg,jpeg,png,gif,webp,svg|max:102400';
+        }
+
         $this->validate([
-            'files.*' => 'file|max:51200', // 50MB Max
+            'files.*' => $rules,
         ]);
 
         foreach ($this->files as $file) {
@@ -67,9 +76,16 @@ class MediaPicker extends Component
 
     public function render()
     {
-        $mediaFiles = Media::where('file_name', 'like', '%' . $this->search . '%')
-            ->latest()
-            ->paginate(12);
+        $query = Media::where('file_name', 'like', '%' . $this->search . '%');
+
+        $field = strtolower($this->targetField);
+        if (\Illuminate\Support\Str::contains($field, ['image', 'logo', 'avatar', 'photo'])) {
+            $query->where('mime_type', 'like', 'image/%');
+        } elseif (\Illuminate\Support\Str::contains($field, ['video'])) {
+            $query->where('mime_type', 'like', 'video/%');
+        }
+
+        $mediaFiles = $query->latest()->paginate(12);
 
         return view('modules.crm.media.media-picker', [
             'mediaFiles' => $mediaFiles,

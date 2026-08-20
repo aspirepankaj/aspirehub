@@ -21,13 +21,13 @@
                  x-on:livewire-upload-progress="progress = $event.detail.progress"
                  class="relative">
                 
-                <input type="file" wire:model="files" id="media-upload" multiple accept="image/*" class="hidden" />
+                <input type="file" wire:model="files" id="media-upload" multiple accept=".pdf,.xls,.xlsx,.txt,.mp4,.avi,.mov,.wmv,.flv,.mkv,.webm,.doc,.docx,.zip,.csv,.ppt,.pptx,image/*" class="hidden" />
                 
                 <label for="media-upload" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-all cursor-pointer">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    <span x-show="!uploading">Upload Media <span class="text-xs font-normal opacity-80">(Max 2MB)</span></span>
+                    <span x-show="!uploading">Upload Media <span class="text-xs font-normal opacity-80">(Max 100MB)</span></span>
                     <span x-show="uploading">Uploading... <span x-text="progress + '%'"></span></span>
                 </label>
             </div>
@@ -44,8 +44,24 @@
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         @forelse($mediaFiles as $media)
             <div class="group relative bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-                <div class="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-2 relative">
-                    <img src="{{ asset('storage/' . $media->file_path) }}" alt="{{ $media->file_name }}" class="object-contain w-full h-full rounded-lg">
+                <div class="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-2 relative overflow-hidden">
+                    @if(Str::startsWith($media->mime_type ?? '', 'image/'))
+                        <img src="{{ asset('storage/' . $media->file_path) }}" alt="{{ $media->file_name }}" class="object-contain w-full h-full rounded-lg">
+                    @elseif(Str::startsWith($media->mime_type ?? '', 'video/'))
+                        <div class="flex flex-col items-center justify-center text-blue-500">
+                            <svg class="w-10 h-10 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-[9px] font-bold uppercase tracking-wider">Video</span>
+                        </div>
+                    @else
+                        <div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
+                            <svg class="w-10 h-10 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Document</span>
+                        </div>
+                    @endif
                     
                     <!-- Overlay Actions -->
                     <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">

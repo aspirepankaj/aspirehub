@@ -17,7 +17,7 @@ class ManageMedia extends Component
     public $files = [];
 
     protected $rules = [
-        'files.*' => 'image|max:10240', // 10MB Max per file
+        'files.*' => 'file|mimes:pdf,xls,xlsx,txt,mp4,avi,mov,wmv,flv,mkv,webm,doc,docx,zip,csv,ppt,pptx,jpg,jpeg,png,gif,webp,svg|max:102400', // 100MB Max per file
     ];
 
     // Listen for file updates to process uploads immediately

@@ -62,7 +62,7 @@
                         <div class="flex items-center gap-2">
                             <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
                                 Change photo
-                                <input type="file" wire:model="profile_image" class="hidden" />
+                                <input type="file" wire:model="profile_image" accept="image/*" class="hidden" />
                             </label>
                             @if ($profile_image || ($existing_profile_image && file_exists(public_path('storage/' . $existing_profile_image))))
                                 <button type="button" wire:click="removeProfileImage" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800/50 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition">

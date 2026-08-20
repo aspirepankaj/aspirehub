@@ -26,12 +26,21 @@
                 </div>
 
                 <div class="relative">
-                    <input type="file" wire:model="files" id="media-picker-upload" multiple accept="*/*" class="hidden" />
+                    @php
+                        $acceptTypes = '.pdf,.xls,.xlsx,.txt,.mp4,.avi,.mov,.wmv,.flv,.mkv,.webm,.doc,.docx,.zip,.csv,.ppt,.pptx,image/*';
+                        $fieldLower = strtolower($targetField);
+                        if (\Illuminate\Support\Str::contains($fieldLower, ['image', 'logo', 'avatar', 'photo'])) {
+                            $acceptTypes = 'image/*';
+                        } elseif (\Illuminate\Support\Str::contains($fieldLower, ['video'])) {
+                            $acceptTypes = 'video/*';
+                        }
+                    @endphp
+                    <input type="file" wire:model="files" id="media-picker-upload" multiple accept="{{ $acceptTypes }}" class="hidden" />
                     <label for="media-picker-upload" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-all cursor-pointer">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
-                        <span x-show="!uploading">Upload New <span class="text-[10px] opacity-80">(Max 50MB)</span></span>
+                        <span x-show="!uploading">Upload New <span class="text-[10px] opacity-80">(Max 100MB)</span></span>
                         <span x-show="uploading">Uploading... <span x-text="progress + '%'"></span></span>
                     </label>
                 </div>
