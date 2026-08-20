@@ -48,12 +48,15 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('manage-documents', \App\Modules\CRM\Documents\Livewire\ManageDocuments::class);
         \Livewire\Livewire::component('manage-media', \App\Modules\CRM\Media\Livewire\ManageMedia::class);
         \Livewire\Livewire::component('media-picker', \App\Modules\CRM\Media\Livewire\MediaPicker::class);
+        \Livewire\Livewire::component('manage-support-tickets', \App\Modules\Support\Livewire\ManageSupportTickets::class);
+
         \Livewire\Livewire::component('client-dashboard', \App\Modules\Client\Dashboard\Livewire\ClientDashboard::class);
         \Livewire\Livewire::component('client-websites', \App\Modules\Client\Dashboard\Livewire\ClientMyWebsites::class);
         \Livewire\Livewire::component('client-profile', \App\Modules\Client\Dashboard\Livewire\ClientProfile::class);
         \Livewire\Livewire::component('client-documents', \App\Modules\Client\Dashboard\Livewire\ClientDocuments::class);
         \Livewire\Livewire::component('client-maintenance', \App\Modules\Client\Dashboard\Livewire\ClientMaintenanceReports::class);
         \Livewire\Livewire::component('client-view-maintenance-report', \App\Modules\Client\Dashboard\Livewire\ClientViewMaintenanceReport::class);
+        \Livewire\Livewire::component('client-support', \App\Modules\Client\Dashboard\Livewire\ClientSupport::class);
 
         \Livewire\Livewire::component('staff-dashboard', \App\Modules\CRM\Staff\Livewire\Portal\StaffDashboard::class);
         \Livewire\Livewire::component('staff-clients', \App\Modules\CRM\Staff\Livewire\Portal\StaffClients::class);
@@ -64,5 +67,6 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('staff-view-maintenance-report', \App\Modules\CRM\Staff\Livewire\Portal\StaffViewMaintenanceReport::class);
         \Livewire\Livewire::component('staff-documents', \App\Modules\CRM\Staff\Livewire\Portal\StaffDocuments::class);
         \Livewire\Livewire::component('staff-profile', \App\Modules\CRM\Staff\Livewire\Portal\StaffProfile::class);
+        \Livewire\Livewire::component('staff-support', \App\Modules\CRM\Staff\Livewire\Portal\StaffSupport::class);
     }
 }

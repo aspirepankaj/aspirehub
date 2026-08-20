@@ -78,5 +78,21 @@ class User extends Authenticatable
     {
         return $this->hasOne(\App\Modules\CRM\Staff\Models\Staff::class, 'user_id');
     }
+
+    /**
+     * Get profile image URL for Client, Staff, or Admin.
+     */
+    public function getProfileImageUrl(): ?string
+    {
+        $img = $this->client?->profile_image 
+            ?? $this->staff?->profile_image 
+            ?? $this->admin?->profile_image;
+
+        if (!$img) {
+            return null;
+        }
+
+        return \Illuminate\Support\Str::startsWith($img, 'http') ? $img : asset('storage/' . $img);
+    }
 }
 

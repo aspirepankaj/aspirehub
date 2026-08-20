@@ -164,15 +164,22 @@
                 <div class="space-y-6">
                     <!-- Assigned Plans -->
                     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Assigned Plans</h3>
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Assigned Plans</h3>
+                            @if($clientDetails->plans->isNotEmpty())
+                                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                    {{ $clientDetails->plans->count() }} {{ Str::plural('Plan', $clientDetails->plans->count()) }}
+                                </span>
+                            @endif
+                        </div>
                         <div class="space-y-3">
                             @forelse($clientDetails->plans as $plan)
-                                <div class="p-3 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/40 flex items-center justify-between">
-                                    <div>
-                                        <h4 class="text-xs font-extrabold text-indigo-900 dark:text-indigo-300">{{ $plan->name }}</h4>
-                                        <p class="text-[10px] text-indigo-700/70 dark:text-indigo-400/70">{{ $plan->description ?: 'No description' }}</p>
+                                <div class="p-3 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/40 flex items-center justify-between gap-3">
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-xs font-bold text-indigo-900 dark:text-indigo-300 truncate">{{ $plan->name }}</h4>
+                                        <p class="text-[10px] text-indigo-700/70 dark:text-indigo-400/70 line-clamp-2 mt-0.5">{{ $plan->description ?: 'No description' }}</p>
                                     </div>
-                                    <span class="px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-bold">Active</span>
+                                    <span class="px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-bold shrink-0">Active</span>
                                 </div>
                             @empty
                                 <div class="text-sm text-slate-500 dark:text-slate-400 italic">No plans assigned.</div>
@@ -182,21 +189,53 @@
 
                     <!-- Assigned Staff Members -->
                     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Assigned Staff</h3>
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Assigned Staff</h3>
+                            @if($clientDetails->assignedStaff->isNotEmpty())
+                                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                    {{ $clientDetails->assignedStaff->count() }} {{ Str::plural('Member', $clientDetails->assignedStaff->count()) }}
+                                </span>
+                            @endif
+                        </div>
                         <div class="space-y-3">
                             @forelse($clientDetails->assignedStaff as $staff)
-                                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
-                                    @if($staff->user->profile_photo_url)
-                                        <img src="{{ $staff->user->profile_photo_url }}" alt="{{ $staff->user->name }}" class="w-9 h-9 rounded-full object-cover" />
-                                    @else
-                                        <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center">
-                                            {{ strtoupper(substr($staff->user->name, 0, 2)) }}
+                                @php
+                                    $staffImg = $staff->profile_image;
+                                    $staffImgUrl = $staffImg ? (Str::startsWith($staffImg, 'http') ? $staffImg : asset('storage/' . $staffImg)) : null;
+                                    $staffDesignation = $staff->designations->pluck('name')->implode(', ') ?: 'Staff Member';
+                                    $staffDetailUrl = route('admin.staff.detail', ['id' => $staff->id]);
+                                @endphp
+                                <div class="flex items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800 transition-colors">
+                                    <a href="{{ $staffDetailUrl }}" class="flex items-center gap-3 min-w-0 flex-1 group">
+                                        <div class="shrink-0">
+                                            @if($staffImgUrl)
+                                                <img src="{{ $staffImgUrl }}" alt="{{ $staff->user->name ?? 'Staff' }}"
+                                                     class="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 group-hover:border-indigo-500 transition-colors"
+                                                     onerror="this.outerHTML=`<div class='w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center'>{{ $staff->getInitials() }}</div>`" />
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                                    {{ $staff->getInitials() }}
+                                                </div>
+                                            @endif
                                         </div>
-                                    @endif
-                                    <div class="min-w-0 flex-1">
-                                        <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ $staff->user->name }}</h4>
-                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ $staff->user->email }}</p>
-                                    </div>
+                                        <div class="min-w-0 flex-1">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate flex items-center gap-1">
+                                                <span>{{ $staff->user->name ?? 'Staff Member' }}</span>
+                                                <svg class="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                </svg>
+                                            </h4>
+                                            <div class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 truncate">{{ $staffDesignation }}</div>
+                                            @if(!empty($staff->user->email))
+                                                <div class="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span class="truncate">{{ $staff->user->email }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </a>
                                 </div>
                             @empty
                                 <div class="text-sm text-slate-500 dark:text-slate-400 italic">No staff assigned.</div>

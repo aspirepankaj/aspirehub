@@ -578,7 +578,7 @@ class ManageClients extends Component
             $pageIds = [];
 
             // 1. Basic Client Details (header & overview)
-            $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])->findOrFail($this->selectedClientDetailId);
+            $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user', 'assignedStaff.designations'])->findOrFail($this->selectedClientDetailId);
             
             // 2. Strict Tab-Based Data Loading (Only load what the active tab needs!)
             if ($this->activeTab === 'websites') {

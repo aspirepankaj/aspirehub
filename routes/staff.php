@@ -25,6 +25,11 @@ Route::get('/maintenance/{id}/pdf', [StaffMaintenance::class, 'downloadPdf'])->n
 
 use App\Modules\CRM\Media\Livewire\ManageMedia;
 
+use App\Modules\CRM\Staff\Livewire\Portal\StaffSupport;
+
 Route::get('/documents', StaffDocuments::class)->name('documents');
 Route::get('/media', ManageMedia::class)->name('media');
 Route::get('/profile', StaffProfile::class)->name('profile');
+Route::get('/support', StaffSupport::class)->name('support');
+Route::get('/support/ticket/{ticket}', StaffSupport::class)->name('support.detail');
+Route::get('/notifications', \App\Livewire\UserNotificationsPage::class)->name('notifications');

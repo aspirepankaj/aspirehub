@@ -28,6 +28,8 @@ new #[Layout('layouts.auth')] class extends Component
 
         Session::regenerate();
 
+        $user->client->update(['last_login_at' => now()]);
+
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 }; ?>

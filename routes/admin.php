@@ -42,9 +42,10 @@ Route::get('/maintenance-reports/{id}/edit', EditMaintenanceReport::class)->name
 Route::get('/maintenance-reports/{id}', ViewMaintenanceReport::class)->name('maintenance.view');
 Route::get('/maintenance-reports/{id}/pdf', [ManageMaintenanceReports::class, 'downloadPdf'])->name('maintenance.pdf');
 
-Route::get('/support-center', function () {
-    return view('modules.core.placeholder', ['title' => 'Support Center']);
-})->name('support');
+use App\Modules\Support\Livewire\ManageSupportTickets;
+
+Route::get('/support-center', ManageSupportTickets::class)->name('support');
+Route::get('/support-center/ticket/{ticket}', ManageSupportTickets::class)->name('support.detail');
 
 Route::get('/integrations', function () {
     return view('modules.core.placeholder', ['title' => 'Integrations Panel']);
@@ -58,9 +59,7 @@ Route::get('/revenue', function () {
     return view('modules.core.placeholder', ['title' => 'Revenue & Billing']);
 })->name('revenue');
 
-Route::get('/notifications', function () {
-    return view('modules.core.placeholder', ['title' => 'Notifications Center']);
-})->name('notifications');
+Route::get('/notifications', \App\Livewire\UserNotificationsPage::class)->name('notifications');
 
 use App\Modules\CRM\Documents\Livewire\ManageDocuments;
 use App\Modules\CRM\Media\Livewire\ManageMedia;
