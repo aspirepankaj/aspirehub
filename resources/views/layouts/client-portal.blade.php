@@ -1,6 +1,23 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ dark: localStorage.getItem('client-theme') === 'dark' }" x-init="$watch('dark', v => localStorage.setItem('client-theme', v ? 'dark' : 'light'))" :class="{ 'dark': dark }">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
+      x-data="{ dark: localStorage.getItem('client-theme') === 'dark' }" 
+      x-init="$watch('dark', v => {
+          localStorage.setItem('client-theme', v ? 'dark' : 'light');
+          if (v) {
+              document.documentElement.classList.add('dark');
+          } else {
+              document.documentElement.classList.remove('dark');
+          }
+      })" 
+      :class="{ 'dark': dark }">
 <head>
+    <script>
+        if (localStorage.getItem('client-theme') === 'dark' || (!('client-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -27,7 +44,7 @@
             -webkit-backdrop-filter: blur(16px);
         }
         .dark .glass {
-            background: rgba(15, 23, 42, 0.45);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
         }
@@ -40,10 +57,10 @@
             border: 1px solid rgba(255, 255, 255, 0.43);
         }
         .dark .glass-card {
-            background: rgba(30, 41, 59, 0.45);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 25%);
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
     </style>
 </head>
@@ -62,15 +79,15 @@
     <aside class="w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between">
         <div>
             <div class="px-6 py-6 flex flex-col gap-1">
-                <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start" alt="Aspire Hub" />
+                <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start dark:brightness-0 dark:invert" alt="Aspire Hub" />
                 <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase pl-1 mt-0.5">Client Portal</div>
             </div>
 
             <div class="px-4 mb-4">
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
-                    <input type="text" placeholder="Quick search..." class="w-full pl-9 pr-10 py-2 rounded-lg bg-slate-50 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
-                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-[10px] font-bold text-slate-400 border-l border-slate-200 dark:border-slate-800 pl-2">⌘K</span>
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
+                    <input type="text" placeholder="Quick search..." class="w-full pl-9 pr-10 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 border-l border-slate-200 dark:border-slate-700/60 pl-2">⌘K</span>
                 </div>
             </div>
 

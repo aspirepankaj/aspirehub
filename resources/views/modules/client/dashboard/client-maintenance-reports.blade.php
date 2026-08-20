@@ -183,7 +183,7 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-2 pt-2">
                     <a href="{{ route('client.maintenance.view', $report->id) }}"
-                       class="px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition">
+                       class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition">
                         View report
                     </a>
                     
@@ -206,8 +206,8 @@
 
             </div>
         @empty
-            <div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white py-20 text-center">
-                <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="col-span-full rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/40 py-20 text-center">
+                <svg class="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <h3 class="mt-4 text-sm font-bold text-slate-850 dark:text-slate-300">
@@ -370,7 +370,7 @@
                 @endif
 
                 <div class="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <button type="button" wire:click="closeCompare" class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition shadow-sm">
+                    <button type="button" wire:click="closeCompare" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition">
                         Close Comparison
                     </button>
                 </div>

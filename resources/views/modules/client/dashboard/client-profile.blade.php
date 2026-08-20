@@ -104,7 +104,7 @@
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition shadow-sm">
+                    <button type="submit" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition">
                         Save changes
                     </button>
                 </div>

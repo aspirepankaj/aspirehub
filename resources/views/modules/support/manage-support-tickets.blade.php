@@ -35,21 +35,183 @@
                     </svg>
                 </div>
 
-                <!-- Filters Grid -->
+                <!-- Filters Grid (Searchable Combobox Dropdowns) -->
                 <div class="grid grid-cols-2 gap-2">
-                    <select wire:model.live="clientFilter" class="px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                        <option value="">All Clients</option>
-                        @foreach($allClients as $c)
-                            <option value="{{ $c->id }}">{{ $c->company_name ?: ($c->user->name ?? 'Client') }}</option>
-                        @endforeach
-                    </select>
+                    <!-- Searchable Client Filter Dropdown -->
+                    <div x-data="{
+                            open: false,
+                            search: '',
+                            get selectedName() {
+                                let id = $wire.clientFilter;
+                                if (!id) return 'All Clients';
+                                @foreach($allClients as $c)
+                                    if (id == {{ $c->id }}) return '{{ e($c->display_name) }}';
+                                @endforeach
+                                return 'All Clients';
+                            },
+                            selectClient(id) {
+                                $wire.set('clientFilter', id);
+                                this.open = false;
+                                this.search = '';
+                            }
+                         }"
+                         @click.away="open = false"
+                         class="relative">
 
-                    <select wire:model.live="staffFilter" class="px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                        <option value="">All Staff</option>
-                        @foreach($allStaff as $s)
-                            <option value="{{ $s->id }}">{{ $s->user->name ?? 'Staff' }}</option>
-                        @endforeach
-                    </select>
+                        <button type="button"
+                                @click="open = !open; if(open) $nextTick(() => $refs.searchInput.focus())"
+                                class="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between gap-1 shadow-sm hover:border-indigo-500 transition-colors">
+                            <span class="truncate" x-text="selectedName">All Clients</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute left-0 right-0 mt-1 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-1.5 space-y-1 max-h-64 overflow-hidden flex flex-col"
+                             style="display: none;">
+
+                            <div class="relative p-1">
+                                <input type="text"
+                                       x-model="search"
+                                       x-ref="searchInput"
+                                       @click.stop
+                                       placeholder="🔍 Search client..."
+                                       class="w-full px-2.5 py-1.5 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                            </div>
+
+                            <div class="overflow-y-auto max-h-48 space-y-0.5 custom-scrollbar">
+                                <button type="button"
+                                        @click="selectClient('')"
+                                        class="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors flex items-center justify-between"
+                                        :class="!$wire.clientFilter ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[9px] flex items-center justify-center shrink-0">👥</div>
+                                        <span>All Clients</span>
+                                    </div>
+                                    <span x-show="!$wire.clientFilter" class="text-indigo-600 font-bold">✓</span>
+                                </button>
+
+                                @foreach($allClients as $c)
+                                    @php
+                                        $cAvatar = $c->user?->getProfileImageUrl();
+                                        $cInitials = $c->getInitials();
+                                    @endphp
+                                    <button type="button"
+                                            x-show="!search || '{{ strtolower(e($c->display_name)) }}'.includes(search.toLowerCase())"
+                                            @click="selectClient({{ $c->id }})"
+                                            class="w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-colors flex items-center justify-between gap-2"
+                                            :class="$wire.clientFilter == {{ $c->id }} ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'">
+                                        <div class="flex items-center gap-2 truncate">
+                                            @if($cAvatar)
+                                                <img src="{{ $cAvatar }}" alt="{{ $c->user->name ?? 'Client' }}" class="w-5 h-5 rounded-full object-cover shrink-0 shadow-sm border border-slate-200 dark:border-slate-700" />
+                                            @else
+                                                <div class="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[8px] flex items-center justify-center shrink-0 shadow-sm">
+                                                    {{ $cInitials }}
+                                                </div>
+                                            @endif
+                                            <span class="truncate">{{ $c->display_name }}</span>
+                                        </div>
+                                        <span x-show="$wire.clientFilter == {{ $c->id }}" class="text-indigo-600 font-bold shrink-0">✓</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Searchable Staff Filter Dropdown -->
+                    <div x-data="{
+                            open: false,
+                            search: '',
+                            get selectedName() {
+                                let id = $wire.staffFilter;
+                                if (!id) return 'All Staff';
+                                @foreach($allStaff as $s)
+                                    if (id == {{ $s->id }}) return '{{ e($s->user->name ?? 'Staff') }}';
+                                @endforeach
+                                return 'All Staff';
+                            },
+                            selectStaff(id) {
+                                $wire.set('staffFilter', id);
+                                this.open = false;
+                                this.search = '';
+                            }
+                         }"
+                         @click.away="open = false"
+                         class="relative">
+
+                        <button type="button"
+                                @click="open = !open; if(open) $nextTick(() => $refs.staffSearchInput.focus())"
+                                class="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between gap-1 shadow-sm hover:border-indigo-500 transition-colors">
+                            <span class="truncate" x-text="selectedName">All Staff</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute left-0 right-0 mt-1 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-1.5 space-y-1 max-h-64 overflow-hidden flex flex-col"
+                             style="display: none;">
+
+                            <div class="relative p-1">
+                                <input type="text"
+                                       x-model="search"
+                                       x-ref="staffSearchInput"
+                                       @click.stop
+                                       placeholder="🔍 Search staff..."
+                                       class="w-full px-2.5 py-1.5 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                            </div>
+
+                            <div class="overflow-y-auto max-h-48 space-y-0.5 custom-scrollbar">
+                                <button type="button"
+                                        @click="selectStaff('')"
+                                        class="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors flex items-center justify-between"
+                                        :class="!$wire.staffFilter ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[9px] flex items-center justify-center shrink-0">👔</div>
+                                        <span>All Staff</span>
+                                    </div>
+                                    <span x-show="!$wire.staffFilter" class="text-indigo-600 font-bold">✓</span>
+                                </button>
+
+                                @foreach($allStaff as $s)
+                                    @php
+                                        $sAvatar = $s->user?->getProfileImageUrl();
+                                        $sInitials = $s->user?->getInitials() ?? strtoupper(substr($s->user->name ?? 'S', 0, 2));
+                                    @endphp
+                                    <button type="button"
+                                            x-show="!search || '{{ strtolower(e($s->user->name ?? 'Staff')) }}'.includes(search.toLowerCase())"
+                                            @click="selectStaff({{ $s->id }})"
+                                            class="w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-colors flex items-center justify-between gap-2"
+                                            :class="$wire.staffFilter == {{ $s->id }} ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-extrabold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'">
+                                        <div class="flex items-center gap-2 truncate">
+                                            @if($sAvatar)
+                                                <img src="{{ $sAvatar }}" alt="{{ $s->user->name ?? 'Staff' }}" class="w-5 h-5 rounded-full object-cover shrink-0 shadow-sm border border-slate-200 dark:border-slate-700" />
+                                            @else
+                                                <div class="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-[8px] flex items-center justify-center shrink-0 shadow-sm">
+                                                    {{ $sInitials }}
+                                                </div>
+                                            @endif
+                                            <span class="truncate">{{ $s->user->name ?? 'Staff' }}</span>
+                                        </div>
+                                        <span x-show="$wire.staffFilter == {{ $s->id }}" class="text-indigo-600 font-bold shrink-0">✓</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Status Filter Pills -->
@@ -74,7 +236,7 @@
                                     {{ $t->ticket_number }}
                                 </span>
                                 @if(($t->unread_count ?? 0) > 0)
-                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-purple-600 text-white shadow-sm animate-pulse" title="{{ $t->unread_count }} unread messages">
+                                    <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-indigo-600 text-white shadow-sm animate-pulse" title="{{ $t->unread_count }} unread messages">
                                         {{ $t->unread_count > 9 ? '9+' : $t->unread_count }}
                                     </span>
                                 @endif
@@ -96,9 +258,23 @@
                             {{ $t->subject }}
                         </h4>
 
+                        @if(!empty($drafts[$t->id]) || !empty($draftAttachments[$t->id]))
+                            <div class="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 px-2 py-1 rounded-lg border border-amber-500/20">
+                                <span class="font-extrabold uppercase tracking-wider text-[8px] px-1 py-0.2 bg-amber-500 text-white rounded">Draft</span>
+                                <span class="truncate italic font-medium text-slate-700 dark:text-slate-300">
+                                    @if(!empty($drafts[$t->id]))
+                                        {{ Str::limit($drafts[$t->id], 20) }}
+                                    @endif
+                                    @if(!empty($draftAttachments[$t->id]))
+                                        <span class="text-amber-600 dark:text-amber-400 font-extrabold ml-1">📎 {{ count($draftAttachments[$t->id]) }} {{ Str::plural('file', count($draftAttachments[$t->id])) }}</span>
+                                    @endif
+                                </span>
+                            </div>
+                        @endif
+
                         <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-2">
                             <span class="truncate font-bold text-slate-700 dark:text-slate-300">
-                                🏢 {{ $t->client->company_name ?: ($t->client->user->name ?? 'Client') }}
+                                👤 {{ $t->client->display_name }}
                             </span>
                             <span>{{ $t->updated_at->diffForHumans() }}</span>
                         </div>
@@ -122,7 +298,7 @@
                                 <div class="flex items-center gap-2 flex-wrap mb-1">
                                     <span class="text-xs font-black text-indigo-600 dark:text-indigo-400">{{ $selectedTicket->ticket_number }}</span>
                                     <span class="text-xs font-bold text-slate-400">•</span>
-                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200">🏢 {{ $selectedTicket->client->company_name ?: ($selectedTicket->client->user->name ?? 'Client') }}</span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200">👤 {{ $selectedTicket->client->display_name }}</span>
                                     <span class="text-xs font-semibold text-slate-500">🌐 {{ $selectedTicket->website->site_name ?? 'Website' }}</span>
                                 </div>
                                 <h3 class="text-base font-extrabold text-slate-900 dark:text-white">
@@ -136,7 +312,7 @@
                             <!-- Status Selector -->
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[11px] font-bold text-slate-500">Status:</span>
-                                <select wire:change="updateStatus($event.target.value)" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100">
+                                <select wire:change="updateStatus($event.target.value)" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40">
                                     <option value="open" {{ $selectedTicket->status === 'open' ? 'selected' : '' }}>Open</option>
                                     <option value="in_progress" {{ $selectedTicket->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
                                     <option value="resolved" {{ $selectedTicket->status === 'resolved' ? 'selected' : '' }}>Resolved</option>
@@ -147,7 +323,7 @@
                             <!-- Assign Staff Selector -->
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[11px] font-bold text-slate-500">Assign Staff:</span>
-                                <select wire:change="assignStaff($event.target.value)" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-100">
+                                <select wire:change="assignStaff($event.target.value)" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40">
                                     <option value="">-- Unassigned --</option>
                                     @foreach($allStaff as $st)
                                         <option value="{{ $st->id }}" {{ $selectedTicket->assigned_staff_id === $st->id ? 'selected' : '' }}>
@@ -160,13 +336,13 @@
                     </div>
 
                     <!-- Chat Body Wrapper with Fixed Watermark Overlay -->
-                    <div class="relative flex-1 min-h-0 bg-slate-50/30 dark:bg-slate-950/20">
+                    <div class="relative flex-1 min-h-0 bg-slate-50/30 dark:bg-slate-950/20 flex flex-col">
                         <!-- Fixed Centered Logo Watermark (Stays in center of chat viewport at all times) -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] dark:opacity-[0.09] select-none z-0">
                             <img src="{{ asset('aspire-hub-1.svg') }}" class="w-48 sm:w-64 max-w-[50%] h-auto filter grayscale" alt="Watermark" />
                         </div>
 
-                        <!-- Chat Thread (WhatsApp style auto-scroll) -->
+                        <!-- Chat Thread (Smooth auto-scroll) -->
                         <div x-data="{
                                 scrollToBottom() {
                                     $nextTick(() => {
@@ -176,7 +352,7 @@
                              }"
                              x-init="scrollToBottom()"
                              x-effect="scrollToBottom()"
-                             class="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[450px] relative z-10">
+                             class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 max-h-[520px] min-h-[350px] relative z-10 custom-scrollbar">
                             @foreach ($selectedTicket->messages as $msg)
                                 @php
                                     $isAdmin = $msg->sender_type === 'admin';
@@ -188,9 +364,9 @@
                                     @if($senderAvatarUrl)
                                         <img src="{{ $senderAvatarUrl }}" alt="{{ $msg->sender->name ?? 'User' }}"
                                              class="w-8 h-8 rounded-full object-cover shrink-0 shadow-sm border border-slate-200 dark:border-slate-700"
-                                             onerror="this.outerHTML=`<div class='w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-sm {{ $isAdmin ? 'bg-purple-600 text-white' : ($msg->sender_type === 'staff' ? 'bg-blue-600 text-white' : 'bg-indigo-600 text-white') }}'>{{ $senderInitials }}</div>`" />
+                                             onerror="this.outerHTML=`<div class='w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-sm {{ $isAdmin ? 'bg-indigo-600 text-white' : ($msg->sender_type === 'staff' ? 'bg-blue-600 text-white' : 'bg-indigo-600 text-white') }}'>{{ $senderInitials }}</div>`" />
                                     @else
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-sm {{ $isAdmin ? 'bg-purple-600 text-white' : ($msg->sender_type === 'staff' ? 'bg-blue-600 text-white' : 'bg-indigo-600 text-white') }}">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-sm {{ $isAdmin ? 'bg-indigo-600 text-white' : ($msg->sender_type === 'staff' ? 'bg-blue-600 text-white' : 'bg-indigo-600 text-white') }}">
                                             {{ $senderInitials }}
                                         </div>
                                     @endif
@@ -204,7 +380,7 @@
                                                 {{ $msg->created_at->format('M d, g:i a') }}
                                             </span>
                                         </div>
-                                        <div class="p-3.5 rounded-2xl text-xs leading-relaxed shadow-sm {{ $isAdmin ? 'bg-purple-600 text-white rounded-tr-none' : ($msg->sender_type === 'staff' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/60 dark:border-slate-700/60 rounded-tl-none') }}">
+                                        <div class="p-3.5 rounded-2xl text-xs leading-relaxed shadow-sm {{ $isAdmin ? 'bg-indigo-600 text-white rounded-tr-none shadow-indigo-500/10' : ($msg->sender_type === 'staff' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/60 dark:border-slate-700/60 rounded-tl-none') }}">
                                             {!! nl2br(e($msg->message)) !!}
 
                                             <!-- Attachments Preview -->
@@ -231,7 +407,7 @@
                                                                 </video>
                                                             </div>
                                                         @else
-                                                            <a href="{{ $url }}" target="_blank" download class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-purple-500 hover:text-white transition-colors mt-1">
+                                                            <a href="{{ $url }}" target="_blank" download class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-indigo-500 hover:text-white transition-colors mt-1">
                                                                 <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                                 </svg>
@@ -287,15 +463,15 @@
                                 }
                             }
                          }"
-                         @paste="handlePaste($event)"
+                         @paste.window="handlePaste($event)"
                          @dragover.prevent
                          @drop.prevent="handleDrop($event)"
-                         class="border-t border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-900 p-3 sm:p-4 space-y-2">
+                         class="p-4 border-t border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/40 space-y-3">
 
                         @if (!empty($replyAttachments))
                             <div class="flex flex-wrap gap-2 px-1">
                                 @foreach ($replyAttachments as $idx => $file)
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 text-[10px] font-bold border border-purple-200 dark:border-purple-800">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold border border-indigo-200 dark:border-indigo-800">
                                         📎 <span class="truncate max-w-[150px]">{{ $file->getClientOriginalName() }}</span>
                                         <button type="button" wire:click="removeReplyAttachment({{ $idx }})" class="hover:text-red-500 font-black">✕</button>
                                     </span>
@@ -311,8 +487,8 @@
                                 <input type="file" x-ref="replyFileInput" wire:model="replyAttachments" multiple class="hidden" />
                             </label>
                             <input type="text" wire:model="replyMessage" placeholder="Type reply or paste image (Ctrl+V / Cmd+V)..."
-                                   class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/40" />
-                            <button type="submit" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md transition shrink-0 flex items-center gap-1.5">
+                                   class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
+                            <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition shrink-0 flex items-center gap-1.5">
                                 <span>Reply as Admin</span>
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />

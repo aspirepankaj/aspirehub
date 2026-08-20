@@ -91,6 +91,20 @@
                             {{ $t->subject }}
                         </h4>
 
+                        @if(!empty($drafts[$t->id]) || !empty($draftAttachments[$t->id]))
+                            <div class="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 px-2 py-1 rounded-lg border border-amber-500/20">
+                                <span class="font-extrabold uppercase tracking-wider text-[8px] px-1 py-0.2 bg-amber-500 text-white rounded">Draft</span>
+                                <span class="truncate italic font-medium text-slate-700 dark:text-slate-300">
+                                    @if(!empty($drafts[$t->id]))
+                                        {{ Str::limit($drafts[$t->id], 20) }}
+                                    @endif
+                                    @if(!empty($draftAttachments[$t->id]))
+                                        <span class="text-amber-600 dark:text-amber-400 font-extrabold ml-1">📎 {{ count($draftAttachments[$t->id]) }} {{ Str::plural('file', count($draftAttachments[$t->id])) }}</span>
+                                    @endif
+                                </span>
+                            </div>
+                        @endif
+
                         <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-2">
                             <span class="truncate font-semibold text-slate-600 dark:text-slate-300">
                                 🌐 {{ $t->website->site_name ?? 'Website' }}
@@ -145,7 +159,7 @@
                             <img src="{{ asset('aspire-hub-1.svg') }}" class="w-48 sm:w-64 max-w-[50%] h-auto filter grayscale" alt="Watermark" />
                         </div>
 
-                        <!-- Chat Conversation Thread (WhatsApp style auto-scroll) -->
+                        <!-- Chat Conversation Thread (Smooth auto-scroll) -->
                         <div x-data="{
                                 scrollToBottom() {
                                     $nextTick(() => {
@@ -155,7 +169,7 @@
                              }"
                              x-init="scrollToBottom()"
                              x-effect="scrollToBottom()"
-                             class="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[450px] relative z-10">
+                             class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 max-h-[520px] min-h-[350px] relative z-10 custom-scrollbar">
                             @foreach ($selectedTicket->messages as $msg)
                                 @php
                                     $isMe = $msg->sender_type === 'client' && $msg->sender_id === auth()->id();

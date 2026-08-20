@@ -72,6 +72,11 @@ class Client extends Model
         return $this->hasMany(\App\Modules\CRM\Websites\Models\Website::class, 'client_id');
     }
 
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Support\Models\SupportTicket::class, 'client_id');
+    }
+
     protected function getActivityDescription(string $action): string
     {
         $userName = auth()->user()->name ?? 'System';
@@ -87,6 +92,12 @@ class Client extends Model
             default:
                 return "{$userName} performed action '{$action}' on client: '{$clientName}'";
         }
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        $name = $this->user->name ?? 'Client';
+        return !empty($this->company_name) ? "{$name} ({$this->company_name})" : $name;
     }
 
     public function getInitials(): string

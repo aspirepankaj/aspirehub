@@ -26,6 +26,8 @@ class ManageSupportTickets extends Component
 
     public string $replyMessage = '';
     public $replyAttachments = [];
+    public array $drafts = [];
+    public array $draftAttachments = [];
 
     protected array $rules = [
         'replyAttachments.*' => 'nullable|file|max:51200',
@@ -41,9 +43,47 @@ class ManageSupportTickets extends Component
         }
     }
 
+    public function updatedReplyMessage($val): void
+    {
+        if ($this->selectedTicketId) {
+            if (!empty(trim($val))) {
+                $this->drafts[$this->selectedTicketId] = $val;
+            } else {
+                unset($this->drafts[$this->selectedTicketId]);
+            }
+        }
+    }
+
+    public function updatedReplyAttachments($val): void
+    {
+        if ($this->selectedTicketId) {
+            $this->draftAttachments[$this->selectedTicketId] = $this->replyAttachments;
+        }
+    }
+
     public function selectTicket(int $ticketId): void
     {
+        // Save text & attachment drafts of currently open ticket
+        if ($this->selectedTicketId) {
+            if (!empty(trim($this->replyMessage))) {
+                $this->drafts[$this->selectedTicketId] = $this->replyMessage;
+            } else {
+                unset($this->drafts[$this->selectedTicketId]);
+            }
+
+            if (!empty($this->replyAttachments)) {
+                $this->draftAttachments[$this->selectedTicketId] = $this->replyAttachments;
+            } else {
+                unset($this->draftAttachments[$this->selectedTicketId]);
+            }
+        }
+
         $this->selectedTicketId = $ticketId;
+
+        // Restore text & attachment drafts of newly selected ticket
+        $this->replyMessage = $this->drafts[$ticketId] ?? '';
+        $this->replyAttachments = $this->draftAttachments[$ticketId] ?? [];
+
         $t = SupportTicket::find($ticketId);
         if ($t) {
             $url = route('admin.support.detail', ['ticket' => $t->ticket_number]);
@@ -62,6 +102,13 @@ class ManageSupportTickets extends Component
     {
         unset($this->replyAttachments[$index]);
         $this->replyAttachments = array_values($this->replyAttachments);
+        if ($this->selectedTicketId) {
+            if (!empty($this->replyAttachments)) {
+                $this->draftAttachments[$this->selectedTicketId] = $this->replyAttachments;
+            } else {
+                unset($this->draftAttachments[$this->selectedTicketId]);
+            }
+        }
     }
 
     protected function storeUploadedFiles($files): array
@@ -115,6 +162,11 @@ class ManageSupportTickets extends Component
 
         \App\Services\NotificationService::notifyNewTicketMessage($ticket, $msg);
 
+        if ($this->selectedTicketId) {
+            unset($this->drafts[$this->selectedTicketId]);
+            unset($this->draftAttachments[$this->selectedTicketId]);
+        }
+
         $this->reset(['replyMessage', 'replyAttachments']);
     }
 
@@ -161,7 +213,10 @@ class ManageSupportTickets extends Component
                 $q->where('ticket_number', 'like', "%{$this->search}%")
                   ->orWhere('subject', 'like', "%{$this->search}%")
                   ->orWhereHas('client', function ($cq) {
-                      $cq->where('company_name', 'like', "%{$this->search}%");
+                      $cq->where('company_name', 'like', "%{$this->search}%")
+                         ->orWhereHas('user', function ($uq) {
+                             $uq->where('name', 'like', "%{$this->search}%");
+                         });
                   });
             });
         }
@@ -182,7 +237,7 @@ class ManageSupportTickets extends Component
                 ->update(['is_read_by_admin' => true]);
         }
 
-        $allClients = Client::with('user')->orderBy('company_name')->get();
+        $allClients = Client::whereHas('supportTickets')->with('user')->orderBy('company_name')->get();
         $allStaff = Staff::with('user')->get();
 
         return view('modules.support.manage-support-tickets', [
