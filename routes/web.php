@@ -34,6 +34,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('storage/{path}', function ($path) {
+    if (!auth()->check()) {
+        abort(403, 'Unauthorized. Please log in to view this file.');
+    }
+
     $fullPath = storage_path('app/public/' . $path);
     if (!file_exists($fullPath)) {
         abort(404);

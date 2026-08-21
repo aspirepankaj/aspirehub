@@ -103,8 +103,9 @@ class EditMaintenanceReport extends Component
 
     // 12. Attachments
     public array $existingAttachments = [];
-    public array $newAttachments = []; // uploads
+    public array $attachments = []; // array of ['path' => '', 'name' => '']
     public bool $attachments_visible_to_client = false;
+    public $pastedImages = [];
 
     public function mount(int $id)
     {
@@ -253,7 +254,7 @@ class EditMaintenanceReport extends Component
             'developer_notes' => 'nullable|string',
             'client_summary' => 'nullable|string',
             'attachments_visible_to_client' => 'boolean',
-            'newAttachments' => 'nullable|array',
+            'attachments' => 'nullable|array',
         ];
     }
 
@@ -261,17 +262,35 @@ class EditMaintenanceReport extends Component
     public function setMedia($path, $field, $name = null, $mime_type = null, $size = null): void
     {
         if ($field === 'attachments') {
-            $this->newAttachments[] = [
+            $this->attachments[] = [
                 'path' => $path,
                 'name' => $name ?? basename($path)
             ];
         }
     }
 
+    public function updatedPastedImages()
+    {
+        $this->validate([
+            'pastedImages.*' => 'image|max:10240', // 10MB max
+        ]);
+
+        foreach ($this->pastedImages as $image) {
+            $media = \App\Modules\CRM\Media\Models\Media::uploadFile($image);
+            if ($media) {
+                $this->attachments[] = [
+                    'path' => $media->file_path,
+                    'name' => $media->file_name
+                ];
+            }
+        }
+        $this->pastedImages = [];
+    }
+
     public function removeNewAttachment($index)
     {
-        unset($this->newAttachments[$index]);
-        $this->newAttachments = array_values($this->newAttachments);
+        unset($this->attachments[$index]);
+        $this->attachments = array_values($this->attachments);
     }
 
     public function addPluginField()
@@ -381,8 +400,8 @@ class EditMaintenanceReport extends Component
             }
 
             // Save new attachments
-            if (!empty($this->newAttachments)) {
-                foreach ($this->newAttachments as $file) {
+            if (!empty($this->attachments)) {
+                foreach ($this->attachments as $file) {
                     $report->attachments()->create([
                         'file_path' => $file['path'],
                         'file_name' => $file['name'],

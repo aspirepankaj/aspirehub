@@ -32,13 +32,19 @@ class MediaPicker extends Component
             'files.*' => $rules,
         ]);
 
+        $uploadedMedias = [];
         foreach ($this->files as $file) {
-            Media::uploadFile($file);
+            $uploadedMedias[] = Media::uploadFile($file);
         }
 
         $this->files = [];
         $this->resetPage();
         session()->flash('success', 'Media uploaded successfully!');
+
+        // If exactly 1 file was uploaded, auto-select it!
+        if (count($uploadedMedias) === 1) {
+            $this->selectMedia($uploadedMedias[0]->file_path);
+        }
     }
 
     #[On('open-media-picker')]

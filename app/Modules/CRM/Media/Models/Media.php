@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
+    use \App\Modules\Core\Activity\Traits\LogsActivity;
+
     protected $table = 'adspv_media';
 
     protected $fillable = [
@@ -15,6 +17,20 @@ class Media extends Model
         'mime_type',
         'size',
     ];
+
+    protected function getActivityDescription(string $action): string
+    {
+        $userName = auth()->user()->name ?? 'System';
+        $fileName = $this->file_name ?? 'a file';
+        if ($action === 'created') {
+            return "{$userName} uploaded new media: {$fileName}";
+        } elseif ($action === 'updated') {
+            return "{$userName} updated media: {$fileName}";
+        } elseif ($action === 'deleted') {
+            return "{$userName} deleted media: {$fileName}";
+        }
+        return "{$userName} {$action} media: {$fileName}";
+    }
 
     public static function syncStorageFiles()
     {
@@ -39,6 +55,65 @@ class Media extends Model
                 ]);
             }
         }
+    }
+
+    public static function uploadFileFromUrl($url)
+    {
+        try {
+            $response = \Illuminate\Support\Facades\Http::get($url);
+            if (!$response->successful()) {
+                return null;
+            }
+            $contents = $response->body();
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        $year = date('Y');
+        $month = date('m');
+        $folder = "media/{$year}/{$month}";
+        
+        $originalName = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
+        if (!$originalName) {
+            $originalName = 'downloaded_image_' . time();
+        }
+        $originalName = preg_replace('/[^A-Za-z0-9\-_]/', '-', $originalName);
+        
+        $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+        if (!$extension) {
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->buffer($contents);
+            $mimeTypes = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/gif' => 'gif',
+                'image/webp' => 'webp',
+                'image/svg+xml' => 'svg',
+                'application/pdf' => 'pdf',
+            ];
+            $extension = $mimeTypes[$mime] ?? 'jpg';
+        }
+
+        $fileName = "{$originalName}.{$extension}";
+        
+        $counter = 1;
+        while (\Illuminate\Support\Facades\Storage::disk('public')->exists("{$folder}/{$fileName}")) {
+            $fileName = "{$originalName}-{$counter}.{$extension}";
+            $counter++;
+        }
+        
+        $path = "{$folder}/{$fileName}";
+        \Illuminate\Support\Facades\Storage::disk('public')->put($path, $contents);
+        
+        $mimeType = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($path);
+        $size = \Illuminate\Support\Facades\Storage::disk('public')->size($path);
+
+        return self::create([
+            'file_name' => $fileName,
+            'file_path' => $path,
+            'mime_type' => $mimeType ?: 'application/octet-stream',
+            'size'      => $size ?: 0,
+        ]);
     }
 
     public static function uploadFile($file)

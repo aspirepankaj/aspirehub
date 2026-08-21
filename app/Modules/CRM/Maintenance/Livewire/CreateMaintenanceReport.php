@@ -100,8 +100,9 @@ class CreateMaintenanceReport extends Component
     public string $client_summary = '';
 
     // 12. Attachments
-    public array $attachments = []; // uploaded files
+    public array $attachments = []; // array of ['path' => '', 'name' => '']
     public bool $attachments_visible_to_client = false;
+    public $pastedImages = [];
 
     public function mount()
     {
@@ -313,6 +314,24 @@ class CreateMaintenanceReport extends Component
             ];
             \Log::info('Attachment added', $this->attachments);
         }
+    }
+
+    public function updatedPastedImages()
+    {
+        $this->validate([
+            'pastedImages.*' => 'image|max:10240', // 10MB max
+        ]);
+
+        foreach ($this->pastedImages as $image) {
+            $media = \App\Modules\CRM\Media\Models\Media::uploadFile($image);
+            if ($media) {
+                $this->attachments[] = [
+                    'path' => $media->file_path,
+                    'name' => $media->file_name
+                ];
+            }
+        }
+        $this->pastedImages = [];
     }
 
     public function removeAttachment($index)
