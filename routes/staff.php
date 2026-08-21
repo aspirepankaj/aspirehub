@@ -11,9 +11,12 @@ use App\Modules\CRM\Staff\Livewire\Portal\StaffViewMaintenanceReport;
 use App\Modules\CRM\Staff\Livewire\Portal\StaffDocuments;
 use App\Modules\CRM\Staff\Livewire\Portal\StaffProfile;
 
+use App\Modules\CRM\Staff\Livewire\Portal\StaffClickUpTickets;
+
 Route::get('/', StaffDashboard::class)->name('dashboard');
 Route::get('/clients', StaffClients::class)->name('clients');
 Route::get('/clients/ADSCL-{id}', StaffClients::class)->name('clients.detail');
+Route::get('/clickup-tickets', StaffClickUpTickets::class)->name('clickup-tickets');
 Route::get('/websites', StaffWebsites::class)->name('websites');
 Route::get('/websites/ADSWS-{id}', StaffWebsites::class)->name('websites.detail');
 

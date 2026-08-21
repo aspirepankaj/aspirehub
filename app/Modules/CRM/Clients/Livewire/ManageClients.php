@@ -697,7 +697,7 @@ class ManageClients extends Component
             ->values();
 
         // ClickUp Data for Mapping Modal
-        $clickUpSpaces = ClickUpSpace::orderBy('name')->get();
+        $clickUpSpaces = ClickUpSpace::withCount('folders')->orderBy('name')->get();
 
         if (!empty($this->clickUpSpaceId)) {
             $clickUpFoldersQuery = ClickUpFolder::with('client.user')

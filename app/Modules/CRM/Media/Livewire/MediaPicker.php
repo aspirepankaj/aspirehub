@@ -70,6 +70,8 @@ class MediaPicker extends Component
 
     public function render()
     {
+        Media::syncStorageFiles();
+
         $query = Media::where('file_name', 'like', '%' . $this->search . '%');
 
         $field = strtolower($this->targetField);

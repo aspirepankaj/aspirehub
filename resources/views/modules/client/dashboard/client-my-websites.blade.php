@@ -1,31 +1,25 @@
 <div>
-    <?php
-    // echo "<pre>";
-    // print_r($websites);
-    // echo "</pre>";
-    // dd();
-    ?>
     <x-admin.breadcrumbs
         :items="[
             'My Websites' => null,
         ]"
     />
-    <div class="mb-8">
+    <div class="mb-6 sm:mb-8">
 
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
             My Websites
         </div>
 
-        <h1 class="mt-2 text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
             All your websites.
         </h1>
 
-        <p class="mt-3 text-slate-500 dark:text-slate-400">
+        <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             All websites associated with your account.
         </p>
 
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 
         @forelse($websites as $website)
 
@@ -67,14 +61,14 @@
             <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
 
                 {{-- Image --}}
-                <div class="relative h-64 overflow-hidden bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center">
+                <div class="relative h-48 sm:h-64 overflow-hidden bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center">
 
                     <img
                         src="{{ $website->image ? asset('storage/' . $website->image) : asset('default-website.svg') }}"
                         alt="{{ $website->site_name }}"
                         class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105">
 
-                    <span class="absolute left-4 top-4 z-20 rounded-lg bg-emerald-100/95 dark:bg-emerald-950/90 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 backdrop-blur">
+                    <span class="absolute left-3 top-3 sm:left-4 sm:top-4 z-20 rounded-lg bg-emerald-100/95 dark:bg-emerald-950/90 px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-emerald-700 dark:text-emerald-300 backdrop-blur">
 
                         ● {{ ucfirst($status) }}
 
@@ -85,7 +79,7 @@
                         <a
                             href="{{ $website->url }}"
                             target="_blank"
-                            class="absolute bottom-4 right-4 z-20 rounded-lg bg-white/95 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100 px-3 py-2 text-sm font-medium shadow transition hover:bg-white dark:hover:bg-slate-800">
+                            class="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20 rounded-lg bg-white/95 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100 px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium shadow transition hover:bg-white dark:hover:bg-slate-800">
 
                             Visit
 
@@ -96,26 +90,26 @@
                 </div>
 
                 {{-- Content --}}
-                <div class="p-6">
+                <div class="p-4 sm:p-6">
 
-                    <h3 class="text-3xl font-bold text-slate-900 dark:text-white">
+                    <h3 class="text-xl sm:text-3xl font-bold text-slate-900 dark:text-white truncate">
 
                         {{ $website->site_name }}
 
                     </h3>
 
-                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400 truncate">
+                    <p class="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">
 
                         {{ parse_url($website->url, PHP_URL_HOST) ?: $website->url }}
 
                     </p>
 
                     {{-- Health --}}
-                    <div class="mt-8 space-y-5">
+                    <div class="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
 
                         <div>
 
-                            <div class="mb-2 flex justify-between text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            <div class="mb-1.5 sm:mb-2 flex justify-between text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
 
                                 <span>Health</span>
 
@@ -137,7 +131,7 @@
                         {{-- Performance --}}
                         <div>
 
-                            <div class="mb-2 flex justify-between text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            <div class="mb-1.5 sm:mb-2 flex justify-between text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
 
                                 <span>Performance</span>
 
@@ -159,7 +153,7 @@
                         {{-- Security --}}
                         <div>
 
-                            <div class="mb-2 flex justify-between text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            <div class="mb-1.5 sm:mb-2 flex justify-between text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
 
                                 <span>Security</span>
 
@@ -181,17 +175,17 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="mt-8 flex justify-between border-t border-slate-200 dark:border-slate-800/60 pt-5">
+                    <div class="mt-6 sm:mt-8 flex justify-between border-t border-slate-200 dark:border-slate-800/60 pt-4 sm:pt-5 gap-2">
 
-                        <div>
+                        <div class="min-w-0">
 
-                            <div class="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
+                            <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 truncate">
 
                                 Maintenance Cycle
 
                             </div>
 
-                            <div class="mt-2 text-sm font-medium text-slate-900 dark:text-white">
+                            <div class="mt-1 sm:mt-2 text-xs sm:text-sm font-medium text-slate-900 dark:text-white truncate">
 
                                 {{ $website->maintenance_month ?: '-' }}
 
@@ -199,15 +193,15 @@
 
                         </div>
 
-                        <div class="text-right">
+                        <div class="text-right min-w-0">
 
-                            <div class="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
+                            <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 truncate">
 
                                 Account Manager
 
                             </div>
 
-                            <div class="mt-2 text-sm font-medium text-slate-900 dark:text-white">
+                            <div class="mt-1 sm:mt-2 text-xs sm:text-sm font-medium text-slate-900 dark:text-white truncate">
 
                                 {{ $assignedStaffName ?? 'Not Assigned' }}
 
@@ -223,10 +217,10 @@
 
         @empty
 
-            <div class="col-span-full rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/40 py-20 text-center">
+            <div class="col-span-full rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/40 py-16 sm:py-20 text-center">
 
                 <svg
-                    class="mx-auto h-14 w-14 text-slate-300 dark:text-slate-600"
+                    class="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -239,13 +233,13 @@
 
                 </svg>
 
-                <h3 class="mt-6 text-xl font-bold text-slate-800 dark:text-slate-200">
+                <h3 class="mt-4 text-lg font-bold text-slate-800 dark:text-slate-200">
 
                     No Websites Found
 
                 </h3>
 
-                <p class="mt-2 text-slate-500 dark:text-slate-400">
+                <p class="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
 
                     There are currently no websites assigned to your account.
 

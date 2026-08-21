@@ -5,31 +5,31 @@
         ]"
     />
 
-    <div class="mb-8">
+    <div class="mb-6 sm:mb-8">
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400">
             Maintenance Reports
         </div>
-        <h1 class="mt-2 text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
             Everything we did, in plain language.
         </h1>
-        <p class="mt-3 text-slate-500 dark:text-slate-400">
+        <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             Every month we run a full maintenance cycle across your websites. Below is a business-friendly summary of the work — no jargon, no technical noise.
         </p>
     </div>
 
     <!-- Header Actions (Tabs + Filter) -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-200 dark:border-slate-800/60 pb-3 pt-2">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 border-b border-slate-200 dark:border-slate-800/60 pb-3 pt-2">
         <!-- Tabs -->
         <div class="flex items-center gap-6">
             <button type="button" wire:click="$set('viewMode', 'recent')" 
-                    class="pb-1 text-sm font-bold transition-all relative {{ $viewMode === 'recent' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                    class="pb-1 text-xs sm:text-sm font-bold transition-all relative {{ $viewMode === 'recent' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
                 Recent Reports
                 @if($viewMode === 'recent')
                     <div class="absolute -bottom-3.5 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full"></div>
                 @endif
             </button>
             <button type="button" wire:click="$set('viewMode', 'archive')" 
-                    class="pb-1 text-sm font-bold transition-all relative flex items-center gap-2 {{ $viewMode === 'archive' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                    class="pb-1 text-xs sm:text-sm font-bold transition-all relative flex items-center gap-2 {{ $viewMode === 'archive' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' }}">
                 Archive
                 @if($viewMode === 'archive')
                     <div class="absolute -bottom-3.5 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full"></div>
@@ -41,7 +41,7 @@
         @if($viewMode === 'archive')
         <div class="flex items-center">
             <select wire:model.live="filterMonth" 
-                    class="block w-full sm:w-48 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                    class="block w-full sm:w-48 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
                 <option value="">All Months</option>
                 @foreach($availableMonths as $month)
                     <option value="{{ $month['value'] }}">{{ $month['label'] }}</option>
@@ -73,15 +73,15 @@
                     $securityScore = min((int)$securityText, 100);
                 }
             @endphp
-            <div class="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm hover:border-slate-350 dark:hover:border-slate-750 transition duration-150 flex flex-col justify-between max-w-2xl">
+            <div class="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-4 sm:p-6 shadow-sm hover:border-slate-350 dark:hover:border-slate-750 transition duration-150 flex flex-col justify-between max-w-2xl overflow-hidden">
                 
                 <!-- Card Header -->
-                <div class="flex items-start justify-between mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
                     <div>
-                        <div class="text-[10px] font-extrabold text-slate-400 dark:text-slate-550 uppercase tracking-wider mb-1">
+                        <div class="text-[10px] font-extrabold text-slate-400 dark:text-slate-550 uppercase tracking-wider mb-1 truncate">
                             {{ $report->site_name }}
                         </div>
-                        <h3 class="text-2xl font-black text-slate-900 dark:text-white">
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                             {{ $formattedMonth }}
                         </h3>
                         <p class="text-[11px] font-semibold text-slate-450 dark:text-slate-500 mt-0.5">
@@ -90,7 +90,7 @@
                     </div>
 
                     <!-- Scores Circular Progress Indicators -->
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3 sm:gap-4 shrink-0">
                         <!-- Health Score -->
                         <div class="flex flex-col items-center">
                             <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
@@ -133,22 +133,22 @@
                 </div>
 
                 <!-- Metrics Grid -->
-                <div class="grid grid-cols-4 gap-4 py-4 border-t border-b border-slate-100 dark:border-slate-800/80 mb-5">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4 border-t border-b border-slate-100 dark:border-slate-800/80 mb-5">
                     <div>
                         <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Backups</span>
-                        <span class="block text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->backups_count }}</span>
+                        <span class="block text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->backups_count }}</span>
                     </div>
                     <div>
                         <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Updates</span>
-                        <span class="block text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->updates_count }}</span>
+                        <span class="block text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->updates_count }}</span>
                     </div>
                     <div>
                         <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Issues Found</span>
-                        <span class="block text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->issues_found }}</span>
+                        <span class="block text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->issues_found }}</span>
                     </div>
                     <div>
                         <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Issues Fixed</span>
-                        <span class="block text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->issues_fixed }}</span>
+                        <span class="block text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{{ $report->issues_fixed }}</span>
                     </div>
                 </div>
 

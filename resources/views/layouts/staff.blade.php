@@ -93,9 +93,7 @@
                 </main>
 
                 <!-- Footer -->
-                <footer class="py-4 px-6 text-center text-xs text-slate-400 dark:text-slate-600 border-t border-slate-200/50 dark:border-slate-800/50">
-                    &copy; {{ date('Y') }} Aspire Hub. All rights reserved. Staff Portal.
-                </footer>
+                <x-common-footer />
             </div>
         </div>
 

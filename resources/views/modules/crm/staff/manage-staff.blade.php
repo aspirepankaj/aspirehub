@@ -493,7 +493,7 @@
     @endif
 
     <!-- Staff Table Card -->
-    <x-admin.card>
+    <x-admin.card class="w-full max-w-full overflow-hidden">
 
         {{-- Bulk Action Bar (visible only when items are selected) --}}
         @if(count($selectedStaff) > 0)
@@ -527,38 +527,38 @@
             </div>
         @else
             {{-- Custom table with checkbox column --}}
-            <div class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+            <div class="overflow-x-auto custom-scrollbar w-full rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
                 <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                     <thead>
                         <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                             {{-- Select All checkbox --}}
-                            <th class="px-4 py-4 w-10">
+                            <th class="px-3 py-3.5 w-10 text-center">
                                 <input type="checkbox"
                                        wire:model.live="selectAll"
                                        wire:change="toggleSelectAll({{ json_encode($pageIds) }})"
                                        class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                             </th>
-                            <th class="px-4 py-4">Staff Details</th>
-                            <th class="px-4 py-4">Company Name</th>
-                            <th class="px-4 py-4">Designation</th>
-                            <th class="px-4 py-4">Department</th>
-                            <th class="px-4 py-4">Phone Numbers</th>
-                            <th class="px-4 py-4">Status</th>
-                            <th class="px-4 py-4">Registered</th>
-                            <th class="px-4 py-4 text-right">Actions</th>
+                            <th class="px-3 py-3.5">Staff Details</th>
+                            <th class="px-3 py-3.5 hidden xl:table-cell">Company Name</th>
+                            <th class="px-3 py-3.5">Designation</th>
+                            <th class="px-3 py-3.5">Department</th>
+                            <th class="px-3 py-3.5 hidden xl:table-cell">Phone Numbers</th>
+                            <th class="px-3 py-3.5 text-center">Status</th>
+                            <th class="px-3 py-3.5 text-center hidden lg:table-cell">Registered</th>
+                            <th class="px-3 py-3.5 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                         @foreach($Staff as $staff)
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors {{ in_array($staff->id, $selectedStaff) ? 'bg-indigo-50/40 dark:bg-indigo-900/10' : '' }}">
                                 {{-- Row Checkbox --}}
-                                <td class="px-4 py-4 w-10">
+                                <td class="px-3 py-3.5 w-10 text-center">
                                     <input type="checkbox"
                                            wire:model.live="selectedStaff"
                                            value="{{ $staff->id }}"
                                            class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                                 </td>
-                                <td class="px-4 py-4">
+                                <td class="px-3 py-3.5">
                                     <div class="flex items-center gap-3">
                                         <div class="shrink-0">
                                             @if($staff->profile_image)
@@ -569,16 +569,16 @@
                                                 </div>
                                             @endif
                                         </div>
-                                        <div>
-                                            <button type="button" wire:click="viewStaffDetail({{ $staff->id }})" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left">{{ $staff->user->name ?? 'Deleted User' }}</button>
-                                            <div class="text-xs text-slate-400 dark:text-slate-500">{{ $staff->user->email ?? 'N/A' }}</div>
+                                        <div class="min-w-0 flex-1">
+                                            <button type="button" wire:click="viewStaffDetail({{ $staff->id }})" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block" title="{{ $staff->user->name ?? 'Deleted User' }}">{{ $staff->user->name ?? 'Deleted User' }}</button>
+                                            <div class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal" title="{{ $staff->user->email ?? 'N/A' }}">{{ $staff->user->email ?? 'N/A' }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 text-slate-700 dark:text-slate-300 font-semibold">
+                                <td class="px-3 py-3.5 hidden xl:table-cell text-slate-700 dark:text-slate-300 font-semibold">
                                     {{ $staff->company_name ?: '—' }}
                                 </td>
-                                <td class="px-4 py-4 text-slate-650 dark:text-slate-350 text-sm font-medium">
+                                <td class="px-3 py-3.5 text-slate-650 dark:text-slate-350 text-sm font-medium">
                                     @if($staff->designations->isEmpty())
                                         <span class="text-slate-400 dark:text-slate-650">—</span>
                                     @else
@@ -591,12 +591,12 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4">
+                                <td class="px-3 py-3.5">
                                     @php
                                         $sDepts = $staff->departments ?? ($staff->department ? [$staff->department] : []);
                                     @endphp
                                     @if(empty($sDepts))
-                                        <span class="text-slate-450 dark:text-slate-550 italic text-xs">—</span>
+                                        <span class="text-slate-455 dark:text-slate-555 italic text-xs">—</span>
                                     @else
                                         <div class="flex flex-wrap gap-1.5 max-w-[200px]">
                                             @foreach($sDepts as $deptName)
@@ -607,7 +607,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs">
+                                <td class="px-3 py-3.5 hidden xl:table-cell text-slate-500 dark:text-slate-400 font-medium text-xs">
                                     @if($staff->phones->isEmpty())
                                         {{ $staff->phone ?: '—' }}
                                     @else
@@ -618,7 +618,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4">
+                                <td class="px-3 py-3.5 text-center">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded-lg
                                           {{ $staff->status === 'active'
                                               ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
@@ -626,20 +626,21 @@
                                         {{ ucfirst($staff->status) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-xs text-slate-400 dark:text-slate-555 font-semibold">
+                                <td class="px-3 py-3.5 text-center hidden lg:table-cell text-xs text-slate-400 dark:text-slate-555 font-semibold">
                                     {{ $staff->created_at->diffForHumans() }}
                                 </td>
-                                <td class="px-4 py-4 text-right">
-                                    <div class="inline-flex items-center gap-1">
+                                <td class="px-3 py-3.5 text-center whitespace-nowrap">
+                                    <div class="inline-flex items-center justify-center gap-1.5 shrink-0">
                                         <a href="{{ route('impersonate.start', $staff->user_id) }}"
-                                           class="inline-flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90"
-                                           title="Login as this Staff Member"
+                                           class="inline-flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90 shrink-0"
+                                           title="Login as {{ $staff->user->name ?? 'this staff member' }}"
                                            onclick="return confirm('Are you sure you want to login as {{ $staff->user->name ?? 'this staff member' }}?')">
-                                            <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-7 h-7 opacity-60 hover:opacity-100 transition-opacity" alt="Switch Account" />
+                                            <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-6 h-6 shrink-0 opacity-80 hover:opacity-100 transition-opacity" alt="Switch Account" />
                                         </a>
                                         <button type="button" wire:click="editStaff({{ $staff->id }})"
-                                                class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90 shrink-0"
+                                                title="Edit Staff Member">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </button>

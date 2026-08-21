@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('staff-dashboard', \App\Modules\CRM\Staff\Livewire\Portal\StaffDashboard::class);
         \Livewire\Livewire::component('staff-clients', \App\Modules\CRM\Staff\Livewire\Portal\StaffClients::class);
         \Livewire\Livewire::component('staff-websites', \App\Modules\CRM\Staff\Livewire\Portal\StaffWebsites::class);
+        \Livewire\Livewire::component('staff-clickup-tickets', \App\Modules\CRM\Staff\Livewire\Portal\StaffClickUpTickets::class);
         \Livewire\Livewire::component('staff-maintenance', \App\Modules\CRM\Staff\Livewire\Portal\StaffMaintenance::class);
         \Livewire\Livewire::component('staff-create-maintenance-report', \App\Modules\CRM\Staff\Livewire\Portal\StaffCreateMaintenanceReport::class);
         \Livewire\Livewire::component('staff-edit-maintenance-report', \App\Modules\CRM\Staff\Livewire\Portal\StaffEditMaintenanceReport::class);

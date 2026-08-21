@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
-      x-data="{ dark: localStorage.getItem('client-theme') === 'dark' }" 
+      x-data="{ dark: localStorage.getItem('client-theme') === 'dark', mobileSidebar: false }" 
       x-init="$watch('dark', v => {
           localStorage.setItem('client-theme', v ? 'dark' : 'light');
           if (v) {
@@ -75,12 +75,33 @@
 
 <div class="relative min-h-screen flex z-10">
 
+    <!-- Mobile Overlay Backdrop -->
+    <div x-show="mobileSidebar" 
+         x-transition:enter="transition-opacity ease-linear duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="transition-opacity ease-linear duration-300" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0" 
+         @click="mobileSidebar = false" 
+         class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 lg:hidden" 
+         style="display: none;">
+    </div>
+
     <!-- Sidebar -->
-    <aside class="w-64 shrink-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between">
+    <aside :class="mobileSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" 
+           class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:static lg:z-auto shrink-0">
         <div>
-            <div class="px-6 py-6 flex flex-col gap-1">
-                <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start dark:brightness-0 dark:invert" alt="Aspire Hub" />
-                <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase pl-1 mt-0.5">Client Portal</div>
+            <div class="px-6 py-6 flex items-center justify-between">
+                <div class="flex flex-col gap-1">
+                    <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start dark:brightness-0 dark:invert" alt="Aspire Hub" />
+                    <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase pl-1 mt-0.5">Client Portal</div>
+                </div>
+                <button type="button" @click="mobileSidebar = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lg:hidden">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             <div class="px-4 mb-4">
@@ -162,23 +183,34 @@
         </div>
     </aside>
 
-    <!-- Main -->
-    <div class="flex-1 flex flex-col min-w-0">
+    <!-- Main Content Container -->
+    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen">
         <!-- Topbar -->
-        <header class="h-16 sticky top-0 z-50 flex items-center justify-between px-8 border-b border-slate-100 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
-            <div class="text-sm font-semibold text-slate-400 dark:text-slate-500">{{ now()->format('l, F j') }}</div>
+        <header class="h-16 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-slate-100 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
             <div class="flex items-center gap-3">
+                <button type="button" @click="mobileSidebar = !mobileSidebar" class="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 lg:hidden focus:outline-none hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div class="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 truncate">{{ now()->format('l, F j') }}</div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
                 <livewire:header-notifications />
-                <a href="{{ route('client.support') }}" class="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                <a href="{{ route('client.support') }}" class="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
                     <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Support
+                    <span class="hidden xs:inline">Support</span>
                 </a>
             </div>
         </header>
 
-        <main class="flex-1 p-8 overflow-y-auto">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
             {{ $slot }}
         </main>
+
+        <!-- Footer -->
+        <x-common-footer />
     </div>
 </div>
 

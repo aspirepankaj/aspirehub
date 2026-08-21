@@ -802,13 +802,13 @@
         </div>
 
         {{-- ══════════════════════════════════════════════
-             FILTERS — 50 / 50 layout
+             FILTERS — Responsive grid
              ══════════════════════════════════════════════ --}}
         <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
 
                 {{-- Search (33%) --}}
-                <div class="relative flex items-center">
+                <div class="relative flex items-center col-span-1 sm:col-span-2 md:col-span-1">
                     <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -879,7 +879,7 @@
         @endif
 
         <!-- Clients Table Card -->
-        <x-admin.card>
+        <x-admin.card class="w-full max-w-full overflow-hidden">
 
             {{-- Bulk Action Bar (visible only when items are selected) --}}
             @if(count($selectedClients) > 0)
@@ -914,38 +914,38 @@
                 </div>
             @else
                 {{-- Custom table with checkbox column --}}
-                <div class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                <div class="overflow-x-auto custom-scrollbar w-full rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
                     <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                         <thead>
                             <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                                 {{-- Select All checkbox --}}
-                                <th class="px-4 py-4 w-10">
+                                <th class="px-3 py-3.5 w-10 text-center">
                                     <input type="checkbox"
                                            wire:model.live="selectAll"
                                            wire:change="toggleSelectAll({{ json_encode($pageIds) }})"
                                            class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                                 </th>
-                                <th class="px-4 py-4">Client Details</th>
-                                <th class="px-4 py-4">Company Name</th>
-                                <th class="px-4 py-4">Plans</th>
-                                <th class="px-4 py-4">Websites</th>
-                                <th class="px-4 py-4">Phone Numbers</th>
-                                <th class="px-4 py-4">Status</th>
-                                <th class="px-4 py-4">Last Login</th>
-                                <th class="px-4 py-4 text-right">Actions</th>
+                                <th class="px-3 py-3.5">Client Details</th>
+                                <th class="px-3 py-3.5">Company Name</th>
+                                <th class="px-3 py-3.5">Plans</th>
+                                <th class="px-3 py-3.5 text-center">Websites</th>
+                                <th class="px-3 py-3.5 hidden xl:table-cell">Phone Numbers</th>
+                                <th class="px-3 py-3.5 text-center">Status</th>
+                                <th class="px-3 py-3.5 text-center hidden lg:table-cell">Last Login</th>
+                                <th class="px-3 py-3.5 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                             @foreach($clients as $client)
                                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors {{ in_array($client->id, $selectedClients) ? 'bg-indigo-50/40 dark:bg-indigo-900/10' : '' }}">
                                     {{-- Row Checkbox --}}
-                                    <td class="px-4 py-4 w-10">
+                                    <td class="px-3 py-3.5 w-10 text-center">
                                         <input type="checkbox"
                                                wire:model.live="selectedClients"
                                                value="{{ $client->id }}"
                                                class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                                     </td>
-                                    <td class="px-4 py-4">
+                                    <td class="px-3 py-3.5">
                                         <div class="flex items-center gap-3">
                                             <div class="shrink-0 cursor-pointer" wire:click="viewClientDetail({{ $client->id }})">
                                                 @if($client->profile_image)
@@ -956,18 +956,18 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                            <div>
-                                                <div class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition" wire:click="viewClientDetail({{ $client->id }})">
+                                            <div class="min-w-0 flex-1">
+                                                <div class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal" title="{{ $client->user->name ?? 'Deleted User' }}" wire:click="viewClientDetail({{ $client->id }})">
                                                     {{ $client->user->name ?? 'Deleted User' }}
                                                 </div>
-                                                <div class="text-xs text-slate-400 dark:text-slate-500">{{ $client->user->email ?? 'N/A' }}</div>
+                                                <div class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal" title="{{ $client->user->email ?? 'N/A' }}">{{ $client->user->email ?? 'N/A' }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-4 text-slate-700 dark:text-slate-350 font-semibold cursor-pointer" wire:click="viewClientDetail({{ $client->id }})">
+                                    <td class="px-3 py-3.5 text-slate-700 dark:text-slate-350 font-semibold cursor-pointer" wire:click="viewClientDetail({{ $client->id }})">
                                         {{ $client->company_name ?: '—' }}
                                     </td>
-                                    <td class="px-4 py-4">
+                                    <td class="px-3 py-3.5">
                                         @if($client->plans->isNotEmpty())
                                             <div class="flex flex-wrap gap-1">
                                                 @foreach($client->plans as $pl)
@@ -980,7 +980,7 @@
                                             —
                                         @endif
                                     </td>
-                                    <td class="px-4 py-4">
+                                    <td class="px-3 py-3.5 text-center">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50">
                                         <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -989,7 +989,7 @@
                                     </span>
                                 </td>
 
-                                <td class="px-4 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs">
+                                <td class="px-3 py-3.5 hidden xl:table-cell text-slate-500 dark:text-slate-400 font-medium text-xs">
                                     @if($client->phones->isEmpty())
                                         {{ $client->phone ?: '—' }}
                                     @else
@@ -1000,7 +1000,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4">
+                                <td class="px-3 py-3.5 text-center">
                                     <span class="px-2.5 py-1 text-xs font-bold rounded-lg
                                           {{ $client->status === 'active'
                                               ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
@@ -1008,20 +1008,20 @@
                                         {{ ucfirst($client->status) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                                <td class="px-3 py-3.5 text-center hidden lg:table-cell text-xs text-slate-500 dark:text-slate-400 font-semibold">
                                     {{ $client->last_login_at ? $client->last_login_at->diffForHumans() : 'Never' }}
                                 </td>
-                                <td class="px-4 py-4 text-right whitespace-nowrap">
-                                    <div class="inline-flex items-center justify-end gap-1.5">
+                                <td class="px-3 py-3.5 text-center whitespace-nowrap">
+                                    <div class="inline-flex items-center justify-center gap-1.5 shrink-0">
                                         <button type="button" wire:click="openClickUpMappingModal({{ $client->id }})"
-                                                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition-all duration-150 active:scale-95"
+                                                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition-all duration-150 active:scale-95 shrink-0"
                                                 title="Map ClickUp Folders to this Client">
-                                                <span>Map With</span>
+                                                <span class="hidden 2xl:inline">Map With</span>
                                             <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
                                         </button>
 
                                         <button type="button" wire:click="editClient({{ $client->id }})"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all duration-150 active:scale-95"
+                                                class="inline-flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all duration-150 active:scale-95 shrink-0"
                                                 title="Edit Client Profile">
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1044,78 +1044,95 @@
 
     <!-- Add Client Modal -->
     <x-admin.modal name="add-client-modal" title="Add New Client" maxWidth="max-w-3xl">
-        <div class=" mt-2 flex flex-col gap-3">
-            <!-- Profile Image -->
-            <div>
-                <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Profile Image') }}</label>
-                <div class="mt-1.5 flex items-center gap-3">
-                    @if ($profile_image)
-                        <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'C', 0, 2)) }}</div>`" />
-                    @else
-                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                    @endif
-                    
-                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
-                        Choose from Media Library
-                    </button>
-
-                    @if ($profile_image)
-                        <button type="button" wire:click="removeProfileImage" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
-                            Remove
-                        </button>
-                    @endif
+        <div class="space-y-6 mt-2">
+            
+            <!-- Section 1: Profile & Basic Details -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Basic Profile</h4>
                 </div>
-                <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
+
+                <!-- Profile Image -->
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Profile Image') }}</label>
+                    <div class="flex items-center gap-3">
+                        @if ($profile_image)
+                            <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-500/30 shadow-sm" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold'>{{ strtoupper(substr($name ?? 'C', 0, 2)) }}</div>`" />
+                        @else
+                            <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 flex items-center justify-center text-slate-400">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        @endif
+                        
+                        <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 font-bold text-xs rounded-xl transition-colors border border-indigo-200/80 dark:border-indigo-800/60">
+                            Choose from Media Library
+                        </button>
+
+                        @if ($profile_image)
+                            <button type="button" wire:click="removeProfileImage" class="px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-900/40 rounded-xl hover:bg-red-100 transition">
+                                Remove
+                            </button>
+                        @endif
+                    </div>
+                    <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
+                </div>
+
+                <!-- 2-Column Grid: Name & Email -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="name" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Full Name') }}</label>
+                        <input wire:model="name" id="name" type="text" required autocomplete="new-name" placeholder="e.g. John Doe"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('name')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <label for="client_email" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Email Address') }}</label>
+                        <input wire:model="email" id="client_email" type="email" required autocomplete="new-email" placeholder="john.doe@example.com"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('email')" class="mt-1" />
+                    </div>
+                </div>
+
+                <!-- 2-Column Grid: Password & Company Name -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="client_password" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Password') }}</label>
+                        <input wire:model="password" id="client_password" type="password" required autocomplete="new-password" placeholder="Min 8 characters"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('password')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <label for="company_name" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Company Name') }}</label>
+                        <input wire:model="company_name" id="company_name" type="text" placeholder="e.g. Acme Corp"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('company_name')" class="mt-1" />
+                    </div>
+                </div>
             </div>
 
-            <!-- Name -->
-            <div>
-                <label for="name" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Full Name') }}</label>
-                <input wire:model="name" id="name" type="text" required autocomplete="new-name" placeholder="e.g. John Doe"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('name')" class="mt-1" />
-            </div>
-
-            <!-- Email -->
-            <div>
-                <label for="client_email" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Email Address') }}</label>
-                <input wire:model="email" id="client_email" type="email" required autocomplete="new-email" placeholder="john.doe@example.com"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('email')" class="mt-1" />
-            </div>
-
-            <!-- Password -->
-            <div>
-                <label for="client_password" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Password') }}</label>
-                <input wire:model="password" id="client_password" type="password" required autocomplete="new-password" placeholder="Min 8 characters"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('password')" class="mt-1" />
-            </div>
-
-            <!-- Company Name -->
-            <div>
-                <label for="company_name" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Company Name') }}</label>
-                <input wire:model="company_name" id="company_name" type="text" placeholder="e.g. Acme Corp"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('company_name')" class="mt-1" />
-            </div>
-
-            <!-- Phones Section -->
-            <div class="space-y-2 border-t border-slate-100 dark:border-slate-800/50 ">
-                <div class="flex items-center justify-between">
-                    <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Phone Numbers</label>
+            <!-- Section 2: Contact Numbers -->
+            <div class="space-y-3 pt-2">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Phone Numbers</h4>
+                    </div>
                     @if(count($phones) < 5)
-                        <button type="button" wire:click="addPhoneField" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1.5 active:scale-95">
+                        <button type="button" wire:click="addPhoneField" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition flex items-center gap-1.5 active:scale-95">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                             Add Phone
                         </button>
                     @else
-                        <span class="text-[10px] font-semibold text-amber-500 dark:text-amber-400 flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span class="text-[10px] font-semibold text-amber-500 flex items-center gap-1">
                             Max 5 reached
                         </span>
                     @endif
@@ -1125,7 +1142,7 @@
                     @foreach($phones as $index => $phoneItem)
                         <div class="flex items-start gap-3" wire:key="add-phone-{{ $index }}">
                             <div class="w-1/3">
-                                <select wire:model="phones.{{ $index }}.label" class="block w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                                <select wire:model="phones.{{ $index }}.label" class="block w-full px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition duration-150">
                                     <option value="Work">Work</option>
                                     <option value="Mobile">Mobile</option>
                                     <option value="Home">Home</option>
@@ -1133,15 +1150,15 @@
                                 </select>
                                 <x-input-error :messages="$errors->get('phones.'.$index.'.label')" class="mt-1" />
                             </div>
-                            <div class="flex-1 relative">
+                            <div class="flex-1">
                                 <input wire:model="phones.{{ $index }}.phone" type="tel" placeholder="e.g. +1 555-0199" max="20" maxlength="20"
                                        oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
-                                       class="block w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                                       class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                                 <x-input-error :messages="$errors->get('phones.'.$index.'.phone')" class="mt-1" />
                             </div>
                             @if(count($phones) > 1)
-                                <button type="button" wire:click="removePhoneField({{ $index }})" class="p-2.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 self-center">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                <button type="button" wire:click="removePhoneField({{ $index }})" class="p-2.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 self-center">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
                             @endif
                         </div>
@@ -1149,109 +1166,127 @@
                 </div>
             </div>
 
-            {{-- Assign Staff - Checkbox Grid for multiple staff --}}
-            <div>
-                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Account Manager</label>
-                <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-40 overflow-y-auto scrollbar-thin">
-                    @foreach($staffMembers as $staffOpt)
-                        <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
-                            <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
-                                   class="rounded-full border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
-                            <div class="flex flex-col truncate">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
-                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
-                            </div>
-                        </label>
-                    @endforeach
+            <!-- Section 3: Account Assignment & Status -->
+            <div class="space-y-4 pt-2">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Assignment & Plans</h4>
                 </div>
-                <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Assign Staff -->
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Assign Account Manager</label>
+                        <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
+                            @foreach($staffMembers as $staffOpt)
+                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
+                                    <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
+                                           class="rounded-full border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
+                                    <div class="flex flex-col truncate">
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
+                                        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                        <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
+                    </div>
+
+                    <!-- Plans Selection -->
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Subscribed Plans</label>
+                        <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
+                            @foreach($plans as $planOpt)
+                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
+                                    <input type="checkbox" wire:model="plan_ids" value="{{ $planOpt->id }}"
+                                           class="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $planOpt->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <x-input-error :messages="$errors->get('plan_ids')" class="mt-1" />
+                    </div>
+                </div>
+
+                <!-- Status Select -->
+                <div>
+                    <label for="client_status" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Account Status') }}</label>
+                    <select wire:model="status" id="client_status" 
+                            class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition duration-150">
+                        <option value="active" class="dark:bg-slate-900">Active</option>
+                        <option value="inactive" class="dark:bg-slate-900">Inactive</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('status')" class="mt-1" />
+                </div>
             </div>
 
-            <!-- Address Details -->
-            <div class="border-t border-slate-100 dark:border-slate-800/50 pt-4 mt-2">
-                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest mb-3">Address Details</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Section 4: Address Details -->
+            <div class="space-y-4 pt-2">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Address Details</h4>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="md:col-span-2">
-                        <label for="address" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Address</label>
+                        <label for="address" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Street Address</label>
                         <textarea wire:model="address" id="address" rows="2" placeholder="Street Address"
-                                  class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150"></textarea>
+                                  class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150"></textarea>
                         <x-input-error :messages="$errors->get('address')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="landmark" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Landmark</label>
+                        <label for="landmark" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Landmark</label>
                         <input wire:model="landmark" id="landmark" type="text" placeholder="Near Hospital, Mall etc."
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('landmark')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="state" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">State</label>
+                        <label for="state" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">State / Province</label>
                         <input wire:model="state" id="state" type="text" placeholder="State/Province"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('state')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="country" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Country</label>
+                        <label for="country" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Country</label>
                         <input wire:model="country" id="country" type="text" placeholder="Country"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('country')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="region" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Region</label>
+                        <label for="region" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Region</label>
                         <input wire:model="region" id="region" type="text" placeholder="Region"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('region')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="zip_code" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-550 uppercase tracking-widest">Zip Code</label>
+                        <label for="zip_code" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Zip / Postal Code</label>
                         <input wire:model="zip_code" id="zip_code" type="text" placeholder="Postal Code"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('zip_code')" class="mt-1" />
                     </div>
                 </div>
             </div>
 
-            <!-- Plans Selection -->
-            <div>
-                <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Plans</label>
-                <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-28 overflow-y-auto scrollbar-thin">
-                    @foreach($plans as $planOpt)
-                        <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
-                            <input type="checkbox" wire:model="plan_ids" value="{{ $planOpt->id }}"
-                                   class="rounded border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $planOpt->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-                <x-input-error :messages="$errors->get('plan_ids')" class="mt-1" />
-            </div>
-
-            <!-- Status -->
-            <div>
-                <label for="client_status" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Account Status') }}</label>
-                <select wire:model="status" id="client_status" 
-                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
-                    <option value="active" class="dark:bg-slate-900">Active</option>
-                    <option value="inactive" class="dark:bg-slate-900">Inactive</option>
-                </select>
-                <x-input-error :messages="$errors->get('status')" class="mt-1" />
-            </div>
-
-            <!-- Notes -->
-            <div>
-                <label for="notes" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Notes') }}</label>
+            <!-- Section 5: Notes -->
+            <div class="space-y-2 pt-2">
+                <label for="notes" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Notes') }}</label>
                 <textarea wire:model="notes" id="notes" rows="3" placeholder="Enter any additional details about the client..."
-                          class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150"></textarea>
+                          class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150"></textarea>
                 <x-input-error :messages="$errors->get('notes')" class="mt-1" />
             </div>
 
-            <!-- Actions -->
-            <div class="flex items-center justify-end  space-x-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">
+            <!-- Actions Footer -->
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button type="button" @click="$dispatch('close-modal', { name: 'add-client-modal' })" 
-                        class="px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
+                        class="px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
-                <x-admin.button type="button" wire:click="saveClient" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5 ">
-                    <!-- Loading Spinner -->
+                <x-admin.button type="button" wire:click="saveClient" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
                     <svg wire:loading wire:target="saveClient" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1264,80 +1299,97 @@
 
     <!-- Edit Client Modal -->
     <x-admin.modal name="edit-client-modal" title="Edit Client" maxWidth="max-w-3xl">
-        <div class="space-y-4.5 mt-2">
-            <!-- Profile Image -->
-            <div>
-                <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Profile Image') }}</label>
-                <div class="mt-1.5 flex items-center gap-3">
-                    @if ($profile_image)
-                        <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'C', 0, 2)) }}</div>`" />
-                    @elseif ($existing_profile_image)
-                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'C', 0, 2)) }}</div>`" />
-                    @else
-                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                    @endif
-                    
-                    <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
-                        Choose from Media Library
-                    </button>
-
-                    @if ($profile_image || $existing_profile_image)
-                        <button type="button" wire:click="removeProfileImage" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
-                            Remove
-                        </button>
-                    @endif
+        <div class="space-y-6 mt-2">
+            
+            <!-- Section 1: Profile & Basic Details -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Basic Profile</h4>
                 </div>
-                <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
+
+                <!-- Profile Image -->
+                <div>
+                    <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Profile Image') }}</label>
+                    <div class="flex items-center gap-3">
+                        @if ($profile_image)
+                            <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-500/30 shadow-sm" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold'>{{ strtoupper(substr($name ?? 'C', 0, 2)) }}</div>`" />
+                        @elseif ($existing_profile_image)
+                            <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-500/30 shadow-sm" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold'>{{ strtoupper(substr($name ?? 'C', 0, 2)) }}</div>`" />
+                        @else
+                            <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 flex items-center justify-center text-slate-400">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        @endif
+                        
+                        <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 font-bold text-xs rounded-xl transition-colors border border-indigo-200/80 dark:border-indigo-800/60">
+                            Choose from Media Library
+                        </button>
+
+                        @if ($profile_image || $existing_profile_image)
+                            <button type="button" wire:click="removeProfileImage" class="px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-900/40 rounded-xl hover:bg-red-100 transition">
+                                Remove
+                            </button>
+                        @endif
+                    </div>
+                    <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
+                </div>
+
+                <!-- 2-Column Grid: Name & Email -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="edit_name" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Full Name') }}</label>
+                        <input wire:model="name" id="edit_name" type="text" required placeholder="e.g. John Doe"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('name')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <label for="edit_client_email" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Email Address') }}</label>
+                        <input wire:model="email" id="edit_client_email" type="email" required placeholder="john.doe@example.com"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('email')" class="mt-1" />
+                    </div>
+                </div>
+
+                <!-- 2-Column Grid: Password & Company Name -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="edit_client_password" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Password (Leave blank to keep current)') }}</label>
+                        <input wire:model="password" id="edit_client_password" type="password" placeholder="Min 8 characters" autocomplete="new-password"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('password')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <label for="edit_company_name" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Company Name') }}</label>
+                        <input wire:model="company_name" id="edit_company_name" type="text" placeholder="e.g. Acme Corp"
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
+                        <x-input-error :messages="$errors->get('company_name')" class="mt-1" />
+                    </div>
+                </div>
             </div>
 
-            <!-- Name -->
-            <div>
-                <label for="edit_name" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Full Name') }}</label>
-                <input wire:model="name" id="edit_name" type="text" required placeholder="e.g. John Doe"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('name')" class="mt-1" />
-            </div>
-
-            <!-- Email -->
-            <div>
-                <label for="edit_client_email" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Email Address') }}</label>
-                <input wire:model="email" id="edit_client_email" type="email" required placeholder="john.doe@example.com"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('email')" class="mt-1" />
-            </div>
-
-            <!-- Password -->
-            <div>
-                <label for="edit_client_password" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Password (Leave blank to keep current)') }}</label>
-                <input wire:model="password" id="edit_client_password" type="password" placeholder="Min 8 characters" autocomplete="new-password"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('password')" class="mt-1" />
-            </div>
-
-            <!-- Company Name -->
-            <div>
-                <label for="edit_company_name" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Company Name') }}</label>
-                <input wire:model="company_name" id="edit_company_name" type="text" placeholder="e.g. Acme Corp"
-                       class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                <x-input-error :messages="$errors->get('company_name')" class="mt-1" />
-            </div>
-
-            <!-- Phones Section (Edit) -->
-            <div class="space-y-2 border-t border-slate-100 dark:border-slate-800/50 pt-3.5">
-                <div class="flex items-center justify-between">
-                    <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Phone Numbers</label>
+            <!-- Section 2: Contact Numbers -->
+            <div class="space-y-3 pt-2">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Phone Numbers</h4>
+                    </div>
                     @if(count($phones) < 5)
-                        <button type="button" wire:click="addPhoneField" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1.5 active:scale-95">
+                        <button type="button" wire:click="addPhoneField" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition flex items-center gap-1.5 active:scale-95">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                             Add Phone
                         </button>
                     @else
-                        <span class="text-[10px] font-semibold text-amber-500 dark:text-amber-400 flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span class="text-[10px] font-semibold text-amber-500 flex items-center gap-1">
                             Max 5 reached
                         </span>
                     @endif
@@ -1347,7 +1399,7 @@
                     @foreach($phones as $index => $phoneItem)
                         <div class="flex items-start gap-3" wire:key="edit-phone-{{ $index }}">
                             <div class="w-1/3">
-                                <select wire:model="phones.{{ $index }}.label" class="block w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                                <select wire:model="phones.{{ $index }}.label" class="block w-full px-3 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition duration-150">
                                     <option value="Work">Work</option>
                                     <option value="Mobile">Mobile</option>
                                     <option value="Home">Home</option>
@@ -1355,15 +1407,15 @@
                                 </select>
                                 <x-input-error :messages="$errors->get('phones.'.$index.'.label')" class="mt-1" />
                             </div>
-                            <div class="flex-1 relative">
+                            <div class="flex-1">
                                 <input wire:model="phones.{{ $index }}.phone" type="tel" placeholder="e.g. +1 555-0199" max="20" maxlength="20"
                                        oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
-                                       class="block w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                                       class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                                 <x-input-error :messages="$errors->get('phones.'.$index.'.phone')" class="mt-1" />
                             </div>
                             @if(count($phones) > 1)
-                                <button type="button" wire:click="removePhoneField({{ $index }})" class="p-2.5 text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 self-center">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                <button type="button" wire:click="removePhoneField({{ $index }})" class="p-2.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 self-center">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
                             @endif
                         </div>
@@ -1371,109 +1423,127 @@
                 </div>
             </div>
 
-            {{-- Assign Staff - Checkbox Grid for multiple staff --}}
-            <div>
-                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest">Assign Account Manager</label>
-                <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-40 overflow-y-auto scrollbar-thin">
-                    @foreach($staffMembers as $staffOpt)
-                        <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
-                            <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
-                                   class="rounded-full border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
-                            <div class="flex flex-col truncate">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
-                                <span class="text-[9px] text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
-                            </div>
-                        </label>
-                    @endforeach
+            <!-- Section 3: Account Assignment & Status -->
+            <div class="space-y-4 pt-2">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Assignment & Plans</h4>
                 </div>
-                <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Assign Staff -->
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Assign Account Manager</label>
+                        <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
+                            @foreach($staffMembers as $staffOpt)
+                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
+                                    <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
+                                           class="rounded-full border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
+                                    <div class="flex flex-col truncate">
+                                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
+                                        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                        <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
+                    </div>
+
+                    <!-- Plans Selection -->
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Subscribed Plans</label>
+                        <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
+                            @foreach($plans as $planOpt)
+                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
+                                    <input type="checkbox" wire:model="plan_ids" value="{{ $planOpt->id }}"
+                                           class="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $planOpt->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <x-input-error :messages="$errors->get('plan_ids')" class="mt-1" />
+                    </div>
+                </div>
+
+                <!-- Status Select -->
+                <div>
+                    <label for="edit_client_status" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Account Status') }}</label>
+                    <select wire:model="status" id="edit_client_status" 
+                            class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition duration-150">
+                        <option value="active" class="dark:bg-slate-900">Active</option>
+                        <option value="inactive" class="dark:bg-slate-900">Inactive</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('status')" class="mt-1" />
+                </div>
             </div>
 
-            <!-- Address Details -->
-            <div class="border-t border-slate-100 dark:border-slate-800/50 pt-4 mt-2">
-                <label class="block text-[10px] font-extrabold text-slate-650 dark:text-slate-500 uppercase tracking-widest mb-3">Address Details</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Section 4: Address Details -->
+            <div class="space-y-4 pt-2">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Address Details</h4>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="md:col-span-2">
-                        <label for="edit_address" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Address</label>
+                        <label for="edit_address" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Street Address</label>
                         <textarea wire:model="address" id="edit_address" rows="2" placeholder="Street Address"
-                                  class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150"></textarea>
+                                  class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150"></textarea>
                         <x-input-error :messages="$errors->get('address')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="edit_landmark" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Landmark</label>
+                        <label for="edit_landmark" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Landmark</label>
                         <input wire:model="landmark" id="edit_landmark" type="text" placeholder="Near Hospital, Mall etc."
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('landmark')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="edit_state" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">State</label>
+                        <label for="edit_state" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">State / Province</label>
                         <input wire:model="state" id="edit_state" type="text" placeholder="State/Province"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('state')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="edit_country" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Country</label>
+                        <label for="edit_country" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Country</label>
                         <input wire:model="country" id="edit_country" type="text" placeholder="Country"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('country')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="edit_region" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Region</label>
+                        <label for="edit_region" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Region</label>
                         <input wire:model="region" id="edit_region" type="text" placeholder="Region"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('region')" class="mt-1" />
                     </div>
                     <div>
-                        <label for="edit_zip_code" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-555 uppercase tracking-widest">Zip Code</label>
+                        <label for="edit_zip_code" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Zip / Postal Code</label>
                         <input wire:model="zip_code" id="edit_zip_code" type="text" placeholder="Postal Code"
-                               class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
+                               class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('zip_code')" class="mt-1" />
                     </div>
                 </div>
             </div>
 
-            <!-- Plans Selection -->
-            <div>
-                <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Plans</label>
-                <div class="grid grid-cols-2 gap-2 mt-1.5 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 max-h-28 overflow-y-auto scrollbar-thin">
-                    @foreach($plans as $planOpt)
-                        <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition duration-150 cursor-pointer">
-                            <input type="checkbox" wire:model="plan_ids" value="{{ $planOpt->id }}"
-                                   class="rounded border-slate-200/100 dark:border-slate-800/50 text-indigo-600 focus:ring-indigo-500/50">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $planOpt->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-                <x-input-error :messages="$errors->get('plan_ids')" class="mt-1" />
-            </div>
-
-            <!-- Status -->
-            <div>
-                <label for="edit_client_status" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Account Status') }}</label>
-                <select wire:model="status" id="edit_client_status" 
-                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150">
-                    <option value="active" class="dark:bg-slate-900">Active</option>
-                    <option value="inactive" class="dark:bg-slate-900">Inactive</option>
-                </select>
-                <x-input-error :messages="$errors->get('status')" class="mt-1" />
-            </div>
-
-            <!-- Notes -->
-            <div>
-                <label for="edit_notes" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Notes') }}</label>
+            <!-- Section 5: Notes -->
+            <div class="space-y-2 pt-2">
+                <label for="edit_notes" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Notes') }}</label>
                 <textarea wire:model="notes" id="edit_notes" rows="3" placeholder="Enter any additional details about the client..."
-                          class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150"></textarea>
+                          class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150"></textarea>
                 <x-input-error :messages="$errors->get('notes')" class="mt-1" />
             </div>
 
-            <!-- Actions -->
-            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">
+            <!-- Actions Footer -->
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button type="button" @click="$dispatch('close-modal', { name: 'edit-client-modal' })" 
-                        class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
+                        class="px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
                 <x-admin.button type="button" wire:click="updateClient" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
-                    <!-- Loading Spinner -->
                     <svg wire:loading wire:target="updateClient" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1514,20 +1584,53 @@
                     </button>
                 </div>
 
-                <!-- ClickUp Spaces Selection Tabs -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
-                        Select ClickUp Space
-                    </label>
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                <!-- ClickUp Spaces Selection Grid -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            Select ClickUp Space
+                        </label>
+                        <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700/60">
+                            {{ count($clickUpSpaces) }} {{ Str::plural('Space', count($clickUpSpaces)) }}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
                         @foreach($clickUpSpaces as $space)
+                            @php
+                                $isSelected = $clickUpSpaceId === $space->id;
+                                $spaceColor = $space->color ?: '#135266';
+                            @endphp
                             <button type="button" 
                                     wire:click="selectClickUpSpace('{{ $space->id }}')"
-                                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap border {{ $clickUpSpaceId === $space->id ? 'bg-[#135266] text-white border-[#135266] shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50' }}">
-                                @if($space->color)
-                                    <span class="w-2 h-2 rounded-full" style="background-color: {{ $space->color }}"></span>
-                                @endif
-                                {{ $space->name }}
+                                    class="group relative text-left p-3 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-2.5 overflow-hidden {{ $isSelected ? 'bg-gradient-to-br from-indigo-50/90 to-slate-50 dark:from-slate-800 dark:to-slate-850 border-indigo-500 dark:border-indigo-400 shadow-md ring-2 ring-indigo-500/20' : 'bg-white dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700/70 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm' }}">
+                                
+                                <div class="flex items-start justify-between gap-1.5">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="w-3 h-3 rounded-full shrink-0 shadow-sm border border-black/10" style="background-color: {{ $spaceColor }}"></span>
+                                        <h5 class="text-xs font-bold truncate transition-colors {{ $isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
+                                            {{ $space->name }}
+                                        </h5>
+                                    </div>
+                                    @if($isSelected)
+                                        <span class="w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shrink-0 shadow-sm">✓</span>
+                                    @endif
+                                </div>
+
+                                <div class="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-400 font-medium pt-1.5 border-t border-slate-100 dark:border-slate-750/50">
+                                    <span class="flex items-center gap-1 font-semibold">
+                                        <svg class="w-3 h-3 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                        </svg>
+                                        {{ $space->folders_count ?? count($space->folders) }} {{ Str::plural('folder', $space->folders_count ?? count($space->folders)) }}
+                                    </span>
+                                    @if($isSelected)
+                                        <span class="text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider text-[9px]">Selected</span>
+                                    @endif
+                                </div>
                             </button>
                         @endforeach
                     </div>

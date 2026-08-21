@@ -3,6 +3,7 @@
 namespace App\Modules\CRM\Media\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
@@ -14,6 +15,31 @@ class Media extends Model
         'mime_type',
         'size',
     ];
+
+    public static function syncStorageFiles()
+    {
+        $allFiles = Storage::disk('public')->allFiles();
+        $existingPathsMap = array_flip(self::pluck('file_path')->toArray());
+
+        foreach ($allFiles as $filePath) {
+            $baseName = basename($filePath);
+            if (in_array($baseName, ['.DS_Store', '.gitignore']) || str_starts_with($baseName, '.')) {
+                continue;
+            }
+
+            if (!isset($existingPathsMap[$filePath])) {
+                $mimeType = Storage::disk('public')->mimeType($filePath) ?: 'application/octet-stream';
+                $size = Storage::disk('public')->size($filePath) ?: 0;
+
+                self::create([
+                    'file_name' => $baseName,
+                    'file_path' => $filePath,
+                    'mime_type' => $mimeType,
+                    'size'      => $size,
+                ]);
+            }
+        }
+    }
 
     public static function uploadFile($file)
     {
@@ -28,7 +54,7 @@ class Media extends Model
         $fileName = "{$originalName}.{$extension}";
         
         $counter = 1;
-        while (\Illuminate\Support\Facades\Storage::disk('public')->exists("{$folder}/{$fileName}")) {
+        while (Storage::disk('public')->exists("{$folder}/{$fileName}")) {
             $fileName = "{$originalName}-{$counter}.{$extension}";
             $counter++;
         }
@@ -39,7 +65,7 @@ class Media extends Model
             'file_name' => $fileName,
             'file_path' => $path,
             'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
+            'size'      => $file->getSize(),
         ]);
     }
 }

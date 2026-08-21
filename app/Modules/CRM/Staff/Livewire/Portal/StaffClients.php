@@ -62,11 +62,21 @@ class StaffClients extends Component
         $this->resetPage();
     }
 
+    // ClickUp Tickets State in Staff Client Detail View
+    public array $clientClickUpTasks = [];
+    public string $clickUpTaskStatusFilter = '';
+    public string $clickUpTaskFolderFilter = '';
+    public string $clickUpTaskSearch = '';
+    public string $clickUpTaskAssigneeFilter = 'assigned_to_me'; // 'assigned_to_me' or 'all'
+    public bool $clickUpTasksLoaded = false;
+
     public function selectClient(?int $id)
     {
         if ($id) {
             $currentPage = $this->paginators['page'] ?? 1;
             session()->put('staff_clients_list_page', $currentPage);
+            $this->clickUpTasksLoaded = false;
+            $this->clientClickUpTasks = [];
             return $this->redirect(route('staff.clients.detail', ['id' => $id]), navigate: true);
         } else {
             $page = session()->get('staff_clients_list_page', 1);
@@ -75,100 +85,155 @@ class StaffClients extends Component
         }
     }
 
-    public function getQueryString()
+    /**
+     * Async background loader for ClickUp tickets
+     */
+    public function loadClickUpTasks(\App\Services\ClickUpService $clickUpService): void
     {
-        if ($this->selectedClientId) {
-            return [
-                'activeTab' => ['as' => 'tab', 'history' => true],
-            ];
+        if (!$this->selectedClientId || $this->clickUpTasksLoaded) {
+            return;
         }
-        return [];
+
+        try {
+            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientId);
+            $this->clickUpTasksLoaded = true;
+        } catch (\Exception $e) {
+            $this->clientClickUpTasks = [];
+            $this->clickUpTasksLoaded = true;
+        }
     }
 
-    public function queryStringHandlesPagination()
+    /**
+     * Refresh ClickUp tickets for active client
+     */
+    public function syncClientClickUpTasks(\App\Services\ClickUpService $clickUpService): void
     {
-        if ($this->selectedClientId) {
-            return collect($this->paginators)
-                ->only(['activitypage', 'maintenancepage', 'documentspage'])
-                ->mapWithKeys(function ($page, $pageName) {
-                    return ['paginators.'.$pageName => ['history' => true, 'as' => $pageName, 'keep' => false]];
-                })->toArray();
+        if (!$this->selectedClientId) {
+            return;
         }
-        return [];
+
+        try {
+            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientId);
+            $this->clickUpTasksLoaded = true;
+            session()->flash('success', "ClickUp tickets refreshed successfully!");
+        } catch (\Exception $e) {
+            session()->flash('error', "Failed to load ClickUp tickets: " . $e->getMessage());
+        }
     }
 
-    public function render()
+    public function render(\App\Services\ClickUpService $clickUpService)
     {
         $staffId = auth()->user()->staff->id ?? 0;
+        $staffUser = auth()->user();
+        $staffEmail = strtolower(trim($staffUser->email ?? ''));
+        $staffName = strtolower(trim($staffUser->name ?? ''));
         
         $clientDetails = null;
         $clientWebsites = collect();
         $clientMaintenanceReports = collect();
         $clientDocuments = collect();
         $clientActivityLogs = collect();
+        $clientClickUpFolders = collect();
+        $filteredClickUpTasks = collect();
+        $isAssignedToStaff = false;
 
         if ($this->selectedClientId) {
             $clients = collect();
             
             $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
                 ->findOrFail($this->selectedClientId);
+
+            $isAssignedToStaff = Client::where('id', $this->selectedClientId)
+                ->whereHas('assignedStaff', fn($q) => $q->where('staff_id', $staffId))
+                ->exists();
+
+            if (!$isAssignedToStaff && $this->activeTab === 'clickup_tickets') {
+                $this->activeTab = 'overview';
+            }
             
-            $clientWebsites = \App\Modules\CRM\Websites\Models\Website::with('latestMaintenanceReport')
-                ->where('client_id', $this->selectedClientId)
-                ->latest()
-                ->get();
-                
-            $clientMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'website'])
-                ->where('client_id', $this->selectedClientId)
-                ->latest()
-                ->paginate(10, ['*'], 'maintenancepage')
-                ->onEachSide(1);
-                
-            $clientDocuments = \App\Modules\CRM\Documents\Models\Document::with('addedBy')
-                ->where('client_id', $this->selectedClientId)
-                ->latest()
-                ->paginate(10, ['*'], 'documentspage')
-                ->onEachSide(1);
+            if ($this->activeTab === 'websites') {
+                $clientWebsites = \App\Modules\CRM\Websites\Models\Website::with('latestMaintenanceReport')
+                    ->where('client_id', $this->selectedClientId)
+                    ->latest()
+                    ->get();
+            }
 
-            $websiteIds = $clientWebsites->pluck('id')->toArray();
-            $reportIds = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::where('client_id', $this->selectedClientId)
-                ->pluck('id')
-                ->toArray();
-            $docIds = \App\Modules\CRM\Documents\Models\Document::where('client_id', $this->selectedClientId)
-                ->pluck('id')
-                ->toArray();
+            if ($this->activeTab === 'clickup_tickets') {
+                $clientClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::where('client_id', $this->selectedClientId)->get();
 
-            $clientActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
-                ->where(function ($query) use ($websiteIds, $reportIds, $docIds) {
-                    $query->where(function ($q) {
-                        $q->where('loggable_type', Client::class)
-                          ->where('loggable_id', $this->selectedClientId);
-                    })
-                    ->orWhere(function ($q) {
-                        $q->where('user_id', $this->selectedClientId);
-                    })
-                    ->when(!empty($websiteIds), function ($q) use ($websiteIds) {
-                        $q->orWhere(function ($sq) use ($websiteIds) {
-                            $sq->where('loggable_type', \App\Modules\CRM\Websites\Models\Website::class)
-                              ->whereIn('loggable_id', $websiteIds);
+                $clickUpStatuses = collect($this->clientClickUpTasks)
+                    ->pluck('status')
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values();
+
+                $filteredClickUpTasks = collect($this->clientClickUpTasks);
+
+                if (!empty($this->clickUpTaskStatusFilter)) {
+                    $sf = strtolower(trim($this->clickUpTaskStatusFilter));
+                    $filteredClickUpTasks = $filteredClickUpTasks->filter(fn($t) => strtolower(trim($t['status'])) === $sf);
+                }
+
+                if (!empty($this->clickUpTaskFolderFilter)) {
+                    $ff = (string) $this->clickUpTaskFolderFilter;
+                    $filteredClickUpTasks = $filteredClickUpTasks->filter(fn($t) => (string) $t['folder_id'] === $ff);
+                }
+            }
+                
+            if ($this->activeTab === 'maintenance') {
+                $clientMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'website'])
+                    ->where('client_id', $this->selectedClientId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'maintenancepage')
+                    ->onEachSide(1);
+            }
+                
+            if ($this->activeTab === 'documents') {
+                $clientDocuments = \App\Modules\CRM\Documents\Models\Document::with('addedBy')
+                    ->where('client_id', $this->selectedClientId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'documentspage')
+                    ->onEachSide(1);
+            }
+
+            if ($this->activeTab === 'activity log' || $this->activeTab === 'activity') {
+                $websiteIds = \App\Modules\CRM\Websites\Models\Website::where('client_id', $this->selectedClientId)->pluck('id')->toArray();
+                $reportIds  = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::where('client_id', $this->selectedClientId)->pluck('id')->toArray();
+                $docIds     = \App\Modules\CRM\Documents\Models\Document::where('client_id', $this->selectedClientId)->pluck('id')->toArray();
+
+                $clientActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+                    ->where(function ($query) use ($websiteIds, $reportIds, $docIds) {
+                        $query->where(function ($q) {
+                            $q->where('loggable_type', Client::class)
+                              ->where('loggable_id', $this->selectedClientId);
+                        })
+                        ->orWhere(function ($q) {
+                            $q->where('user_id', $this->selectedClientId);
+                        })
+                        ->when(!empty($websiteIds), function ($q) use ($websiteIds) {
+                            $q->orWhere(function ($sq) use ($websiteIds) {
+                                $sq->where('loggable_type', \App\Modules\CRM\Websites\Models\Website::class)
+                                  ->whereIn('loggable_id', $websiteIds);
+                            });
+                        })
+                        ->when(!empty($reportIds), function ($q) use ($reportIds) {
+                            $q->orWhere(function ($sq) use ($reportIds) {
+                                $sq->where('loggable_type', \App\Modules\CRM\Maintenance\Models\MaintenanceReport::class)
+                                  ->whereIn('loggable_id', $reportIds);
+                            });
+                        })
+                        ->when(!empty($docIds), function ($q) use ($docIds) {
+                            $q->orWhere(function ($sq) use ($docIds) {
+                                $sq->where('loggable_type', \App\Modules\CRM\Documents\Models\Document::class)
+                                  ->whereIn('loggable_id', $docIds);
+                            });
                         });
                     })
-                    ->when(!empty($reportIds), function ($q) use ($reportIds) {
-                        $q->orWhere(function ($sq) use ($reportIds) {
-                            $sq->where('loggable_type', \App\Modules\CRM\Maintenance\Models\MaintenanceReport::class)
-                              ->whereIn('loggable_id', $reportIds);
-                        });
-                    })
-                    ->when(!empty($docIds), function ($q) use ($docIds) {
-                        $q->orWhere(function ($sq) use ($docIds) {
-                            $sq->where('loggable_type', \App\Modules\CRM\Documents\Models\Document::class)
-                              ->whereIn('loggable_id', $docIds);
-                        });
-                    });
-                })
-                ->latest()
-                ->paginate(10, ['*'], 'activitypage')
-                ->onEachSide(1);
+                    ->latest()
+                    ->paginate(10, ['*'], 'activitypage')
+                    ->onEachSide(1);
+            }
         } else {
             $clients = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
                 ->withCount('websites')
@@ -194,6 +259,17 @@ class StaffClients extends Component
         $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
         $hasActiveFilters = $this->search || $this->statusFilter || $this->planFilter;
 
+        $assignedToMeCountInClient = collect($this->clientClickUpTasks)->filter(function ($task) use ($staffEmail, $staffName) {
+            if (empty($task['assignees'])) return false;
+            foreach ($task['assignees'] as $assignee) {
+                $aEmail = strtolower(trim($assignee['email'] ?? ''));
+                $aName = strtolower(trim($assignee['username'] ?? ''));
+                if ($staffEmail && $aEmail === $staffEmail) return true;
+                if ($staffName && (str_contains($aName, $staffName) || str_contains($staffName, $aName))) return true;
+            }
+            return false;
+        })->count();
+
         return view('modules.crm.staff.portal.clients', [
             'clients' => $clients,
             'clientDetails' => $clientDetails,
@@ -201,6 +277,11 @@ class StaffClients extends Component
             'clientMaintenanceReports' => $clientMaintenanceReports,
             'clientDocuments' => $clientDocuments,
             'clientActivityLogs' => $clientActivityLogs,
+            'clientClickUpFolders' => $clientClickUpFolders,
+            'filteredClickUpTasks' => $filteredClickUpTasks->values(),
+            'clickUpStatuses' => $clickUpStatuses ?? collect(),
+            'assignedToMeCountInClient' => $assignedToMeCountInClient,
+            'isAssignedToStaff' => $isAssignedToStaff,
             'plans' => $plans,
             'hasActiveFilters' => $hasActiveFilters,
         ])->layoutData(['title' => 'My Clients - Staff Portal']);

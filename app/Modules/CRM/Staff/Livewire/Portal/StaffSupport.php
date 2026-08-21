@@ -83,7 +83,7 @@ class StaffSupport extends Component
 
         $t = SupportTicket::find($ticketId);
         if ($t) {
-            $url = route('support.detail', ['ticket' => $t->ticket_number]);
+            $url = route('staff.support.detail', ['ticket' => $t->ticket_number]);
             $this->js("window.history.pushState({}, '', '{$url}')");
         }
     }
@@ -91,7 +91,7 @@ class StaffSupport extends Component
     public function closeTicket(): void
     {
         $this->selectedTicketId = null;
-        $url = route('support');
+        $url = route('staff.support');
         $this->js("window.history.pushState({}, '', '{$url}')");
     }
 
