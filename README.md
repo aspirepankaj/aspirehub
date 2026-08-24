@@ -137,10 +137,39 @@ app/
     └── Shared/             (Shared components, base classes, traits, enums)
 ```
 
+---## Google Integrations Setup Guide
+
+To configure Google Analytics 4, Google Search Console, or Google Ads integrations in the Admin or Staff panel, follow these steps to retrieve your Google OAuth Credentials:
+
+### Step 1: Create a Project in Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **New Project** (e.g., *Aspire Hub Integrations*).
+3. Navigate to **APIs & Services > Library**.
+4. Search for and **Enable** the following APIs:
+   - **Google Analytics Admin API** (required to fetch analytics properties list)
+   - **Google Analytics Data API** (required to fetch and run reporting data queries)
+
+### Step 2: Configure the OAuth Consent Screen
+1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab on the left sidebar.
+2. Select **User Type: External** and click **Create**.
+3. Fill in the required application details:
+   - **App name**: (e.g., *Aspire Hub*)
+   - **User support email**
+   - **Developer contact information**
+4. Under the **Scopes** section, add the following scopes for GA4 access:
+   - `https://www.googleapis.com/auth/analytics.readonly` (to read Google Analytics data)
+5. Save and continue.
+
+### Step 3: Generate OAuth Credentials (Client ID & Client Secret)
+1. Go to the **Credentials** tab on the left sidebar.
+2. Click **Create Credentials** at the top and select **OAuth client ID**.
+3. Set the **Application type** to **Web application**.
+4. Under **Authorized redirect URIs**, add the callback URI for your application:
+   - `http://127.0.0.1:8000/admin/integrations/google/callback`
+5. Click **Create**. You will be presented with your **Client ID** and **Client Secret**.
+6. Download the credentials as a `.json` file. This file will be uploaded under the integrations tab in the Admin or Staff Portal to complete the connection setup.
+
 ---
-
-
-\Livewire\Livewire::component('your-component-name', \App\Modules\Path\To\YourComponent::class);
 
 ## Running Tests
 
