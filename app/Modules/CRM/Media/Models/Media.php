@@ -34,10 +34,18 @@ class Media extends Model
 
     public static function syncStorageFiles()
     {
+        // Automatically delete any historically synced adscljson media records
+        self::where('file_path', 'like', 'adscljson/%')->delete();
+
         $allFiles = Storage::disk('public')->allFiles();
         $existingPathsMap = array_flip(self::pluck('file_path')->toArray());
 
         foreach ($allFiles as $filePath) {
+            // Ignore adscljson integration directory files
+            if (str_starts_with($filePath, 'adscljson/')) {
+                continue;
+            }
+
             $baseName = basename($filePath);
             if (in_array($baseName, ['.DS_Store', '.gitignore']) || str_starts_with($baseName, '.')) {
                 continue;

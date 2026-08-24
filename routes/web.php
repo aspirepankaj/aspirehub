@@ -76,3 +76,9 @@ Route::get('storage/{path}', function ($path) {
 
     return response()->file($fullPath, $headers);
 })->where('path', '.*');
+
+use App\Modules\CRM\Clients\Controllers\GoogleIntegrationController;
+
+Route::get('/admin/integrations/google/callback', [GoogleIntegrationController::class, 'callback'])
+    ->middleware(['web'])
+    ->name('admin.integrations.google.callback');

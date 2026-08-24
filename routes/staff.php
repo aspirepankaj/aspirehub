@@ -36,3 +36,7 @@ Route::get('/profile', StaffProfile::class)->name('profile');
 Route::get('/support', StaffSupport::class)->name('support');
 Route::get('/support/ticket/{ticket}', StaffSupport::class)->name('support.detail');
 Route::get('/notifications', \App\Livewire\UserNotificationsPage::class)->name('notifications');
+
+use App\Modules\CRM\Clients\Controllers\GoogleIntegrationController;
+
+Route::get('/integrations/google/redirect/{id}', [GoogleIntegrationController::class, 'redirect'])->name('integrations.google.redirect');

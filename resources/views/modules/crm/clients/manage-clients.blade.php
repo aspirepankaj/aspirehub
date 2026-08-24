@@ -87,13 +87,22 @@
         </div>
 
         <!-- Tabs Navigation -->
-        <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6 overflow-x-auto no-scrollbar">
-            <nav class="flex space-x-4 sm:space-x-8 min-w-max pb-1" aria-label="Tabs">
-                @foreach(['overview' => 'Overview', 'clickup_tickets' => 'ClickUp Tickets', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'documents' => 'Documents', 'activity log' => 'Activity Log', 'settings' => 'Settings'] as $tabKey => $tabLabel)
-                    <button type="button" wire:click="setTab('{{ $tabKey }}')" class="py-3 sm:py-4 px-1 border-b-2 font-bold text-xs sm:text-sm whitespace-nowrap transition flex items-center gap-1.5 shrink-0 {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
-                        @if($tabKey === 'hide_clickup_tickets')
-                            <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp" class="h-3.5 w-auto shrink-0" />
-                        @endif
+        <div class="mb-6 bg-slate-100/80 dark:bg-slate-900/50 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-200/40 dark:border-slate-800/40">
+            <nav class="flex flex-nowrap space-x-1 min-w-max" aria-label="Tabs">
+                @foreach([
+                    'overview' => 'Overview', 
+                    'clickup_tickets' => 'Projects', 
+                    'websites' => 'Websites', 
+                    'marketing' => 'Marketing',
+                    'maintenance' => 'Maintenance', 
+                    'support' => 'Support',
+                    'documents' => 'Documents', 
+                    'activity log' => 'Activity', 
+                    'integrations' => 'Integrations',
+                    'settings' => 'Settings'
+                ] as $tabKey => $tabLabel)
+                    <button type="button" wire:click="setTab('{{ $tabKey }}')" 
+                            class="py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0 {{ $activeTab === $tabKey ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-850 hover:bg-white/40 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/30' }}">
                         <span>{{ $tabLabel }}</span>
                     </button>
                 @endforeach
@@ -750,6 +759,583 @@
                 @endif
             </div>
 
+        @elseif ($activeTab === 'marketing')
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm animate-fadeIn">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Marketing Performance Hub</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Track and review comprehensive marketing stats and campaign results.</p>
+                    </div>
+                </div>
+                <div class="border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center bg-slate-50/20 dark:bg-slate-950/10">
+                    <svg class="w-12 h-12 text-slate-350 dark:text-slate-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                    </svg>
+                    <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1">Marketing Reports Coming Soon</h4>
+                    <p class="text-xs text-slate-450 dark:text-slate-550 max-w-md mx-auto">We are actively working on building comprehensive marketing performance reports. Soon you will be able to track search performance, campaign statistics, and SEO health directly from this dashboard.</p>
+                </div>
+            </div>
+
+        @elseif ($activeTab === 'support')
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm animate-fadeIn">
+                <div class="flex items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800/60">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Client Support Tickets</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">All registered support requests and responses for this client.</p>
+                    </div>
+                </div>
+
+                @if($clientSupportTickets->isEmpty())
+                    <div class="border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center bg-slate-50/20 dark:bg-slate-950/10">
+                        <svg class="w-12 h-12 text-slate-350 dark:text-slate-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1">No Support Tickets Found</h4>
+                        <p class="text-xs text-slate-450 dark:text-slate-550">This client has not opened any support requests yet.</p>
+                    </div>
+                @else
+                    <div class="overflow-x-auto rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                    <th class="px-4 py-3">Ticket ID</th>
+                                    <th class="px-4 py-3">Subject</th>
+                                    <th class="px-4 py-3">Category</th>
+                                    <th class="px-4 py-3">Priority</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3">Last Active</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-slate-700 dark:text-slate-350">
+                                @foreach($clientSupportTickets as $ticket)
+                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
+                                        <td class="px-4 py-3 font-semibold font-mono text-slate-500">{{ $ticket->ticket_number }}</td>
+                                        <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">{{ $ticket->subject }}</td>
+                                        <td class="px-4 py-3 font-semibold">{{ ucfirst($ticket->category) }}</td>
+                                        <td class="px-4 py-3">
+                                            @php
+                                                $prioColor = [
+                                                    'low' => 'slate',
+                                                    'medium' => 'indigo',
+                                                    'high' => 'amber',
+                                                    'urgent' => 'red',
+                                                ][$ticket->priority] ?? 'slate';
+                                            @endphp
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-{{ $prioColor }}-500/10 text-{{ $prioColor }}-600 dark:text-{{ $prioColor }}-450 tracking-wider">
+                                                {{ $ticket->priority }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @php
+                                                $statColor = [
+                                                    'open' => 'indigo',
+                                                    'pending' => 'amber',
+                                                    'resolved' => 'emerald',
+                                                    'closed' => 'slate',
+                                                ][$ticket->status] ?? 'slate';
+                                            @endphp
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-{{ $statColor }}-500/10 text-{{ $statColor }}-600 dark:text-{{ $statColor }}-450 tracking-wider">
+                                                {{ $ticket->status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-slate-450 dark:text-slate-500 font-semibold">{{ $ticket->updated_at->diffForHumans() }}</td>
+                                        <td class="px-4 py-3 text-right">
+                                            <a href="{{ route('admin.support.detail', $ticket->id) }}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-250 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-lg transition">
+                                                View Thread
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
+        @elseif ($activeTab === 'integrations')
+            <!-- Website Selection Dropdown -->
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/40 dark:border-slate-800/40 rounded-2xl">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Manage Integrations</h3>
+                    <p class="text-xs text-slate-500">Select a specific website to manage its third-party connection credentials.</p>
+                </div>
+                <div class="w-full sm:w-64">
+                    <select wire:model.live="selectedWebsiteId" class="w-full text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-750 dark:text-slate-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                        @if($clientWebsites->isEmpty())
+                            <option value="">No websites registered</option>
+                        @else
+                            @foreach($clientWebsites as $site)
+                                <option value="{{ $site->id }}">{{ $site->site_name }} ({{ parse_url($site->url, PHP_URL_HOST) ?? $site->url }})</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+            </div>
+
+            @if(!$selectedWebsiteId)
+                <div class="border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center bg-slate-50/20 dark:bg-slate-950/10">
+                    <svg class="w-12 h-12 text-slate-350 dark:text-slate-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
+                    </svg>
+                    <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1">No Website Selected</h4>
+                    <p class="text-xs text-slate-450 dark:text-slate-550">Please register or select a website from the list above to configure its third-party app integrations.</p>
+                </div>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
+                    @foreach ($clientIntegrations as $integration)
+                        @php
+                            $isNotConfigured = $integration['status'] === 'not_configured';
+                            $isConfigured = $integration['status'] === 'credentials_configured';
+                            $isConnected = $integration['status'] === 'connected';
+                            $isDegraded = $integration['status'] === 'degraded';
+
+                            $cardTheme = match($integration['id']) {
+                                'ga4' => [
+                                    'iconBg' => 'bg-orange-50 dark:bg-orange-950/20',
+                                    'hoverBorder' => 'hover:border-orange-500/35 dark:hover:border-orange-500/25',
+                                    'hoverShadow' => 'hover:shadow-orange-500/5',
+                                    'svg' => '<svg class="w-5 h-5 text-orange-500 dark:text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>'
+                                ],
+                                'gsc' => [
+                                    'iconBg' => 'bg-blue-50 dark:bg-blue-950/20',
+                                    'hoverBorder' => 'hover:border-blue-500/35 dark:hover:border-blue-500/25',
+                                    'hoverShadow' => 'hover:shadow-blue-500/5',
+                                    'svg' => '<svg class="w-5 h-5 text-blue-500 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>'
+                                ],
+                                'gads' => [
+                                    'iconBg' => 'bg-emerald-50 dark:bg-emerald-950/20',
+                                    'hoverBorder' => 'hover:border-emerald-500/35 dark:hover:border-emerald-500/25',
+                                    'hoverShadow' => 'hover:shadow-emerald-500/5',
+                                    'svg' => '<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"></path><polyline points="17 6 23 6 23 12"></polyline></svg>'
+                                ],
+                                default => [
+                                    'iconBg' => 'bg-slate-50 dark:bg-slate-800/40',
+                                    'hoverBorder' => 'hover:border-indigo-500/35 dark:hover:border-indigo-500/25',
+                                    'hoverShadow' => 'hover:shadow-indigo-500/5',
+                                    'svg' => '<svg class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="21" x2="9" y2="9"></line><line x1="3" y1="14" x2="21" y2="14"></line></svg>'
+                                ]
+                            };
+                        @endphp
+                        <div wire:key="integration-card-{{ $integration['id'] }}" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-none {{ $cardTheme['hoverBorder'] }} {{ $cardTheme['hoverShadow'] }} {{ $isNotConfigured ? 'opacity-70 bg-slate-50/20 dark:bg-slate-950/10' : '' }}">
+                            <div>
+                                <!-- Top Row: Logo, Name/Category, Status Badge -->
+                                <div class="flex items-start justify-between mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <!-- Circular icon container (Custom per integration) -->
+                                        <div class="w-10 h-10 rounded-full {{ $cardTheme['iconBg'] }} flex items-center justify-center shrink-0">
+                                            {!! $cardTheme['svg'] !!}
+                                        </div>
+                                        <div>
+                                            <h4 class="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">
+                                                {{ $integration['name'] }}
+                                            </h4>
+                                            <span class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 block">
+                                                {{ $integration['category'] }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Badge -->
+                                    <div>
+                                        @if ($isNotConfigured)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-450 dark:bg-slate-800 dark:text-slate-500">
+                                                Not Configured
+                                            </span>
+                                        @elseif ($isConfigured)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-650 dark:text-indigo-400">
+                                                Keys Configured
+                                            </span>
+                                        @elseif ($isDegraded)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                                Degraded
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-450">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                                                Connected
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Middle: Stats columns (Modern card sub-containers) -->
+                                <div class="grid grid-cols-2 gap-4 mb-6">
+                                    <div class="bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100/50 dark:border-slate-850/50 p-3.5 rounded-2xl transition hover:bg-slate-100/30 dark:hover:bg-slate-850/20">
+                                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">API health</span>
+                                        <span class="text-base font-extrabold text-slate-800 dark:text-slate-200">
+                                            {{ $isConnected ? $integration['api_health'] . '%' : '—' }}
+                                        </span>
+                                    </div>
+                                    <div class="bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100/50 dark:border-slate-850/50 p-3.5 rounded-2xl transition hover:bg-slate-100/30 dark:hover:bg-slate-850/20">
+                                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Last sync</span>
+                                        <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate block mt-0.5" title="{{ $integration['last_sync'] }}">
+                                            {{ $integration['last_sync'] }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @if ($integration['id'] === 'ga4' && $isConnected)
+                                @if (!$integration['property_id'])
+                                    <div class="mt-4 p-3 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-xl border border-indigo-100/30 dark:border-indigo-900/20 mb-4">
+                                        <span class="text-[10px] font-bold text-indigo-650 dark:text-indigo-400 block mb-1.5 uppercase tracking-wider">Select GA4 Property</span>
+                                        <div class="flex gap-2">
+                                            <select wire:model.live="selectedPropertyId" wire:key="property-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="">Select Property...</option>
+                                                @foreach ($this->getGA4Properties() as $prop)
+                                                    <option value="{{ $prop['id'] }}">{{ $prop['name'] }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="button" wire:click="savePropertyId('{{ $integration['id'] }}')" wire:key="property-save-btn-{{ $integration['id'] }}" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-[10px] rounded-lg transition shrink-0">
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
+                                        <span class="text-slate-455 dark:text-slate-550 font-medium">GA4 Property ID</span>
+                                        <span class="font-bold text-slate-755 dark:text-slate-300">{{ $integration['property_id'] }}</span>
+                                    </div>
+                                @endif
+                            @endif
+                            </div>
+
+                            <!-- Footer Actions -->
+                            <div class="flex items-center gap-3 mt-auto">
+                                @if ($isNotConfigured)
+                                    <!-- Configure credentials first -->
+                                    <button type="button" 
+                                            wire:click="openConfigModal('{{ $integration['id'] }}')"
+                                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition active:scale-95">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                        </svg>
+                                        Configure Credentials
+                                    </button>
+                                @elseif ($isConfigured)
+                                    <!-- Auth stage -->
+                                    <a href="{{ route('admin.integrations.google.redirect', $integration['db_id']) }}"
+                                       class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 text-center flex items-center justify-center">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                        </svg>
+                                        Sign in with Google
+                                    </a>
+                                    <button type="button" 
+                                            wire:click="removeCredentials('{{ $integration['id'] }}')"
+                                            wire:confirm="Are you sure you want to remove the credentials for this integration?"
+                                            class="px-3 py-2.5 bg-slate-100 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-955/20 text-slate-500 hover:text-red-650 dark:text-slate-400 dark:hover:text-red-400 font-bold text-xs rounded-xl transition active:scale-95"
+                                            title="Remove Credentials">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                @else
+                                    <!-- Connected stage -->
+                                    <div class="w-full flex flex-col gap-2.5 mt-auto">
+                                        @if ($integration['id'] === 'ga4' && !empty($integration['property_id']))
+                                            <button type="button" 
+                                                    wire:click="openReportModal('{{ $integration['id'] }}')"
+                                                    class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">
+                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/>
+                                                </svg>
+                                                View Full Report
+                                            </button>
+                                        @endif
+                                        <div class="flex items-center gap-3">
+                                            <button type="button" 
+                                                    wire:click="refreshIntegration('{{ $integration['id'] }}')"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="refreshIntegration('{{ $integration['id'] }}')"
+                                                    class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-white dark:bg-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl transition shadow-sm active:scale-95">
+                                                <svg wire:loading.class="animate-spin" wire:target="refreshIntegration('{{ $integration['id'] }}')" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                Refresh
+                                            </button>
+                                            <button type="button" 
+                                                    wire:click="disconnectIntegration('{{ $integration['id'] }}')"
+                                                    wire:loading.attr="disabled"
+                                                    wire:confirm="Are you sure you want to disconnect {{ $integration['name'] }}?"
+                                                    class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-white dark:bg-slate-850 hover:bg-red-50 dark:hover:bg-red-955/20 border border-slate-200/80 dark:border-slate-700/80 hover:border-red-200 dark:hover:border-red-900/40 text-slate-750 hover:text-red-650 dark:text-slate-300 dark:hover:text-red-400 font-bold text-xs rounded-xl transition shadow-sm active:scale-95">
+                                                <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round"/>
+                                                    <path d="M18.364 5.636L5.636 18.364" stroke="red" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                                Disconnect
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- Credentials Upload Modal -->
+            @if ($showConfigModal)
+                <div class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-slate-905/60 backdrop-blur-sm animate-fadeIn">
+                    <div class="relative w-full max-w-lg mx-auto my-6 p-4">
+                        <div class="relative flex flex-col w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl outline-none focus:outline-none">
+                            <!-- Modal Header -->
+                            <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800/60 rounded-t-3xl">
+                                <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                                    Configure Google Analytics 4
+                                </h3>
+                                <button type="button" wire:click="closeConfigModal" class="text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 focus:outline-none transition">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Modal Body -->
+                            <form wire:submit.prevent="saveCredentials">
+                                <div class="p-6 flex-auto">
+                                    <div class="mb-5">
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Google OAuth Credentials (.json)</label>
+                                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 dark:border-slate-800 border-dashed rounded-2xl hover:border-indigo-500/50 dark:hover:border-indigo-400/50 transition-colors relative">
+                                            <div class="space-y-1 text-center">
+                                                <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                                <div class="flex text-xs text-slate-600 dark:text-slate-400 justify-center">
+                                                    <label for="credentials-upload" class="relative cursor-pointer bg-white dark:bg-slate-900 rounded-md font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 focus-within:outline-none">
+                                                        <span>Upload a file</span>
+                                                        <input id="credentials-upload" name="credentials-upload" type="file" wire:model="credentialsFile" class="sr-only">
+                                                    </label>
+                                                    <p class="pl-1">or drag and drop</p>
+                                                </div>
+                                                <p class="text-[10px] text-slate-400">JSON keys only up to 2MB</p>
+                                            </div>
+                                        </div>
+                                        @if($credentialsFile)
+                                            <div class="mt-3 flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 rounded-xl">
+                                                <span class="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[200px]" title="{{ $credentialsFile->getClientOriginalName() }}">
+                                                    {{ $credentialsFile->getClientOriginalName() }}
+                                                </span>
+                                                <button type="button" wire:click="$set('credentialsFile', null)" class="text-red-500 text-xs font-bold hover:underline">Remove</button>
+                                            </div>
+                                        @endif
+                                        @error('credentialsFile') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="text-[11px] text-slate-450 leading-relaxed bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3 rounded-xl text-indigo-650 dark:text-indigo-400 font-medium">
+                                        Note: We securely encrypt and store your credentials file. Your OAuth Client details are isolated and only used for your integration.
+                                    </div>
+                                </div>
+                                
+                                <!-- Modal Footer -->
+                                <div class="flex items-center justify-end p-4 border-t border-slate-100 dark:border-slate-800/60 rounded-b-3xl gap-2">
+                                    <button type="button" wire:click="closeConfigModal" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-330 font-bold text-xs rounded-xl transition hover:bg-slate-200">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" wire:loading.attr="disabled" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-755 text-white font-bold text-xs rounded-xl transition shadow-sm active:scale-95">
+                                        <span wire:loading.remove>Save & Configure</span>
+                                        <span wire:loading>Processing...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- View Report Modal -->
+            @if ($showReportModal)
+                <div class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+                    <div class="relative w-full max-w-4xl mx-auto my-6 p-4">
+                        <div class="relative flex flex-col w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl outline-none focus:outline-none max-h-[90vh] overflow-y-auto">
+                            <!-- Modal Header -->
+                            <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800/60 rounded-t-3xl sticky top-0 bg-white dark:bg-slate-900 z-10">
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-650 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                        </svg>
+                                        Google Analytics 4 - Detailed Report
+                                    </h3>
+                                    <p class="text-[11px] text-slate-400 mt-1">
+                                        Property ID: <span class="font-semibold text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['property_id'] ?? '—' }}</span> &bull; Source: <span class="text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['source'] ?? '—' }}</span>
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                     <!-- Month Filter Selector -->
+                                     <div class="flex items-center gap-2">
+                                         <label for="report-month-select" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0">Report Month:</label>
+                                         <select id="report-month-select" wire:model.live="selectedReportMonth" class="text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-200 py-1.5 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer">
+                                             @foreach ($this->getAvailableReportMonths() as $opt)
+                                                 <option value="{{ $opt['value'] }}">{{ $opt['label'] }}</option>
+                                             @endforeach
+                                         </select>
+                                     </div>
+                                    <button type="button" wire:click="closeReportModal" class="text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 focus:outline-none transition p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Modal Body -->
+                            <div class="p-6">
+                                @if (empty($activeReportData))
+                                    <div class="py-12 text-center">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                                        <p class="text-xs text-slate-500 font-medium">Loading report dataset...</p>
+                                    </div>
+                                @else
+                                    <!-- 1. Stats Summary Widgets -->
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                                        <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Active Users</span>
+                                            <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
+                                                {{ number_format($activeReportData['overall_summary']['active_users'] ?? 0) }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Views</span>
+                                            <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                                                {{ number_format($activeReportData['overall_summary']['pageviews'] ?? 0) }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Sessions</span>
+                                            <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
+                                                {{ number_format($activeReportData['overall_summary']['sessions'] ?? 0) }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Bounce Rate</span>
+                                            <span class="text-lg font-extrabold text-amber-600 dark:text-amber-400">
+                                                {{ $activeReportData['overall_summary']['bounce_rate'] ?? '—' }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-rose-50/20 dark:bg-rose-950/10 border border-rose-100/30 dark:border-rose-900/20 rounded-2xl col-span-2 md:col-span-1">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Session Duration</span>
+                                            <span class="text-lg font-extrabold text-rose-600 dark:text-rose-400">
+                                                {{ $activeReportData['overall_summary']['avg_session_duration'] ?? '—' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Tables Grid -->
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                        <!-- Pageviews by Page Path -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Viewed Pages</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold">Page Path</th>
+                                                            <th class="py-2 text-right font-bold">Views</th>
+                                                            <th class="py-2 text-right font-bold">Users</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($activeReportData['pages_report'] ?? [] as $page)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold">{{ number_format($page['pageviews'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($page['users'] ?? 0) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <!-- Traffic Sources & Channels -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Traffic Sources / Mediums</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold">Source / Medium</th>
+                                                            <th class="py-2 text-right font-bold">Sessions</th>
+                                                            <th class="py-2 text-right font-bold">Bounce Rate</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($activeReportData['traffic_sources'] ?? [] as $source)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                <td class="py-2.5 font-bold">{{ $source['source_medium'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold">{{ number_format($source['sessions'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $source['bounce_rate'] ?? '—' }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Lower Grid: Demographics, Geography -->
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <!-- Devices -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Device Breakdowns</h4>
+                                            <div class="space-y-4">
+                                                @foreach ($activeReportData['device_demographics'] ?? [] as $device)
+                                                    <div>
+                                                        <div class="flex justify-between text-xs mb-1">
+                                                            <span class="font-bold text-slate-750 dark:text-slate-350">{{ $device['device'] }}</span>
+                                                            <span class="text-slate-450 dark:text-slate-500 font-bold">{{ $device['percentage'] }}</span>
+                                                        </div>
+                                                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                                            <div class="bg-indigo-650 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <!-- Geographic Country Sources -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Geographic Audience</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold">Country</th>
+                                                            <th class="py-2 text-right font-bold">Active Users</th>
+                                                            <th class="py-2 text-right font-bold">Sessions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($activeReportData['geographic_sources'] ?? [] as $geo)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-300">
+                                                                <td class="py-2.5 font-bold">{{ $geo['country'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-450 dark:text-slate-500">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            <!-- Modal Footer -->
+                            <div class="flex items-center justify-end p-4 border-t border-slate-100 dark:border-slate-800/60 rounded-b-3xl sticky bottom-0 bg-white dark:bg-slate-900 z-10">
+                                <button type="button" wire:click="closeReportModal" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition">
+                                    Close Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         @elseif ($activeTab === 'settings')
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm animate-fadeIn">
                 <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Quick Settings</h3>

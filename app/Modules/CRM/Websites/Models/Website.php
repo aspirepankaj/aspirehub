@@ -61,6 +61,11 @@ class Website extends Model
 
     // ─── Relationships ──────────────────────────────────────────────────────────
 
+    public function integrations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WebsiteIntegration::class, 'website_id');
+    }
+
     public function maintenanceReports(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Modules\CRM\Maintenance\Models\MaintenanceReport::class, 'website_id');
