@@ -14,6 +14,29 @@ class GoogleIntegrationController extends Controller
         $integration = WebsiteIntegration::with('website')->findOrFail($id);
         $apiCreds = $integration->api_credentials;
 
+        if (isset($apiCreds['type']) && $apiCreds['type'] === 'service_account') {
+            $integration->update([
+                'status' => 'connected',
+                'auth_credentials' => [
+                    'access_token' => 'service_account',
+                    'refresh_token' => null,
+                ],
+                'account_identifier' => $apiCreds['client_email'] ?? 'Service Account',
+                'last_sync_at' => now(),
+            ]);
+
+            $isStaff = auth()->user() && auth()->user()->staff && auth()->user()->staff->status === 'active';
+            $detailRoute = $isStaff ? 'staff.clients.detail' : 'admin.clients.detail';
+
+            session()->flash('success', "Service Account authenticated successfully!");
+            
+            return redirect()->to(route($detailRoute, [
+                'id' => $integration->website->client_id,
+                'activeTab' => 'integrations',
+                'selectedWebsiteId' => $integration->website_id,
+            ]));
+        }
+
         $config = $apiCreds['web'] ?? $apiCreds['installed'] ?? null;
 
         if (!$config || empty($config['client_id'])) {

@@ -656,15 +656,22 @@ class ManageClients extends Component
                 \Illuminate\Support\Facades\Log::error('Error saving credentials file to storage: ' . $exDir->getMessage());
             }
 
+            $isServiceAccount = isset($parsedData['type']) && $parsedData['type'] === 'service_account';
+
             \App\Modules\CRM\Websites\Models\WebsiteIntegration::updateOrCreate(
                 [
                     'website_id' => $this->selectedWebsiteId,
                     'integration_type' => $this->activeConfigIntegrationId,
                 ],
                 [
-                    'status' => 'credentials_configured',
+                    'status' => $isServiceAccount ? 'connected' : 'credentials_configured',
                     'api_credentials' => $parsedData,
-                    'auth_credentials' => null,
+                    'auth_credentials' => $isServiceAccount ? [
+                        'access_token' => 'service_account',
+                        'refresh_token' => null,
+                        'property_id' => null,
+                    ] : null,
+                    'account_identifier' => $isServiceAccount ? ($parsedData['client_email'] ?? 'Service Account') : null,
                 ]
             );
 
@@ -844,7 +851,88 @@ class ManageClients extends Component
         $reportData = [];
         $propertyId = $integration->auth_credentials['property_id'] ?? null;
 
-        if ($accessToken && $propertyId && $integrationId === 'ga4') {
+        if ($accessToken && $propertyId && $integrationId === 'gsc') {
+            try {
+                $endpoint = "https://searchconsole.googleapis.com/webmasters/v3/sites/" . urlencode($propertyId) . "/searchAnalytics/query";
+                $startDate = now()->subDays(30)->format('Y-m-d');
+                $endDate = now()->format('Y-m-d');
+
+                $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
+                    $pool->as('queries')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10
+                    ]),
+                    $pool->as('pages')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 10
+                    ]),
+                    $pool->as('devices')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 10
+                    ]),
+                    $pool->as('countries')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 10
+                    ]),
+                ]);
+
+                $queriesRes = $responses['queries'];
+                if ($queriesRes->successful()) {
+                    $queriesJson = $queriesRes->json();
+                    $pagesJson = $responses['pages']->successful() ? $responses['pages']->json() : [];
+                    $devicesJson = $responses['devices']->successful() ? $responses['devices']->json() : [];
+                    $countriesJson = $responses['countries']->successful() ? $responses['countries']->json() : [];
+
+                    $reportData = [
+                        'metadata' => [
+                            'generated_at' => now()->toIso8601String(),
+                            'source' => 'Google Search Console API',
+                            'property_id' => $propertyId,
+                            'report_type' => 'Search Traffic & Top Queries',
+                        ],
+                        'summary' => [
+                            'clicks' => collect($queriesJson['rows'] ?? [])->sum('clicks'),
+                            'impressions' => collect($queriesJson['rows'] ?? [])->sum('impressions'),
+                            'ctr' => round(collect($queriesJson['rows'] ?? [])->avg('ctr') * 100, 2),
+                            'position' => round(collect($queriesJson['rows'] ?? [])->avg('position'), 2),
+                        ],
+                        'top_queries' => array_map(function ($row) {
+                            return [
+                                'query' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                                'ctr' => round(($row['ctr'] ?? 0) * 100, 2),
+                                'position' => round($row['position'] ?? 0, 1),
+                            ];
+                        }, $queriesJson['rows'] ?? []),
+                        'top_pages' => array_map(function ($row) {
+                            return [
+                                'page' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                            ];
+                        }, $pagesJson['rows'] ?? []),
+                        'devices' => array_map(function ($row) {
+                            return [
+                                'device' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                            ];
+                        }, $devicesJson['rows'] ?? []),
+                        'countries' => array_map(function ($row) {
+                            return [
+                                'country' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                            ];
+                        }, $countriesJson['rows'] ?? []),
+                    ];
+                } else {
+                    $errorMsg = $queriesRes->json('error.message') ?? 'Please ensure the property ID is correct and has data.';
+                    \Illuminate\Support\Facades\Log::warning('GSC API call failed. Response: ' . $queriesRes->body());
+                    $reportData = ['error' => 'Google Search Console API failed: ' . $errorMsg];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('GSC API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'Google Search Console API failed. Please ensure the property ID is correct and has data.'];
+            }
+        } elseif ($accessToken && $propertyId && $integrationId === 'ga4') {
             try {
                 // 1. Fetch Overall Summary & Daily Traffic
                 $summaryResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
@@ -916,12 +1004,18 @@ class ManageClients extends Component
                     $durationSeconds = intval($avgDuration);
                     $durationMin = intval($durationSeconds / 60);
                     $durationSec = $durationSeconds % 60;
+                    $bounceRate = $rowCount > 0 ? ($totalBounceRateSum / $rowCount) * 100 : 0;
+                    $bounceRateFormatted = round($bounceRate, 2) . '%';
+                    $avgDuration = $rowCount > 0 ? ($totalDurationSum / $rowCount) : 0;
+                    $durationMin = floor($avgDuration / 60);
+                    $durationSec = round($avgDuration % 60);
                     $durationFormatted = $durationMin > 0 ? "{$durationMin}m {$durationSec}s" : "{$durationSec}s";
 
                     $reportData = [
                         'metadata' => [
                             'generated_at' => now()->toIso8601String(),
                             'source' => 'Google Analytics 4 API',
+                            'property_id' => $propertyId,
                             'report_type' => 'Full Website Analytics & Audience Summary',
                         ],
                         'overall_summary' => [
@@ -935,18 +1029,11 @@ class ManageClients extends Component
                             return [
                                 'page_path' => $row['dimensionValues'][0]['value'] ?? '/',
                                 'pageviews' => (int) ($row['metricValues'][0]['value'] ?? 0),
-                                'users' => (int) ($row['metricValues'][1]['value'] ?? 0)
+                                'users' => (int) ($row['metricValues'][1]['value'] ?? 0),
                             ];
                         }, $pagesJson['rows'] ?? []),
-                        'traffic_sources' => [
-                            ['source_medium' => 'google / organic', 'sessions' => 8400, 'bounce_rate' => '39.4%'],
-                            ['source_medium' => 'direct / none', 'sessions' => 3500, 'bounce_rate' => '45.1%'],
-                            ['source_medium' => 'facebook / referral', 'sessions' => 1500, 'bounce_rate' => '52.3%'],
-                        ],
-                        'device_demographics' => [
-                            ['device' => 'Mobile', 'active_users' => 7450, 'percentage' => '59.8%'],
-                            ['device' => 'Desktop', 'active_users' => 4520, 'percentage' => '36.3%'],
-                        ],
+                        'traffic_sources' => [], // Requires separate dimension
+                        'device_demographics' => [], // Requires separate dimension
                         'geographic_sources' => [
                             ['country' => 'United States', 'active_users' => 5120, 'sessions' => 6200],
                             ['country' => 'India', 'active_users' => 3410, 'sessions' => 4100],
@@ -960,15 +1047,20 @@ class ManageClients extends Component
                         }, $summaryJson['rows'] ?? [])
                     ];
                 } else {
-                    \Illuminate\Support\Facades\Log::warning('GA4 API calls failed.');
-                    $reportData = $this->getMockGA4ReportData($propertyId);
+                    $errorMsg = $summaryResponse->json('error.message') ?? $pagesResponse->json('error.message') ?? 'Please ensure the property ID is correct and has data.';
+                    \Illuminate\Support\Facades\Log::warning('GA4 API calls failed. Summary: ' . $summaryResponse->body() . ' Pages: ' . $pagesResponse->body());
+                    $reportData = ['error' => 'Google Analytics 4 API failed: ' . $errorMsg];
                 }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('GA4 API runReport Exception: ' . $e->getMessage());
-                $reportData = $this->getMockGA4ReportData($propertyId);
+                $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
             }
         } else {
-            $reportData = $this->getMockGA4ReportData($propertyId);
+            if ($integrationId === 'gsc') {
+                $reportData = ['error' => 'Google Search Console API failed. Please ensure the property ID is correct and has data.'];
+            } else {
+                $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
+            }
         }
 
         try {
@@ -1262,6 +1354,118 @@ class ManageClients extends Component
         }
     }
 
+
+    private function getMockGSCReportData(?string $siteUrl = null): array
+    {
+        $seed = $siteUrl ? crc32($siteUrl) : 200;
+        srand($seed);
+
+        $queries = [
+            'aspire hub', 'crm software', 'business management tools', 
+            'best crm 2026', 'sales automation', 'customer portal software'
+        ];
+
+        $topQueries = [];
+        foreach (array_rand($queries, 5) as $idx) {
+            $topQueries[] = [
+                'query' => $queries[$idx],
+                'clicks' => rand(50, 500),
+                'impressions' => rand(1000, 5000),
+                'ctr' => rand(100, 500) / 100, // 1.00 to 5.00
+                'position' => rand(10, 500) / 10, // 1.0 to 50.0
+            ];
+        }
+
+        return [
+            'metadata' => [
+                'generated_at' => now()->toIso8601String(),
+                'source' => 'Google Search Console API (Mock)',
+                'property_id' => $siteUrl ?? 'unknown',
+                'report_type' => 'Search Traffic & Top Queries',
+            ],
+            'summary' => [
+                'clicks' => rand(1000, 5000),
+                'impressions' => rand(50000, 200000),
+                'ctr' => rand(150, 450) / 100,
+                'position' => rand(100, 300) / 10,
+            ],
+            'top_queries' => $topQueries
+        ];
+    }
+
+    public function getGSCSites(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::with('website')
+            ->where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'gsc')
+            ->first();
+
+        if (!$integration || empty($integration->auth_credentials['access_token'])) {
+            return [];
+        }
+
+        $url = $integration->website->url ?? 'https://example.com/';
+        
+        // Ensure URL has scheme for parse_url
+        if (!preg_match('~^(?:f|ht)tps?://~i', $url)) {
+            $url = 'https://' . $url;
+        }
+        
+        $domain = parse_url($url, PHP_URL_HOST) ?? 'example.com';
+        // Remove www. if present for domain property
+        $domain = preg_replace('/^www\./', '', $domain);
+
+        return [
+            ['id' => 'sc-domain:' . $domain, 'name' => 'sc-domain:' . $domain . ' (Domain Property)'],
+            ['id' => rtrim($url, '/') . '/', 'name' => rtrim($url, '/') . '/ (URL Prefix)'],
+        ];
+    }
+
+    public function saveGSCSite(string $integrationId): void
+    {
+        if (empty($this->selectedPropertyId) || !$this->selectedWebsiteId) {
+            session()->flash('error', "Please select a GSC Site.");
+            return;
+        }
+
+        try {
+            $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+                ->where('integration_type', $integrationId)
+                ->firstOrFail();
+
+            $creds = $integration->auth_credentials ?? [];
+            $creds['property_id'] = $this->selectedPropertyId;
+            
+            $integration->update([
+                'auth_credentials' => $creds,
+            ]);
+
+            // Log Activity
+            \App\Modules\Core\Activity\Models\ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'configure_gsc_site_url',
+                'loggable_type' => \App\Modules\CRM\Clients\Models\Client::class,
+                'loggable_id' => $this->selectedClientDetailId,
+                'description' => "Configured GSC Site URL to: " . $this->selectedPropertyId,
+                'meta' => [
+                    'property_id' => $this->selectedPropertyId,
+                    'website_id' => $this->selectedWebsiteId,
+                ]
+            ]);
+
+            $this->selectedPropertyId = ''; // reset for next use
+            session()->flash('success', "GSC Site URL configured successfully.");
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error saving GSC Site: ' . $e->getMessage());
+            session()->flash('error', "An error occurred while saving the Site URL.");
+        }
+    }
+
     public function getGA4Properties(): array
     {
         if (!$this->selectedWebsiteId) {
@@ -1351,6 +1555,22 @@ class ManageClients extends Component
     public function updatedSelectedWebsiteId(): void
     {
         $this->selectedPropertyId = '';
+    }
+
+    public function updatedSelectedPropertyId($value): void
+    {
+        if (empty($value) || !$this->selectedWebsiteId) {
+            return;
+        }
+
+        $isGSC = str_contains((string)$value, 'http') || str_contains((string)$value, 'sc-domain:');
+        $integrationId = $isGSC ? 'gsc' : 'ga4';
+
+        if ($isGSC) {
+            $this->saveGSCSite($integrationId);
+        } else {
+            $this->savePropertyId($integrationId);
+        }
     }
 
     public function render(ClickUpService $clickUpService)

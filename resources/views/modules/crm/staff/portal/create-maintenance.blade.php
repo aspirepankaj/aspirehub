@@ -445,12 +445,38 @@
                     </button>
                 </div>
             </div>
-            <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'attachments' })" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Choose from Media Library
-            </button>
+                          <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                              <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'attachments' })" class="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
+                                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                  </svg>
+                                  Choose from Media Library
+                              </button>
+                              <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">OR</span>
+                              <div class="flex items-center justify-center gap-2 flex-1 max-w-lg border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-900/50 cursor-text focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                   tabindex="0"
+                                   x-data
+                                   @paste="
+                                      let items = $event.clipboardData.items;
+                                      for (let i = 0; i < items.length; i++) {
+                                          if (items[i].type.indexOf('image') !== -1) {
+                                              let file = items[i].getAsFile();
+                                              @this.upload('pastedImages', file);
+                                          }
+                                      }
+                                   ">
+                                  <div wire:loading wire:target="pastedImages" class="text-xs text-indigo-500 font-bold flex items-center gap-2">
+                                      <svg class="animate-spin h-3 w-3 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      Uploading pasted image...
+                                  </div>
+                                  <div wire:loading.remove wire:target="pastedImages" class="text-xs text-slate-500 dark:text-slate-400">
+                                      <span class="font-bold">Click here</span> and press <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 rounded-md shadow-sm border border-slate-300 dark:border-slate-700">Ctrl+V</kbd> to paste an image
+                                  </div>
+                              </div>
+                          </div>
             <x-input-error :messages="$errors->get('attachments.*')" class="mt-1" />
 
             @if(!empty($attachments))

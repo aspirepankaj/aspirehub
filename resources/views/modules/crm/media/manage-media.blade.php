@@ -72,7 +72,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         @forelse($mediaFiles as $media)
             <div class="group relative bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-                <div class="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-2 relative overflow-hidden cursor-pointer" wire:click="viewDetails({{ $media->id }})">
+                <div class="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-2 relative overflow-hidden cursor-pointer" @click="$dispatch('open-media-modal', { id: {{ $media->id }}, file_name: '{{ addslashes($media->file_name) }}', file_path: '{{ asset('storage/' . $media->file_path) }}', size: '{{ number_format($media->size / 1024, 1) }} KB', date: '{{ $media->created_at ? $media->created_at->format('d M Y, h:i A') : 'N/A' }}', ext: '{{ strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION)) }}', isImage: {{ Str::startsWith($media->mime_type ?? '', 'image/') ? 'true' : 'false' }} })">
                     @if(Str::startsWith($media->mime_type ?? '', 'image/'))
                         <img src="{{ asset('storage/' . $media->file_path) }}" alt="{{ $media->file_name }}" class="object-contain w-full h-full rounded-lg">
                     @elseif(Str::startsWith($media->mime_type ?? '', 'video/'))
@@ -94,7 +94,7 @@
                     <!-- Overlay Actions -->
                     <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
                         <button type="button" 
-                                wire:click.stop="viewDetails({{ $media->id }})"
+                                @click.stop="$dispatch('open-media-modal', { id: {{ $media->id }}, file_name: '{{ addslashes($media->file_name) }}', file_path: '{{ asset('storage/' . $media->file_path) }}', size: '{{ number_format($media->size / 1024, 1) }} KB', date: '{{ $media->created_at ? $media->created_at->format('d M Y, h:i A') : 'N/A' }}', ext: '{{ strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION)) }}', isImage: {{ Str::startsWith($media->mime_type ?? '', 'image/') ? 'true' : 'false' }} })"
                                 class="p-2 bg-white/20 hover:bg-white/40 text-white rounded-lg transition-colors"
                                 title="View Details">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -123,7 +123,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="p-2 border-t border-slate-100 dark:border-slate-800 cursor-pointer" wire:click="viewDetails({{ $media->id }})">
+                <div class="p-2 border-t border-slate-100 dark:border-slate-800 cursor-pointer" @click="$dispatch('open-media-modal', { id: {{ $media->id }}, file_name: '{{ addslashes($media->file_name) }}', file_path: '{{ asset('storage/' . $media->file_path) }}', size: '{{ number_format($media->size / 1024, 1) }} KB', date: '{{ $media->created_at ? $media->created_at->format('d M Y, h:i A') : 'N/A' }}', ext: '{{ strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION)) }}', isImage: {{ Str::startsWith($media->mime_type ?? '', 'image/') ? 'true' : 'false' }} })">
                     <p class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate" title="{{ $media->file_name }}">
                         {{ $media->file_name }}
                     </p>
@@ -153,14 +153,12 @@
     @endif
 
     <!-- Media Details Modal (WordPress Style - Premium Design) -->
-    @if($showDetailsModal && $selectedMedia)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto" 
-             x-data 
-             @keydown.window.escape.window="$wire.closeDetailsModal()" 
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto" 
+             x-data="{ media: {}, showModal: false }" @open-media-modal.window="media = $event.detail; showModal = true" x-show="showModal" x-cloak @keydown.window.escape.window="showModal = false" 
              aria-labelledby="modal-title" role="dialog" aria-modal="true">
             
             {{-- Backdrop --}}
-            <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" wire:click="closeDetailsModal"></div>
+            <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" @click="showModal = false"></div>
 
             {{-- Modal Container --}}
             <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 rounded-3xl text-left shadow-2xl shadow-slate-950/50 transform transition-all border border-slate-200/80 dark:border-slate-800 z-10 my-auto">
@@ -178,7 +176,7 @@
                                 <p class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Press <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px]">ESC</kbd> to close</p>
                             </div>
                         </div>
-                        <button type="button" wire:click="closeDetailsModal" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <button type="button" @click="showModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -190,42 +188,29 @@
                         
                         {{-- Left Column: Media Preview (7 Cols) --}}
                         <div class="lg:col-span-7 bg-slate-950 flex flex-col items-center justify-center p-6 min-h-[340px] max-h-[520px] relative overflow-hidden">
-                            @php
-                                $ext = strtolower(pathinfo($selectedMedia->file_name, PATHINFO_EXTENSION));
-                                $isVideo = Str::startsWith($selectedMedia->mime_type ?? '', 'video/') || in_array($ext, ['mp4', 'webm', 'ogg', 'mov', 'm4v', 'avi', 'mkv', 'flv', 'wmv']);
-                                $videoMime = match($ext) {
-                                    'mov' => 'video/quicktime',
-                                    'webm' => 'video/webm',
-                                    'avi' => 'video/x-msvideo',
-                                    'mkv' => 'video/x-matroska',
-                                    'wmv' => 'video/x-ms-wmv',
-                                    'flv' => 'video/x-flv',
-                                    'ogg', 'ogv' => 'video/ogg',
-                                    default => 'video/mp4',
-                                };
-                            @endphp
+                            
 
-                            @if(Str::startsWith($selectedMedia->mime_type ?? '', 'image/'))
-                                <img src="{{ asset('storage/' . $selectedMedia->file_path) }}" alt="{{ $selectedMedia->file_name }}" class="max-h-[460px] max-w-full object-contain rounded-2xl shadow-xl border border-slate-800" />
-                            @elseif($isVideo)
+                            <template x-if="media.isImage">
+                                <img x-bind:src="media.file_path" alt="<span x-text="media.file_name"></span>" class="max-h-[460px] max-w-full object-contain rounded-2xl shadow-xl border border-slate-800" />
+                            </template><template x-if="!media.isImage && ['mp4', 'webm', 'ogg', 'mov', 'm4v', 'avi', 'mkv', 'flv', 'wmv'].includes(media.ext)">
                                 <video controls preload="auto" playsinline class="max-h-[460px] w-full rounded-2xl shadow-2xl border border-slate-800 bg-black">
-                                    <source src="{{ asset('storage/' . $selectedMedia->file_path) }}" type="{{ $videoMime }}">
-                                    <source src="{{ asset('storage/' . $selectedMedia->file_path) }}">
+                                    <source x-bind:src="media.file_path" x-bind:type="media.mime_type">
+                                    <source x-bind:src="media.file_path">
                                     Your browser does not support playing this video format.
                                 </video>
-                            @else
+                            </template><template x-if="!media.isImage && !['mp4', 'webm', 'ogg', 'mov', 'm4v', 'avi', 'mkv', 'flv', 'wmv'].includes(media.ext)">
                                 <div class="flex flex-col items-center justify-center p-8 text-center">
                                     <div class="w-20 h-20 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-3 text-indigo-400 shadow-inner">
                                         <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
-                                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">{{ strtoupper($ext) }} Document</span>
-                                    <a href="{{ asset('storage/' . $selectedMedia->file_path) }}" target="_blank" class="mt-4 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition active:scale-95">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300"><span x-text="media.ext"></span> Document</span>
+                                    <a x-bind:href="media.file_path" target="_blank" class="mt-4 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition active:scale-95">
                                         Download / View File
                                     </a>
                                 </div>
-                            @endif
+                            </template>
                         </div>
 
                         {{-- Right Column: File Details & Edit Form (5 Cols) --}}
@@ -236,11 +221,11 @@
                                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/60 space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
                                     <div class="flex justify-between items-center">
                                         <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Uploaded On</span>
-                                        <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $selectedMedia->created_at ? $selectedMedia->created_at->format('d M Y, h:i A') : 'N/A' }}</span>
+                                        <span class="font-semibold text-slate-800 dark:text-slate-200"><span x-text="media.date"></span></span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px]">File Size</span>
-                                        <span class="font-semibold text-slate-800 dark:text-slate-200">{{ number_format($selectedMedia->size / 1024, 1) }} KB</span>
+                                        <span class="font-semibold text-slate-800 dark:text-slate-200"><span x-text="media.size"></span></span>
                                     </div>
                                 </div>
 
@@ -250,8 +235,8 @@
                                         Title / File Name
                                     </label>
                                     <div class="flex gap-2">
-                                        <input type="text" wire:model="editFileName" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 focus:outline-none transition" />
-                                        <button type="button" wire:click="updateMediaName" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition active:scale-95 shrink-0 flex items-center gap-1.5">
+                                        <input type="text" x-model="media.file_name" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 focus:outline-none transition" />
+                                        <button type="button" x-on:click="$wire.updateMediaName(media.id, media.file_name)" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition active:scale-95 shrink-0 flex items-center gap-1.5">
                                             <span>Save</span>
                                         </button>
                                     </div>
@@ -271,9 +256,9 @@
                                         File URL / Public Link
                                     </label>
                                     <div class="flex gap-2">
-                                        <input type="text" readonly value="{{ asset('storage/' . $selectedMedia->file_path) }}" class="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none select-all" />
+                                        <input type="text" readonly x-bind:value="media.file_path" class="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none select-all" />
                                         <button type="button" 
-                                                onclick="navigator.clipboard.writeText('{{ asset('storage/' . $selectedMedia->file_path) }}').then(() => alert('URL Copied!'))"
+                                                x-on:click="navigator.clipboard.writeText(media.file_path).then(() => alert('URL Copied!'))"
                                                 class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-bold text-xs rounded-xl transition active:scale-95 shrink-0">
                                             Copy
                                         </button>
@@ -283,10 +268,10 @@
 
                             {{-- Footer Actions --}}
                             <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                                <button type="button" wire:click="deleteSelectedMedia" wire:confirm="Are you sure you want to permanently delete this file?" class="text-xs font-bold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition">
+                                <button type="button" x-on:click="if(confirm('Are you sure you want to permanently delete this file?')) $wire.deleteSelectedMedia(media.id)" class="text-xs font-bold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition">
                                     Delete Permanently
                                 </button>
-                                <button type="button" wire:click="closeDetailsModal" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                                <button type="button" @click="showModal = false" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition">
                                     Close
                                 </button>
                             </div>
@@ -294,6 +279,4 @@
                     </div>
                 </div>
             </div>
-        </div>
-    @endif
 </div>

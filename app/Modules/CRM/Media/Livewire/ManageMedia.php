@@ -58,16 +58,13 @@ class ManageMedia extends Component
     }
 
     // Update media title
-    public function updateMediaName()
+    public function updateMediaName($id, $newName)
     {
-        if (!$this->selectedMedia) return;
+        $media = Media::find($id);
+        if (!$media) return;
 
-        $this->validate([
-            'editFileName' => 'required|string|max:255',
-        ]);
-
-        $this->selectedMedia->update([
-            'file_name' => $this->editFileName,
+        $media->update([
+            'file_name' => $newName,
         ]);
 
         $this->savedSuccessMessage = 'Title updated successfully!';
@@ -75,11 +72,8 @@ class ManageMedia extends Component
         $this->dispatch('notify', ['message' => 'Media title updated successfully!', 'type' => 'success']);
     }
 
-    public function deleteSelectedMedia()
+    public function deleteSelectedMedia($id)
     {
-        if (!$this->selectedMedia) return;
-
-        $id = $this->selectedMedia->id;
         $this->closeDetailsModal();
         $this->deleteMedia($id);
     }

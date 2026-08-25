@@ -355,7 +355,7 @@
                                     @else
                                         <!-- Connected stage -->
                                         <div class="w-full flex flex-col gap-2.5 mt-auto">
-                                            @if ($integration['id'] === 'ga4' && !empty($integration['property_id']))
+                                            @if (in_array($integration['id'], ['ga4', 'gsc']) && !empty($integration['property_id']))
                                                 <button type="button" 
                                                         wire:click="openReportModal('{{ $integration['id'] }}')"
                                                         class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">

@@ -105,6 +105,7 @@ class StaffCreateMaintenanceReport extends Component
 
     // 12. Attachments
     public array $attachments = [];
+    public $pastedImages = [];
     public bool $attachments_visible_to_client = false;
 
     public function mount()
@@ -306,6 +307,25 @@ class StaffCreateMaintenanceReport extends Component
                 'name' => $name ?? basename($path)
             ];
         }
+    }
+
+
+    public function updatedPastedImages()
+    {
+        $this->validate([
+            'pastedImages.*' => 'image|max:10240', // 10MB max
+        ]);
+
+        foreach ($this->pastedImages as $image) {
+            $media = \App\Modules\CRM\Media\Models\Media::uploadFile($image);
+            if ($media) {
+                $this->attachments[] = [
+                    'path' => $media->file_path,
+                    'name' => $media->file_name
+                ];
+            }
+        }
+        $this->pastedImages = [];
     }
 
     public function removeAttachment($index)

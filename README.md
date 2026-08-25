@@ -137,9 +137,9 @@ app/
     └── Shared/             (Shared components, base classes, traits, enums)
 ```
 
----## Google Integrations Setup Guide
+---## Google Analytics 4 (GA4) Setup Guide
 
-To configure Google Analytics 4, Google Search Console, or Google Ads integrations in the Admin or Staff panel, follow these steps to retrieve your Google OAuth Credentials:
+To configure Google Analytics 4 integration in the Admin or Staff panel, follow these steps to retrieve your Google OAuth Credentials:
 
 ### Step 1: Create a Project in Google Cloud Console
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
@@ -168,6 +168,32 @@ To configure Google Analytics 4, Google Search Console, or Google Ads integratio
    - `http://127.0.0.1:8000/admin/integrations/google/callback`
 5. Click **Create**. You will be presented with your **Client ID** and **Client Secret**.
 6. Download the credentials as a `.json` file. This file will be uploaded under the integrations tab in the Admin or Staff Portal to complete the connection setup.
+
+========================================================================
+
+## Google Search Console (GSC) Setup Guide
+
+To configure Google Search Console integration, follow these similar steps to retrieve your GSC OAuth Credentials:
+
+### Step 1: Create a Project in Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **New Project** or select your existing integrations project.
+3. Navigate to **APIs & Services > Library**.
+4. Search for and **Enable** the following API:
+   - **Google Search Console API** (required to fetch search queries, pages, and performance data)
+
+### Step 2: Configure the OAuth Consent Screen
+1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
+2. Under the **Scopes** section, make sure to add the following scope for GSC access:
+   - `https://www.googleapis.com/auth/webmasters.readonly` (to read Google Search Console data)
+3. Save and continue.
+
+### Step 3: Generate OAuth Credentials
+1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
+2. Under **Authorized redirect URIs**, add the callback URI:
+   - `http://127.0.0.1:8000/admin/integrations/google/callback`
+3. Click **Create** and download the `.json` file.
+4. Upload this file in the Admin or Staff Portal under the Google Search Console integration section.
 
 ---
 

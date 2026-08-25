@@ -104,6 +104,7 @@ class StaffEditMaintenanceReport extends Component
     // 12. Attachments
     public array $existingAttachments = [];
     public array $newAttachments = [];
+    public $pastedImages = [];
     public bool $attachments_visible_to_client = false;
 
     public function mount(int $id)

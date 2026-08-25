@@ -728,7 +728,11 @@ class StaffClients extends Component
                 $reportData = $this->getMockGA4ReportData($propertyId);
             }
         } else {
-            $reportData = $this->getMockGA4ReportData($propertyId);
+            if ($integrationId === 'gsc') {
+                $reportData = $this->getMockGSCReportData($propertyId);
+            } else {
+                $reportData = $this->getMockGA4ReportData($propertyId);
+            }
         }
 
         try {
@@ -999,6 +1003,98 @@ class StaffClients extends Component
             return [
                 ['value' => date('Y') . '-' . \Illuminate\Support\Str::lower(date('F')), 'label' => date('F Y')]
             ];
+        }
+    }
+
+
+    private function getMockGSCReportData(?string $siteUrl = null): array
+    {
+        $seed = $siteUrl ? crc32($siteUrl) : 200;
+        srand($seed);
+
+        $queries = [
+            'aspire hub', 'crm software', 'business management tools', 
+            'best crm 2026', 'sales automation', 'customer portal software'
+        ];
+
+        $topQueries = [];
+        foreach (array_rand($queries, 5) as $idx) {
+            $topQueries[] = [
+                'query' => $queries[$idx],
+                'clicks' => rand(50, 500),
+                'impressions' => rand(1000, 5000),
+                'ctr' => rand(100, 500) / 100, // 1.00 to 5.00
+                'position' => rand(10, 500) / 10, // 1.0 to 50.0
+            ];
+        }
+
+        return [
+            'summary' => [
+                'clicks' => rand(1000, 5000),
+                'impressions' => rand(50000, 200000),
+                'ctr' => rand(150, 450) / 100,
+                'position' => rand(100, 300) / 10,
+            ],
+            'top_queries' => $topQueries
+        ];
+    }
+
+    public function getGSCSites(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'gsc')
+            ->first();
+
+        if (!$integration || empty($integration->auth_credentials['access_token'])) {
+            return [];
+        }
+
+        return [
+            ['id' => 'sc-domain:example.com', 'name' => 'sc-domain:example.com (Domain Property)'],
+            ['id' => 'https://example.com/', 'name' => 'https://example.com/ (URL Prefix)'],
+        ];
+    }
+
+    public function saveGSCSite(string $integrationId): void
+    {
+        if (empty($this->selectedPropertyId) || !$this->selectedWebsiteId) {
+            session()->flash('error', "Please select a GSC Site.");
+            return;
+        }
+
+        try {
+            $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+                ->where('integration_type', $integrationId)
+                ->firstOrFail();
+
+            $creds = $integration->auth_credentials ?? [];
+            $creds['property_id'] = $this->selectedPropertyId;
+            $integration->auth_credentials = $creds;
+            $integration->save();
+
+            // Log Activity
+            \App\Modules\Core\Activity\Models\ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'configure_gsc_site_url',
+                'loggable_type' => \App\Modules\CRM\Clients\Models\Client::class, // Depending on if it's Client or Staff
+                'loggable_id' => $this->selectedClientId,
+                'description' => "Configured GSC Site URL to: " . $this->selectedPropertyId,
+                'meta' => [
+                    'property_id' => $this->selectedPropertyId,
+                    'website_id' => $this->selectedWebsiteId,
+                ]
+            ]);
+
+            $this->selectedPropertyId = ''; // reset
+            session()->flash('success', "GSC Site URL configured successfully.");
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error saving GSC Site: ' . $e->getMessage());
+            session()->flash('error', "An error occurred while saving the Site URL.");
         }
     }
 

@@ -388,7 +388,7 @@
         </p>
 
         {{-- Add Staff button --}}
-        <button type="button" wire:click="openAddModal"
+        <button type="button" @click="$dispatch('open-modal', { name: 'add-staff-modal' })"
                 style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95 whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

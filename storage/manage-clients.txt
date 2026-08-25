@@ -984,12 +984,15 @@
                                     <div class="mt-4 p-3 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-xl border border-indigo-100/30 dark:border-indigo-900/20 mb-4">
                                         <span class="text-[10px] font-bold text-indigo-650 dark:text-indigo-400 block mb-1.5 uppercase tracking-wider">Select GA4 Property</span>
                                         <div class="flex gap-2">
-                                            <select wire:model.live="selectedPropertyId" wire:key="property-select-{{ $integration['id'] }}" class="w-full text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                            <select wire:model.live="selectedPropertyId" wire:key="property-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                                 <option value="">Select Property...</option>
                                                 @foreach ($this->getGA4Properties() as $prop)
                                                     <option value="{{ $prop['id'] }}">{{ $prop['name'] }}</option>
                                                 @endforeach
                                             </select>
+                                            <button type="button" wire:click="savePropertyId('{{ $integration['id'] }}')" wire:key="property-save-btn-{{ $integration['id'] }}" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-[10px] rounded-lg transition shrink-0">
+                                                Save
+                                            </button>
                                         </div>
                                     </div>
                                 @else
@@ -1011,6 +1014,9 @@
                                                     <option value="{{ $site['id'] }}">{{ $site['name'] }}</option>
                                                 @endforeach
                                             </select>
+                                            <button type="button" wire:click="saveGSCSite('{{ $integration['id'] }}')" wire:key="gsc-site-save-btn-{{ $integration['id'] }}" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-750 text-white font-bold text-[10px] rounded-lg transition shrink-0">
+                                                Save
+                                            </button>
                                         </div>
                                     </div>
                                 @else
@@ -1177,7 +1183,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                                         </svg>
-                                        {{ $activeReportIntegrationId === 'gsc' ? 'Google Search Console - Detailed Report' : 'Google Analytics 4 - Detailed Report' }}
+                                        Google Analytics 4 - Detailed Report
                                     </h3>
                                     <p class="text-[11px] text-slate-400 mt-1">
                                         Property ID: <span class="font-semibold text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['property_id'] ?? '—' }}</span> &bull; Source: <span class="text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['source'] ?? '—' }}</span>
@@ -1209,139 +1215,6 @@
                                         <p class="text-xs text-slate-500 font-medium">Loading report dataset...</p>
                                     </div>
                                 @else
-                                    @if ($activeReportIntegrationId === 'gsc')
-                                        <!-- 1. Stats Summary Widgets (GSC) -->
-                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                            <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
-                                                <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                                                    {{ number_format($activeReportData['summary']['clicks'] ?? 0) }}
-                                                </span>
-                                            </div>
-                                            <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
-                                                <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                                                    {{ number_format($activeReportData['summary']['impressions'] ?? 0) }}
-                                                </span>
-                                            </div>
-                                            <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CTR</span>
-                                                <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
-                                                    {{ $activeReportData['summary']['ctr'] ?? 0 }}%
-                                                </span>
-                                            </div>
-                                            <div class="p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. Position</span>
-                                                <span class="text-lg font-extrabold text-amber-600 dark:text-amber-400">
-                                                    {{ $activeReportData['summary']['position'] ?? 0 }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <!-- 2. Top Queries Table (GSC) -->
-                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Search Queries</h4>
-                                                <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
-                                                        <thead>
-                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">Query</th>
-                                                                <th class="py-2 text-right font-bold">Clicks</th>
-                                                                <th class="py-2 text-right font-bold">Imp.</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($activeReportData['top_queries'] ?? [] as $query)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-bold truncate max-w-[150px]" title="{{ $query['query'] }}">{{ $query['query'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($query['clicks'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($query['impressions'] ?? 0) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
-                                                <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
-                                                        <thead>
-                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">URL</th>
-                                                                <th class="py-2 text-right font-bold">Clicks</th>
-                                                                <th class="py-2 text-right font-bold">Imp.</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($activeReportData['top_pages'] ?? [] as $page)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-bold truncate max-w-[150px] text-indigo-600" title="{{ $page['page'] }}">
-                                                                        <a href="{{ $page['page'] }}" target="_blank" class="hover:underline">{{ str_replace('https://', '', $page['page']) }}</a>
-                                                                    </td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($page['clicks'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($page['impressions'] ?? 0) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- 3. Devices and Countries -->
-                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Device Breakdown</h4>
-                                                <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
-                                                        <thead>
-                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">Device</th>
-                                                                <th class="py-2 text-right font-bold">Clicks</th>
-                                                                <th class="py-2 text-right font-bold">Imp.</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($activeReportData['devices'] ?? [] as $device)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-bold capitalize">{{ strtolower($device['device']) }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($device['clicks'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($device['impressions'] ?? 0) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Countries</h4>
-                                                <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
-                                                        <thead>
-                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">Country</th>
-                                                                <th class="py-2 text-right font-bold">Clicks</th>
-                                                                <th class="py-2 text-right font-bold">Imp.</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($activeReportData['countries'] ?? [] as $country)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-bold capitalize">{{ strtolower(strlen($country['country']) === 3 ? $country['country'] : $country['country']) }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($country['clicks'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($country['impressions'] ?? 0) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @elseif ($activeReportIntegrationId === 'ga4')
                                     <!-- 1. Stats Summary Widgets -->
                                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                                         <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
@@ -1474,8 +1347,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    </div>
-                                    @endif
                                 @endif
                             </div>
                             
