@@ -90,8 +90,8 @@
 
     <!-- Sidebar -->
     <aside :class="mobileSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" 
-           class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:static lg:z-auto shrink-0">
-        <div>
+           class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:z-auto shrink-0">
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
             <div class="px-6 py-6 flex items-center justify-between">
                 <div class="flex flex-col gap-1">
                     <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start dark:brightness-0 dark:invert" alt="Aspire Hub" />
@@ -125,6 +125,14 @@
                         ['label' => 'Resources', 'route' => 'client.documents', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
                         ['label' => 'My Profile', 'route' => 'client.profile', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
                     ];
+                    if (session()->has('impersonator_id')) {
+                        $navItems[] = [
+                            'label' => 'Switch Back to Admin',
+                            'route' => 'impersonate.stop',
+                            'icon' => 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
+                            'is_special' => true
+                        ];
+                    }
                     $currentRoute = request()->route()?->getName();
                 @endphp
 
@@ -137,12 +145,15 @@
                             str_starts_with($currentRoute ?? '', $route . '-')
                         );
                         $href = $route ? route($route) : '#';
+                        $isSpecial = $item['is_special'] ?? false;
                     @endphp
                     <a href="{{ $href }}"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition
                               {{ $isActive
                                     ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-extrabold shadow-sm shadow-indigo-500/10'
-                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}">
+                                    : ($isSpecial
+                                        ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-sm'
+                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white') }}">
                         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                         </svg>

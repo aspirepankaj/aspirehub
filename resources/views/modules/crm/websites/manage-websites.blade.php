@@ -57,7 +57,11 @@
                             {{ $websiteDetails->status }}
                         </span>
                         @foreach($websiteDetails->serviceTypes as $sT)
-                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-{{ $sT->color }}-500/10 text-{{ $sT->color }}-600 dark:text-{{ $sT->color }}-400 tracking-wider">
+                            @php
+                                $colorHex = str_starts_with($sT->color, '#') ? $sT->color : '#' . $sT->color;
+                            @endphp
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider"
+                                  style="background-color: {{ $colorHex }}1a; color: {{ $colorHex }}; border: 1px solid {{ $colorHex }}33;">
                                 {{ $sT->name }}
                             </span>
                         @endforeach
@@ -538,8 +542,11 @@
                                     @if($website->serviceTypes->isNotEmpty())
                                         <div class="flex flex-wrap gap-1.5">
                                             @foreach($website->serviceTypes as $sT)
-                                                <span class="px-2.5 py-1 text-xs font-bold rounded-lg
-                                                    bg-{{ $sT->color }}-500/10 text-{{ $sT->color }}-600 dark:text-{{ $sT->color }}-400 uppercase tracking-wider text-[10px]">
+                                                @php
+                                                    $colorHex = str_starts_with($sT->color, '#') ? $sT->color : '#' . $sT->color;
+                                                @endphp
+                                                <span class="px-2.5 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wider"
+                                                      style="background-color: {{ $colorHex }}1a; color: {{ $colorHex }}; border: 1px solid {{ $colorHex }}33;">
                                                     {{ $sT->name }}
                                                 </span>
                                             @endforeach

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminAuthenticate
+class ClientAuthenticate
 {
     /**
      * Handle an incoming request.
@@ -18,27 +18,26 @@ class AdminAuthenticate
     {
         $user = Auth::user();
 
-        // 1. If not logged in at all, redirect to admin login
+        // 1. If not logged in at all, redirect to client login
         if (!$user) {
-            return redirect()->route('admin.login');
+            return redirect()->route('login');
         }
 
-        // 2. If logged in but not an active admin, redirect to their correct dashboard
-        if (!$user->admin || !$user->admin->is_active) {
+        // 2. If logged in but not a client, redirect them to their respective portal dashboard
+        if (!$user->client || $user->client->status !== 'active') {
+            if ($user->admin && $user->admin->is_active) {
+                return redirect()->route('admin.dashboard');
+            }
             if ($user->staff && $user->staff->status === 'active') {
                 return redirect()->route('staff.dashboard');
             }
-            if ($user->client && $user->client->status === 'active') {
-                return redirect()->route('client.dashboard');
-            }
 
-            // Fallback
+            // Fallback: log out if they are not active in any role
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-
-            return redirect()->route('admin.login')->withErrors([
-                'email' => 'Access denied. You do not have administrator privileges.',
+            return redirect()->route('login')->withErrors([
+                'email' => 'Access denied. Your account is inactive or not registered as a client.',
             ]);
         }
 

@@ -10,7 +10,7 @@ use App\Modules\Client\Dashboard\Livewire\ClientMaintenanceReports;
 use App\Modules\Client\Dashboard\Livewire\ClientSupport;
 
 // Client Portal Routing
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', \App\Http\Middleware\ClientAuthenticate::class])->group(function () {
     Route::get('/dashboard', ClientDashboard::class)->name('dashboard');
     Route::get('/websites', ClientMyWebsites::class)->name('websites');
     Route::get('/profile', ClientProfile::class)->name('profile');

@@ -14,10 +14,16 @@ class ManageServiceTypes extends Component
 
     // Form attributes
     public string $name = '';
-    public string $color = 'indigo';
+    public string $color = '#4f46e5';
+    public string $search = '';
 
     // Edit tracking
     public ?int $editingTypeId = null;
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
 
     protected function rules(): array
     {
@@ -27,14 +33,14 @@ class ManageServiceTypes extends Component
         }
         return [
             'name'  => $uniqueRule,
-            'color' => 'required|string|in:indigo,emerald,pink,amber,slate,red,sky,violet,rose',
+            'color' => 'required|string|max:20',
         ];
     }
 
     public function resetForm(): void
     {
         $this->reset(['name', 'color', 'editingTypeId']);
-        $this->color = 'indigo';
+        $this->color = '#4f46e5';
         $this->resetValidation();
     }
 
@@ -48,9 +54,14 @@ class ManageServiceTypes extends Component
     {
         $this->validate();
 
+        $hexColor = trim($this->color);
+        if (!str_starts_with($hexColor, '#')) {
+            $hexColor = '#' . $hexColor;
+        }
+
         ServiceType::create([
             'name'  => $this->name,
-            'color' => $this->color,
+            'color' => $hexColor,
         ]);
 
         $this->dispatch('close-modal', name: 'add-service-type-modal');
@@ -73,10 +84,15 @@ class ManageServiceTypes extends Component
     {
         $this->validate();
 
+        $hexColor = trim($this->color);
+        if (!str_starts_with($hexColor, '#')) {
+            $hexColor = '#' . $hexColor;
+        }
+
         $type = ServiceType::findOrFail($this->editingTypeId);
         $type->update([
             'name'  => $this->name,
-            'color' => $this->color,
+            'color' => $hexColor,
         ]);
 
         $this->dispatch('close-modal', name: 'edit-service-type-modal');
@@ -99,7 +115,12 @@ class ManageServiceTypes extends Component
 
     public function render()
     {
-        $types = ServiceType::latest()->paginate(10);
+        $types = ServiceType::when($this->search, function($query) {
+                $query->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('color', 'like', '%' . $this->search . '%');
+            })
+            ->latest()
+            ->paginate(10);
 
         return view('modules.crm.websites.manage-service-types', [
             'types' => $types,

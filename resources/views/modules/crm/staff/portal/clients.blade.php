@@ -546,53 +546,105 @@
                                         <!-- 2. Tables Grid -->
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <!-- Pageviews by Page Path -->
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllPages: false }">
                                                 <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Viewed Pages</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-xs">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">Page Path</th>
-                                                                <th class="py-2 text-right font-bold">Views</th>
-                                                                <th class="py-2 text-right font-bold">Users</th>
+                                                                <th class="py-2 font-bold w-1/2">Page Path</th>
+                                                                <th class="py-2 text-right font-bold w-1/4">Views</th>
+                                                                <th class="py-2 text-right font-bold w-1/4">Users</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @foreach ($activeReportData['pages_report'] ?? [] as $page)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($page['pageviews'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($page['users'] ?? 0) }}</td>
+                                                            @foreach (array_slice($activeReportData['pages_report'] ?? [], 0, 6) as $page)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
+                                                                    <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                                                    <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                @if (count($activeReportData['pages_report'] ?? []) > 6)
+                                                    <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                         :style="showAllPages ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                        <div class="overflow-x-auto">
+                                                            <table class="w-full text-left text-xs">
+                                                                <tbody>
+                                                                    @foreach (array_slice($activeReportData['pages_report'] ?? [], 6) as $page)
+                                                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
+                                                                            <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                                                            <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
+                                                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                        <button type="button" @click="showAllPages = !showAllPages" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                            <span x-text="showAllPages ? 'Show Less' : 'View Full'"></span>
+                                                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllPages ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
                                             </div>
 
                                             <!-- Traffic Sources & Channels -->
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllSources: false }">
                                                 <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Traffic Sources / Mediums</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-xs">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">Source / Medium</th>
-                                                                <th class="py-2 text-right font-bold">Sessions</th>
-                                                                <th class="py-2 text-right font-bold">Bounce Rate</th>
+                                                                <th class="py-2 font-bold w-1/2">Source / Medium</th>
+                                                                <th class="py-2 text-right font-bold w-1/4">Sessions</th>
+                                                                <th class="py-2 text-right font-bold w-1/4">Bounce Rate</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @foreach ($activeReportData['traffic_sources'] ?? [] as $source)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-bold">{{ $source['source_medium'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($source['sessions'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $source['bounce_rate'] ?? '—' }}</td>
+                                                            @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 0, 6) as $source)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
+                                                                    <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
+                                                                    <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                @if (count($activeReportData['traffic_sources'] ?? []) > 6)
+                                                    <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                         :style="showAllSources ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                        <div class="overflow-x-auto">
+                                                            <table class="w-full text-left text-xs">
+                                                                <tbody>
+                                                                    @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 6) as $source)
+                                                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
+                                                                            <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
+                                                                            <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
+                                                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                        <button type="button" @click="showAllSources = !showAllSources" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                            <span x-text="showAllSources ? 'Show Less' : 'View Full'"></span>
+                                                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllSources ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
 
@@ -605,11 +657,11 @@
                                                     @foreach ($activeReportData['device_demographics'] ?? [] as $device)
                                                         <div>
                                                             <div class="flex justify-between text-xs mb-1">
-                                                                <span class="font-bold text-slate-755 dark:text-slate-350">{{ $device['device'] }}</span>
-                                                                <span class="text-slate-455 dark:text-slate-500 font-bold">{{ $device['percentage'] }}</span>
+                                                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ $device['device'] }}</span>
+                                                                <span class="text-slate-400 dark:text-slate-550 font-bold">{{ $device['percentage'] }}</span>
                                                             </div>
                                                             <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                                                <div class="bg-indigo-650 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
+                                                                <div class="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
                                                             </div>
                                                         </div>
                                                     @endforeach
@@ -617,28 +669,54 @@
                                             </div>
 
                                             <!-- Geographic Country Sources -->
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2">
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2" x-data="{ showAllGeo: false }">
                                                 <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Geographic Audience</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-xs">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">Country</th>
-                                                                <th class="py-2 text-right font-bold">Active Users</th>
-                                                                <th class="py-2 text-right font-bold">Sessions</th>
+                                                                <th class="py-2 font-bold w-1/2">Country</th>
+                                                                <th class="py-2 text-right font-bold w-1/4">Active Users</th>
+                                                                <th class="py-2 text-right font-bold w-1/4">Sessions</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @foreach ($activeReportData['geographic_sources'] ?? [] as $geo)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-300">
-                                                                    <td class="py-2.5 font-bold">{{ $geo['country'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($geo['active_users'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-455 dark:text-slate-550">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                            @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 0, 6) as $geo)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                    <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
+                                                                    <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                @if (count($activeReportData['geographic_sources'] ?? []) > 6)
+                                                    <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                         :style="showAllGeo ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                        <div class="overflow-x-auto">
+                                                            <table class="w-full text-left text-xs">
+                                                                <tbody>
+                                                                    @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 6) as $geo)
+                                                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                            <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
+                                                                            <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                        <button type="button" @click="showAllGeo = !showAllGeo" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                            <span x-text="showAllGeo ? 'Show Less' : 'View Full'"></span>
+                                                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllGeo ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     @endif

@@ -53,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('client-dashboard', \App\Modules\Client\Dashboard\Livewire\ClientDashboard::class);
         \Livewire\Livewire::component('client-websites', \App\Modules\Client\Dashboard\Livewire\ClientMyWebsites::class);
         \Livewire\Livewire::component('client-profile', \App\Modules\Client\Dashboard\Livewire\ClientProfile::class);
+        \Livewire\Livewire::component('client-marketing', \App\Modules\Client\Dashboard\Livewire\ClientMarketingReports::class);
         \Livewire\Livewire::component('client-documents', \App\Modules\Client\Dashboard\Livewire\ClientDocuments::class);
         \Livewire\Livewire::component('client-maintenance', \App\Modules\Client\Dashboard\Livewire\ClientMaintenanceReports::class);
         \Livewire\Livewire::component('client-view-maintenance-report', \App\Modules\Client\Dashboard\Livewire\ClientViewMaintenanceReport::class);

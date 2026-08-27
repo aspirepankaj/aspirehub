@@ -28,6 +28,19 @@
         <x-admin.alert type="danger" class="mb-5" :message="session('error')" />
     @endif
 
+    {{-- Search Filter Bar --}}
+    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm">
+        <div class="relative flex items-center max-w-md">
+            <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input wire:model.live.debounce.300ms="search"
+                   type="text"
+                   placeholder="Search service types by name or color..."
+                   class="block w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150" />
+        </div>
+    </div>
+
     {{-- Data Table Card --}}
     <x-admin.card>
         @if($types->isEmpty())
@@ -46,12 +59,19 @@
                             {{ $type->name }}
                         </td>
                         <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-{{ $type->color }}-500/10 text-{{ $type->color }}-600 dark:text-{{ $type->color }}-400 uppercase tracking-wider">
+                            @php
+                                $colorHex = str_starts_with($type->color, '#') ? $type->color : '#' . $type->color;
+                            @endphp
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg uppercase tracking-wider"
+                                  style="background-color: {{ $colorHex }}1a; color: {{ $colorHex }}; border: 1px solid {{ $colorHex }}33;">
                                 {{ $type->name }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-xs font-mono text-slate-500 dark:text-slate-400">
-                            {{ $type->color }}
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-full border border-slate-200/50 dark:border-slate-800" style="background-color: {{ $colorHex }};"></span>
+                                <span>{{ $type->color }}</span>
+                            </div>
                         </td>
                         <td class="px-6 py-4 text-center">
                             <div class="inline-flex items-center gap-1 justify-center">
@@ -92,18 +112,14 @@
 
             <div>
                 <label for="color" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Badge Color Theme</label>
-                <select wire:model="color" id="color"
-                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
-                    <option value="indigo">Indigo (Blue-Purple)</option>
-                    <option value="emerald">Emerald (Green)</option>
-                    <option value="pink">Pink (Red-Pink)</option>
-                    <option value="amber">Amber (Orange-Yellow)</option>
-                    <option value="slate">Slate (Gray)</option>
-                    <option value="red">Red (Danger)</option>
-                    <option value="sky">Sky (Light Blue)</option>
-                    <option value="violet">Violet (Purple)</option>
-                    <option value="rose">Rose (Deep Red)</option>
-                </select>
+                <div class="flex items-center gap-2.5 mt-1.5 bg-slate-50 dark:bg-slate-905/30 p-2 rounded-xl border border-slate-200 dark:border-slate-800 focus-within:ring-2 focus-within:ring-indigo-500/55 focus-within:border-indigo-500 transition-all">
+                    <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+                        <input wire:model.live="color" type="color" id="color"
+                               class="absolute inset-0 cursor-pointer border-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4" style="padding: 0; outline: none; margin: 0; border: none;" />
+                    </div>
+                    <input wire:model="color" type="text" placeholder="#4f46e5"
+                           class="block w-full border-0 bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-0 text-sm font-semibold p-0" />
+                </div>
                 <x-input-error :messages="$errors->get('color')" class="mt-1" />
             </div>
 
@@ -135,18 +151,14 @@
 
             <div>
                 <label for="edit_color" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Badge Color Theme</label>
-                <select wire:model="color" id="edit_color"
-                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/55 focus:border-indigo-500 text-sm transition duration-150">
-                    <option value="indigo">Indigo (Blue-Purple)</option>
-                    <option value="emerald">Emerald (Green)</option>
-                    <option value="pink">Pink (Red-Pink)</option>
-                    <option value="amber">Amber (Orange-Yellow)</option>
-                    <option value="slate">Slate (Gray)</option>
-                    <option value="red">Red (Danger)</option>
-                    <option value="sky">Sky (Light Blue)</option>
-                    <option value="violet">Violet (Purple)</option>
-                    <option value="rose">Rose (Deep Red)</option>
-                </select>
+                <div class="flex items-center gap-2.5 mt-1.5 bg-slate-50 dark:bg-slate-905/30 p-2 rounded-xl border border-slate-200 dark:border-slate-800 focus-within:ring-2 focus-within:ring-indigo-500/55 focus-within:border-indigo-500 transition-all">
+                    <div class="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+                        <input wire:model.live="color" type="color" id="edit_color"
+                               class="absolute inset-0 cursor-pointer border-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4" style="padding: 0; outline: none; margin: 0; border: none;" />
+                    </div>
+                    <input wire:model="color" type="text" placeholder="#4f46e5"
+                           class="block w-full border-0 bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-0 text-sm font-semibold p-0" />
+                </div>
                 <x-input-error :messages="$errors->get('color')" class="mt-1" />
             </div>
 

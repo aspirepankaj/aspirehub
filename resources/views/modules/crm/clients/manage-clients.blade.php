@@ -984,12 +984,17 @@
                                     <div class="mt-4 p-3 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-xl border border-indigo-100/30 dark:border-indigo-900/20 mb-4">
                                         <span class="text-[10px] font-bold text-indigo-650 dark:text-indigo-400 block mb-1.5 uppercase tracking-wider">Select GA4 Property</span>
                                         <div class="flex gap-2">
-                                            <select wire:model.live="selectedPropertyId" wire:key="property-select-{{ $integration['id'] }}" class="w-full text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                            <select wire:model.live="selectedPropertyId" wire:key="property-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                                 <option value="">Select Property...</option>
                                                 @foreach ($this->getGA4Properties() as $prop)
                                                     <option value="{{ $prop['id'] }}">{{ $prop['name'] }}</option>
                                                 @endforeach
                                             </select>
+                                            @if($selectedPropertyId && !str_contains((string)$selectedPropertyId, 'http') && !str_contains((string)$selectedPropertyId, 'sc-domain:'))
+                                                <button type="button" wire:click="saveGA4Property" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] rounded-lg transition shrink-0 active:scale-95 shadow-sm">
+                                                    Save
+                                                </button>
+                                            @endif
                                         </div>
                                     </div>
                                 @else
@@ -1379,53 +1384,105 @@
                                     <!-- 2. Tables Grid -->
                                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                         <!-- Pageviews by Page Path -->
-                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllPages: false }">
                                             <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Viewed Pages</h4>
                                             <div class="overflow-x-auto">
                                                 <table class="w-full text-left text-xs">
                                                     <thead>
                                                         <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                            <th class="py-2 font-bold">Page Path</th>
-                                                            <th class="py-2 text-right font-bold">Views</th>
-                                                            <th class="py-2 text-right font-bold">Users</th>
+                                                            <th class="py-2 font-bold w-1/2">Page Path</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Views</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Users</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($activeReportData['pages_report'] ?? [] as $page)
+                                                        @foreach (array_slice($activeReportData['pages_report'] ?? [], 0, 6) as $page)
                                                             <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
-                                                                <td class="py-2.5 text-right font-bold">{{ number_format($page['pageviews'] ?? 0) }}</td>
-                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($page['users'] ?? 0) }}</td>
+                                                                <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            @if (count($activeReportData['pages_report'] ?? []) > 6)
+                                                <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                     :style="showAllPages ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                    <div class="overflow-x-auto">
+                                                        <table class="w-full text-left text-xs">
+                                                            <tbody>
+                                                                @foreach (array_slice($activeReportData['pages_report'] ?? [], 6) as $page)
+                                                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                        <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                                                        <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
+                                                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                    <button type="button" @click="showAllPages = !showAllPages" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                        <span x-text="showAllPages ? 'Show Less' : 'View Full'"></span>
+                                                        <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllPages ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </div>
 
                                         <!-- Traffic Sources & Channels -->
-                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllSources: false }">
                                             <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Traffic Sources / Mediums</h4>
                                             <div class="overflow-x-auto">
                                                 <table class="w-full text-left text-xs">
                                                     <thead>
                                                         <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                            <th class="py-2 font-bold">Source / Medium</th>
-                                                            <th class="py-2 text-right font-bold">Sessions</th>
-                                                            <th class="py-2 text-right font-bold">Bounce Rate</th>
+                                                            <th class="py-2 font-bold w-1/2">Source / Medium</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Sessions</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Bounce Rate</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($activeReportData['traffic_sources'] ?? [] as $source)
-                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                <td class="py-2.5 font-bold">{{ $source['source_medium'] }}</td>
-                                                                <td class="py-2.5 text-right font-bold">{{ number_format($source['sessions'] ?? 0) }}</td>
-                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $source['bounce_rate'] ?? '—' }}</td>
+                                                        @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 0, 6) as $source)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            @if (count($activeReportData['traffic_sources'] ?? []) > 6)
+                                                <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                     :style="showAllSources ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                    <div class="overflow-x-auto">
+                                                        <table class="w-full text-left text-xs">
+                                                            <tbody>
+                                                                @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 6) as $source)
+                                                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                        <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
+                                                                        <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
+                                                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                    <button type="button" @click="showAllSources = !showAllSources" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                        <span x-text="showAllSources ? 'Show Less' : 'View Full'"></span>
+                                                        <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllSources ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -1438,11 +1495,11 @@
                                                 @foreach ($activeReportData['device_demographics'] ?? [] as $device)
                                                     <div>
                                                         <div class="flex justify-between text-xs mb-1">
-                                                            <span class="font-bold text-slate-750 dark:text-slate-350">{{ $device['device'] }}</span>
-                                                            <span class="text-slate-450 dark:text-slate-500 font-bold">{{ $device['percentage'] }}</span>
+                                                            <span class="font-bold text-slate-700 dark:text-slate-300">{{ $device['device'] }}</span>
+                                                            <span class="text-slate-400 dark:text-slate-500 font-bold">{{ $device['percentage'] }}</span>
                                                         </div>
                                                         <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                                            <div class="bg-indigo-650 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
+                                                            <div class="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
                                                         </div>
                                                     </div>
                                                 @endforeach
@@ -1450,30 +1507,55 @@
                                         </div>
 
                                         <!-- Geographic Country Sources -->
-                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2">
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2" x-data="{ showAllGeo: false }">
                                             <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Geographic Audience</h4>
                                             <div class="overflow-x-auto">
                                                 <table class="w-full text-left text-xs">
                                                     <thead>
                                                         <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                            <th class="py-2 font-bold">Country</th>
-                                                            <th class="py-2 text-right font-bold">Active Users</th>
-                                                            <th class="py-2 text-right font-bold">Sessions</th>
+                                                            <th class="py-2 font-bold w-1/2">Country</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Active Users</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Sessions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($activeReportData['geographic_sources'] ?? [] as $geo)
-                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-300">
-                                                                <td class="py-2.5 font-bold">{{ $geo['country'] }}</td>
-                                                                <td class="py-2.5 text-right font-bold">{{ number_format($geo['active_users'] ?? 0) }}</td>
-                                                                <td class="py-2.5 text-right text-slate-450 dark:text-slate-500">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                        @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 0, 6) as $geo)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            @if (count($activeReportData['geographic_sources'] ?? []) > 6)
+                                                <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                     :style="showAllGeo ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                    <div class="overflow-x-auto">
+                                                        <table class="w-full text-left text-xs">
+                                                            <tbody>
+                                                                @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 6) as $geo)
+                                                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                        <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
+                                                                        <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                    <button type="button" @click="showAllGeo = !showAllGeo" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                        <span x-text="showAllGeo ? 'Show Less' : 'View Full'"></span>
+                                                        <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllGeo ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </div>
-                                    </div>
                                     </div>
                                     @endif
                                 @endif
@@ -1667,7 +1749,20 @@
                                 <th class="px-3 py-3.5">Client Details</th>
                                 <th class="px-3 py-3.5">Company Name</th>
                                 <th class="px-3 py-3.5">Plans</th>
-                                <th class="px-3 py-3.5 text-center">Websites</th>
+                                <th class="px-3 py-3.5 text-center cursor-pointer select-none" wire:click="sortBy('websites_count')">
+                                    <div class="inline-flex items-center gap-1 justify-center">
+                                        <span>Websites</span>
+                                        @if($sortField === 'websites_count')
+                                            @if($sortDirection === 'asc')
+                                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
+                                            @else
+                                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                            @endif
+                                        @else
+                                            <svg class="w-3 h-3 text-slate-300 hover:text-slate-400 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                                        @endif
+                                    </div>
+                                </th>
                                 <th class="px-3 py-3.5 hidden xl:table-cell">Phone Numbers</th>
                                 <th class="px-3 py-3.5 text-center">Status</th>
                                 <th class="px-3 py-3.5 text-center hidden lg:table-cell">Last Login</th>
@@ -1758,6 +1853,15 @@
                                                 <span class="hidden 2xl:inline">Map With</span>
                                             <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
                                         </button>
+
+                                        @if($client->user_id)
+                                            <a href="{{ route('impersonate.start', $client->user_id) }}"
+                                               class="inline-flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90 shrink-0"
+                                               title="Login as {{ $client->user->name ?? 'this client' }}"
+                                               onclick="return confirm('Are you sure you want to login as {{ $client->user->name ?? 'this client' }}?')">
+                                                <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-6 h-6 shrink-0 opacity-80 hover:opacity-100 transition-opacity" alt="Switch Account" />
+                                            </a>
+                                        @endif
 
                                         <button type="button" wire:click="editClient({{ $client->id }})"
                                                 class="inline-flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all duration-150 active:scale-95 shrink-0"
