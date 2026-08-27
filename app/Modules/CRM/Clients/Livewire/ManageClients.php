@@ -1543,21 +1543,38 @@ class ManageClients extends Component
             return [];
         }
 
-        $url = $integration->website->url ?? 'https://example.com/';
-        
-        // Ensure URL has scheme for parse_url
-        if (!preg_match('~^(?:f|ht)tps?://~i', $url)) {
-            $url = 'https://' . $url;
-        }
-        
-        $domain = parse_url($url, PHP_URL_HOST) ?? 'example.com';
-        // Remove www. if present for domain property
-        $domain = preg_replace('/^www\./', '', $domain);
+        $accessToken = $integration->auth_credentials['access_token'];
 
-        return [
-            ['id' => 'sc-domain:' . $domain, 'name' => 'sc-domain:' . $domain . ' (Domain Property)'],
-            ['id' => rtrim($url, '/') . '/', 'name' => rtrim($url, '/') . '/ (URL Prefix)'],
-        ];
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->timeout(5)
+                ->get('https://searchconsole.googleapis.com/webmasters/v3/sites');
+
+            if ($response->successful()) {
+                $sites = $response->json()['siteEntry'] ?? [];
+                $sitesList = [];
+                foreach ($sites as $site) {
+                    $siteUrl = $site['siteUrl'] ?? '';
+                    if ($siteUrl) {
+                        $sitesList[] = [
+                            'id' => $siteUrl,
+                            'name' => $siteUrl,
+                        ];
+                    }
+                }
+                
+                // Sort alphabetically
+                usort($sitesList, function ($a, $b) {
+                    return strcasecmp($a['name'], $b['name']);
+                });
+                
+                return $sitesList;
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error fetching GSC sites: ' . $e->getMessage());
+        }
+
+        return [];
     }
 
     public function saveGSCSite(string $integrationId): void

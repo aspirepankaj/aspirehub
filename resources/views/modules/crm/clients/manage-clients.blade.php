@@ -1109,7 +1109,13 @@
                             <!-- Modal Header -->
                             <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800/60 rounded-t-3xl">
                                 <h3 class="text-base font-bold text-slate-900 dark:text-white">
-                                    Configure Google Analytics 4
+                                    @if($activeConfigIntegrationId === 'ga4')
+                                        Configure Google Analytics 4
+                                    @elseif($activeConfigIntegrationId === 'gsc')
+                                        Configure Google Search Console
+                                    @else
+                                        Configure {{ strtoupper($activeConfigIntegrationId) }}
+                                    @endif
                                 </h3>
                                 <button type="button" wire:click="closeConfigModal" class="text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 focus:outline-none transition">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

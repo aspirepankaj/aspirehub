@@ -1166,10 +1166,38 @@ class StaffClients extends Component
             return [];
         }
 
-        return [
-            ['id' => 'sc-domain:example.com', 'name' => 'sc-domain:example.com (Domain Property)'],
-            ['id' => 'https://example.com/', 'name' => 'https://example.com/ (URL Prefix)'],
-        ];
+        $accessToken = $integration->auth_credentials['access_token'];
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->timeout(5)
+                ->get('https://searchconsole.googleapis.com/webmasters/v3/sites');
+
+            if ($response->successful()) {
+                $sites = $response->json()['siteEntry'] ?? [];
+                $sitesList = [];
+                foreach ($sites as $site) {
+                    $siteUrl = $site['siteUrl'] ?? '';
+                    if ($siteUrl) {
+                        $sitesList[] = [
+                            'id' => $siteUrl,
+                            'name' => $siteUrl,
+                        ];
+                    }
+                }
+                
+                // Sort alphabetically
+                usort($sitesList, function ($a, $b) {
+                    return strcasecmp($a['name'], $b['name']);
+                });
+                
+                return $sitesList;
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error fetching GSC sites: ' . $e->getMessage());
+        }
+
+        return [];
     }
 
     public function saveGSCSite(string $integrationId): void
