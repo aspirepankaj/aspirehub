@@ -232,6 +232,18 @@
                                         'hoverShadow' => 'hover:shadow-emerald-500/5',
                                         'svg' => '<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"></path><polyline points="17 6 23 6 23 12"></polyline></svg>'
                                     ],
+                                    'youtube' => [
+                                        'iconBg' => 'bg-red-50 dark:bg-red-950/20',
+                                        'hoverBorder' => 'hover:border-red-500/35 dark:hover:border-red-500/25',
+                                        'hoverShadow' => 'hover:shadow-red-500/5',
+                                        'svg' => '<svg class="w-5 h-5 text-red-600 dark:text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.42a2.78 2.78 0 0 0-1.94 2C1 8.14 1 12 1 12s0 3.86.46 5.58a2.78 2.78 0 0 0 1.94 2C5.12 20 12 20 12 20s6.88 0 8.6-.42a2.78 2.78 0 0 0 1.94-2C23 15.86 23 12 23 12s0-3.86-.46-5.58z"></path><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"></polygon></svg>'
+                                    ],
+                                    'keyword' => [
+                                        'iconBg' => 'bg-slate-100 dark:bg-slate-800/60',
+                                        'hoverBorder' => 'hover:border-slate-400/35 dark:hover:border-slate-500/25',
+                                        'hoverShadow' => 'hover:shadow-slate-500/5',
+                                        'svg' => '<svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="9"></rect><rect x="14" y="7" width="3" height="5"></rect></svg>'
+                                    ],
                                     default => [
                                         'iconBg' => 'bg-slate-50 dark:bg-slate-800/40',
                                         'hoverBorder' => 'hover:border-indigo-500/35 dark:hover:border-indigo-500/25',
@@ -320,6 +332,48 @@
                                         </div>
                                     @endif
                                 @endif
+
+                                @if ($integration['id'] === 'youtube' && $isConnected)
+                                    @if (!$integration['property_id'])
+                                        <div class="mt-4 p-3 bg-red-50/30 dark:bg-red-950/10 rounded-xl border border-red-100/30 dark:border-red-900/20 mb-4">
+                                            <span class="text-[10px] font-bold text-red-650 dark:text-red-400 block mb-1.5 uppercase tracking-wider">Select YouTube Channel</span>
+                                            <div class="flex gap-2">
+                                                <select wire:model.live="youtubeChannelId" wire:key="youtube-channel-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-red-500">
+                                                    <option value="">Select Channel...</option>
+                                                    @foreach ($this->getYoutubeChannels() as $channel)
+                                                        <option value="{{ $channel['id'] }}">{{ $channel['name'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
+                                            <span class="text-slate-455 dark:text-slate-550 font-medium">YouTube Channel</span>
+                                            <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[120px] truncate" title="{{ $integration['property_id'] }}">{{ $integration['property_id'] }}</span>
+                                        </div>
+                                    @endif
+                                @endif
+
+                                @if ($integration['id'] === 'keyword' && $isConnected)
+                                    @if (!$integration['property_id'])
+                                        <div class="mt-4 p-3 bg-purple-50/30 dark:bg-purple-950/10 rounded-xl border border-purple-100/30 dark:border-purple-900/20 mb-4">
+                                            <span class="text-[10px] font-bold text-purple-650 dark:text-purple-400 block mb-1.5 uppercase tracking-wider">Select Keyword Project</span>
+                                            <div class="flex gap-2">
+                                                <select wire:model.live="keywordProjectId" wire:key="keyword-project-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                                    <option value="">Select Project...</option>
+                                                    @foreach ($this->getKeywordProjects() as $project)
+                                                        <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
+                                            <span class="text-slate-455 dark:text-slate-550 font-medium">Keyword Project ID</span>
+                                            <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[120px] truncate" title="{{ $integration['property_id'] }}">{{ $integration['property_id'] }}</span>
+                                        </div>
+                                    @endif
+                                @endif
                                 </div>
 
                                 <!-- Footer Actions -->
@@ -355,7 +409,7 @@
                                     @else
                                         <!-- Connected stage -->
                                         <div class="w-full flex flex-col gap-2.5 mt-auto">
-                                            @if (in_array($integration['id'], ['ga4', 'gsc']) && !empty($integration['property_id']))
+                                            @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword']) && !empty($integration['property_id']))
                                                 <button type="button" 
                                                         wire:click="openReportModal('{{ $integration['id'] }}')"
                                                         class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">
@@ -422,36 +476,47 @@
                                 <!-- Modal Body -->
                                 <form wire:submit.prevent="saveCredentials">
                                     <div class="p-6 flex-auto">
-                                        <div class="mb-5">
-                                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Google OAuth Credentials (.json)</label>
-                                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 dark:border-slate-800 border-dashed rounded-2xl hover:border-indigo-500/50 dark:hover:border-indigo-400/50 transition-colors relative">
-                                                <div class="space-y-1 text-center">
-                                                    <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                    </svg>
-                                                    <div class="flex text-xs text-slate-600 dark:text-slate-400 justify-center">
-                                                        <label for="credentials-upload" class="relative cursor-pointer bg-white dark:bg-slate-900 rounded-md font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 focus-within:outline-none">
-                                                            <span>Upload a file</span>
-                                                            <input id="credentials-upload" name="credentials-upload" type="file" wire:model="credentialsFile" class="sr-only">
-                                                        </label>
-                                                        <p class="pl-1">or drag and drop</p>
-                                                    </div>
-                                                    <p class="text-[10px] text-slate-400">JSON keys only up to 2MB</p>
-                                                </div>
+                                        @if($activeConfigIntegrationId === 'keyword')
+                                            <div class="mb-5">
+                                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Keyword.com API Token</label>
+                                                <input type="text" wire:model="apiKey" placeholder="Enter your Keyword.com API Token" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all">
+                                                @error('apiKey') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
                                             </div>
-                                            @if($credentialsFile)
-                                                <div class="mt-3 flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 rounded-xl">
-                                                    <span class="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[200px]" title="{{ $credentialsFile->getClientOriginalName() }}">
-                                                        {{ $credentialsFile->getClientOriginalName() }}
-                                                    </span>
-                                                    <button type="button" wire:click="$set('credentialsFile', null)" class="text-red-500 text-xs font-bold hover:underline">Remove</button>
+                                            <div class="text-[11px] text-slate-450 leading-relaxed bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3 rounded-xl text-indigo-650 dark:text-indigo-400 font-medium">
+                                                Note: Your API key will be securely stored and used only to fetch your keyword ranking data.
+                                            </div>
+                                        @else
+                                            <div class="mb-5">
+                                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Google OAuth Credentials (.json)</label>
+                                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 dark:border-slate-800 border-dashed rounded-2xl hover:border-indigo-500/50 dark:hover:border-indigo-400/50 transition-colors relative">
+                                                    <div class="space-y-1 text-center">
+                                                        <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                        <div class="flex text-xs text-slate-600 dark:text-slate-400 justify-center">
+                                                            <label for="credentials-upload" class="relative cursor-pointer bg-white dark:bg-slate-900 rounded-md font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 focus-within:outline-none">
+                                                                <span>Upload a file</span>
+                                                                <input id="credentials-upload" name="credentials-upload" type="file" wire:model="credentialsFile" class="sr-only">
+                                                            </label>
+                                                            <p class="pl-1">or drag and drop</p>
+                                                        </div>
+                                                        <p class="text-[10px] text-slate-400">JSON keys only up to 2MB</p>
+                                                    </div>
                                                 </div>
-                                            @endif
-                                            @error('credentialsFile') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
-                                        </div>
-                                        <div class="text-[11px] text-slate-455 leading-relaxed bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3 rounded-xl text-indigo-650 dark:text-indigo-400 font-medium">
-                                            Note: We securely encrypt and store your credentials file. Your OAuth Client details are isolated and only used for your integration.
-                                        </div>
+                                                @if($credentialsFile)
+                                                    <div class="mt-3 flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 rounded-xl">
+                                                        <span class="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[200px]" title="{{ $credentialsFile->getClientOriginalName() }}">
+                                                            {{ $credentialsFile->getClientOriginalName() }}
+                                                        </span>
+                                                        <button type="button" wire:click="$set('credentialsFile', null)" class="text-red-500 text-xs font-bold hover:underline">Remove</button>
+                                                    </div>
+                                                @endif
+                                                @error('credentialsFile') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div class="text-[11px] text-slate-455 leading-relaxed bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3 rounded-xl text-indigo-650 dark:text-indigo-400 font-medium">
+                                                Note: We securely encrypt and store your credentials file. Your OAuth Client details are isolated and only used for your integration.
+                                            </div>
+                                        @endif
                                     </div>
                                     
                                     <!-- Modal Footer -->
@@ -483,7 +548,15 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                                             </svg>
-                                            Google Analytics 4 - Detailed Report
+                                            @if($activeReportIntegrationId === 'gsc')
+                                                Google Search Console - Detailed Report
+                                            @elseif($activeReportIntegrationId === 'youtube')
+                                                YouTube - Detailed Report
+                                            @elseif($activeReportIntegrationId === 'keyword')
+                                                Keyword.com - Detailed Report
+                                            @else
+                                                Google Analytics 4 - Detailed Report
+                                            @endif
                                         </h3>
                                         <p class="text-[11px] text-slate-400 mt-1">
                                             Property ID: <span class="font-semibold text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['property_id'] ?? '—' }}</span> &bull; Source: <span class="text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['source'] ?? '—' }}</span>
@@ -515,216 +588,500 @@
                                             <p class="text-xs text-slate-500 font-medium">Loading report dataset...</p>
                                         </div>
                                     @else
-                                        <!-- 1. Stats Summary Widgets -->
-                                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                                        @if ($activeReportIntegrationId === 'gsc')
+                                        <!-- 1. Stats Summary Widgets (GSC) -->
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                                             <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Active Users</span>
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
                                                 <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                                                    {{ number_format($activeReportData['overall_summary']['active_users'] ?? 0) }}
+                                                    {{ number_format($activeReportData['summary']['clicks'] ?? 0) }}
                                                 </span>
                                             </div>
                                             <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Views</span>
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
                                                 <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                                                    {{ number_format($activeReportData['overall_summary']['pageviews'] ?? 0) }}
+                                                    {{ number_format($activeReportData['summary']['impressions'] ?? 0) }}
                                                 </span>
                                             </div>
                                             <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Sessions</span>
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CTR</span>
                                                 <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
-                                                    {{ number_format($activeReportData['overall_summary']['sessions'] ?? 0) }}
+                                                    {{ $activeReportData['summary']['ctr'] ?? 0 }}%
                                                 </span>
                                             </div>
                                             <div class="p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Bounce Rate</span>
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. Position</span>
                                                 <span class="text-lg font-extrabold text-amber-600 dark:text-amber-400">
-                                                    {{ $activeReportData['overall_summary']['bounce_rate'] ?? '—' }}
-                                                </span>
-                                            </div>
-                                            <div class="p-4 bg-rose-50/20 dark:bg-rose-950/10 border border-rose-100/30 dark:border-rose-900/20 rounded-2xl col-span-2 md:col-span-1">
-                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Session Duration</span>
-                                                <span class="text-lg font-extrabold text-rose-600 dark:text-rose-400">
-                                                    {{ $activeReportData['overall_summary']['avg_session_duration'] ?? '—' }}
+                                                    {{ $activeReportData['summary']['position'] ?? 0 }}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <!-- 2. Tables Grid -->
+                                        <!-- 2. Top Queries Table (GSC) -->
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                            <!-- Pageviews by Page Path -->
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllPages: false }">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Viewed Pages</h4>
-                                                <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
-                                                        <thead>
-                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold w-1/2">Page Path</th>
-                                                                <th class="py-2 text-right font-bold w-1/4">Views</th>
-                                                                <th class="py-2 text-right font-bold w-1/4">Users</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach (array_slice($activeReportData['pages_report'] ?? [], 0, 6) as $page)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                @if (count($activeReportData['pages_report'] ?? []) > 6)
-                                                    <div class="transition-all duration-500 ease-in-out overflow-hidden"
-                                                         :style="showAllPages ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
-                                                        <div class="overflow-x-auto">
-                                                            <table class="w-full text-left text-xs">
-                                                                <tbody>
-                                                                    @foreach (array_slice($activeReportData['pages_report'] ?? [], 6) as $page)
-                                                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
-                                                                            <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
-                                                                            <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
-                                                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
-                                                        <button type="button" @click="showAllPages = !showAllPages" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
-                                                            <span x-text="showAllPages ? 'Show Less' : 'View Full'"></span>
-                                                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllPages ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                @endif
-                                            </div>
-
-                                            <!-- Traffic Sources & Channels -->
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllSources: false }">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Traffic Sources / Mediums</h4>
-                                                <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
-                                                        <thead>
-                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold w-1/2">Source / Medium</th>
-                                                                <th class="py-2 text-right font-bold w-1/4">Sessions</th>
-                                                                <th class="py-2 text-right font-bold w-1/4">Bounce Rate</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 0, 6) as $source)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                @if (count($activeReportData['traffic_sources'] ?? []) > 6)
-                                                    <div class="transition-all duration-500 ease-in-out overflow-hidden"
-                                                         :style="showAllSources ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
-                                                        <div class="overflow-x-auto">
-                                                            <table class="w-full text-left text-xs">
-                                                                <tbody>
-                                                                    @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 6) as $source)
-                                                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-755 dark:text-slate-350">
-                                                                            <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
-                                                                            <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
-                                                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
-                                                        <button type="button" @click="showAllSources = !showAllSources" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
-                                                            <span x-text="showAllSources ? 'Show Less' : 'View Full'"></span>
-                                                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllSources ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <!-- 3. Lower Grid: Demographics, Geography -->
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <!-- Devices -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Device Breakdowns</h4>
-                                                <div class="space-y-4">
-                                                    @foreach ($activeReportData['device_demographics'] ?? [] as $device)
-                                                        <div>
-                                                            <div class="flex justify-between text-xs mb-1">
-                                                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ $device['device'] }}</span>
-                                                                <span class="text-slate-400 dark:text-slate-550 font-bold">{{ $device['percentage'] }}</span>
-                                                            </div>
-                                                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                                                <div class="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-
-                                            <!-- Geographic Country Sources -->
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2" x-data="{ showAllGeo: false }">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Geographic Audience</h4>
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Search Queries</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-xs">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold w-1/2">Country</th>
-                                                                <th class="py-2 text-right font-bold w-1/4">Active Users</th>
-                                                                <th class="py-2 text-right font-bold w-1/4">Sessions</th>
+                                                                <th class="py-2 font-bold">Query</th>
+                                                                <th class="py-2 text-right font-bold">Clicks</th>
+                                                                <th class="py-2 text-right font-bold">Imp.</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 0, 6) as $geo)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
-                                                                    <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                            @foreach ($activeReportData['top_queries'] ?? [] as $query)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                    <td class="py-2.5 font-bold truncate max-w-[150px]" title="{{ $query['query'] }}">{{ $query['query'] }}</td>
+                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($query['clicks'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($query['impressions'] ?? 0) }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                @if (count($activeReportData['geographic_sources'] ?? []) > 6)
-                                                    <div class="transition-all duration-500 ease-in-out overflow-hidden"
-                                                         :style="showAllGeo ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
-                                                        <div class="overflow-x-auto">
-                                                            <table class="w-full text-left text-xs">
-                                                                <tbody>
-                                                                    @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 6) as $geo)
-                                                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
-                                                                            <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
-                                                                            <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
-                                                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
-                                                        <button type="button" @click="showAllGeo = !showAllGeo" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
-                                                            <span x-text="showAllGeo ? 'Show Less' : 'View Full'"></span>
-                                                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllGeo ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                @endif
+                                            </div>
+
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-left text-xs">
+                                                        <thead>
+                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                                <th class="py-2 font-bold">URL</th>
+                                                                <th class="py-2 text-right font-bold">Clicks</th>
+                                                                <th class="py-2 text-right font-bold">Imp.</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($activeReportData['top_pages'] ?? [] as $page)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                    <td class="py-2.5 font-bold truncate max-w-[150px] text-indigo-600" title="{{ $page['page'] }}">
+                                                                        <a href="{{ $page['page'] }}" target="_blank" class="hover:underline">{{ str_replace('https://', '', $page['page']) }}</a>
+                                                                    </td>
+                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($page['clicks'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($page['impressions'] ?? 0) }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        <!-- 3. Devices and Countries -->
+                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Device Breakdown</h4>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-left text-xs">
+                                                        <thead>
+                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                                <th class="py-2 font-bold">Device</th>
+                                                                <th class="py-2 text-right font-bold">Clicks</th>
+                                                                <th class="py-2 text-right font-bold">Imp.</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($activeReportData['devices'] ?? [] as $device)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                    <td class="py-2.5 font-bold capitalize">{{ strtolower($device['device']) }}</td>
+                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($device['clicks'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($device['impressions'] ?? 0) }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Countries</h4>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-left text-xs">
+                                                        <thead>
+                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                                <th class="py-2 font-bold">Country</th>
+                                                                <th class="py-2 text-right font-bold">Clicks</th>
+                                                                <th class="py-2 text-right font-bold">Imp.</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($activeReportData['countries'] ?? [] as $country)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                    <td class="py-2.5 font-bold capitalize">{{ strtolower(strlen($country['country']) === 3 ? $country['country'] : $country['country']) }}</td>
+                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($country['clicks'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($country['impressions'] ?? 0) }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @elseif ($activeReportIntegrationId === 'ga4')
+                                    <!-- 1. Stats Summary Widgets -->
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                                        <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Active Users</span>
+                                            <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
+                                                {{ number_format($activeReportData['overall_summary']['active_users'] ?? 0) }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Views</span>
+                                            <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                                                {{ number_format($activeReportData['overall_summary']['pageviews'] ?? 0) }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Sessions</span>
+                                            <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
+                                                {{ number_format($activeReportData['overall_summary']['sessions'] ?? 0) }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Bounce Rate</span>
+                                            <span class="text-lg font-extrabold text-amber-600 dark:text-amber-400">
+                                                {{ $activeReportData['overall_summary']['bounce_rate'] ?? '—' }}
+                                            </span>
+                                        </div>
+                                        <div class="p-4 bg-rose-50/20 dark:bg-rose-950/10 border border-rose-100/30 dark:border-rose-900/20 rounded-2xl col-span-2 md:col-span-1">
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Session Duration</span>
+                                            <span class="text-lg font-extrabold text-rose-600 dark:text-rose-400">
+                                                {{ $activeReportData['overall_summary']['avg_session_duration'] ?? '—' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Tables Grid -->
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                        <!-- Pageviews by Page Path -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllPages: false }">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Viewed Pages</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold w-1/2">Page Path</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Views</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Users</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (array_slice($activeReportData['pages_report'] ?? [], 0, 6) as $page)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            @if (count($activeReportData['pages_report'] ?? []) > 6)
+                                                <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                     :style="showAllPages ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                    <div class="overflow-x-auto">
+                                                        <table class="w-full text-left text-xs">
+                                                            <tbody>
+                                                                @foreach (array_slice($activeReportData['pages_report'] ?? [], 6) as $page)
+                                                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                        <td class="py-2.5 font-mono text-[10px] max-w-[220px] truncate w-1/2" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                                                        <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($page['pageviews'] ?? 0) }}</td>
+                                                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($page['users'] ?? 0) }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                    <button type="button" @click="showAllPages = !showAllPages" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                        <span x-text="showAllPages ? 'Show Less' : 'View Full'"></span>
+                                                        <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllPages ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <!-- Traffic Sources & Channels -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50" x-data="{ showAllSources: false }">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Traffic Sources / Mediums</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold w-1/2">Source / Medium</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Sessions</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Bounce Rate</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 0, 6) as $source)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            @if (count($activeReportData['traffic_sources'] ?? []) > 6)
+                                                <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                     :style="showAllSources ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                    <div class="overflow-x-auto">
+                                                        <table class="w-full text-left text-xs">
+                                                            <tbody>
+                                                                @foreach (array_slice($activeReportData['traffic_sources'] ?? [], 6) as $source)
+                                                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                        <td class="py-2.5 font-bold w-1/2">{{ $source['source_medium'] }}</td>
+                                                                        <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($source['sessions'] ?? 0) }}</td>
+                                                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ $source['bounce_rate'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                    <button type="button" @click="showAllSources = !showAllSources" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                        <span x-text="showAllSources ? 'Show Less' : 'View Full'"></span>
+                                                        <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllSources ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Lower Grid: Demographics, Geography -->
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <!-- Devices -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Device Breakdowns</h4>
+                                            <div class="space-y-4">
+                                                @foreach ($activeReportData['device_demographics'] ?? [] as $device)
+                                                    <div>
+                                                        <div class="flex justify-between text-xs mb-1">
+                                                            <span class="font-bold text-slate-700 dark:text-slate-300">{{ $device['device'] }}</span>
+                                                            <span class="text-slate-400 dark:text-slate-500 font-bold">{{ $device['percentage'] }}</span>
+                                                        </div>
+                                                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                                            <div class="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <!-- Geographic Country Sources -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2" x-data="{ showAllGeo: false }">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Geographic Audience</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold w-1/2">Country</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Active Users</th>
+                                                            <th class="py-2 text-right font-bold w-1/4">Sessions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 0, 6) as $geo)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            @if (count($activeReportData['geographic_sources'] ?? []) > 6)
+                                                <div class="transition-all duration-500 ease-in-out overflow-hidden"
+                                                     :style="showAllGeo ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
+                                                    <div class="overflow-x-auto">
+                                                        <table class="w-full text-left text-xs">
+                                                            <tbody>
+                                                                @foreach (array_slice($activeReportData['geographic_sources'] ?? [], 6) as $geo)
+                                                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
+                                                                        <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
+                                                                        <td class="py-2.5 text-right font-bold w-1/4">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
+                                                    <button type="button" @click="showAllGeo = !showAllGeo" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
+                                                        <span x-text="showAllGeo ? 'Show Less' : 'View Full'"></span>
+                                                        <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllGeo ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @elseif ($activeReportIntegrationId === 'youtube')
+                                        <!-- 1. Stats Summary Widgets (YouTube) -->
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                            <div class="p-4 bg-red-50/20 dark:bg-red-950/10 border border-red-100/30 dark:border-red-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
+                                                <span class="text-lg font-extrabold text-red-600 dark:text-red-400">
+                                                    {{ number_format($activeReportData['summary']['views'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/30 dark:border-orange-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Watch Time (hrs)</span>
+                                                <span class="text-lg font-extrabold text-orange-600 dark:text-orange-400">
+                                                    {{ number_format($activeReportData['summary']['watch_time'] ?? 0, 1) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Subscribers</span>
+                                                <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
+                                                    {{ number_format($activeReportData['summary']['subscribers'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Duration</span>
+                                                <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
+                                                    {{ $activeReportData['summary']['avg_view_duration'] ?? '0s' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. Top Videos Table (YouTube) -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mb-6">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Performing Videos</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold">Video Title</th>
+                                                            <th class="py-2 text-right font-bold">Views</th>
+                                                            <th class="py-2 text-right font-bold">Watch Time</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @forelse ($activeReportData['top_videos'] ?? [] as $video)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $video['title'] }}">{{ $video['title'] }}</td>
+                                                                <td class="py-2.5 text-right font-bold">{{ number_format($video['views'] ?? 0) }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($video['watch_time'] ?? 0, 1) }} hrs</td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr>
+                                                                <td colspan="3" class="py-4 text-center text-slate-500">No video data available.</td>
+                                                            </tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    @elseif($activeReportIntegrationId === 'keyword')
+                                        <!-- 1. Summary Cards (Keyword) -->
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                            <div class="p-4 bg-purple-50/20 dark:bg-purple-950/10 border border-purple-100/30 dark:border-purple-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Keywords</span>
+                                                <span class="text-lg font-extrabold text-purple-600 dark:text-purple-400">
+                                                    {{ number_format($activeReportData['summary']['total_keywords'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10 Rankings</span>
+                                                <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
+                                                    {{ number_format($activeReportData['summary']['top_10'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Up Movements</span>
+                                                <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                                                    {{ number_format($activeReportData['summary']['up_movements'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/30 dark:border-orange-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Share of Voice</span>
+                                                <span class="text-lg font-extrabold text-orange-600 dark:text-orange-400">
+                                                    {{ $activeReportData['summary']['share_of_voice'] ?? '0%' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. Keywords and Pages Tables (Keyword) -->
+                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                            <!-- Top Keyword Rankings -->
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Keyword Rankings</h4>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-left text-xs">
+                                                        <thead>
+                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                                <th class="py-2 font-bold">Keyword</th>
+                                                                <th class="py-2 text-right font-bold">Position</th>
+                                                                <th class="py-2 text-right font-bold">Change</th>
+                                                                <th class="py-2 text-right font-bold">Volume</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @forelse ($activeReportData['keywords'] ?? [] as $kw)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                    <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $kw['keyword'] }}">{{ $kw['keyword'] }}</td>
+                                                                    <td class="py-2.5 text-right font-bold">#{{ $kw['position'] ?? '-' }}</td>
+                                                                    <td class="py-2.5 text-right {{ (strpos($kw['change'], '+') !== false) ? 'text-emerald-500' : ((strpos($kw['change'], '-') !== false) ? 'text-red-500' : 'text-slate-400') }} font-bold">
+                                                                        {{ $kw['change'] ?? '0' }}
+                                                                    </td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($kw['volume'] ?? 0) }}</td>
+                                                                </tr>
+                                                            @empty
+                                                                <tr>
+                                                                    <td colspan="4" class="py-4 text-center text-slate-500">No keyword data available.</td>
+                                                                </tr>
+                                                            @endforelse
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            <!-- Top Ranking URLs -->
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Ranking URLs</h4>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-left text-xs">
+                                                        <thead>
+                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                                <th class="py-2 font-bold">URL</th>
+                                                                <th class="py-2 text-right font-bold">Keywords</th>
+                                                                <th class="py-2 text-right font-bold">Total Volume</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @forelse ($activeReportData['pages'] ?? [] as $pg)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                    <td class="py-2.5 truncate max-w-[250px]" title="{{ $pg['url'] }}">{{ $pg['path'] }}</td>
+                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($pg['keyword_count'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($pg['total_volume'] ?? 0) }}</td>
+                                                                </tr>
+                                                            @empty
+                                                                <tr>
+                                                                    <td colspan="3" class="py-4 text-center text-slate-500">No URL data available.</td>
+                                                                </tr>
+                                                            @endforelse
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                     @endif
                                 </div>
                                 

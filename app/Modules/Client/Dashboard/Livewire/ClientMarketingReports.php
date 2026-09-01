@@ -22,6 +22,8 @@ class ClientMarketingReports extends Component
     public array $activeReportData = [];
     public array $ga4Data = [];
     public array $gscData = [];
+    public array $youtubeData = [];
+    public array $keywordData = [];
     
     // Dropdown list holders
     public $websites = [];
@@ -95,6 +97,8 @@ class ClientMarketingReports extends Component
         $this->activeReportData = [];
         $this->ga4Data = [];
         $this->gscData = [];
+        $this->youtubeData = [];
+        $this->keywordData = [];
 
         if (!$this->selectedWebsiteId || !$this->selectedMonth) {
             return;
@@ -135,11 +139,27 @@ class ClientMarketingReports extends Component
                 $this->gscData = json_decode(file_get_contents($gscPath), true) ?? [];
             }
 
+            // Load YouTube data
+            $youtubePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/youtube/{$year}/{$month}.json");
+            if (file_exists($youtubePath)) {
+                $this->youtubeData = json_decode(file_get_contents($youtubePath), true) ?? [];
+            }
+
+            // Load Keyword data
+            $keywordPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/keyword/{$year}/{$month}.json");
+            if (file_exists($keywordPath)) {
+                $this->keywordData = json_decode(file_get_contents($keywordPath), true) ?? [];
+            }
+
             // Set activeReportData if looking at specific tab
             if ($this->activeReportIntegrationId === 'ga4') {
                 $this->activeReportData = $this->ga4Data;
             } elseif ($this->activeReportIntegrationId === 'gsc') {
                 $this->activeReportData = $this->gscData;
+            } elseif ($this->activeReportIntegrationId === 'youtube') {
+                $this->activeReportData = $this->youtubeData;
+            } elseif ($this->activeReportIntegrationId === 'keyword') {
+                $this->activeReportData = $this->keywordData;
             }
         } catch (\Exception $e) {
             Log::error('Error loading client marketing report JSON: ' . $e->getMessage());
@@ -170,9 +190,9 @@ class ClientMarketingReports extends Component
                 $websiteFolder = 'site-' . $website->id;
             }
 
-            // Scan both ga4 and gsc directories to find all available months
+            // Scan all directories to find all available months
             $options = [];
-            $types = ['ga4', 'gsc'];
+            $types = ['ga4', 'gsc', 'youtube', 'keyword'];
 
             foreach ($types as $typeId) {
                 $integrationPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$typeId}");

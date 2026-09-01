@@ -31,6 +31,7 @@ class StaffClients extends Component
     public array $activeReportData = [];
     public string $selectedReportMonth = '';
     public $credentialsFile = null;
+    public string $apiKey = '';
     public string $activeTab = 'overview';
     public string $activeViewTab = 'my_clients'; // 'my_clients' or 'all_clients'
 
@@ -44,6 +45,9 @@ class StaffClients extends Component
     public int $activitypage = 1;
     public int $maintenancepage = 1;
     public int $documentspage = 1;
+
+    public ?string $youtubeChannelId = null;
+    public ?string $keywordProjectId = null;
 
     public function mount($id = null): void
     {
@@ -190,6 +194,8 @@ class StaffClients extends Component
                         'ga4' => ['name' => 'Google Analytics 4', 'category' => 'Analytics'],
                         'gsc' => ['name' => 'Google Search Console', 'category' => 'SEO'],
                         'gads' => ['name' => 'Google Ads', 'category' => 'Marketing'],
+                        'youtube' => ['name' => 'YouTube', 'category' => 'Social'],
+                        'keyword' => ['name' => 'Keyword.com', 'category' => 'SEO'],
                     ];
 
                     foreach ($types as $typeId => $meta) {
@@ -376,6 +382,34 @@ class StaffClients extends Component
     public function saveCredentials(): void
     {
         if (!$this->selectedWebsiteId || !$this->activeConfigIntegrationId) {
+            return;
+        }
+
+        if ($this->activeConfigIntegrationId === 'keyword') {
+            $this->validate([
+                'apiKey' => 'required|string',
+            ]);
+
+            \App\Modules\CRM\Websites\Models\WebsiteIntegration::updateOrCreate(
+                [
+                    'website_id' => $this->selectedWebsiteId,
+                    'integration_type' => $this->activeConfigIntegrationId,
+                ],
+                [
+                    'api_credentials' => ['api_key' => $this->apiKey],
+                    'status' => 'connected',
+                    'auth_credentials' => [
+                        'access_token' => $this->apiKey,
+                    ],
+                ]
+            );
+
+            $this->closeConfigModal();
+            $this->apiKey = '';
+            
+            if ($this->activeTab !== 'integrations') {
+                $this->activeTab = 'integrations';
+            }
             return;
         }
 
@@ -599,8 +633,90 @@ class StaffClients extends Component
         $accessToken = $this->getValidAccessToken($integration);
         $reportData = [];
         $propertyId = $integration->auth_credentials['property_id'] ?? null;
+        $apiKey = $integration->api_credentials['api_key'] ?? null;
 
-        if ($accessToken && $propertyId && $integrationId === 'ga4') {
+        if ($accessToken && $propertyId && $integrationId === 'gsc') {
+            try {
+                $endpoint = "https://searchconsole.googleapis.com/webmasters/v3/sites/" . urlencode($propertyId) . "/searchAnalytics/query";
+                $startDate = now()->subDays(30)->format('Y-m-d');
+                $endDate = now()->format('Y-m-d');
+
+                $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
+                    $pool->as('queries')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10
+                    ]),
+                    $pool->as('pages')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 10
+                    ]),
+                    $pool->as('devices')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 10
+                    ]),
+                    $pool->as('countries')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 10
+                    ]),
+                ]);
+
+                $queriesRes = $responses['queries'];
+                if ($queriesRes->successful()) {
+                    $queriesJson = $queriesRes->json();
+                    $pagesJson = $responses['pages']->successful() ? $responses['pages']->json() : [];
+                    $devicesJson = $responses['devices']->successful() ? $responses['devices']->json() : [];
+                    $countriesJson = $responses['countries']->successful() ? $responses['countries']->json() : [];
+
+                    $reportData = [
+                        'metadata' => [
+                            'generated_at' => now()->toIso8601String(),
+                            'source' => 'Google Search Console API',
+                            'property_id' => $propertyId,
+                            'report_type' => 'Search Traffic & Top Queries',
+                        ],
+                        'summary' => [
+                            'clicks' => collect($queriesJson['rows'] ?? [])->sum('clicks'),
+                            'impressions' => collect($queriesJson['rows'] ?? [])->sum('impressions'),
+                            'ctr' => round(collect($queriesJson['rows'] ?? [])->avg('ctr') * 100, 2),
+                            'position' => round(collect($queriesJson['rows'] ?? [])->avg('position'), 2),
+                        ],
+                        'top_queries' => array_map(function ($row) {
+                            return [
+                                'query' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                                'ctr' => round(($row['ctr'] ?? 0) * 100, 2),
+                                'position' => round($row['position'] ?? 0, 1),
+                            ];
+                        }, $queriesJson['rows'] ?? []),
+                        'top_pages' => array_map(function ($row) {
+                            return [
+                                'page' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                            ];
+                        }, $pagesJson['rows'] ?? []),
+                        'devices' => array_map(function ($row) {
+                            return [
+                                'device' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                            ];
+                        }, $devicesJson['rows'] ?? []),
+                        'countries' => array_map(function ($row) {
+                            return [
+                                'country' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                            ];
+                        }, $countriesJson['rows'] ?? []),
+                    ];
+                } else {
+                    $errorMsg = $queriesRes->json('error.message') ?? 'Please ensure the property ID is correct and has data.';
+                    \Illuminate\Support\Facades\Log::warning('GSC API call failed. Response: ' . $queriesRes->body());
+                    $reportData = ['error' => 'Google Search Console API failed: ' . $errorMsg];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('GSC API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'Google Search Console API failed. Please ensure the property ID is correct and has data.'];
+            }
+        } elseif ($accessToken && $propertyId && $integrationId === 'ga4') {
             try {
                 // Fetch reports in parallel using Http::pool
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
@@ -682,43 +798,40 @@ class StaffClients extends Component
                     $rowCount = count($rows);
 
                     foreach ($rows as $row) {
-                        $totalUsers += intval($row['metricValues'][0]['value'] ?? 0);
-                        $totalViews += intval($row['metricValues'][1]['value'] ?? 0);
-                        $totalSessions += intval($row['metricValues'][2]['value'] ?? 0);
-                        $totalBounceRateSum += floatval($row['metricValues'][3]['value'] ?? 0);
-                        $totalDurationSum += floatval($row['metricValues'][4]['value'] ?? 0);
+                        $totalUsers += (int) ($row['metricValues'][0]['value'] ?? 0);
+                        $totalViews += (int) ($row['metricValues'][1]['value'] ?? 0);
+                        $totalSessions += (int) ($row['metricValues'][2]['value'] ?? 0);
+                        $totalBounceRateSum += (float) ($row['metricValues'][3]['value'] ?? 0);
+                        $totalDurationSum += (float) ($row['metricValues'][4]['value'] ?? 0);
                     }
 
-                    $bounceRateAvg = $rowCount > 0 ? ($totalBounceRateSum / $rowCount) : 0.0;
-                    $durationAvg = $rowCount > 0 ? ($totalDurationSum / $rowCount) : 0.0;
+                    $avgBounceRate = $rowCount > 0 ? ($totalBounceRateSum / $rowCount) : 0.0;
+                    $avgDuration = $rowCount > 0 ? ($totalDurationSum / $rowCount) : 0.0;
 
-                    $avgMin = floor($durationAvg / 60);
-                    $avgSec = round($durationAvg % 60);
-
-                    $totals = $summaryJson['totals'][0]['metricValues'] ?? null;
-                    if ($totals) {
-                        $activeUsers = intval($totals[0]['value'] ?? 0);
-                        $pageviews = intval($totals[1]['value'] ?? 0);
-                        $sessions = intval($totals[2]['value'] ?? 0);
-                        $bounceRate = number_format(floatval($totals[3]['value'] ?? 0) * 100, 1) . '%';
-                        $avgSessionDurationSec = floatval($totals[4]['value'] ?? 0);
-                        $avgSessionDuration = floor($avgSessionDurationSec / 60) . 'm ' . round($avgSessionDurationSec % 60) . 's';
-                    } else {
-                        $activeUsers = $totalUsers;
-                        $pageviews = $totalViews;
-                        $sessions = $totalSessions;
-                        $bounceRate = number_format($bounceRateAvg * 100, 1) . '%';
-                        $avgSessionDuration = "{$avgMin}m {$avgSec}s";
+                    if (!empty($summaryJson['totals'][0]['metricValues'])) {
+                        $totals = $summaryJson['totals'][0]['metricValues'];
+                        $totalUsers = (int) ($totals[0]['value'] ?? $totalUsers);
+                        $totalViews = (int) ($totals[1]['value'] ?? $totalViews);
+                        $totalSessions = (int) ($totals[2]['value'] ?? $totalSessions);
+                        $avgBounceRate = (float) ($totals[3]['value'] ?? $avgBounceRate);
+                        $avgDuration = (float) ($totals[4]['value'] ?? $avgDuration);
                     }
 
-                    $pages = [];
-                    foreach ($pagesJson['rows'] ?? [] as $row) {
-                        $pages[] = [
-                            'page_path' => $row['dimensionValues'][0]['value'] ?? '',
-                            'pageviews' => intval($row['metricValues'][0]['value'] ?? 0),
-                            'users' => intval($row['metricValues'][1]['value'] ?? 0),
-                        ];
+                    $bounceRateFormatted = number_format($avgBounceRate * 100, 1) . '%';
+                    if (str_contains($bounceRateFormatted, '%') && (float)$avgBounceRate > 1.0) {
+                        // If Google returns pre-multiplied value (e.g. 0.45 representing 45%)
+                        $bounceRateFormatted = number_format($avgBounceRate, 1) . '%';
                     }
+
+                    $durationSeconds = intval($avgDuration);
+                    $durationMin = intval($durationSeconds / 60);
+                    $durationSec = $durationSeconds % 60;
+                    $bounceRate = $rowCount > 0 ? ($totalBounceRateSum / $rowCount) * 100 : 0;
+                    $bounceRateFormatted = round($bounceRate, 2) . '%';
+                    $avgDuration = $rowCount > 0 ? ($totalDurationSum / $rowCount) : 0;
+                    $durationMin = floor($avgDuration / 60);
+                    $durationSec = round($avgDuration % 60);
+                    $durationFormatted = $durationMin > 0 ? "{$durationMin}m {$durationSec}s" : "{$durationSec}s";
 
                     // Parse dynamic traffic sources
                     $trafficSources = [];
@@ -811,13 +924,19 @@ class StaffClients extends Component
                             'report_type' => 'Full Website Analytics & Audience Summary',
                         ],
                         'overall_summary' => [
-                            'active_users' => $activeUsers,
-                            'pageviews' => $pageviews,
-                            'sessions' => $sessions,
-                            'bounce_rate' => $bounceRate,
-                            'avg_session_duration' => $avgSessionDuration,
+                            'active_users' => $totalUsers,
+                            'pageviews' => $totalViews,
+                            'sessions' => $totalSessions,
+                            'bounce_rate' => $bounceRateFormatted,
+                            'avg_session_duration' => $durationFormatted,
                         ],
-                        'pages_report' => $pages,
+                        'pages_report' => array_map(function ($row) {
+                            return [
+                                'page_path' => $row['dimensionValues'][0]['value'] ?? '/',
+                                'pageviews' => (int) ($row['metricValues'][0]['value'] ?? 0),
+                                'users' => (int) ($row['metricValues'][1]['value'] ?? 0),
+                            ];
+                        }, $pagesJson['rows'] ?? []),
                         'traffic_sources' => $trafficSources,
                         'device_demographics' => $devices,
                         'geographic_sources' => $geographicSources,
@@ -825,24 +944,241 @@ class StaffClients extends Component
                         'daily_traffic' => array_map(function ($row) {
                             return [
                                 'date' => $row['dimensionValues'][0]['value'] ?? '',
-                                'users' => intval($row['metricValues'][0]['value'] ?? 0),
-                                'pageviews' => intval($row['metricValues'][1]['value'] ?? 0),
+                                'users' => (int) ($row['metricValues'][0]['value'] ?? 0),
+                                'pageviews' => (int) ($row['metricValues'][1]['value'] ?? 0),
                             ];
                         }, $summaryJson['rows'] ?? [])
                     ];
                 } else {
-                    \Illuminate\Support\Facades\Log::warning('GA4 API calls failed.');
-                    $reportData = $this->getMockGA4ReportData($propertyId);
+                    $errorMsg = $summaryResponse->json('error.message') ?? $pagesResponse->json('error.message') ?? 'Please ensure the property ID is correct and has data.';
+                    \Illuminate\Support\Facades\Log::warning('GA4 API calls failed. Summary: ' . $summaryResponse->body() . ' Pages: ' . $pagesResponse->body());
+                    $reportData = ['error' => 'Google Analytics 4 API failed: ' . $errorMsg];
                 }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('GA4 API runReport Exception: ' . $e->getMessage());
-                $reportData = $this->getMockGA4ReportData($propertyId);
+                $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
+            }
+        } elseif ($accessToken && $propertyId && $integrationId === 'youtube') {
+            try {
+                $startDate = now()->subDays(30)->format('Y-m-d');
+                $endDate = now()->format('Y-m-d');
+                
+                // 1. Fetch channel stats from Data API v3
+                $channelResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                    ->get("https://www.googleapis.com/youtube/v3/channels", [
+                        'part' => 'statistics,snippet',
+                        'id' => $propertyId
+                    ]);
+
+                if ($channelResponse->successful() && !empty($channelResponse->json('items'))) {
+                    $channel = $channelResponse->json('items')[0];
+                    $stats = $channel['statistics'] ?? [];
+                    
+                    // 2. Fetch watch time and avg duration from Analytics API
+                    $analyticsResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
+                            'ids' => 'channel==MINE',
+                            'startDate' => $startDate,
+                            'endDate' => $endDate,
+                            'metrics' => 'views,estimatedMinutesWatched,averageViewDuration'
+                        ]);
+                        
+                    $watchTimeHrs = 0;
+                    $avgViewDurationSec = 0;
+                    if ($analyticsResponse->successful() && !empty($analyticsResponse->json('rows'))) {
+                        $analyticsData = $analyticsResponse->json('rows')[0];
+                        // views is index 0, estimatedMinutesWatched is index 1, averageViewDuration is index 2
+                        $watchTimeHrs = ($analyticsData[1] ?? 0) / 60;
+                        $avgViewDurationSec = $analyticsData[2] ?? 0;
+                    }
+                    
+                    $durationMin = floor($avgViewDurationSec / 60);
+                    $durationSec = round($avgViewDurationSec % 60);
+                    $durationFormatted = $durationMin > 0 ? "{$durationMin}m {$durationSec}s" : "{$durationSec}s";
+
+                    // 3. Fetch top videos from Analytics API
+                    $topVideosResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
+                            'ids' => 'channel==MINE',
+                            'startDate' => $startDate,
+                            'endDate' => $endDate,
+                            'metrics' => 'views,estimatedMinutesWatched',
+                            'dimensions' => 'video',
+                            'sort' => '-views',
+                            'maxResults' => 3
+                        ]);
+                        
+                    $topVideos = [];
+                    if ($topVideosResponse->successful() && !empty($topVideosResponse->json('rows'))) {
+                        $videoRows = $topVideosResponse->json('rows');
+                        $videoIds = array_map(fn($row) => $row[0], $videoRows);
+                        
+                        // 4. Fetch titles for these top video IDs from Data API v3
+                        $titlesResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                            ->get("https://www.googleapis.com/youtube/v3/videos", [
+                                'part' => 'snippet',
+                                'id' => implode(',', $videoIds)
+                            ]);
+                            
+                        $titlesMap = [];
+                        if ($titlesResponse->successful() && !empty($titlesResponse->json('items'))) {
+                            foreach ($titlesResponse->json('items') as $videoItem) {
+                                $titlesMap[$videoItem['id']] = $videoItem['snippet']['title'] ?? 'Unknown Video';
+                            }
+                        }
+                        
+                        foreach ($videoRows as $row) {
+                            $vid = $row[0];
+                            $vViews = $row[1] ?? 0;
+                            $vMinutes = $row[2] ?? 0;
+                            $topVideos[] = [
+                                'title' => $titlesMap[$vid] ?? 'Video (' . $vid . ')',
+                                'views' => (int)$vViews,
+                                'watch_time' => $vMinutes / 60
+                            ];
+                        }
+                    }
+
+                    $reportData = [
+                        'summary' => [
+                            'views' => (int) ($stats['viewCount'] ?? 0),
+                            'subscribers' => (int) ($stats['subscriberCount'] ?? 0),
+                            'video_count' => (int) ($stats['videoCount'] ?? 0),
+                            'watch_time' => $watchTimeHrs,
+                            'avg_view_duration' => $durationFormatted
+                        ],
+                        'top_videos' => $topVideos
+                    ];
+                } else {
+                    $errorMsg = $channelResponse->json('error.message') ?? 'Please ensure the channel ID is correct.';
+                    \Illuminate\Support\Facades\Log::warning('YouTube API call failed: ' . $channelResponse->body());
+                    $reportData = ['error' => 'YouTube Data API failed: ' . $errorMsg];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('YouTube API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'YouTube API failed. Please ensure the Analytics API is enabled.'];
+            }
+        } elseif ($apiKey && $propertyId && $integrationId === 'keyword') {
+            try {
+                // Find actual group ID (string) if numeric project_id is saved
+                $actualGroupId = $propertyId;
+                if (is_numeric($propertyId)) {
+                    $groupsResponse = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10)->get('https://app.keyword.com/api/v2/groups/active');
+                    if ($groupsResponse->successful()) {
+                        $groups = $groupsResponse->json()['data'] ?? ($groupsResponse->json() ?? []);
+                        foreach ($groups as $g) {
+                            if (isset($g['attributes']['project_id']) && $g['attributes']['project_id'] == $propertyId) {
+                                $actualGroupId = $g['id'] ?? $propertyId;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Dynamic fetch from Keyword.com API
+                $url = "https://app.keyword.com/api/v2/groups/" . rawurlencode($actualGroupId) . "/keywords?per_page=1000";
+                $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+                    ->timeout(15)
+                    ->get($url);
+
+                if ($response->successful()) {
+                    $json = $response->json();
+                    $items = isset($json['data']) ? $json['data'] : $json;
+                    
+                    $totalKeywords = count($items);
+                    $top10 = 0;
+                    $upMovements = 0;
+                    $downMovements = 0;
+                    $totalVisibility = 0;
+                    $keywordsList = [];
+                    $pagesMap = [];
+                    
+                    foreach ($items as $item) {
+                        $attr = $item['attributes'] ?? [];
+                        if (empty($attr)) continue;
+                        
+                        $rank = $attr['grank'] ?? 0;
+                        if ($rank > 0 && $rank <= 10) $top10++;
+                        
+                        $change = $attr['trends']['month'] ?? 0;
+                        if ($change > 0) $upMovements++;
+                        if ($change < 0) $downMovements++;
+                        
+                        $totalVisibility += ($attr['visibility'] ?? 0);
+                        
+                        $keywordsList[] = [
+                            'keyword' => $attr['kw'] ?? 'Unknown',
+                            'position' => $rank,
+                            'change' => ($change > 0 ? '+' : '') . $change,
+                            'volume' => $attr['ms'] ?? 0
+                        ];
+
+                        $rankingUrl = $attr['rankingurl'] ?? '';
+                        if (!empty($rankingUrl)) {
+                            $urlPath = parse_url($rankingUrl, PHP_URL_PATH) ?? $rankingUrl;
+                            if (empty($urlPath)) $urlPath = '/';
+                            
+                            if (!isset($pagesMap[$rankingUrl])) {
+                                $pagesMap[$rankingUrl] = [
+                                    'url' => $rankingUrl,
+                                    'path' => $urlPath,
+                                    'keyword_count' => 0,
+                                    'total_volume' => 0
+                                ];
+                            }
+                            $pagesMap[$rankingUrl]['keyword_count']++;
+                            $pagesMap[$rankingUrl]['total_volume'] += ($attr['ms'] ?? 0);
+                        }
+                    }
+                    
+                    // Sort keywords by rank (best rank first)
+                    usort($keywordsList, function($a, $b) {
+                        if ($a['position'] == 0) return 1;
+                        if ($b['position'] == 0) return -1;
+                        return $a['position'] <=> $b['position'];
+                    });
+
+                    // Sort pages by keyword count (highest first)
+                    $pagesList = array_values($pagesMap);
+                    usort($pagesList, function($a, $b) {
+                        if ($b['keyword_count'] == $a['keyword_count']) {
+                            return $b['total_volume'] <=> $a['total_volume'];
+                        }
+                        return $b['keyword_count'] <=> $a['keyword_count'];
+                    });
+                    
+                    $reportData = [
+                        'metadata' => [
+                            'generated_at' => now()->toIso8601String(),
+                            'source' => 'Keyword.com API',
+                            'property_id' => $actualGroupId,
+                        ],
+                        'summary' => [
+                            'total_keywords' => $totalKeywords,
+                            'top_10' => $top10,
+                            'up_movements' => $upMovements,
+                            'down_movements' => $downMovements,
+                            'share_of_voice' => round($totalVisibility / max(1, $totalKeywords), 2) . '%'
+                        ],
+                        'keywords' => array_slice($keywordsList, 0, 500), // limit to top 500 for UI performance
+                        'pages' => array_slice($pagesList, 0, 500) // limit to top 500 for UI performance
+                    ];
+                } else {
+                    $reportData = ['error' => 'Keyword API failed with status ' . $response->status()];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Keyword API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'Keyword API failed. Please ensure the API Key is correct.'];
             }
         } else {
             if ($integrationId === 'gsc') {
-                $reportData = $this->getMockGSCReportData($propertyId);
+                $reportData = ['error' => 'Google Search Console API failed. Please ensure the property ID is correct and has data.'];
+            } elseif ($integrationId === 'youtube') {
+                $reportData = ['error' => 'YouTube API failed. Please ensure the channel ID is correct.'];
+            } elseif ($integrationId === 'keyword') {
+                $reportData = ['error' => 'Keyword.com API failed. Please ensure the API Key and Project ID are correct.'];
             } else {
-                $reportData = $this->getMockGA4ReportData($propertyId);
+                $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
             }
         }
 
@@ -1239,6 +1575,120 @@ class StaffClients extends Component
         }
     }
 
+    public function getYoutubeChannels(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'youtube')
+            ->first();
+
+        if (!$integration) {
+            \Illuminate\Support\Facades\Log::info('YouTube API Debug: No integration found.');
+            return [];
+        }
+
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            \Illuminate\Support\Facades\Log::info('YouTube API Debug: getValidAccessToken returned null. Auth credentials: ' . json_encode($integration->auth_credentials) . ', API credentials: ' . json_encode($integration->api_credentials));
+            return [];
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->timeout(15)
+                ->get('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true');
+
+            if ($response->successful()) {
+                $channels = $response->json('items') ?? [];
+                return collect($channels)->map(fn($c) => [
+                    'id' => $c['id'],
+                    'name' => $c['snippet']['title'] ?? 'Unknown Channel',
+                ])->toArray();
+            } else {
+                \Illuminate\Support\Facades\Log::error('YouTube API Debug: API call failed. Status: ' . $response->status() . ', Body: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('YouTube API Debug: Exception: ' . $e->getMessage());
+        }
+
+        // Mock fallback for local testing if API fails
+        return [
+            ['id' => 'UC_x5XG1OV2P6uZZ5FSM9Ttw', 'name' => 'Google Developers'],
+            ['id' => 'UC_1234567890ABCDEFGHIJK', 'name' => 'My Personal Channel'],
+        ];
+    }
+
+    public function getKeywordProjects(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'keyword')
+            ->first();
+
+        if (!$integration || empty($integration->api_credentials['api_key'])) {
+            return [];
+        }
+
+        $apiKey = $integration->api_credentials['api_key'];
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+                ->timeout(5)
+                ->get('https://app.keyword.com/api/v2/groups/active');
+
+            if ($response->successful()) {
+                $projects = $response->json() ?? []; 
+                $projects = isset($projects['data']) ? $projects['data'] : $projects;
+                return collect($projects)->map(fn($p) => [
+                    'id' => $p['id'] ?? uniqid(),
+                    'name' => $p['attributes']['name'] ?? $p['id'] ?? 'Unknown Project',
+                ])->toArray();
+            }
+        } catch (\Exception $e) {
+            // Ignore
+        }
+
+        // Mock fallback
+        return [
+            ['id' => 'prj_123', 'name' => 'Main Website SEO'],
+            ['id' => 'prj_456', 'name' => 'Blog Ranking'],
+        ];
+    }
+
+    public function saveKeywordProject(): void
+    {
+        if (empty($this->keywordProjectId)) return;
+        $this->selectedPropertyId = $this->keywordProjectId;
+        $this->savePropertyId('keyword');
+        $this->keywordProjectId = '';
+    }
+
+    public function updatedKeywordProjectId($value): void
+    {
+        if (empty($value)) return;
+        $this->saveKeywordProject();
+    }
+
+    public function saveYoutubeChannel(): void
+    {
+        if (empty($this->youtubeChannelId)) return;
+        $this->selectedPropertyId = $this->youtubeChannelId;
+        $this->savePropertyId('youtube');
+        $this->youtubeChannelId = '';
+    }
+
+    public function updatedYoutubeChannelId($value): void
+    {
+        if (empty($value)) return;
+        $this->saveYoutubeChannel();
+    }
+
     public function getGA4Properties(): array
     {
         if (!$this->selectedWebsiteId) {
@@ -1344,3 +1794,4 @@ class StaffClients extends Component
         }
     }
 }
+

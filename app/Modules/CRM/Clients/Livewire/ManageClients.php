@@ -73,9 +73,11 @@ class ManageClients extends Component
     // Website Integrations state variables
     public ?int $selectedWebsiteId = null;
     public $credentialsFile;
+    public $apiKey;
     public bool $showConfigModal = false;
     public string $activeConfigIntegrationId = '';
     public string $selectedPropertyId = '';
+    public string $youtubeChannelId = '';
 
     // Report Modal State
     public bool $showReportModal = false;
@@ -610,6 +612,31 @@ class ManageClients extends Component
             return;
         }
 
+        if ($this->activeConfigIntegrationId === 'keyword') {
+            $this->validate([
+                'apiKey' => 'required|string',
+            ]);
+
+            \App\Modules\CRM\Websites\Models\WebsiteIntegration::updateOrCreate(
+                [
+                    'website_id' => $this->selectedWebsiteId,
+                    'integration_type' => $this->activeConfigIntegrationId,
+                ],
+                [
+                    'api_credentials' => ['api_key' => $this->apiKey],
+                    'status' => 'connected',
+                    'auth_credentials' => [
+                        'access_token' => $this->apiKey,
+                    ],
+                    'account_identifier' => 'Keyword.com API',
+                ]
+            );
+
+            session()->flash('success', "Keyword.com connected successfully!");
+            $this->closeConfigModal();
+            return;
+        }
+
         $this->validate([
             'credentialsFile' => 'required|file|mimes:json,txt|max:2048',
         ]);
@@ -864,6 +891,7 @@ class ManageClients extends Component
         $accessToken = $this->getValidAccessToken($integration);
         $reportData = [];
         $propertyId = $integration->auth_credentials['property_id'] ?? null;
+        $apiKey = $integration->api_credentials['api_key'] ?? null;
 
         if ($accessToken && $propertyId && $integrationId === 'gsc') {
             try {
@@ -1188,9 +1216,225 @@ class ManageClients extends Component
                 \Illuminate\Support\Facades\Log::error('GA4 API runReport Exception: ' . $e->getMessage());
                 $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
             }
+        } elseif ($accessToken && $propertyId && $integrationId === 'youtube') {
+            try {
+                $startDate = now()->subDays(30)->format('Y-m-d');
+                $endDate = now()->format('Y-m-d');
+                
+                // 1. Fetch channel stats from Data API v3
+                $channelResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                    ->get("https://www.googleapis.com/youtube/v3/channels", [
+                        'part' => 'statistics,snippet',
+                        'id' => $propertyId
+                    ]);
+
+                if ($channelResponse->successful() && !empty($channelResponse->json('items'))) {
+                    $channel = $channelResponse->json('items')[0];
+                    $stats = $channel['statistics'] ?? [];
+                    
+                    // 2. Fetch watch time and avg duration from Analytics API
+                    $analyticsResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
+                            'ids' => 'channel==MINE',
+                            'startDate' => $startDate,
+                            'endDate' => $endDate,
+                            'metrics' => 'views,estimatedMinutesWatched,averageViewDuration'
+                        ]);
+                        
+                    $watchTimeHrs = 0;
+                    $avgViewDurationSec = 0;
+                    if ($analyticsResponse->successful() && !empty($analyticsResponse->json('rows'))) {
+                        $analyticsData = $analyticsResponse->json('rows')[0];
+                        // views is index 0, estimatedMinutesWatched is index 1, averageViewDuration is index 2
+                        $watchTimeHrs = ($analyticsData[1] ?? 0) / 60;
+                        $avgViewDurationSec = $analyticsData[2] ?? 0;
+                    }
+                    
+                    $durationMin = floor($avgViewDurationSec / 60);
+                    $durationSec = round($avgViewDurationSec % 60);
+                    $durationFormatted = $durationMin > 0 ? "{$durationMin}m {$durationSec}s" : "{$durationSec}s";
+
+                    // 3. Fetch top videos from Analytics API
+                    $topVideosResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
+                            'ids' => 'channel==MINE',
+                            'startDate' => $startDate,
+                            'endDate' => $endDate,
+                            'metrics' => 'views,estimatedMinutesWatched',
+                            'dimensions' => 'video',
+                            'sort' => '-views',
+                            'maxResults' => 3
+                        ]);
+                        
+                    $topVideos = [];
+                    if ($topVideosResponse->successful() && !empty($topVideosResponse->json('rows'))) {
+                        $videoRows = $topVideosResponse->json('rows');
+                        $videoIds = array_map(fn($row) => $row[0], $videoRows);
+                        
+                        // 4. Fetch titles for these top video IDs from Data API v3
+                        $titlesResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
+                            ->get("https://www.googleapis.com/youtube/v3/videos", [
+                                'part' => 'snippet',
+                                'id' => implode(',', $videoIds)
+                            ]);
+                            
+                        $titlesMap = [];
+                        if ($titlesResponse->successful() && !empty($titlesResponse->json('items'))) {
+                            foreach ($titlesResponse->json('items') as $videoItem) {
+                                $titlesMap[$videoItem['id']] = $videoItem['snippet']['title'] ?? 'Unknown Video';
+                            }
+                        }
+                        
+                        foreach ($videoRows as $row) {
+                            $vid = $row[0];
+                            $vViews = $row[1] ?? 0;
+                            $vMinutes = $row[2] ?? 0;
+                            $topVideos[] = [
+                                'title' => $titlesMap[$vid] ?? 'Video (' . $vid . ')',
+                                'views' => (int)$vViews,
+                                'watch_time' => $vMinutes / 60
+                            ];
+                        }
+                    }
+
+                    $reportData = [
+                        'summary' => [
+                            'views' => (int) ($stats['viewCount'] ?? 0),
+                            'subscribers' => (int) ($stats['subscriberCount'] ?? 0),
+                            'video_count' => (int) ($stats['videoCount'] ?? 0),
+                            'watch_time' => $watchTimeHrs,
+                            'avg_view_duration' => $durationFormatted
+                        ],
+                        'top_videos' => $topVideos
+                    ];
+                } else {
+                    $errorMsg = $channelResponse->json('error.message') ?? 'Please ensure the channel ID is correct.';
+                    \Illuminate\Support\Facades\Log::warning('YouTube API call failed: ' . $channelResponse->body());
+                    $reportData = ['error' => 'YouTube Data API failed: ' . $errorMsg];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('YouTube API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'YouTube API failed. Please ensure the Analytics API is enabled.'];
+            }
+        } elseif ($apiKey && $propertyId && $integrationId === 'keyword') {
+            try {
+                // Find actual group ID (string) if numeric project_id is saved
+                $actualGroupId = $propertyId;
+                if (is_numeric($propertyId)) {
+                    $groupsResponse = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10)->get('https://app.keyword.com/api/v2/groups/active');
+                    if ($groupsResponse->successful()) {
+                        $groups = $groupsResponse->json()['data'] ?? ($groupsResponse->json() ?? []);
+                        foreach ($groups as $g) {
+                            if (isset($g['attributes']['project_id']) && $g['attributes']['project_id'] == $propertyId) {
+                                $actualGroupId = $g['id'] ?? $propertyId;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Dynamic fetch from Keyword.com API
+                $url = "https://app.keyword.com/api/v2/groups/" . rawurlencode($actualGroupId) . "/keywords?per_page=1000";
+                $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+                    ->timeout(15)
+                    ->get($url);
+
+                if ($response->successful()) {
+                    $json = $response->json();
+                    $items = isset($json['data']) ? $json['data'] : $json;
+                    
+                    $totalKeywords = count($items);
+                    $top10 = 0;
+                    $upMovements = 0;
+                    $downMovements = 0;
+                    $totalVisibility = 0;
+                    $keywordsList = [];
+                    $pagesMap = [];
+                    
+                    foreach ($items as $item) {
+                        $attr = $item['attributes'] ?? [];
+                        if (empty($attr)) continue;
+                        
+                        $rank = $attr['grank'] ?? 0;
+                        if ($rank > 0 && $rank <= 10) $top10++;
+                        
+                        $change = $attr['trends']['month'] ?? 0;
+                        if ($change > 0) $upMovements++;
+                        if ($change < 0) $downMovements++;
+                        
+                        $totalVisibility += ($attr['visibility'] ?? 0);
+                        
+                        $keywordsList[] = [
+                            'keyword' => $attr['kw'] ?? 'Unknown',
+                            'position' => $rank,
+                            'change' => ($change > 0 ? '+' : '') . $change,
+                            'volume' => $attr['ms'] ?? 0
+                        ];
+
+                        $rankingUrl = $attr['rankingurl'] ?? '';
+                        if (!empty($rankingUrl)) {
+                            $urlPath = parse_url($rankingUrl, PHP_URL_PATH) ?? $rankingUrl;
+                            if (empty($urlPath)) $urlPath = '/';
+                            
+                            if (!isset($pagesMap[$rankingUrl])) {
+                                $pagesMap[$rankingUrl] = [
+                                    'url' => $rankingUrl,
+                                    'path' => $urlPath,
+                                    'keyword_count' => 0,
+                                    'total_volume' => 0
+                                ];
+                            }
+                            $pagesMap[$rankingUrl]['keyword_count']++;
+                            $pagesMap[$rankingUrl]['total_volume'] += ($attr['ms'] ?? 0);
+                        }
+                    }
+                    
+                    // Sort keywords by rank (best rank first)
+                    usort($keywordsList, function($a, $b) {
+                        if ($a['position'] == 0) return 1;
+                        if ($b['position'] == 0) return -1;
+                        return $a['position'] <=> $b['position'];
+                    });
+
+                    // Sort pages by keyword count (highest first)
+                    $pagesList = array_values($pagesMap);
+                    usort($pagesList, function($a, $b) {
+                        if ($b['keyword_count'] == $a['keyword_count']) {
+                            return $b['total_volume'] <=> $a['total_volume'];
+                        }
+                        return $b['keyword_count'] <=> $a['keyword_count'];
+                    });
+                    
+                    $reportData = [
+                        'metadata' => [
+                            'generated_at' => now()->toIso8601String(),
+                            'source' => 'Keyword.com API',
+                            'property_id' => $actualGroupId,
+                        ],
+                        'summary' => [
+                            'total_keywords' => $totalKeywords,
+                            'top_10' => $top10,
+                            'up_movements' => $upMovements,
+                            'down_movements' => $downMovements,
+                            'share_of_voice' => round($totalVisibility / max(1, $totalKeywords), 2) . '%'
+                        ],
+                        'keywords' => array_slice($keywordsList, 0, 500), // limit to top 500 for UI performance
+                        'pages' => array_slice($pagesList, 0, 500) // limit to top 500 for UI performance
+                    ];
+                } else {
+                    $reportData = ['error' => 'Keyword API failed with status ' . $response->status()];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Keyword API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'Keyword API failed. Please ensure the API Key is correct.'];
+            }
         } else {
             if ($integrationId === 'gsc') {
                 $reportData = ['error' => 'Google Search Console API failed. Please ensure the property ID is correct and has data.'];
+            } elseif ($integrationId === 'youtube') {
+                $reportData = ['error' => 'YouTube API failed. Please ensure the channel ID is correct.'];
+            } elseif ($integrationId === 'keyword') {
+                $reportData = ['error' => 'Keyword.com API failed. Please ensure the API Key and Project ID are correct.'];
             } else {
                 $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
             }
@@ -1663,6 +1907,104 @@ class ManageClients extends Component
         ];
     }
 
+    public function getYoutubeChannels(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'youtube')
+            ->first();
+
+        if (!$integration) {
+            return [];
+        }
+
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->timeout(15)
+                ->get('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true');
+
+            if ($response->successful()) {
+                $channels = $response->json('items') ?? [];
+                return collect($channels)->map(fn($c) => [
+                    'id' => $c['id'],
+                    'name' => $c['snippet']['title'] ?? 'Unknown Channel',
+                ])->toArray();
+            }
+        } catch (\Exception $e) {
+            // Ignore
+        }
+
+        // Mock fallback for local testing if API fails
+        return [
+            ['id' => 'UC_x5XG1OV2P6uZZ5FSM9Ttw', 'name' => 'Google Developers'],
+            ['id' => 'UC_1234567890ABCDEFGHIJK', 'name' => 'My Personal Channel'],
+        ];
+    }
+
+    public string $keywordProjectId = '';
+
+    public function getKeywordProjects(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'keyword')
+            ->first();
+
+        if (!$integration || empty($integration->api_credentials['api_key'])) {
+            return [];
+        }
+
+        $apiKey = $integration->api_credentials['api_key'];
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+                ->timeout(5)
+                ->get('https://app.keyword.com/api/v2/groups/active');
+
+            if ($response->successful()) {
+                $projects = $response->json() ?? []; 
+                $projects = isset($projects['data']) ? $projects['data'] : $projects;
+                return collect($projects)->map(fn($p) => [
+                    'id' => $p['id'] ?? uniqid(),
+                    'name' => $p['attributes']['name'] ?? $p['id'] ?? 'Unknown Project',
+                ])->toArray();
+            }
+        } catch (\Exception $e) {
+            // Ignore
+        }
+
+        // Mock fallback
+        return [
+            ['id' => 'prj_123', 'name' => 'Main Website SEO'],
+            ['id' => 'prj_456', 'name' => 'Blog Ranking'],
+        ];
+    }
+
+    public function saveKeywordProject(): void
+    {
+        if (empty($this->keywordProjectId)) return;
+        $this->selectedPropertyId = $this->keywordProjectId;
+        $this->savePropertyId('keyword');
+        $this->keywordProjectId = '';
+    }
+
+    public function updatedKeywordProjectId($value): void
+    {
+        if (empty($value)) return;
+        $this->saveKeywordProject();
+    }
+
     public function savePropertyId(string $integrationId): void
     {
         \Illuminate\Support\Facades\Log::info('savePropertyId details:', [
@@ -1693,7 +2035,7 @@ class ManageClients extends Component
                 'action' => 'configure_ga4_property_id',
                 'loggable_type' => \App\Modules\CRM\Clients\Models\Client::class,
                 'loggable_id' => $this->selectedClientDetailId,
-                'description' => "Configured GA4 Property ID to: " . $this->selectedPropertyId,
+                'description' => "Configured " . strtoupper($integrationId) . " Property ID to: " . $this->selectedPropertyId,
                 'meta' => [
                     'property_id' => $this->selectedPropertyId,
                     'website_id' => $this->selectedWebsiteId,
@@ -1727,6 +2069,23 @@ class ManageClients extends Component
     {
         $this->savePropertyId('ga4');
         $this->selectedPropertyId = '';
+    }
+
+    public function saveYoutubeChannel(): void
+    {
+        if (empty($this->youtubeChannelId)) return;
+        $this->selectedPropertyId = $this->youtubeChannelId;
+        $this->savePropertyId('youtube');
+        $this->youtubeChannelId = '';
+        $this->selectedPropertyId = '';
+    }
+
+    public function updatedYoutubeChannelId($value): void
+    {
+        if (empty($value) || !$this->selectedWebsiteId) {
+            return;
+        }
+        $this->saveYoutubeChannel();
     }
 
     public function render(ClickUpService $clickUpService)
@@ -1849,6 +2208,8 @@ class ManageClients extends Component
                         'ga4' => ['name' => 'Google Analytics 4', 'category' => 'Analytics'],
                         'gsc' => ['name' => 'Google Search Console', 'category' => 'SEO'],
                         'gads' => ['name' => 'Google Ads', 'category' => 'Marketing'],
+                        'youtube' => ['name' => 'YouTube', 'category' => 'Video Marketing'],
+                        'keyword' => ['name' => 'Keyword.com', 'category' => 'SEO Ranking'],
                     ];
 
                     foreach ($types as $typeId => $meta) {

@@ -49,6 +49,8 @@ class GoogleIntegrationController extends Controller
         $scopes = [
             'https://www.googleapis.com/auth/analytics.readonly',
             'https://www.googleapis.com/auth/webmasters.readonly',
+            'https://www.googleapis.com/auth/youtube.readonly',
+            'https://www.googleapis.com/auth/yt-analytics.readonly'
         ];
 
         $query = http_build_query([
