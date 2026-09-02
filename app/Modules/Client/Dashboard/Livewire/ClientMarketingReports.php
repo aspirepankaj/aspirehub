@@ -24,6 +24,7 @@ class ClientMarketingReports extends Component
     public array $gscData = [];
     public array $youtubeData = [];
     public array $keywordData = [];
+    public array $gtmData = [];
     
     // Dropdown list holders
     public $websites = [];
@@ -99,6 +100,7 @@ class ClientMarketingReports extends Component
         $this->gscData = [];
         $this->youtubeData = [];
         $this->keywordData = [];
+        $this->gtmData = [];
 
         if (!$this->selectedWebsiteId || !$this->selectedMonth) {
             return;
@@ -151,6 +153,12 @@ class ClientMarketingReports extends Component
                 $this->keywordData = json_decode(file_get_contents($keywordPath), true) ?? [];
             }
 
+            // Load GTM data
+            $gtmPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gtm/{$year}/{$month}.json");
+            if (file_exists($gtmPath)) {
+                $this->gtmData = json_decode(file_get_contents($gtmPath), true) ?? [];
+            }
+
             // Set activeReportData if looking at specific tab
             if ($this->activeReportIntegrationId === 'ga4') {
                 $this->activeReportData = $this->ga4Data;
@@ -160,6 +168,8 @@ class ClientMarketingReports extends Component
                 $this->activeReportData = $this->youtubeData;
             } elseif ($this->activeReportIntegrationId === 'keyword') {
                 $this->activeReportData = $this->keywordData;
+            } elseif ($this->activeReportIntegrationId === 'gtm') {
+                $this->activeReportData = $this->gtmData;
             }
         } catch (\Exception $e) {
             Log::error('Error loading client marketing report JSON: ' . $e->getMessage());
@@ -192,7 +202,7 @@ class ClientMarketingReports extends Component
 
             // Scan all directories to find all available months
             $options = [];
-            $types = ['ga4', 'gsc', 'youtube', 'keyword'];
+            $types = ['ga4', 'gsc', 'youtube', 'keyword', 'gtm'];
 
             foreach ($types as $typeId) {
                 $integrationPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$typeId}");

@@ -4,6 +4,7 @@
         $hasGsc = !empty($gscData) && !isset($gscData['error']);
         $hasYoutube = !empty($youtubeData) && !isset($youtubeData['error']);
         $hasKeyword = !empty($keywordData) && !isset($keywordData['error']);
+        $hasGtm = !empty($gtmData) && !isset($gtmData['error']);
     @endphp
 
     <!-- Header Controls Widget -->
@@ -60,6 +61,12 @@
                     <span class="w-1.5 h-1.5 rounded-full {{ isset($integrations['keyword']) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                     <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Keyword.com</span>
                 </div>
+
+                <!-- GTM Badge -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+                    <span class="w-1.5 h-1.5 rounded-full {{ isset($integrations['gtm']) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                    <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Google Tag Manager</span>
+                </div>
             </div>
         </div>
     </div>
@@ -67,7 +74,7 @@
     <!-- Integration Selector Tabs / Date Filter Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <!-- Integration Tabs -->
-        @if($hasGa4 || $hasGsc || $hasYoutube || $hasKeyword)
+        @if($hasGa4 || $hasGsc || $hasYoutube || $hasKeyword || $hasGtm)
             <div class="flex items-center p-1 bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur border border-slate-200/30 dark:border-slate-700/30 rounded-xl max-w-max">
                 <button wire:click="selectIntegration('overview')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 {{ $activeReportIntegrationId === 'overview' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
                     Overview Dashboard
@@ -112,7 +119,7 @@
 
     <!-- ==================== OVERVIEW DASHBOARD VIEW ==================== -->
     @if($activeReportIntegrationId === 'overview')
-        @if($hasGa4 || $hasGsc || $hasYoutube || $hasKeyword)
+        @if($hasGa4 || $hasGsc || $hasYoutube || $hasKeyword || $hasGtm)
             <!-- Dynamic Metric Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <!-- GA4 Metrics -->
@@ -893,4 +900,112 @@
             </div>
         @endif
     @endif
+    <!-- ==================== GOOGLE TAG MANAGER VIEW ==================== -->
+    @if($activeReportIntegrationId === 'gtm')
+        @if($hasGtm)
+            <!-- 1. Stats Summary Widgets (GTM) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Workspace</span>
+                    <span class="text-base font-extrabold text-indigo-600 dark:text-indigo-400 truncate block">
+                        {{ $activeReportData['summary']['workspace_name'] ?? 'Unknown' }}
+                    </span>
+                </div>
+                <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Tags</span>
+                    <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
+                        {{ number_format($activeReportData['summary']['tags_count'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Triggers</span>
+                    <span class="text-lg font-extrabold text-amber-600 dark:text-amber-400">
+                        {{ number_format($activeReportData['summary']['triggers_count'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Variables</span>
+                    <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                        {{ number_format($activeReportData['summary']['variables_count'] ?? 0) }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- 2. GTM Tags Table -->
+            @if(!empty($activeReportData['tags_list']))
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">All Tags</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                <th class="py-2 font-bold">Tag Name</th>
+                                <th class="py-2 text-right font-bold">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($activeReportData['tags_list'] as $tag)
+                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                    <td class="py-2.5 font-bold truncate" title="{{ $tag['name'] }}">{{ $tag['name'] }}</td>
+                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $tag['type'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+
+            <!-- 3. GTM Triggers Table -->
+            @if(!empty($activeReportData['triggers_list']))
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">All Triggers</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                <th class="py-2 font-bold">Trigger Name</th>
+                                <th class="py-2 text-right font-bold">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($activeReportData['triggers_list'] as $trigger)
+                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                    <td class="py-2.5 font-bold truncate" title="{{ $trigger['name'] ?? '' }}">{{ $trigger['name'] ?? 'Unknown' }}</td>
+                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $trigger['type'] ?? 'Unknown' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+
+            <!-- 4. GTM Variables Table -->
+            @if(!empty($activeReportData['variables_list']))
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">All Variables</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                <th class="py-2 font-bold">Variable Name</th>
+                                <th class="py-2 text-right font-bold">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($activeReportData['variables_list'] as $variable)
+                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                    <td class="py-2.5 font-bold truncate" title="{{ $variable['name'] ?? '' }}">{{ $variable['name'] ?? 'Unknown' }}</td>
+                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $variable['type'] ?? 'Unknown' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+        @endif
+    @endif
 </div>
+
