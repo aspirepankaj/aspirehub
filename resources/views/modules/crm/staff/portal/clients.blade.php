@@ -265,9 +265,14 @@
                                                 <h4 class="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">
                                                     {{ $integration['name'] }}
                                                 </h4>
-                                                <span class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 block">
-                                                    {{ $integration['category'] }}
-                                                </span>
+                                                <div class="mt-1.5 flex flex-wrap items-center gap-2">
+                                                    <span class="text-xs text-slate-400 dark:text-slate-500">{{ $integration['category'] }}</span>
+                                                    @if(in_array($integration['id'], ['gsc', 'youtube', 'keyword']))
+                                                        <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md text-[9px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm">Last 7 Days</span>
+                                                    @elseif($integration['id'] === 'ga4')
+                                                        <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md text-[9px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm">Last 30 Days</span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
 
@@ -374,6 +379,27 @@
                                         </div>
                                     @endif
                                 @endif
+                                
+                                @if ($integration['id'] === 'gtm' && $isConnected)
+                                    @if (!$integration['property_id'])
+                                        <div class="mt-4 p-3 bg-teal-50/30 dark:bg-teal-950/10 rounded-xl border border-teal-100/30 dark:border-teal-900/20 mb-4">
+                                            <span class="text-[10px] font-bold text-teal-650 dark:text-teal-400 block mb-1.5 uppercase tracking-wider">Select GTM Container</span>
+                                            <div class="flex gap-2">
+                                                <select wire:model.live="gtmContainerId" wire:key="gtm-container-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-teal-500">
+                                                    <option value="">Select Container...</option>
+                                                    @foreach ($this->getGtmContainers() as $container)
+                                                        <option value="{{ $container['id'] }}">{{ $container['name'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
+                                            <span class="text-slate-455 dark:text-slate-550 font-medium">GTM Container ID</span>
+                                            <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[120px] truncate" title="{{ $integration['property_id'] }}">{{ $integration['property_id'] }}</span>
+                                        </div>
+                                    @endif
+                                @endif
                                 </div>
 
                                 <!-- Footer Actions -->
@@ -409,7 +435,7 @@
                                     @else
                                         <!-- Connected stage -->
                                         <div class="w-full flex flex-col gap-2.5 mt-auto">
-                                            @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword']) && !empty($integration['property_id']))
+                                            @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword', 'gtm']) && !empty($integration['property_id']))
                                                 <button type="button" 
                                                         wire:click="openReportModal('{{ $integration['id'] }}')"
                                                         class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">
@@ -554,6 +580,8 @@
                                                 YouTube - Detailed Report
                                             @elseif($activeReportIntegrationId === 'keyword')
                                                 Keyword.com - Detailed Report
+                                            @elseif($activeReportIntegrationId === 'gtm')
+                                                Google Tag Manager - Container Summary
                                             @else
                                                 Google Analytics 4 - Detailed Report
                                             @endif
@@ -644,7 +672,7 @@
                                             </div>
 
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Ranking URLs</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-xs">
                                                         <thead>
@@ -1080,7 +1108,144 @@
                                                     </table>
                                                 </div>
                                             </div>
+                                            <!-- Top Pages -->
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-5">
+                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-left text-xs">
+                                                        <thead>
+                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                                <th class="py-2 font-bold">URL</th>
+                                                                <th class="py-2 text-right font-bold">Keywords</th>
+                                                                <th class="py-2 text-right font-bold">Avg. Rank</th>
+                                                                <th class="py-2 text-right font-bold">Total Search Volume</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @forelse ($activeReportData['pages'] ?? [] as $pg)
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                    <td class="py-2.5 truncate max-w-[250px]" title="{{ $pg['url'] }}">
+                                                                        <a href="{{ $pg['url'] }}" target="_blank" class="hover:text-indigo-500 hover:underline">
+                                                                            {{ $pg['url'] }}
+                                                                        </a>
+                                                                    </td>
+                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($pg['keyword_count'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">{{ isset($pg['avg_rank']) ? $pg['avg_rank'] : 0 }}</td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($pg['total_volume'] ?? 0) }}</td>
+                                                                </tr>
+                                                            @empty
+                                                                <tr>
+                                                                    <td colspan="4" class="py-4 text-center text-slate-500">No URL data available.</td>
+                                                                </tr>
+                                                            @endforelse
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
                                         </div>
+                                    @elseif($activeReportIntegrationId === 'gtm')
+                                        <!-- 1. Stats Summary Widgets (GTM) -->
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                            <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Workspace</span>
+                                                <span class="text-base font-extrabold text-indigo-600 dark:text-indigo-400 truncate block">
+                                                    {{ $activeReportData['summary']['workspace_name'] ?? 'Unknown' }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Tags</span>
+                                                <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
+                                                    {{ number_format($activeReportData['summary']['tags_count'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Triggers</span>
+                                                <span class="text-lg font-extrabold text-amber-600 dark:text-amber-400">
+                                                    {{ number_format($activeReportData['summary']['triggers_count'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                            <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Variables</span>
+                                                <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                                                    {{ number_format($activeReportData['summary']['variables_count'] ?? 0) }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. GTM Tags Table -->
+                                        @if(!empty($activeReportData['tags_list']))
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">All Tags</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold">Tag Name</th>
+                                                            <th class="py-2 text-right font-bold">Type</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($activeReportData['tags_list'] as $tag)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                <td class="py-2.5 font-bold truncate" title="{{ $tag['name'] }}">{{ $tag['name'] }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $tag['type'] }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        <!-- 3. GTM Triggers Table -->
+                                        @if(!empty($activeReportData['triggers_list']))
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">All Triggers</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold">Trigger Name</th>
+                                                            <th class="py-2 text-right font-bold">Type</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($activeReportData['triggers_list'] as $trigger)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                <td class="py-2.5 font-bold truncate" title="{{ $trigger['name'] ?? '' }}">{{ $trigger['name'] ?? 'Unknown' }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $trigger['type'] ?? 'Unknown' }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        <!-- 4. GTM Variables Table -->
+                                        @if(!empty($activeReportData['variables_list']))
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">All Variables</h4>
+                                            <div class="overflow-x-auto">
+                                                <table class="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                                            <th class="py-2 font-bold">Variable Name</th>
+                                                            <th class="py-2 text-right font-bold">Type</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($activeReportData['variables_list'] as $variable)
+                                                            <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                <td class="py-2.5 font-bold truncate" title="{{ $variable['name'] ?? '' }}">{{ $variable['name'] ?? 'Unknown' }}</td>
+                                                                <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ $variable['type'] ?? 'Unknown' }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        @endif
                                     @endif
                                     @endif
                                 </div>

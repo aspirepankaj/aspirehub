@@ -892,25 +892,36 @@ class ManageClients extends Component
         $reportData = [];
         $propertyId = $integration->auth_credentials['property_id'] ?? null;
         $apiKey = $integration->api_credentials['api_key'] ?? null;
+        
+        $selectedDate = now();
+        if (!empty($this->selectedReportMonth)) {
+            try {
+                $selectedDate = \Carbon\Carbon::parse(str_replace('-', ' ', $this->selectedReportMonth));
+            } catch (\Exception $e) {
+                $selectedDate = now();
+            }
+        }
+        $startDateStr = now()->subDays(7)->format('Y-m-d');
+        $endDateStr = now()->format('Y-m-d');
 
         if ($accessToken && $propertyId && $integrationId === 'gsc') {
             try {
                 $endpoint = "https://searchconsole.googleapis.com/webmasters/v3/sites/" . urlencode($propertyId) . "/searchAnalytics/query";
-                $startDate = now()->subDays(30)->format('Y-m-d');
-                $endDate = now()->format('Y-m-d');
+                $startDate = $startDateStr;
+                $endDate = $endDateStr;
 
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
                     $pool->as('queries')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10, 'dataState' => 'all'
                     ]),
                     $pool->as('pages')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 10
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 10, 'dataState' => 'all'
                     ]),
                     $pool->as('devices')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 10
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 10, 'dataState' => 'all'
                     ]),
                     $pool->as('countries')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 10
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 10, 'dataState' => 'all'
                     ]),
                 ]);
 
@@ -1218,8 +1229,8 @@ class ManageClients extends Component
             }
         } elseif ($accessToken && $propertyId && $integrationId === 'youtube') {
             try {
-                $startDate = now()->subDays(30)->format('Y-m-d');
-                $endDate = now()->format('Y-m-d');
+                $startDate = $startDateStr;
+                $endDate = $endDateStr;
                 
                 // 1. Fetch channel stats from Data API v3
                 $channelResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
@@ -1238,17 +1249,24 @@ class ManageClients extends Component
                             'ids' => 'channel==MINE',
                             'startDate' => $startDate,
                             'endDate' => $endDate,
-                            'metrics' => 'views,estimatedMinutesWatched,averageViewDuration'
+                            'metrics' => 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost'
                         ]);
                         
+                    $monthlyViews = 0;
                     $watchTimeHrs = 0;
                     $avgViewDurationSec = 0;
+                    $subscribersGained = 0;
+                    $subscribersLost = 0;
                     if ($analyticsResponse->successful() && !empty($analyticsResponse->json('rows'))) {
                         $analyticsData = $analyticsResponse->json('rows')[0];
-                        // views is index 0, estimatedMinutesWatched is index 1, averageViewDuration is index 2
+                        // views is index 0, estimatedMinutesWatched is index 1, averageViewDuration is index 2, subscribersGained is 3, subscribersLost is 4
+                        $monthlyViews = $analyticsData[0] ?? 0;
                         $watchTimeHrs = ($analyticsData[1] ?? 0) / 60;
                         $avgViewDurationSec = $analyticsData[2] ?? 0;
+                        $subscribersGained = $analyticsData[3] ?? 0;
+                        $subscribersLost = $analyticsData[4] ?? 0;
                     }
+                    $netSubscribers = $subscribersGained - $subscribersLost;
                     
                     $durationMin = floor($avgViewDurationSec / 60);
                     $durationSec = round($avgViewDurationSec % 60);
@@ -1299,8 +1317,8 @@ class ManageClients extends Component
 
                     $reportData = [
                         'summary' => [
-                            'views' => (int) ($stats['viewCount'] ?? 0),
-                            'subscribers' => (int) ($stats['subscriberCount'] ?? 0),
+                            'views' => (int) $monthlyViews,
+                            'subscribers' => (int) $netSubscribers,
                             'video_count' => (int) ($stats['videoCount'] ?? 0),
                             'watch_time' => $watchTimeHrs,
                             'avg_view_duration' => $durationFormatted
@@ -1341,7 +1359,10 @@ class ManageClients extends Component
 
                 if ($response->successful()) {
                     $json = $response->json();
-                    $items = isset($json['data']) ? $json['data'] : $json;
+                                        $items = isset($json['data']) ? $json['data'] : $json;
+                    
+                    // Keyword API v2 returns live snapshot, no date filtering needed.
+                    // $items remains as is.
                     
                     $totalKeywords = count($items);
                     $top10 = 0;
@@ -1372,7 +1393,7 @@ class ManageClients extends Component
                         ];
 
                         $rankingUrl = $attr['rankingurl'] ?? '';
-                        if (!empty($rankingUrl)) {
+                        if (!empty($rankingUrl) && strtoupper(trim($rankingUrl)) !== 'NOT FOUND') {
                             $urlPath = parse_url($rankingUrl, PHP_URL_PATH) ?? $rankingUrl;
                             if (empty($urlPath)) $urlPath = '/';
                             
@@ -1381,11 +1402,13 @@ class ManageClients extends Component
                                     'url' => $rankingUrl,
                                     'path' => $urlPath,
                                     'keyword_count' => 0,
-                                    'total_volume' => 0
+                                    'total_volume' => 0,
+                                    'total_rank' => 0
                                 ];
                             }
                             $pagesMap[$rankingUrl]['keyword_count']++;
                             $pagesMap[$rankingUrl]['total_volume'] += ($attr['ms'] ?? 0);
+                            $pagesMap[$rankingUrl]['total_rank'] += ($attr['grank'] ?? 0);
                         }
                     }
                     
@@ -1398,6 +1421,10 @@ class ManageClients extends Component
 
                     // Sort pages by keyword count (highest first)
                     $pagesList = array_values($pagesMap);
+                    foreach ($pagesList as &$p) {
+                        $p['avg_rank'] = $p['keyword_count'] > 0 ? round($p['total_rank'] / $p['keyword_count'], 1) : 0;
+                    }
+                    unset($p);
                     usort($pagesList, function($a, $b) {
                         if ($b['keyword_count'] == $a['keyword_count']) {
                             return $b['total_volume'] <=> $a['total_volume'];
@@ -1428,6 +1455,102 @@ class ManageClients extends Component
                 \Illuminate\Support\Facades\Log::error('Keyword API Exception: ' . $e->getMessage());
                 $reportData = ['error' => 'Keyword API failed. Please ensure the API Key is correct.'];
             }
+        } elseif ($accessToken && $propertyId && $integrationId === 'gtm') {
+            try {
+                // PropertyId format: accounts/123/containers/456
+                
+                // 1. Fetch Workspaces (to get active workspace)
+                $workspacesResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                    ->timeout(10)
+                    ->get("https://tagmanager.googleapis.com/tagmanager/v2/{$propertyId}/workspaces");
+                    
+                $workspaceId = null;
+                $workspaceName = 'Unknown Workspace';
+                if ($workspacesResponse->successful()) {
+                    $workspaces = $workspacesResponse->json('workspace') ?? [];
+                    if (!empty($workspaces)) {
+                        $workspaceId = $workspaces[0]['workspaceId'];
+                        $workspaceName = $workspaces[0]['name'];
+                        $propertyId = $workspaces[0]['path']; // accounts/123/containers/456/workspaces/789
+                    }
+                }
+                
+                $tagsCount = 0;
+                $triggersCount = 0;
+                $variablesCount = 0;
+                $tagsData = [];
+                $triggersData = [];
+                $variablesData = [];
+                $currentMonthStr = date('Y-m');
+
+                if ($workspaceId) {
+                    // Fetch Tags
+                    $tagsResp = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                        ->timeout(10)
+                        ->get("https://tagmanager.googleapis.com/tagmanager/v2/{$propertyId}/tags");
+                    if ($tagsResp->successful()) {
+                        $tagsList = $tagsResp->json('tag') ?? [];
+                        foreach ($tagsList as $t) {
+                            $fingerprintMs = $t['fingerprint'] ?? '0';
+                            $timestamp = floor($fingerprintMs / 1000);
+                            $tagMonth = date('Y-m', $timestamp);
+                            if ($tagMonth === $currentMonthStr) {
+                                $tagsData[] = $t;
+                                $tagsCount++;
+                            }
+                        }
+                    }
+
+                    // Fetch Triggers
+                    $trigResp = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                        ->timeout(10)
+                        ->get("https://tagmanager.googleapis.com/tagmanager/v2/{$propertyId}/triggers");
+                    if ($trigResp->successful()) {
+                        $trigList = $trigResp->json('trigger') ?? [];
+                        foreach ($trigList as $t) {
+                            $fingerprintMs = $t['fingerprint'] ?? '0';
+                            $timestamp = floor($fingerprintMs / 1000);
+                            $tagMonth = date('Y-m', $timestamp);
+                            if ($tagMonth === $currentMonthStr) {
+                                $triggersData[] = $t;
+                                $triggersCount++;
+                            }
+                        }
+                    }
+
+                    // Fetch Variables
+                    $varResp = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                        ->timeout(10)
+                        ->get("https://tagmanager.googleapis.com/tagmanager/v2/{$propertyId}/variables");
+                    if ($varResp->successful()) {
+                        $varList = $varResp->json('variable') ?? [];
+                        foreach ($varList as $v) {
+                            $fingerprintMs = $v['fingerprint'] ?? '0';
+                            $timestamp = floor($fingerprintMs / 1000);
+                            $tagMonth = date('Y-m', $timestamp);
+                            if ($tagMonth === $currentMonthStr) {
+                                $variablesData[] = $v;
+                                $variablesCount++;
+                            }
+                        }
+                    }
+                }
+
+                $reportData = [
+                    'summary' => [
+                        'workspace_name' => $workspaceName,
+                        'tags_count' => $tagsCount,
+                        'triggers_count' => $triggersCount,
+                        'variables_count' => $variablesCount,
+                    ],
+                    'tags_list' => $tagsData,
+                    'triggers_list' => $triggersData,
+                    'variables_list' => $variablesData
+                ];
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('GTM API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'GTM API failed. Please ensure the container ID is correct.'];
+            }
         } else {
             if ($integrationId === 'gsc') {
                 $reportData = ['error' => 'Google Search Console API failed. Please ensure the property ID is correct and has data.'];
@@ -1435,6 +1558,8 @@ class ManageClients extends Component
                 $reportData = ['error' => 'YouTube API failed. Please ensure the channel ID is correct.'];
             } elseif ($integrationId === 'keyword') {
                 $reportData = ['error' => 'Keyword.com API failed. Please ensure the API Key and Project ID are correct.'];
+            } elseif ($integrationId === 'gtm') {
+                $reportData = ['error' => 'Google Tag Manager API failed. Please ensure the container ID is correct.'];
             } else {
                 $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
             }
@@ -1454,8 +1579,8 @@ class ManageClients extends Component
                 $websiteFolder = 'site-' . $website->id;
             }
 
-            $year = date('Y');
-            $monthFull = \Illuminate\Support\Str::lower(date('F'));
+            $year = $selectedDate->format('Y');
+            $monthFull = \Illuminate\Support\Str::lower($selectedDate->format('F'));
 
             $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
             
@@ -2210,6 +2335,7 @@ class ManageClients extends Component
                         'gads' => ['name' => 'Google Ads', 'category' => 'Marketing'],
                         'youtube' => ['name' => 'YouTube', 'category' => 'Video Marketing'],
                         'keyword' => ['name' => 'Keyword.com', 'category' => 'SEO Ranking'],
+                        'gtm' => ['name' => 'Google Tag Manager', 'category' => 'Analytics'],
                     ];
 
                     foreach ($types as $typeId => $meta) {
@@ -2338,4 +2464,77 @@ class ManageClients extends Component
             'clientIntegrations'       => $clientIntegrations,
         ])->layoutData(['title' => 'Clients Management - Aspire Hub']);
     }
+
+    public $gtmContainerId = '';
+
+    public function getGtmContainers(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'gtm')
+            ->first();
+
+        if (!$integration) {
+            return [];
+        }
+
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
+        
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->timeout(15)
+                ->get('https://tagmanager.googleapis.com/tagmanager/v2/accounts');
+
+            if ($response->successful()) {
+                $accounts = $response->json('account') ?? [];
+                $options = [];
+                foreach ($accounts as $account) {
+                    $accId = $account['accountId'];
+                    $accName = $account['name'];
+                    
+                    $contResp = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                        ->timeout(10)
+                        ->get("https://tagmanager.googleapis.com/tagmanager/v2/accounts/{$accId}/containers");
+                        
+                    if ($contResp->successful()) {
+                        $containers = $contResp->json('container') ?? [];
+                        foreach ($containers as $c) {
+                            $options[] = [
+                                'id' => $c['path'], // e.g. accounts/123/containers/456
+                                'name' => $accName . ' - ' . $c['name'] . ' (' . $c['publicId'] . ')'
+                            ];
+                        }
+                    }
+                }
+                return collect($options)->toArray();
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('GTM error: ' . $e->getMessage());
+        }
+        return [];
+    }
+
+    public function saveGtmContainer(): void
+    {
+        if (empty($this->gtmContainerId)) return;
+        $this->selectedPropertyId = $this->gtmContainerId;
+        $this->savePropertyId('gtm');
+        $this->gtmContainerId = '';
+        $this->selectedPropertyId = '';
+    }
+
+    public function updatedGtmContainerId($value): void
+    {
+        if (empty($value) || !$this->selectedWebsiteId) {
+            return;
+        }
+        $this->saveGtmContainer();
+    }
+
 }
