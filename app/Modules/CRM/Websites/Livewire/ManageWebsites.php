@@ -9,6 +9,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Storage;
 
 #[Layout('layouts.admin')]
@@ -53,12 +54,17 @@ class ManageWebsites extends Component
 
     // ─── Detail View State ──────────────────────────────────────────────────────
     public ?int $selectedWebsiteDetailId = null;
+
+    #[Url(as: 'tab')]
     public string $activeTab = 'overview';
 
     public function mount($id = null): void
     {
         if ($id) {
             $this->selectedWebsiteDetailId = (int) $id;
+        }
+        if (request()->has('tab')) {
+            $this->activeTab = (string) request()->get('tab');
         }
     }
 

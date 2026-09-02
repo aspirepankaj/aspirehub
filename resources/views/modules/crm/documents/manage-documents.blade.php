@@ -55,9 +55,9 @@
             <div x-data="{ 
                     open: false, 
                     search: '',
-                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name])) }},
-                    select(id, name) {
-                        this.search = name;
+                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name ?? '', 'email' => strtolower($c->user->email ?? ''), 'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')'])) }},
+                    select(id, label) {
+                        this.search = label;
                         $wire.set('clientFilter', id);
                         this.open = false;
                     },
@@ -72,7 +72,7 @@
                             this.search = '';
                         } else {
                             const found = this.clients.find(c => c.id == val);
-                            this.search = found ? found.name : '';
+                            this.search = found ? found.label : '';
                         }
                     },
                     init() {
@@ -109,11 +109,12 @@
                      x-transition 
                      class="absolute z-[9999] w-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto">
                     <div class="p-1 space-y-0.5">
-                        <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
+                        <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
                             <button type="button" 
-                                    x-on:click="select(c.id, c.name)"
-                                    class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                    x-on:click="select(c.id, c.label)"
+                                    class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition flex items-center justify-between gap-2">
                                 <span x-text="c.name"></span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-normal lowercase" x-text="'(' + c.email + ')'"></span>
                             </button>
                         </template>
                         <template x-if="clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length === 0">
@@ -379,9 +380,31 @@
                                                 </svg>
                                             </button>
                                         @endif
-                                        {{-- Edit details --}}
+                                        @php
+                                            $docEditData = [
+                                                'id' => $doc->id,
+                                                'title' => $doc->title ?? '',
+                                                'client_id' => $doc->client_id ?? '',
+                                                'website_id' => $doc->website_id ?? '',
+                                                'resource_type' => $doc->resource_type ?? 'file',
+                                                'file_path' => $doc->file_path ?? '',
+                                                'file_name' => $doc->file_name ?? '',
+                                                'url' => $doc->url ?? '',
+                                            ];
+                                        @endphp
                                         <button type="button" 
-                                                wire:click="editDocument({{ $doc->id }})"
+                                                @click="
+                                                    const data = {{ Js::from($docEditData) }};
+                                                    $wire.editingDocId = data.id;
+                                                    $wire.title = data.name || data.title;
+                                                    $wire.client_id = data.client_id;
+                                                    $wire.website_id = data.website_id;
+                                                    $wire.resource_type = data.resource_type;
+                                                    $wire.file_path = data.file_path;
+                                                    $wire.file_name = data.file_name;
+                                                    $wire.url = data.url;
+                                                    $dispatch('open-modal', { name: 'edit-doc-modal' });
+                                                "
                                                 class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition active:scale-90"
                                                 title="Edit Details">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -618,9 +641,9 @@
                 <div x-data="{ 
                         open: false, 
                         search: '',
-                        clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name])) }},
-                        select(id, name) {
-                            this.search = name;
+                        clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name ?? '', 'email' => strtolower($c->user->email ?? ''), 'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')'])) }},
+                        select(id, label) {
+                            this.search = label;
                             $wire.set('client_id', id);
                             this.open = false;
                         },
@@ -630,7 +653,7 @@
                                 this.search = '';
                             } else {
                                 const found = this.clients.find(c => c.id == val);
-                                this.search = found ? found.name : '';
+                                this.search = found ? found.label : '';
                             }
                         },
                         init() {
@@ -644,7 +667,7 @@
                         <input type="text" 
                                x-model="search"
                                x-on:focus="open = true"
-                               placeholder="Type to search clients..."
+                               placeholder="Type to search clients by name or email..."
                                class="block w-full pl-3 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
                         
                         <button type="button" x-on:click="open = !open" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
@@ -659,11 +682,12 @@
                          x-transition 
                          class="absolute z-[9999] w-full mt-1 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-xl shadow-2xl max-h-48 overflow-y-auto">
                         <div class="p-1 space-y-0.5">
-                            <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
+                            <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
                                 <button type="button" 
-                                        x-on:click="select(c.id, c.name)"
-                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                        x-on:click="select(c.id, c.label)"
+                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition flex items-center justify-between gap-2">
                                     <span x-text="c.name"></span>
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-normal lowercase" x-text="'(' + c.email + ')'"></span>
                                 </button>
                             </template>
                             <template x-if="clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length === 0">

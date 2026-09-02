@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.staff')]
 class StaffClients extends Component
@@ -32,6 +33,8 @@ class StaffClients extends Component
     public string $selectedReportMonth = '';
     public $credentialsFile = null;
     public string $apiKey = '';
+
+    #[Url(as: 'tab')]
     public string $activeTab = 'overview';
     public string $activeViewTab = 'my_clients'; // 'my_clients' or 'all_clients'
 
@@ -53,6 +56,9 @@ class StaffClients extends Component
     {
         if ($id) {
             $this->selectedClientId = (int) $id;
+        }
+        if (request()->has('tab')) {
+            $this->activeTab = (string) request()->get('tab');
         }
     }
 

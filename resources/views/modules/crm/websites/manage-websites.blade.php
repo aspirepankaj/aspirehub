@@ -33,12 +33,12 @@
     @if($websiteDetails)
         <!-- Back Button -->
         <div class="mb-4">
-            <button type="button" wire:click="closeWebsiteDetail" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
+            <a href="{{ route('admin.websites') }}" wire:navigate class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 Back to websites
-            </button>
+            </a>
         </div>
 
         {{-- Website Header Card --}}
@@ -84,8 +84,44 @@
                     </div>
                 </div>
             </div>
+            @php
+                $websiteDetailEditData = [
+                    'id' => $websiteDetails->id,
+                    'client_id' => $websiteDetails->client_id,
+                    'site_name' => $websiteDetails->site_name ?? '',
+                    'url' => $websiteDetails->url ?? '',
+                    'service_type_ids' => $websiteDetails->serviceTypes->pluck('id')->toArray(),
+                    'plan_ids' => $websiteDetails->plans->pluck('id')->toArray(),
+                    'status' => $websiteDetails->status ?? 'active',
+                    'image' => $websiteDetails->image ?? '',
+                    'admin_url' => $websiteDetails->admin_url ?? '',
+                    'admin_username' => $websiteDetails->admin_username ?? '',
+                    'hosting_provider' => $websiteDetails->hosting_provider ?? '',
+                    'hosting_expiry_date' => $websiteDetails->hosting_expiry_date ? \Carbon\Carbon::parse($websiteDetails->hosting_expiry_date)->format('Y-m-d') : '',
+                    'notes' => $websiteDetails->notes ?? '',
+                ];
+            @endphp
             <div class="flex items-center gap-2">
-                <button type="button" wire:click="editWebsite({{ $websiteDetails->id }})"
+                <button type="button" 
+                        @click="
+                            const data = {{ Js::from($websiteDetailEditData) }};
+                            $wire.editingWebsiteId = data.id;
+                            $wire.client_id = data.client_id;
+                            $wire.site_name = data.site_name;
+                            $wire.url = data.url;
+                            $wire.service_type_ids = data.service_type_ids;
+                            $wire.plan_ids = data.plan_ids;
+                            $wire.status = data.status;
+                            $wire.existing_image = data.image;
+                            $wire.image = '';
+                            $wire.admin_url = data.admin_url;
+                            $wire.admin_username = data.admin_username;
+                            $wire.admin_password = '';
+                            $wire.hosting_provider = data.hosting_provider;
+                            $wire.hosting_expiry_date = data.hosting_expiry_date;
+                            $wire.notes = data.notes;
+                            $dispatch('open-modal', { name: 'edit-website-modal' });
+                        "
                         class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl active:scale-95 transition">
                     Edit
                 </button>
@@ -96,13 +132,13 @@
         <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6">
             <nav class="flex space-x-8" aria-label="Tabs">
                 @foreach(['overview' => 'Overview', 'maintenance' => 'Maintenance Reports', 'activity log' => 'Activity Log'] as $tabKey => $tabLabel)
-                    <button type="button" wire:click="setTab('{{ $tabKey }}')"
-                            class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                    <a href="{{ route('admin.websites.detail', ['id' => $websiteDetails->id, 'tab' => $tabKey]) }}" wire:navigate
+                       class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
                         {{ $tabLabel }}
                         @if($tabKey === 'maintenance')
                             <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ $websiteMaintenanceReports->total() }}</span>
                         @endif
-                    </button>
+                    </a>
                 @endforeach
             </nav>
         </div>
@@ -340,9 +376,15 @@
 
             {{-- Search --}}
             <div class="relative flex items-center">
-                <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg wire:loading.remove wire:target="search" class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+                <div wire:loading wire:target="search" class="absolute left-3 pointer-events-none shrink-0 z-10 flex items-center">
+                    <svg class="animate-spin w-4 h-4 text-indigo-600 dark:text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
                 <input wire:model.live.debounce.300ms="search"
                        type="text"
                        autocomplete="off"
@@ -514,7 +556,7 @@
 
                                 {{-- Website Name + URL --}}
                                 <td class="px-4 py-4">
-                                    <button type="button" wire:click="viewWebsiteDetail({{ $website->id }})" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left">{{ $website->site_name }}</button>
+                                    <a href="{{ route('admin.websites.detail', ['id' => $website->id]) }}" wire:navigate class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left block">{{ $website->site_name }}</a>
                                     <a href="{{ $website->url }}" target="_blank"
                                        class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 font-medium truncate max-w-[200px] block">
                                         {{ $website->url }}
@@ -579,7 +621,43 @@
 
                                 {{-- Actions --}}
                                 <td class="px-4 py-4 text-right">
-                                    <button type="button" wire:click="editWebsite({{ $website->id }})"
+                                    @php
+                                        $websiteEditData = [
+                                            'id' => $website->id,
+                                            'client_id' => $website->client_id,
+                                            'site_name' => $website->site_name ?? '',
+                                            'url' => $website->url ?? '',
+                                            'service_type_ids' => $website->serviceTypes->pluck('id')->toArray(),
+                                            'plan_ids' => $website->plans->pluck('id')->toArray(),
+                                            'status' => $website->status ?? 'active',
+                                            'image' => $website->image ?? '',
+                                            'admin_url' => $website->admin_url ?? '',
+                                            'admin_username' => $website->admin_username ?? '',
+                                            'hosting_provider' => $website->hosting_provider ?? '',
+                                            'hosting_expiry_date' => $website->hosting_expiry_date ? \Carbon\Carbon::parse($website->hosting_expiry_date)->format('Y-m-d') : '',
+                                            'notes' => $website->notes ?? '',
+                                        ];
+                                    @endphp
+                                    <button type="button" 
+                                            @click="
+                                                const data = {{ Js::from($websiteEditData) }};
+                                                $wire.editingWebsiteId = data.id;
+                                                $wire.client_id = data.client_id;
+                                                $wire.site_name = data.site_name;
+                                                $wire.url = data.url;
+                                                $wire.service_type_ids = data.service_type_ids;
+                                                $wire.plan_ids = data.plan_ids;
+                                                $wire.status = data.status;
+                                                $wire.existing_image = data.image;
+                                                $wire.image = '';
+                                                $wire.admin_url = data.admin_url;
+                                                $wire.admin_username = data.admin_username;
+                                                $wire.admin_password = '';
+                                                $wire.hosting_provider = data.hosting_provider;
+                                                $wire.hosting_expiry_date = data.hosting_expiry_date;
+                                                $wire.notes = data.notes;
+                                                $dispatch('open-modal', { name: 'edit-website-modal' });
+                                            "
                                             class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -908,30 +986,38 @@
         <div class="space-y-4 mt-2">
 
             <!-- Website Image -->
-            <div>
+            <div x-data="{
+                get imgUrl() {
+                    const path = $wire.image || $wire.existing_image;
+                    if (!path) return '';
+                    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) {
+                        return path;
+                    }
+                    return '/storage/' + path;
+                }
+            }">
                 <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Website Image') }}</label>
                 <div class="mt-1.5 flex items-center gap-3">
-                    @if ($image)
-                        <img src="{{ Str::startsWith($image, 'http') ? $image : asset('storage/' . $image) }}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-800" />
-                    @elseif($existing_image)
-                        <img src="{{ asset('storage/' . $existing_image) }}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-800" />
-                    @else
+                    <template x-if="imgUrl">
+                        <img :src="imgUrl" class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-800" />
+                    </template>
+                    <template x-if="!imgUrl">
                         <div class="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                    @endif
+                    </template>
                     
                     <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
                         Choose from Media Library
                     </button>
                     
-                    @if ($image || $existing_image)
-                        <button type="button" wire:click="removeImage" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
+                    <template x-if="imgUrl">
+                        <button type="button" @click="$wire.image = ''; $wire.existing_image = '';" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
                             Remove
                         </button>
-                    @endif
+                    </template>
                 </div>
                 <x-input-error :messages="$errors->get('image')" class="mt-1" />
             </div>

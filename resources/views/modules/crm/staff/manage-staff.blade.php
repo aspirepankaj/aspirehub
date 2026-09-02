@@ -15,12 +15,12 @@
 
         <!-- Back Button -->
         <div class="mb-4">
-            <button type="button" wire:click="closeStaffDetail" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
+            <a href="{{ route('admin.staff') }}" wire:navigate class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 Back to staff
-            </button>
+            </a>
         </div>
 
         <!-- Staff Header Card -->
@@ -95,14 +95,14 @@
         <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6">
             <nav class="flex space-x-8" aria-label="Tabs">
                 @foreach(['overview' => 'Overview', 'clients' => 'Clients', 'websites' => 'Websites', 'maintenance' => 'Maintenance', 'activity log' => 'Activity Log'] as $tabKey => $tabLabel)
-                    <button type="button" wire:click="setTab('{{ $tabKey }}')" class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                    <a href="{{ route('admin.staff.detail', ['id' => $staffDetails->id, 'tab' => $tabKey]) }}" wire:navigate class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
                         {{ $tabLabel }}
                         @if($tabKey === 'clients')
                             <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ $staffDetails->clients->count() }}</span>
                         @elseif($tabKey === 'websites')
                             <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ $staffWebsites->count() }}</span>
                         @endif
-                    </button>
+                    </a>
                 @endforeach
             </nav>
         </div>
@@ -560,7 +560,7 @@
                                 </td>
                                 <td class="px-3 py-3.5">
                                     <div class="flex items-center gap-3">
-                                        <div class="shrink-0">
+                                        <a href="{{ route('admin.staff.detail', ['id' => $staff->id]) }}" wire:navigate class="shrink-0">
                                             @if($staff->profile_image)
                                                 <img src="{{ asset('storage/' . $staff->profile_image) }}" alt="{{ $staff->user->name ?? 'Staff' }}" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400'>{{ $staff->getInitials() }}</div>`" />
                                             @else
@@ -568,9 +568,9 @@
                                                     {{ $staff->getInitials() }}
                                                 </div>
                                             @endif
-                                        </div>
+                                        </a>
                                         <div class="min-w-0 flex-1">
-                                            <button type="button" wire:click="viewStaffDetail({{ $staff->id }})" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block" title="{{ $staff->user->name ?? 'Deleted User' }}">{{ $staff->user->name ?? 'Deleted User' }}</button>
+                                            <a href="{{ route('admin.staff.detail', ['id' => $staff->id]) }}" wire:navigate class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block" title="{{ $staff->user->name ?? 'Deleted User' }}">{{ $staff->user->name ?? 'Deleted User' }}</a>
                                             <div class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal" title="{{ $staff->user->email ?? 'N/A' }}">{{ $staff->user->email ?? 'N/A' }}</div>
                                         </div>
                                     </div>
@@ -630,6 +630,23 @@
                                     {{ $staff->created_at->diffForHumans() }}
                                 </td>
                                 <td class="px-3 py-3.5 text-center whitespace-nowrap">
+                                    @php
+                                        $staffEditData = [
+                                            'id' => $staff->id,
+                                            'user_id' => $staff->user_id,
+                                            'name' => $staff->user->name ?? 'Deleted User',
+                                            'email' => $staff->user->email ?? '',
+                                            'company_name' => $staff->company_name ?? '',
+                                            'designation_ids' => $staff->designations->pluck('id')->toArray(),
+                                            'departments_list' => $staff->departments ?? ($staff->department ? [$staff->department] : []),
+                                            'profile_image' => $staff->profile_image ?? '',
+                                            'status' => $staff->status ?? 'active',
+                                            'notes' => $staff->notes ?? '',
+                                            'phones' => $staff->phones->isNotEmpty() 
+                                                ? $staff->phones->map(fn($p) => ['phone' => $p->phone, 'label' => $p->label])->toArray() 
+                                                : [['phone' => '', 'label' => 'Work']],
+                                        ];
+                                    @endphp
                                     <div class="inline-flex items-center justify-center gap-1.5 shrink-0">
                                         <a href="{{ route('impersonate.start', $staff->user_id) }}"
                                            class="inline-flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90 shrink-0"
@@ -637,7 +654,24 @@
                                            onclick="return confirm('Are you sure you want to login as {{ $staff->user->name ?? 'this staff member' }}?')">
                                             <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-6 h-6 shrink-0 opacity-80 hover:opacity-100 transition-opacity" alt="Switch Account" />
                                         </a>
-                                        <button type="button" wire:click="editStaff({{ $staff->id }})"
+                                        <button type="button" 
+                                                @click="
+                                                    const data = {{ Js::from($staffEditData) }};
+                                                    $wire.editingStaffId = data.id;
+                                                    $wire.editingUserId = data.user_id;
+                                                    $wire.name = data.name;
+                                                    $wire.email = data.email;
+                                                    $wire.password = '';
+                                                    $wire.company_name = data.company_name;
+                                                    $wire.designation_ids = data.designation_ids;
+                                                    $wire.departments_list = data.departments_list;
+                                                    $wire.existing_profile_image = data.profile_image;
+                                                    $wire.profile_image = '';
+                                                    $wire.status = data.status;
+                                                    $wire.notes = data.notes;
+                                                    $wire.phones = data.phones;
+                                                    $dispatch('open-modal', { name: 'edit-staff-modal' });
+                                                "
                                                 class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90 shrink-0"
                                                 title="Edit Staff Member">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -755,47 +789,59 @@
             </div>
 
             <!-- Phones Section -->
-            <div class="space-y-2 border-t border-slate-100 dark:border-slate-800/50 pt-3">
+            <div x-data="{
+                    phones: $wire.entangle('phones'),
+                    addPhone() {
+                        if (!this.phones) this.phones = [];
+                        if (this.phones.length < 5) {
+                            this.phones.push({ label: 'Work', phone: '' });
+                        }
+                    },
+                    removePhone(index) {
+                        if (this.phones.length > 1) {
+                            this.phones.splice(index, 1);
+                        }
+                    }
+                 }" class="space-y-2 border-t border-slate-100 dark:border-slate-800/50 pt-3">
                 <div class="flex items-center justify-between">
                     <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Phone Numbers</label>
-                    @if(count($phones) < 5)
-                        <button type="button" wire:click="addPhoneField" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1.5 active:scale-95">
+                    <template x-if="phones && phones.length < 5">
+                        <button type="button" @click="addPhone()" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1.5 active:scale-95">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                             Add Phone
                         </button>
-                    @else
+                    </template>
+                    <template x-if="phones && phones.length >= 5">
                         <span class="text-[10px] font-semibold text-amber-500 dark:text-amber-400 flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             Max 5 reached
                         </span>
-                    @endif
+                    </template>
                 </div>
                 
                 <div class="space-y-3">
-                    @foreach($phones as $index => $phoneItem)
-                        <div class="flex items-start gap-3" wire:key="add-phone-{{ $index }}">
+                    <template x-for="(phoneItem, index) in phones" :key="index">
+                        <div class="flex items-start gap-3">
                             <div class="w-1/3">
-                                <select wire:model="phones.{{ $index }}.label" class="block w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                                <select x-model="phoneItem.label" class="block w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
                                     <option value="Work">Work</option>
                                     <option value="Mobile">Mobile</option>
                                     <option value="Home">Home</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                <x-input-error :messages="$errors->get('phones.'.$index.'.label')" class="mt-1" />
                             </div>
                             <div class="flex-1 relative">
-                                <input wire:model="phones.{{ $index }}.phone" type="tel" placeholder="e.g. +1 555-0199" max="20" maxlength="20"
+                                <input x-model="phoneItem.phone" type="tel" placeholder="e.g. +1 555-0199" max="20" maxlength="20"
                                        oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
                                        class="block w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                                <x-input-error :messages="$errors->get('phones.'.$index.'.phone')" class="mt-1" />
                             </div>
-                            @if(count($phones) > 1)
-                                <button type="button" wire:click="removePhoneField({{ $index }})" class="p-2.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 self-center">
+                            <template x-if="phones.length > 1">
+                                <button type="button" @click="removePhone(index)" class="p-2.5 text-slate-400 hover:text-red-500 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 self-center">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
-                            @endif
+                            </template>
                         </div>
-                    @endforeach
+                    </template>
                 </div>
             </div>
 
@@ -844,30 +890,38 @@
     <x-admin.modal name="edit-staff-modal" title="Edit Staff" maxWidth="max-w-3xl">
         <div class="mt-2 flex flex-col gap-3">
             <!-- Profile Image -->
-            <div>
+            <div x-data="{
+                get imgUrl() {
+                    const path = $wire.profile_image || $wire.existing_profile_image;
+                    if (!path) return '';
+                    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) {
+                        return path;
+                    }
+                    return '/storage/' + path;
+                }
+            }">
                 <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Profile Image') }}</label>
                 <div class="mt-1.5 flex items-center gap-3">
-                    @if ($profile_image)
-                        <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'S', 0, 2)) }}</div>`" />
-                    @elseif ($existing_profile_image)
-                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'S', 0, 2)) }}</div>`" />
-                    @else
+                    <template x-if="imgUrl">
+                        <img :src="imgUrl" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+                    </template>
+                    <template x-if="!imgUrl">
                         <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                    @endif
+                    </template>
                     
                     <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
                         Choose from Media Library
                     </button>
 
-                    @if ($profile_image || $existing_profile_image)
-                        <button type="button" wire:click="removeProfileImage" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
+                    <template x-if="imgUrl">
+                        <button type="button" @click="$wire.profile_image = ''; $wire.existing_profile_image = '';" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
                             Remove
                         </button>
-                    @endif
+                    </template>
                 </div>
                 <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
             </div>
@@ -907,7 +961,7 @@
             <!-- Designation & Department -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">{{ __('Designations') }}</label>
+                    <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ __('Designations') }}</label>
                     <div class="mt-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 max-h-36 overflow-y-auto space-y-2">
                         @foreach($designations as $desg)
                             <label class="flex items-center gap-2 text-sm text-slate-750 dark:text-slate-300 cursor-pointer">
@@ -920,7 +974,7 @@
                     <x-input-error :messages="$errors->get('designation_ids')" class="mt-1" />
                 </div>
                 <div>
-                    <label class="block text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">{{ __('Departments') }}</label>
+                    <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ __('Departments') }}</label>
                     <div class="mt-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 max-h-36 overflow-y-auto space-y-2">
                         @foreach($departments as $d)
                             <label class="flex items-center gap-2 text-sm text-slate-750 dark:text-slate-300 cursor-pointer">
@@ -935,47 +989,59 @@
             </div>
 
             <!-- Phones Section (Edit) -->
-            <div class="space-y-2 border-t border-slate-100 dark:border-slate-800/50 pt-3.5">
+            <div x-data="{
+                    phones: $wire.entangle('phones'),
+                    addPhone() {
+                        if (!this.phones) this.phones = [];
+                        if (this.phones.length < 5) {
+                            this.phones.push({ label: 'Work', phone: '' });
+                        }
+                    },
+                    removePhone(index) {
+                        if (this.phones.length > 1) {
+                            this.phones.splice(index, 1);
+                        }
+                    }
+                 }" class="space-y-2 border-t border-slate-100 dark:border-slate-800/50 pt-3.5">
                 <div class="flex items-center justify-between">
                     <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">Phone Numbers</label>
-                    @if(count($phones) < 5)
-                        <button type="button" wire:click="addPhoneField" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1.5 active:scale-95">
+                    <template x-if="phones && phones.length < 5">
+                        <button type="button" @click="addPhone()" class="text-xs font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1.5 active:scale-95">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                             Add Phone
                         </button>
-                    @else
+                    </template>
+                    <template x-if="phones && phones.length >= 5">
                         <span class="text-[10px] font-semibold text-amber-500 dark:text-amber-400 flex items-center gap-1">
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             Max 5 reached
                         </span>
-                    @endif
+                    </template>
                 </div>
                 
                 <div class="space-y-3">
-                    @foreach($phones as $index => $phoneItem)
-                        <div class="flex items-start gap-3" wire:key="edit-phone-{{ $index }}">
+                    <template x-for="(phoneItem, index) in phones" :key="index">
+                        <div class="flex items-start gap-3">
                             <div class="w-1/3">
-                                <select wire:model="phones.{{ $index }}.label" class="block w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
+                                <select x-model="phoneItem.label" class="block w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900/45 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150">
                                     <option value="Work">Work</option>
                                     <option value="Mobile">Mobile</option>
                                     <option value="Home">Home</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                <x-input-error :messages="$errors->get('phones.'.$index.'.label')" class="mt-1" />
                             </div>
                             <div class="flex-1 relative">
-                                <input wire:model="phones.{{ $index }}.phone" type="tel" placeholder="e.g. +1 555-0199" max="20" maxlength="20"
+                                <input x-model="phoneItem.phone" type="tel" placeholder="e.g. +1 555-0199" max="20" maxlength="20"
                                        oninput="this.value = this.value.replace(/[^0-9+\-\s()]/g, '')"
                                        class="block w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
-                                <x-input-error :messages="$errors->get('phones.'.$index.'.phone')" class="mt-1" />
                             </div>
-                            @if(count($phones) > 1)
-                                <button type="button" wire:click="removePhoneField({{ $index }})" class="p-2.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 self-center">
+                            <template x-if="phones.length > 1">
+                                <button type="button" @click="removePhone(index)" class="p-2.5 text-slate-400 hover:text-red-500 transition-colors duration-150 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 self-center">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
-                            @endif
+                            </template>
                         </div>
-                    @endforeach
+                    </template>
                 </div>
             </div>
 

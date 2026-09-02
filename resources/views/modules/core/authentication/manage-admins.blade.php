@@ -13,7 +13,7 @@
         </p>
 
         {{-- Add Admin button --}}
-        <button type="button" wire:click="openAddModal"
+        <button type="button" @click="$wire.resetForm(); $dispatch('open-modal', { name: 'add-admin-modal' })"
                 style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95 whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -185,7 +185,31 @@
                                             </svg>
                                         </a>
                                     @endif
-                                    <button type="button" wire:click="editAdmin({{ $admin->id }})"
+                                    @php
+                                        $adminEditData = [
+                                            'id' => $admin->id,
+                                            'user_id' => $admin->user_id,
+                                            'name' => $admin->user->name ?? '',
+                                            'email' => $admin->user->email ?? '',
+                                            'phone' => $admin->phone ?? '',
+                                            'is_active' => $admin->is_active ? 1 : 0,
+                                            'profile_image' => $admin->profile_image ?? '',
+                                        ];
+                                    @endphp
+                                    <button type="button" 
+                                            @click="
+                                                const data = {{ Js::from($adminEditData) }};
+                                                $wire.editingAdminId = data.id;
+                                                $wire.editingUserId = data.user_id;
+                                                $wire.name = data.name;
+                                                $wire.email = data.email;
+                                                $wire.password = '';
+                                                $wire.phone = data.phone;
+                                                $wire.is_active = data.is_active;
+                                                $wire.existing_profile_image = data.profile_image;
+                                                $wire.profile_image = '';
+                                                $dispatch('open-modal', { name: 'edit-admin-modal' });
+                                            "
                                             class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition duration-150">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -313,30 +337,38 @@
     <x-admin.modal name="edit-admin-modal" title="Edit Admin" maxWidth="max-w-3xl">
         <div class="mt-2 flex flex-col gap-3">
             <!-- Profile Image -->
-            <div>
+            <div x-data="{
+                get imgUrl() {
+                    const path = $wire.profile_image || $wire.existing_profile_image;
+                    if (!path) return '';
+                    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) {
+                        return path;
+                    }
+                    return '/storage/' + path;
+                }
+            }">
                 <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Profile Image') }}</label>
                 <div class="mt-1.5 flex items-center gap-3">
-                    @if ($profile_image)
-                        <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'A', 0, 2)) }}</div>`" />
-                    @elseif ($existing_profile_image)
-                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400 font-bold'>{{ strtoupper(substr($name ?? 'A', 0, 2)) }}</div>`" />
-                    @else
+                    <template x-if="imgUrl">
+                        <img :src="imgUrl" class="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
+                    </template>
+                    <template x-if="!imgUrl">
                         <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-250 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                    @endif
+                    </template>
                     
                     <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">
                         Choose from Media Library
                     </button>
 
-                    @if ($profile_image || $existing_profile_image)
-                        <button type="button" wire:click="removeProfileImage" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
+                    <template x-if="imgUrl">
+                        <button type="button" @click="$wire.profile_image = ''; $wire.existing_profile_image = '';" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition shadow-sm">
                             Remove
                         </button>
-                    @endif
+                    </template>
                 </div>
                 <x-input-error :messages="$errors->get('profile_image')" class="mt-1" />
             </div>

@@ -17,22 +17,22 @@
 
     {{-- Tabs Switcher --}}
     <div class="flex border-b border-slate-200 dark:border-slate-800 mb-6 gap-2">
-        <button type="button" 
-                wire:click="$set('activeTab', 'client')"
+        <a href="{{ route('staff.documents', ['tab' => 'client']) }}" 
+                wire:navigate
                 class="px-4 py-3 text-sm font-bold border-b-2 transition-all duration-150 relative -mb-[2px]
                 {{ $activeTab === 'client' 
                     ? 'border-pink-500 text-pink-600 dark:text-pink-400 font-extrabold' 
                     : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }}">
             Client Documents
-        </button>
-        <button type="button" 
-                wire:click="$set('activeTab', 'website')"
+        </a>
+        <a href="{{ route('staff.documents', ['tab' => 'website']) }}" 
+                wire:navigate
                 class="px-4 py-3 text-sm font-bold border-b-2 transition-all duration-150 relative -mb-[2px]
                 {{ $activeTab === 'website' 
                     ? 'border-pink-500 text-pink-600 dark:text-pink-400 font-extrabold' 
                     : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }}">
             Website Documents
-        </button>
+        </a>
     </div>
 
     {{-- Filters Card --}}
@@ -55,9 +55,9 @@
             <div x-data="{ 
                     open: false, 
                     search: '',
-                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name])) }},
-                    select(id, name) {
-                        this.search = name;
+                    clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name ?? '', 'email' => strtolower($c->user->email ?? ''), 'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')'])) }},
+                    select(id, label) {
+                        this.search = label;
                         $wire.set('clientFilter', id);
                         this.open = false;
                     },
@@ -72,7 +72,7 @@
                             this.search = '';
                         } else {
                             const found = this.clients.find(c => c.id == val);
-                            this.search = found ? found.name : '';
+                            this.search = found ? found.label : '';
                         }
                     },
                     init() {
@@ -109,11 +109,12 @@
                      x-transition 
                      class="absolute z-[9999] w-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto">
                     <div class="p-1 space-y-0.5">
-                        <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
+                        <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
                             <button type="button" 
-                                    x-on:click="select(c.id, c.name)"
-                                    class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition">
+                                    x-on:click="select(c.id, c.label)"
+                                    class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition flex items-center justify-between gap-2">
                                 <span x-text="c.name"></span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-normal lowercase" x-text="'(' + c.email + ')'"></span>
                             </button>
                         </template>
                         <template x-if="clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length === 0">
@@ -429,9 +430,9 @@
                 <div x-data="{ 
                         open: false, 
                         search: '',
-                        clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name])) }},
-                        select(id, name) {
-                            this.search = name;
+                        clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name ?? '', 'email' => strtolower($c->user->email ?? ''), 'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')'])) }},
+                        select(id, label) {
+                            this.search = label;
                             $wire.set('client_id', id);
                             this.open = false;
                         },
@@ -441,7 +442,7 @@
                                 this.search = '';
                             } else {
                                 const found = this.clients.find(c => c.id == val);
-                                this.search = found ? found.name : '';
+                                this.search = found ? found.label : '';
                             }
                         },
                         init() {
@@ -455,7 +456,7 @@
                         <input type="text" 
                                x-model="search"
                                x-on:focus="open = true"
-                               placeholder="Type to search clients..."
+                               placeholder="Type to search clients by name or email..."
                                class="block w-full pl-3 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
                         
                         <button type="button" x-on:click="open = !open" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
@@ -470,11 +471,12 @@
                          x-transition 
                          class="absolute z-[9999] w-full mt-1 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-xl shadow-2xl max-h-48 overflow-y-auto">
                         <div class="p-1 space-y-0.5">
-                            <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
+                            <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
                                 <button type="button" 
-                                        x-on:click="select(c.id, c.name)"
-                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition">
+                                        x-on:click="select(c.id, c.label)"
+                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition flex items-center justify-between gap-2">
                                     <span x-text="c.name"></span>
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-normal lowercase" x-text="'(' + c.email + ')'"></span>
                                 </button>
                             </template>
                             <template x-if="clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length === 0">
@@ -616,9 +618,9 @@
                 <div x-data="{ 
                         open: false, 
                         search: '',
-                        clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name])) }},
-                        select(id, name) {
-                            this.search = name;
+                        clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name ?? '', 'email' => strtolower($c->user->email ?? ''), 'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')'])) }},
+                        select(id, label) {
+                            this.search = label;
                             $wire.set('client_id', id);
                             this.open = false;
                         },
@@ -628,7 +630,7 @@
                                 this.search = '';
                             } else {
                                 const found = this.clients.find(c => c.id == val);
-                                this.search = found ? found.name : '';
+                                this.search = found ? found.label : '';
                             }
                         },
                         init() {
@@ -642,7 +644,7 @@
                         <input type="text" 
                                x-model="search"
                                x-on:focus="open = true"
-                               placeholder="Type to search clients..."
+                               placeholder="Type to search clients by name or email..."
                                class="block w-full pl-3 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm" />
                         
                         <button type="button" x-on:click="open = !open" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
@@ -657,11 +659,12 @@
                          x-transition 
                          class="absolute z-[9999] w-full mt-1 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-xl shadow-2xl max-h-48 overflow-y-auto">
                         <div class="p-1 space-y-0.5">
-                            <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
+                            <template x-for="c in clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase()))" :key="c.id">
                                 <button type="button" 
-                                        x-on:click="select(c.id, c.name)"
-                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition">
+                                        x-on:click="select(c.id, c.label)"
+                                        class="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-300 hover:bg-pink-50 dark:hover:bg-pink-950/20 hover:text-pink-600 dark:hover:text-pink-400 transition flex items-center justify-between gap-2">
                                     <span x-text="c.name"></span>
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-normal lowercase" x-text="'(' + c.email + ')'"></span>
                                 </button>
                             </template>
                             <template x-if="clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length === 0">
