@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.staff')]
 class StaffClients extends Component
@@ -32,6 +33,8 @@ class StaffClients extends Component
     public string $selectedReportMonth = '';
     public $credentialsFile = null;
     public string $apiKey = '';
+
+    #[Url(as: 'tab')]
     public string $activeTab = 'overview';
     public string $activeViewTab = 'my_clients'; // 'my_clients' or 'all_clients'
 
@@ -53,6 +56,9 @@ class StaffClients extends Component
     {
         if ($id) {
             $this->selectedClientId = (int) $id;
+        }
+        if (request()->has('tab')) {
+            $this->activeTab = (string) request()->get('tab');
         }
     }
 
@@ -730,10 +736,11 @@ class StaffClients extends Component
             }
         } elseif ($accessToken && $propertyId && $integrationId === 'ga4') {
             try {
+                $gaStartDate = date('Y-m-01');
                 // Fetch reports in parallel using Http::pool
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
                     $pool->as('summary')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers'],
                             ['name' => 'screenPageViews'],
@@ -745,7 +752,7 @@ class StaffClients extends Component
                         'metricAggregations' => ['TOTAL']
                     ]),
                     $pool->as('pages')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'screenPageViews'],
                             ['name' => 'activeUsers']
@@ -754,7 +761,7 @@ class StaffClients extends Component
                         'limit' => 15
                     ]),
                     $pool->as('trafficSources')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'sessions'],
                             ['name' => 'bounceRate']
@@ -763,7 +770,7 @@ class StaffClients extends Component
                         'limit' => 15
                     ]),
                     $pool->as('devices')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers']
                         ],
@@ -771,7 +778,7 @@ class StaffClients extends Component
                         'limit' => 10
                     ]),
                     $pool->as('geo')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers'],
                             ['name' => 'sessions']
@@ -780,7 +787,7 @@ class StaffClients extends Component
                         'limit' => 15
                     ]),
                     $pool->as('keywords')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers'],
                             ['name' => 'sessions']

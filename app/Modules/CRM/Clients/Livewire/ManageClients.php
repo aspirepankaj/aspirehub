@@ -14,6 +14,7 @@ use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.admin')]
 class ManageClients extends Component
@@ -68,6 +69,8 @@ class ManageClients extends Component
 
     // Detail view state
     public ?int $selectedClientDetailId = null;
+
+    #[Url(as: 'tab')]
     public string $activeTab = 'overview';
 
     // Website Integrations state variables
@@ -102,6 +105,9 @@ class ManageClients extends Component
     {
         if ($id) {
             $this->selectedClientDetailId = (int) $id;
+        }
+        if (request()->has('tab')) {
+            $this->activeTab = (string) request()->get('tab');
         }
     }
 
@@ -531,14 +537,16 @@ class ManageClients extends Component
     /**
      * Save folder mappings for active client
      */
-    public function saveClickUpMapping(): void
+    public function saveClickUpMapping($clientId = null, $folderIds = null): void
     {
-        if (!$this->mappingClientId) {
+        $id = $clientId ?? $this->mappingClientId;
+        if (!$id) {
             return;
         }
 
-        $client = Client::findOrFail($this->mappingClientId);
-        $selectedIds = array_map('strval', array_values(array_filter($this->selectedClickUpFolderIds)));
+        $client = Client::findOrFail($id);
+        $rawFolderIds = $folderIds ?? $this->selectedClickUpFolderIds;
+        $selectedIds = array_map('strval', array_values(array_filter($rawFolderIds)));
 
         // 1. Unmap folders previously assigned to this client that are no longer selected
         ClickUpFolder::where('client_id', $client->id)
@@ -987,10 +995,11 @@ class ManageClients extends Component
             }
         } elseif ($accessToken && $propertyId && $integrationId === 'ga4') {
             try {
+                $gaStartDate = date('Y-m-01');
                 // Fetch reports in parallel using Http::pool
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
                     $pool->as('summary')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers'],
                             ['name' => 'screenPageViews'],
@@ -1002,7 +1011,7 @@ class ManageClients extends Component
                         'metricAggregations' => ['TOTAL']
                     ]),
                     $pool->as('pages')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'screenPageViews'],
                             ['name' => 'activeUsers']
@@ -1011,7 +1020,7 @@ class ManageClients extends Component
                         'limit' => 15
                     ]),
                     $pool->as('trafficSources')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'sessions'],
                             ['name' => 'bounceRate']
@@ -1020,7 +1029,7 @@ class ManageClients extends Component
                         'limit' => 15
                     ]),
                     $pool->as('devices')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers']
                         ],
@@ -1028,7 +1037,7 @@ class ManageClients extends Component
                         'limit' => 10
                     ]),
                     $pool->as('geo')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers'],
                             ['name' => 'sessions']
@@ -1037,7 +1046,7 @@ class ManageClients extends Component
                         'limit' => 15
                     ]),
                     $pool->as('keywords')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => '30daysAgo', 'endDate' => 'today']],
+                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
                         'metrics' => [
                             ['name' => 'activeUsers'],
                             ['name' => 'sessions']
@@ -2441,6 +2450,7 @@ class ManageClients extends Component
         }
 
         $mappingClient = $this->mappingClientId ? Client::with('user')->find($this->mappingClientId) : null;
+        $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
 
         return view('modules.crm.clients.manage-clients', [
             'clients'                  => $clients,
@@ -2459,6 +2469,7 @@ class ManageClients extends Component
             'clickUpStatuses'          => $clickUpStatuses ?? collect(),
             'clickUpSpaces'            => $clickUpSpaces,
             'clickUpFolders'           => $clickUpFolders,
+            'allClickUpFolders'        => $allClickUpFolders,
             'mappingClient'            => $mappingClient,
             'clientSupportTickets'     => $clientSupportTickets,
             'clientIntegrations'       => $clientIntegrations,

@@ -37,9 +37,14 @@
                 <div x-data="{ 
                         open: false, 
                         search: '',
-                        clients: {{ Js::from($clients->map(fn($c) => ['id' => $c->id, 'name' => $c->user->name])) }},
-                        select(id, name) {
-                            this.search = name;
+                        clients: {{ Js::from($clients->map(fn($c) => [
+                            'id' => $c->id, 
+                            'name' => $c->user->name ?? '', 
+                            'email' => strtolower($c->user->email ?? ''),
+                            'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')'
+                        ])) }},
+                        select(id, label) {
+                            this.search = label;
                             $wire.set('client_id', id);
                             this.open = false;
                         },
@@ -49,7 +54,7 @@
                                 this.search = '';
                             } else {
                                 const found = this.clients.find(c => c.id == val);
-                                this.search = found ? found.name : '';
+                                this.search = found ? found.label : '';
                             }
                         },
                         init() {
@@ -64,7 +69,7 @@
                                x-model="search"
                                x-on:focus="open = true"
                                x-on:click.outside="open = false"
-                               placeholder="Type to search client..."
+                               placeholder="Type to search client by name or email..."
                                class="block w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/55" />
                         
                         <!-- Toggle arrow -->
@@ -87,10 +92,11 @@
                          x-transition
                          class="absolute z-[9999] w-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-h-60 overflow-y-auto scrollbar-thin">
                         <template x-for="c in clients" :key="c.id">
-                            <div x-show="search === '' || c.name.toLowerCase().includes(search.toLowerCase())"
-                                 x-on:click="select(c.id, c.name)"
-                                 class="px-4 py-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer transition-colors font-medium dropdown-hover-item"
-                                 x-text="c.name">
+                            <div x-show="search === '' || c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase())"
+                                 x-on:click="select(c.id, c.label)"
+                                 class="px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 cursor-pointer transition-colors font-medium dropdown-hover-item flex items-center justify-between gap-2">
+                                <span class="font-semibold" x-text="c.name"></span>
+                                <span class="text-xs text-slate-400 dark:text-slate-500 font-normal lowercase" x-text="'(' + c.email + ')'"></span>
                             </div>
                         </template>
                     </div>
@@ -224,75 +230,91 @@
             </x-admin.card>
         </div>
 
-        {{-- Section 5: Plugins (Dynamic Table) --}}
-        <x-admin.card>
-            <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4 flex items-center justify-between">
-                <div>
-                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">5. Plugin Updates</h3>
-                    <p class="text-[11px] text-slate-400 dark:text-slate-500">Record all plugins upgraded or requiring attention</p>
+        {{-- Section 5: Plugins (Dynamic Table - Client-Side Alpine JS) --}}
+        <div x-data="{
+                plugins: $wire.entangle('plugins'),
+                addPlugin() {
+                    this.plugins.push({
+                        plugin_name: '',
+                        old_version: '',
+                        new_version: '',
+                        status: 'updated',
+                        notes: ''
+                    });
+                },
+                removePlugin(index) {
+                    this.plugins.splice(index, 1);
+                }
+             }">
+            <x-admin.card>
+                <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3 mb-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">5. Plugin Updates</h3>
+                        <p class="text-[11px] text-slate-400 dark:text-slate-500">Record all plugins upgraded or requiring attention</p>
+                    </div>
+                    <button type="button" @click="addPlugin()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-95 transition-all duration-150">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Plugin
+                    </button>
                 </div>
-                <button type="button" wire:click="addPluginField"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-95 transition-all duration-150">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Plugin
-                </button>
-            </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-100 dark:border-slate-800/70 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                            <th class="py-2.5 pr-3">Plugin Name</th>
-                            <th class="py-2.5 px-3 w-32">Old Version</th>
-                            <th class="py-2.5 px-3 w-32">New Version</th>
-                            <th class="py-2.5 px-3 w-48">Status</th>
-                            <th class="py-2.5 px-3">Notes</th>
-                            <th class="py-2.5 pl-3 w-16 text-right">Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/30">
-                        @foreach($plugins as $index => $plugin)
-                            <tr wire:key="plugin-field-{{ $index }}">
-                                <td class="py-2 pr-3">
-                                    <input type="text" wire:model="plugins.{{ $index }}.plugin_name" placeholder="e.g. Elementor Pro" required
-                                           class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
-                                </td>
-                                <td class="py-2 px-3">
-                                    <input type="text" wire:model="plugins.{{ $index }}.old_version" placeholder="e.g. 3.2.1"
-                                           class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
-                                </td>
-                                <td class="py-2 px-3">
-                                    <input type="text" wire:model="plugins.{{ $index }}.new_version" placeholder="e.g. 3.3.0"
-                                           class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
-                                </td>
-                                <td class="py-2 px-3">
-                                    <select wire:model="plugins.{{ $index }}.status"
-                                            class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none">
-                                        <option value="updated">Updated</option>
-                                        <option value="failed">Failed</option>
-                                        <option value="license_required">License Required</option>
-                                    </select>
-                                </td>
-                                <td class="py-2 px-3">
-                                    <input type="text" wire:model="plugins.{{ $index }}.notes" placeholder="Optional notes..."
-                                           class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
-                                </td>
-                                <td class="py-2 pl-3 text-right">
-                                    <button type="button" wire:click="removePluginField({{ $index }})"
-                                            class="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/40 transition">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </td>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-100 dark:border-slate-800/70 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                <th class="py-2.5 pr-3">Plugin Name</th>
+                                <th class="py-2.5 px-3 w-32">Old Version</th>
+                                <th class="py-2.5 px-3 w-32">New Version</th>
+                                <th class="py-2.5 px-3 w-48">Status</th>
+                                <th class="py-2.5 px-3">Notes</th>
+                                <th class="py-2.5 pl-3 w-16 text-right">Delete</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </x-admin.card>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/30">
+                            <template x-for="(plugin, index) in plugins" :key="index">
+                                <tr>
+                                    <td class="py-2 pr-3">
+                                        <input type="text" x-model="plugin.plugin_name" placeholder="e.g. Elementor Pro" required
+                                               class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
+                                    </td>
+                                    <td class="py-2 px-3">
+                                        <input type="text" x-model="plugin.old_version" placeholder="e.g. 3.2.1"
+                                               class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
+                                    </td>
+                                    <td class="py-2 px-3">
+                                        <input type="text" x-model="plugin.new_version" placeholder="e.g. 3.3.0"
+                                               class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
+                                    </td>
+                                    <td class="py-2 px-3">
+                                        <select x-model="plugin.status"
+                                                class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none">
+                                            <option value="updated">Updated</option>
+                                            <option value="failed">Failed</option>
+                                            <option value="license_required">License Required</option>
+                                        </select>
+                                    </td>
+                                    <td class="py-2 px-3">
+                                        <input type="text" x-model="plugin.notes" placeholder="Optional notes..."
+                                               class="block w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs focus:outline-none" />
+                                    </td>
+                                    <td class="py-2 pl-3 text-right">
+                                        <button type="button" @click="removePlugin(index)"
+                                                class="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/40 transition">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </x-admin.card>
+        </div>
 
         {{-- Section 6: Security Checks --}}
         <x-admin.card>
@@ -436,12 +458,14 @@
                 <div>
                     <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">13. Attachments</h3>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3" x-data>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-400">Share attachments with client?</span>
                     <button type="button" 
-                            wire:click="toggleAttachmentsVisibility"
-                            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $attachments_visible_to_client ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700' }}">
-                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $attachments_visible_to_client ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                            @click="$wire.attachments_visible_to_client = !$wire.attachments_visible_to_client"
+                            :class="$wire.attachments_visible_to_client ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700'"
+                            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                              :class="$wire.attachments_visible_to_client ? 'translate-x-5' : 'translate-x-0'"></span>
                     </button>
                 </div>
             </div>

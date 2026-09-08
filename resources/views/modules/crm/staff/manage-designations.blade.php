@@ -126,7 +126,21 @@
                             </td>
                             <td class="px-4 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <button type="button" wire:click="editDesignation({{ $designation->id }})"
+                                    @php
+                                        $designationEditData = [
+                                            'id' => $designation->id,
+                                            'name' => $designation->name ?? '',
+                                            'description' => $designation->description ?? '',
+                                        ];
+                                    @endphp
+                                    <button type="button" 
+                                            @click="
+                                                const data = {{ Js::from($designationEditData) }};
+                                                $wire.editingDesignationId = data.id;
+                                                $wire.name = data.name;
+                                                $wire.description = data.description;
+                                                $dispatch('open-modal', { name: 'edit-designation-modal' });
+                                            "
                                             class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition duration-150">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

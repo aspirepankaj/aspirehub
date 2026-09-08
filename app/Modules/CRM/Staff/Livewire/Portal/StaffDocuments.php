@@ -11,6 +11,7 @@ use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.staff')]
 class StaffDocuments extends Component
@@ -18,6 +19,7 @@ class StaffDocuments extends Component
     use WithPagination, WithFileUploads;
 
     // Tabs: 'client' or 'website'
+    #[Url(as: 'tab')]
     public string $activeTab = 'client';
 
     // Form fields

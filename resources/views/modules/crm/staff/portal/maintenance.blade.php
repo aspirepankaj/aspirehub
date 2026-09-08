@@ -143,7 +143,7 @@
                             #{{ $report->id }}
                         </td>
                         <td class="px-4 py-4">
-                            <a href="{{ route('staff.clients.detail', ['id' => $report->client->id]) }}" class="no-underline group">
+                            <a href="{{ route('staff.clients.detail', ['id' => $report->client->id]) }}" wire:navigate class="no-underline group">
                                 <div class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-650 dark:group-hover:text-indigo-400">
                                     {{ $report->client->user->name }}
                                 </div>
@@ -154,7 +154,7 @@
                         </td>
                         <td class="px-4 py-4">
                             <div class="font-semibold">
-                                <a href="{{ route('staff.websites.detail', ['id' => $report->website_id]) }}" class="text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                <a href="{{ route('staff.websites.detail', ['id' => $report->website_id]) }}" wire:navigate class="text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
                                     {{ $report->website->site_name }}
                                 </a>
                             </div>
@@ -179,7 +179,7 @@
                         <td class="px-4 py-4 text-center">
                             <div class="inline-flex items-center gap-1 justify-center">
                                 {{-- View button --}}
-                                <a href="{{ route('staff.maintenance.view', $report->id) }}"
+                                <a href="{{ route('staff.maintenance.view', $report->id) }}" wire:navigate
                                    class="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="View Report">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -188,7 +188,7 @@
                                 </a>
 
                                 {{-- Edit button --}}
-                                <a href="{{ route('staff.maintenance.edit', $report->id) }}"
+                                <a href="{{ route('staff.maintenance.edit', $report->id) }}" wire:navigate
                                    class="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="Edit Report">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

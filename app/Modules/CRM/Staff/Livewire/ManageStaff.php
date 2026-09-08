@@ -10,6 +10,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.admin')]
 class ManageStaff extends Component
@@ -46,6 +47,8 @@ class ManageStaff extends Component
 
     // Detail view state
     public ?int $selectedStaffDetailId = null;
+
+    #[Url(as: 'tab')]
     public string $activeTab = 'overview';
 
     // Dropdown options
@@ -58,6 +61,9 @@ class ManageStaff extends Component
     {
         if ($id) {
             $this->selectedStaffDetailId = (int) $id;
+        }
+        if (request()->has('tab')) {
+            $this->activeTab = (string) request()->get('tab');
         }
     }
 

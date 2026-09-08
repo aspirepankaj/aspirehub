@@ -17,6 +17,7 @@ class ClientMarketingReports extends Component
     public ?int $selectedWebsiteId = null;
     public string $activeReportIntegrationId = 'overview';
     public string $selectedMonth = '';
+    public string $compareMonth = '';
     
     // Loaded reports
     public array $activeReportData = [];
@@ -25,6 +26,12 @@ class ClientMarketingReports extends Component
     public array $youtubeData = [];
     public array $keywordData = [];
     public array $gtmData = [];
+    
+    // Comparison reports
+    public array $compareGa4Data = [];
+    public array $compareGscData = [];
+    public array $compareYoutubeData = [];
+    public array $compareKeywordData = [];
     
     // Dropdown list holders
     public $websites = [];
@@ -63,6 +70,11 @@ class ClientMarketingReports extends Component
         $this->loadReportData();
     }
 
+    public function updatedCompareMonth()
+    {
+        $this->loadReportData();
+    }
+
     protected function loadIntegrationsAndMonths()
     {
         if (!$this->selectedWebsiteId) {
@@ -84,10 +96,22 @@ class ClientMarketingReports extends Component
     {
         $this->availableMonths = $this->getAvailableReportMonths();
         
-        if (!empty($this->availableMonths)) {
-            $this->selectedMonth = $this->availableMonths[0]['value'];
-        } else {
-            $this->selectedMonth = date('Y') . '-' . Str::lower(date('F'));
+        $isCurrentMonthValid = false;
+        if (!empty($this->selectedMonth) && !empty($this->availableMonths)) {
+            foreach ($this->availableMonths as $monthOpt) {
+                if ($monthOpt['value'] === $this->selectedMonth) {
+                    $isCurrentMonthValid = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$isCurrentMonthValid) {
+            if (!empty($this->availableMonths)) {
+                $this->selectedMonth = $this->availableMonths[0]['value'];
+            } else {
+                $this->selectedMonth = date('Y') . '-' . Str::lower(date('F'));
+            }
         }
 
         $this->loadReportData();
@@ -101,6 +125,11 @@ class ClientMarketingReports extends Component
         $this->youtubeData = [];
         $this->keywordData = [];
         $this->gtmData = [];
+
+        $this->compareGa4Data = [];
+        $this->compareGscData = [];
+        $this->compareYoutubeData = [];
+        $this->compareKeywordData = [];
 
         if (!$this->selectedWebsiteId || !$this->selectedMonth) {
             return;
@@ -153,10 +182,31 @@ class ClientMarketingReports extends Component
                 $this->keywordData = json_decode(file_get_contents($keywordPath), true) ?? [];
             }
 
-            // Load GTM data
-            $gtmPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gtm/{$year}/{$month}.json");
-            if (file_exists($gtmPath)) {
-                $this->gtmData = json_decode(file_get_contents($gtmPath), true) ?? [];
+            // Load Comparison Data if selected
+            if (!empty($this->compareMonth)) {
+                $cParts = explode('-', $this->compareMonth);
+                $cYear = $cParts[0] ?? date('Y');
+                $cMonth = $cParts[1] ?? Str::lower(date('F'));
+
+                $cGa4Path = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/ga4/{$cYear}/{$cMonth}.json");
+                if (file_exists($cGa4Path)) {
+                    $this->compareGa4Data = json_decode(file_get_contents($cGa4Path), true) ?? [];
+                }
+
+                $cGscPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gsc/{$cYear}/{$cMonth}.json");
+                if (file_exists($cGscPath)) {
+                    $this->compareGscData = json_decode(file_get_contents($cGscPath), true) ?? [];
+                }
+
+                $cYoutubePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/youtube/{$cYear}/{$cMonth}.json");
+                if (file_exists($cYoutubePath)) {
+                    $this->compareYoutubeData = json_decode(file_get_contents($cYoutubePath), true) ?? [];
+                }
+
+                $cKeywordPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/keyword/{$cYear}/{$cMonth}.json");
+                if (file_exists($cKeywordPath)) {
+                    $this->compareKeywordData = json_decode(file_get_contents($cKeywordPath), true) ?? [];
+                }
             }
 
             // Set activeReportData if looking at specific tab
@@ -241,9 +291,50 @@ class ClientMarketingReports extends Component
         }
     }
 
+    public function renderCompareDiff($primaryVal, $compareVal, bool $higherIsBetter = true): string
+    {
+        if (empty($this->compareMonth)) {
+            return '';
+        }
+
+        $p = (float)preg_replace('/[^0-9.]/', '', (string)$primaryVal);
+        $c = (float)preg_replace('/[^0-9.]/', '', (string)$compareVal);
+
+        if ($c <= 0 && $p <= 0) {
+            return '';
+        }
+
+        if ($c <= 0) {
+            $pctStr = '+100%';
+            $isPos = true;
+        } else {
+            $pct = (($p - $c) / $c) * 100;
+            $pctStr = ($pct >= 0 ? '+' : '') . number_format($pct, 1) . '%';
+            $isPos = $higherIsBetter ? ($pct >= 0) : ($pct <= 0);
+        }
+
+        $badgeClass = $isPos ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400' : 'text-rose-600 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400';
+        $icon = $isPos ? '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>' : '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>';
+        $formattedCompare = is_numeric($compareVal) ? number_format((float)$compareVal) : $compareVal;
+
+        return '<div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-slate-400 dark:text-slate-500 text-[10px] font-medium">vs ' . $formattedCompare . '</span>
+            <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold ' . $badgeClass . '">' . $icon . $pctStr . '</span>
+        </div>';
+    }
+
     public function selectIntegration(string $typeId)
     {
         $this->activeReportIntegrationId = $typeId;
+        $this->compareMonth = '';
+        
+        $this->availableMonths = $this->getAvailableReportMonths();
+        if (!empty($this->availableMonths)) {
+            $this->selectedMonth = $this->availableMonths[0]['value'];
+        } else {
+            $this->selectedMonth = date('Y') . '-' . Str::lower(date('F'));
+        }
+
         $this->loadReportData();
     }
 
