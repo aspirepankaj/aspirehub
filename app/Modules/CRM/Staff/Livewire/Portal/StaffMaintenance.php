@@ -152,7 +152,15 @@ class StaffMaintenance extends Component
         $availableMonths = MaintenanceReport::select('maintenance_month')
             ->whereIn('client_id', $assignedClientIds)
             ->distinct()
-            ->pluck('maintenance_month');
+            ->pluck('maintenance_month')
+            ->sortByDesc(function ($month) {
+                try {
+                    return \Carbon\Carbon::parse($month)->timestamp;
+                } catch (\Exception $e) {
+                    return 0;
+                }
+            })
+            ->values();
 
         $totalReportsCount = MaintenanceReport::whereIn('client_id', $assignedClientIds)->count();
         $completedReportsCount = MaintenanceReport::whereIn('client_id', $assignedClientIds)->where('status', 'completed')->count();

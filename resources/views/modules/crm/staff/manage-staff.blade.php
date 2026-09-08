@@ -534,8 +534,8 @@
                             {{-- Select All checkbox --}}
                             <th class="px-3 py-3.5 w-10 text-center">
                                 <input type="checkbox"
-                                       wire:model.live="selectAll"
-                                       wire:change="toggleSelectAll({{ json_encode($pageIds) }})"
+                                       wire:model="selectAll"
+                                             x-on:change="const isChecked = $event.target.checked; Array.from(document.querySelectorAll('input[type=checkbox]')).filter(cb => cb.getAttribute('wire:model') && cb.getAttribute('wire:model').startsWith('selected')).forEach(cb => { if(cb.checked !== isChecked) { cb.checked = isChecked; cb.dispatchEvent(new window.Event('change')); } });"
                                        class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                             </th>
                             <th class="px-3 py-3.5">Staff Details</th>
@@ -554,7 +554,7 @@
                                 {{-- Row Checkbox --}}
                                 <td class="px-3 py-3.5 w-10 text-center">
                                     <input type="checkbox"
-                                           wire:model.live="selectedStaff"
+                                           wire:model="selectedStaff"
                                            value="{{ $staff->id }}"
                                            class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                                 </td>

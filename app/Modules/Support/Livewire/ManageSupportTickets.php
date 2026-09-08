@@ -196,9 +196,7 @@ class ManageSupportTickets extends Component
                   ->where('is_read_by_admin', false);
             }]);
 
-        if ($this->activeTab !== 'all') {
-            $query->where('status', $this->activeTab);
-        }
+        // activeTab filtering removed here to allow client-side filtering via Alpine.js
 
         if ($this->clientFilter) {
             $query->where('client_id', $this->clientFilter);

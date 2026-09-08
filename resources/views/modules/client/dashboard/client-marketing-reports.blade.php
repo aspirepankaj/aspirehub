@@ -4,12 +4,16 @@
         $isGscConnected = isset($integrations['gsc']);
         $isYoutubeConnected = isset($integrations['youtube']);
         $isKeywordConnected = isset($integrations['keyword']);
+        $isGbpConnected = isset($integrations['gbp']);
+        $isGadsConnected = isset($integrations['gads']);
 
         $hasGa4 = !empty($ga4Data) && !isset($ga4Data['error']);
         $hasGsc = !empty($gscData) && !isset($gscData['error']);
         $hasYoutube = !empty($youtubeData) && !isset($youtubeData['error']);
         $hasKeyword = !empty($keywordData) && !isset($keywordData['error']);
         $hasGtm = !empty($gtmData) && !isset($gtmData['error']);
+        $hasGbp = !empty($gbpData) && !isset($gbpData['error']);
+        $hasGads = !empty($gadsData) && !isset($gadsData['error']);
     @endphp
 
     <!-- Header Controls Widget -->
@@ -72,6 +76,12 @@
                     <span class="w-1.5 h-1.5 rounded-full {{ isset($integrations['gtm']) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                     <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Google Tag Manager</span>
                 </div>
+
+                <!-- GADS Badge -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $isGadsConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                    <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Google Ads</span>
+                </div>
             </div>
         </div>
     </div>
@@ -79,7 +89,7 @@
     <!-- Integration Selector Tabs / Date Filter Header -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <!-- Integration Tabs (Scrollable on mobile) -->
-        @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected)
+        @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected)
             <div class="w-full lg:w-auto overflow-x-auto pb-1 scrollbar-none max-w-full">
                 <div class="flex items-center p-1 bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur border border-slate-200/30 dark:border-slate-700/30 rounded-xl min-w-max">
                     <button wire:click="selectIntegration('overview')" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'overview' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
@@ -108,6 +118,18 @@
                         <button wire:click="selectIntegration('keyword')" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'keyword' ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
                             <svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                             <span>Keyword.com</span>
+                        </button>
+                    @endif
+                    @if($isGbpConnected)
+                        <button wire:click="selectIntegration('gbp')" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'gbp' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>Business Profile</span>
+                        </button>
+                    @endif
+                    @if($isGadsConnected)
+                        <button wire:click="selectIntegration('gads')" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'gads' ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
+                            <svg class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>Google Ads</span>
                         </button>
                     @endif
                 </div>
@@ -1524,6 +1546,96 @@
                 </div>
             </div>
             @endif
+        @endif
+    @endif
+
+    <!-- ==================== GOOGLE BUSINESS PROFILE VIEW ==================== -->
+    @if($activeReportIntegrationId === 'gbp')
+        @if($hasGbp)
+            <!-- GBP Report Section -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
+                    <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                        {{ number_format($activeReportData['summary']['views'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Searches</span>
+                    <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                        {{ number_format($activeReportData['summary']['searches'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Interactions</span>
+                    <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                        {{ number_format($activeReportData['summary']['interactions'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Calls</span>
+                    <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
+                        {{ number_format($activeReportData['summary']['calls'] ?? 0) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mb-6">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Google Business Profile Data Dump</h4>
+                <div class="overflow-x-auto">
+                    <pre class="text-[10px] text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{{ json_encode($activeReportData, JSON_PRETTY_PRINT) }}</pre>
+                </div>
+            </div>
+        @else
+            <div class="bg-white/40 dark:bg-slate-900/10 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl p-12 text-center">
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Google Business Profile Data Unavailable</h4>
+                <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Please ensure GBP has been configured correctly and synced for this month.</p>
+            </div>
+        @endif
+    @endif
+
+    <!-- ==================== GOOGLE ADS VIEW ==================== -->
+    @if($activeReportIntegrationId === 'gads')
+        @if($hasGads)
+            <!-- Google Ads Report Section -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="p-4 bg-teal-50/20 dark:bg-teal-950/10 border border-teal-100/30 dark:border-teal-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Clicks</span>
+                    <span class="text-lg font-extrabold text-teal-600 dark:text-teal-400">
+                        {{ number_format($activeReportData['summary']['clicks'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
+                    <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                        {{ number_format($activeReportData['summary']['impressions'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Cost</span>
+                    <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                        ${{ number_format(($activeReportData['summary']['cost_micros'] ?? 0) / 1000000, 2) }}
+                    </span>
+                </div>
+                <div class="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Conversions</span>
+                    <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
+                        {{ number_format($activeReportData['summary']['conversions'] ?? 0, 2) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mb-6">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Google Ads Data Dump</h4>
+                <div class="overflow-x-auto">
+                    <pre class="text-[10px] text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{{ json_encode($activeReportData, JSON_PRETTY_PRINT) }}</pre>
+                </div>
+            </div>
+        @else
+            <div class="bg-white/40 dark:bg-slate-900/10 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl p-12 text-center">
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Google Ads Data Unavailable</h4>
+                <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Please ensure Google Ads has been configured correctly and synced for this month.</p>
+            </div>
         @endif
     @endif
 </div>

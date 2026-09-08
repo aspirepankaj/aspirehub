@@ -51,7 +51,9 @@ class GoogleIntegrationController extends Controller
             'https://www.googleapis.com/auth/webmasters.readonly',
             'https://www.googleapis.com/auth/youtube.readonly',
             'https://www.googleapis.com/auth/yt-analytics.readonly',
-            'https://www.googleapis.com/auth/tagmanager.readonly'
+            'https://www.googleapis.com/auth/tagmanager.readonly',
+            'https://www.googleapis.com/auth/business.manage',
+            'https://www.googleapis.com/auth/adwords'
         ];
 
         $query = http_build_query([

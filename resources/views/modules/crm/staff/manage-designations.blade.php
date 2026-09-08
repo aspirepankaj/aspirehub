@@ -94,8 +94,8 @@
                     <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                         <th class="px-4 py-4 w-10">
                             <input type="checkbox"
-                                   wire:model.live="selectAll"
-                                   x-on:click="$wire.toggleSelectAll({{ json_encode($pageIds) }})"
+                                   wire:model="selectAll"
+                                             x-on:change="const isChecked = $event.target.checked; Array.from(document.querySelectorAll('input[type=checkbox]')).filter(cb => cb.getAttribute('wire:model') && cb.getAttribute('wire:model').startsWith('selected')).forEach(cb => { if(cb.checked !== isChecked) { cb.checked = isChecked; cb.dispatchEvent(new window.Event('change')); } });"
                                    class="w-4 h-4 rounded border-slate-300 dark:border-slate-650 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                         </th>
                         <th class="px-4 py-4">Designation Name</th>
@@ -109,7 +109,7 @@
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors {{ in_array($designation->id, $selectedDesignations) ? 'bg-indigo-50/40 dark:bg-indigo-900/10' : '' }}">
                             <td class="px-4 py-4 w-10">
                                 <input type="checkbox"
-                                       wire:model.live="selectedDesignations"
+                                       wire:model="selectedDesignations"
                                        value="{{ $designation->id }}"
                                        class="w-4 h-4 rounded border-slate-300 dark:border-slate-650 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                             </td>

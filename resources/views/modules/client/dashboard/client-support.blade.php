@@ -1,4 +1,4 @@
-<div @keydown.escape.window="$wire.closeTicket()" class="space-y-6">
+<div x-data="{ showCreateModal: @entangle('showCreateModal') }" @keydown.escape.window="$wire.closeTicket()" class="space-y-6">
     <!-- Top Bar Header -->
     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -13,7 +13,7 @@
             </p>
         </div>
 
-        <button type="button" wire:click="openCreateModal" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 transition shrink-0">
+        <button type="button" @click="showCreateModal = true" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 transition shrink-0">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
@@ -36,7 +36,7 @@
     <!-- Main Support Center Layout (2 Columns) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
         <!-- Left Sidebar: Ticket List & Search (4 Columns) -->
-        <div class="lg:col-span-4 space-y-4">
+        <div class="lg:col-span-4 space-y-4" x-data="{ localTab: 'all' }">
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm space-y-3">
                 <!-- Search Box -->
                 <div class="relative">
@@ -50,18 +50,20 @@
                 <!-- Status Filter Pills -->
                 <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1">
                     @foreach(['all' => 'All', 'open' => 'Open', 'in_progress' => 'In Progress', 'resolved' => 'Resolved', 'closed' => 'Closed'] as $statusKey => $statusLabel)
-                        <button type="button" wire:click="$set('activeTab', '{{ $statusKey }}')"
-                                class="px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition {{ $activeTab === $statusKey ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
+                        <button type="button" @click="localTab = '{{ $statusKey }}'"
+                                :class="localTab === '{{ $statusKey }}' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition">
                             {{ $statusLabel }}
                         </button>
                     @endforeach
                 </div>
             </div>
 
-            <!-- Tickets List Container -->
+            <!-- Tickets List -->
             <div class="space-y-2.5 max-h-[580px] overflow-y-auto pr-1">
                 @forelse($tickets as $t)
                     <div wire:click="selectTicket({{ $t->id }})"
+                         x-show="localTab === 'all' || localTab === '{{ $t->status }}'"
                          class="p-4 rounded-2xl border transition-all cursor-pointer {{ $selectedTicketId === $t->id ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500/50 shadow-md ring-1 ring-indigo-500/30' : 'bg-white/70 dark:bg-slate-900/50 border-slate-200/60 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700' }}">
                         <div class="flex items-start justify-between gap-2 mb-1.5">
                             <div class="flex items-center gap-1.5">
@@ -331,42 +333,46 @@
     </div>
 
     <!-- Create Ticket Modal (Mandatory Website Selection) -->
-    @if ($showCreateModal)
-        <div x-data="{
-                handleModalPaste(e) {
-                    const items = (e.clipboardData || window.clipboardData).items;
-                    const files = [];
-                    if (items) {
-                        for (let i = 0; i < items.length; i++) {
-                            if (items[i].kind === 'file') {
-                                const file = items[i].getAsFile();
-                                if (file) files.push(file);
-                            }
+    <div x-data="{
+            showCreateModal: @entangle('showCreateModal'),
+            handleModalPaste(e) {
+                const items = (e.clipboardData || window.clipboardData).items;
+                const files = [];
+                if (items) {
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].kind === 'file') {
+                            const file = items[i].getAsFile();
+                            if (file) files.push(file);
                         }
-                    }
-                    if (files.length > 0) {
-                        const fileInput = $refs.createFileInput;
-                        const dataTransfer = new DataTransfer();
-                        if (fileInput.files) {
-                            Array.from(fileInput.files).forEach(f => dataTransfer.items.add(f));
-                        }
-                        files.forEach(f => dataTransfer.items.add(f));
-                        fileInput.files = dataTransfer.files;
-                        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 }
-             }"
-             @paste="handleModalPaste($event)"
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 space-y-5">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                if (files.length > 0) {
+                    const fileInput = $refs.createFileInput;
+                    const dataTransfer = new DataTransfer();
+                    if (fileInput.files) {
+                        Array.from(fileInput.files).forEach(f => dataTransfer.items.add(f));
+                    }
+                    files.forEach(f => dataTransfer.items.add(f));
+                    fileInput.files = dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            }
+        }"
+        x-show="showCreateModal"
+        x-cloak
+        style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fadeIn p-4">
+        <div @click.outside="showCreateModal = false" class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden" @paste="handleModalPaste">
+            
+            <div class="p-5 overflow-y-auto max-h-[85vh]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
                         Raise New Support Ticket
                     </h3>
-                    <button type="button" wire:click="closeCreateModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">✕</button>
+                    <button type="button" @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">✕</button>
                 </div>
 
                 <form wire:submit.prevent="createTicket" class="space-y-4">
@@ -378,77 +384,77 @@
                         <select wire:model="website_id" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40">
                             <option value="">-- Choose your registered website --</option>
                             @foreach($websites as $web)
-                                <option value="{{ $web->id }}">{{ $web->site_name }}@if(!empty($web->domain) || !empty($web->url)) ({{ $web->domain ?: $web->url }})@endif</option>
+                                <option value="{{ $web->id }}">{{ $web->site_name }} ({{ parse_url($web->url, PHP_URL_HOST) ?? $web->url }})</option>
                             @endforeach
                         </select>
-                        @error('website_id') <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span> @enderror
+                        @error('website_id') <span class="text-[10px] text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Subject -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                             Ticket Subject <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" wire:model="subject" placeholder="e.g. Website Loading Issue or Content Update Request"
-                               class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40" />
-                        @error('subject') <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span> @enderror
+                        <input type="text" wire:model="subject" placeholder="e.g. Website Loading Issue or Content Update Request" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/40">
+                        @error('subject') <span class="text-[10px] text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Category & Priority Grid -->
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
-                            <select wire:model="category" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100">
+                            <select wire:model="category" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40">
                                 <option value="general">General Inquiry</option>
-                                <option value="technical">Technical Issue</option>
-                                <option value="maintenance">Maintenance</option>
-                                <option value="billing">Billing</option>
+                                <option value="bug">Bug Report / Error</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="content">Content Update</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Priority</label>
-                            <select wire:model="priority" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100">
+                            <select wire:model="priority" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40">
                                 <option value="low">Low</option>
                                 <option value="medium">Medium</option>
                                 <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Initial Message -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                             Description / Details <span class="text-red-500">*</span>
                         </label>
-                        <textarea wire:model="message" rows="3" placeholder="Describe your issue or request in detail (or paste image Ctrl+V)..."
-                                  class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40"></textarea>
-                        @error('message') <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span> @enderror
+                        <textarea wire:model="message" rows="4" placeholder="Describe your issue or request in detail (or paste image Ctrl+V)..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/40 resize-none"></textarea>
+                        @error('message') <span class="text-[10px] text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Attachments -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            Attach Files <span class="text-[10px] text-slate-400 font-normal">(Image, PDF, Excel, Video - Paste Ctrl+V enabled)</span>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                            Attach Files <span class="text-slate-400 font-normal">(Image, PDF, Excel, Video - Paste Ctrl+V enabled)</span>
                         </label>
-                        <input type="file" x-ref="createFileInput" wire:model="createAttachments" multiple class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/40 dark:file:text-indigo-300 cursor-pointer" />
-                        @error('createAttachments.*') <span class="text-red-500 text-[10px] block mt-1">{{ $message }}</span> @enderror
-
-                        @if (!empty($createAttachments))
-                            <div class="flex flex-wrap gap-2 mt-2">
-                                @foreach ($createAttachments as $idx => $file)
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold border border-indigo-200 dark:border-indigo-800">
-                                        📎 <span class="truncate max-w-[150px]">{{ $file->getClientOriginalName() }}</span>
-                                        <button type="button" wire:click="removeCreateAttachment({{ $idx }})" class="hover:text-red-500 font-black">✕</button>
-                                    </span>
-                                @endforeach
-                            </div>
-                        @endif
+                        <input type="file" wire:model="createAttachments" multiple x-ref="createFileInput" class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400" />
+                        <div wire:loading wire:target="createAttachments" class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 italic font-semibold">Uploading attachments...</div>
+                        @error('createAttachments.*') <span class="text-[10px] text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
+
+                    @if($createAttachments)
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            @foreach($createAttachments as $index => $file)
+                                <div class="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-lg px-2 py-1 relative group">
+                                    <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 truncate max-w-[120px]">{{ $file->getClientOriginalName() }}</span>
+                                    <button type="button" wire:click="removeCreateAttachment({{ $index }})" class="text-indigo-400 hover:text-red-500 transition-colors">
+                                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
+                                    <!-- Remove Overlay Loader -->
+                                    <div wire:loading wire:target="removeCreateAttachment({{ $index }})" class="absolute inset-0 bg-indigo-50/80 dark:bg-slate-900/80 rounded-lg flex items-center justify-center">
+                                        <svg class="w-3 h-3 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
                     <!-- Modal Actions -->
                     <div class="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800 pt-3">
-                        <button type="button" wire:click="closeCreateModal" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200">
+                        <button type="button" @click="showCreateModal = false" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200">
                             Cancel
                         </button>
                         <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20">
@@ -458,5 +464,4 @@
                 </form>
             </div>
         </div>
-    @endif
-</div>
+    </div>

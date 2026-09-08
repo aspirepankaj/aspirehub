@@ -318,15 +318,15 @@
                                     @if (!$integration['property_id'])
                                         <div class="mt-4 p-3 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-xl border border-indigo-100/30 dark:border-indigo-900/20 mb-4">
                                             <span class="text-[10px] font-bold text-indigo-650 dark:text-indigo-400 block mb-1.5 uppercase tracking-wider">Select GA4 Property</span>
-                                            <div class="flex gap-2">
-                                                <select wire:model.live="selectedPropertyId" wire:key="property-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
+                                                <select wire:model="selectedPropertyId" x-on:change="hasVal = $event.target.value !== ''" wire:key="property-select-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm">
                                                     <option value="">Select Property...</option>
                                                     @foreach ($this->getGA4Properties() as $prop)
                                                         <option value="{{ $prop['id'] }}">{{ $prop['name'] }}</option>
                                                     @endforeach
                                                 </select>
-                                                <button type="button" wire:click="savePropertyId('{{ $integration['id'] }}')" wire:key="property-save-btn-{{ $integration['id'] }}" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-[10px] rounded-lg transition shrink-0">
-                                                    Save
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveGA4Property" wire:key="property-save-btn-{{ $integration['id'] }}" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-750 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -338,17 +338,44 @@
                                     @endif
                                 @endif
 
+                                @if ($integration['id'] === 'gsc' && $isConnected)
+                                    @if (!$integration['property_id'])
+                                        <div class="mt-4 p-3 bg-teal-50/30 dark:bg-teal-950/10 rounded-xl border border-teal-100/30 dark:border-teal-900/20 mb-4">
+                                            <span class="text-[10px] font-bold text-teal-650 dark:text-teal-400 block mb-1.5 uppercase tracking-wider">Select GSC Site</span>
+                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
+                                                <select wire:model="selectedPropertyId" x-on:change="hasVal = $event.target.value !== ''" wire:key="gsc-site-select-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm">
+                                                    <option value="">Select Site...</option>
+                                                    @foreach ($this->getGSCSites() as $site)
+                                                        <option value="{{ $site['id'] }}">{{ $site['name'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveGSCSite('gsc')" wire:key="save-btn-gsc-{{ $integration['id'] }}" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-750 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
+                                            <span class="text-slate-455 dark:text-slate-550 font-medium">GSC Site</span>
+                                            <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[120px] truncate" title="{{ $integration['property_id'] }}">{{ $integration['property_id'] }}</span>
+                                        </div>
+                                    @endif
+                                @endif
+
                                 @if ($integration['id'] === 'youtube' && $isConnected)
                                     @if (!$integration['property_id'])
                                         <div class="mt-4 p-3 bg-red-50/30 dark:bg-red-950/10 rounded-xl border border-red-100/30 dark:border-red-900/20 mb-4">
                                             <span class="text-[10px] font-bold text-red-650 dark:text-red-400 block mb-1.5 uppercase tracking-wider">Select YouTube Channel</span>
-                                            <div class="flex gap-2">
-                                                <select wire:model.live="youtubeChannelId" wire:key="youtube-channel-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-red-500">
+                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
+                                                <select wire:model="youtubeChannelId" x-on:change="hasVal = $event.target.value !== ''" wire:key="youtube-channel-select-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-red-500 shadow-sm">
                                                     <option value="">Select Channel...</option>
                                                     @foreach ($this->getYoutubeChannels() as $channel)
                                                         <option value="{{ $channel['id'] }}">{{ $channel['name'] }}</option>
                                                     @endforeach
                                                 </select>
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveYoutubeChannel" wire:key="save-btn-youtube-{{ $integration['id'] }}" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-750 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
                                             </div>
                                         </div>
                                     @else
@@ -363,13 +390,16 @@
                                     @if (!$integration['property_id'])
                                         <div class="mt-4 p-3 bg-purple-50/30 dark:bg-purple-950/10 rounded-xl border border-purple-100/30 dark:border-purple-900/20 mb-4">
                                             <span class="text-[10px] font-bold text-purple-650 dark:text-purple-400 block mb-1.5 uppercase tracking-wider">Select Keyword Project</span>
-                                            <div class="flex gap-2">
-                                                <select wire:model.live="keywordProjectId" wire:key="keyword-project-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
+                                                <select wire:model="keywordProjectId" x-on:change="hasVal = $event.target.value !== ''" wire:key="keyword-project-select-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-purple-500 shadow-sm">
                                                     <option value="">Select Project...</option>
                                                     @foreach ($this->getKeywordProjects() as $project)
                                                         <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
                                                     @endforeach
                                                 </select>
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveKeywordProject" wire:key="save-btn-keyword-{{ $integration['id'] }}" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-750 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
                                             </div>
                                         </div>
                                     @else
@@ -384,18 +414,45 @@
                                     @if (!$integration['property_id'])
                                         <div class="mt-4 p-3 bg-teal-50/30 dark:bg-teal-950/10 rounded-xl border border-teal-100/30 dark:border-teal-900/20 mb-4">
                                             <span class="text-[10px] font-bold text-teal-650 dark:text-teal-400 block mb-1.5 uppercase tracking-wider">Select GTM Container</span>
-                                            <div class="flex gap-2">
-                                                <select wire:model.live="gtmContainerId" wire:key="gtm-container-select-{{ $integration['id'] }}" class="flex-1 text-[11px] rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-teal-500">
+                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
+                                                <select wire:model="gtmContainerId" x-on:change="hasVal = $event.target.value !== ''" wire:key="gtm-container-select-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm">
                                                     <option value="">Select Container...</option>
                                                     @foreach ($this->getGtmContainers() as $container)
                                                         <option value="{{ $container['id'] }}">{{ $container['name'] }}</option>
                                                     @endforeach
                                                 </select>
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveGtmContainer" wire:key="save-btn-gtm-{{ $integration['id'] }}" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-750 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
                                             </div>
                                         </div>
                                     @else
                                         <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
                                             <span class="text-slate-455 dark:text-slate-550 font-medium">GTM Container ID</span>
+                                            <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[120px] truncate" title="{{ $integration['property_id'] }}">{{ $integration['property_id'] }}</span>
+                                        </div>
+                                    @endif
+                                @endif
+
+                                @if ($integration['id'] === 'gbp' && $isConnected)
+                                    @if (!$integration['property_id'])
+                                        <div class="mt-4 p-3 bg-blue-50/30 dark:bg-blue-950/10 rounded-xl border border-blue-100/30 dark:border-blue-900/20 mb-4">
+                                            <span class="text-[10px] font-bold text-blue-650 dark:text-blue-400 block mb-1.5 uppercase tracking-wider">GBP Location ID</span>
+                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
+                                                <select wire:model="selectedPropertyId" x-on:change="hasVal = $event.target.value !== ''" wire:key="gbp-location-select-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm">
+                                                    <option value="">Select Location...</option>
+                                                    @foreach ($this->getGBPLocations() as $location)
+                                                        <option value="{{ $location['id'] }}">{{ $location['name'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="savePropertyId('gbp')" wire:key="save-btn-gbp-{{ $integration['id'] }}" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-750 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
+                                            <span class="text-slate-455 dark:text-slate-550 font-medium">GBP Location ID</span>
                                             <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[120px] truncate" title="{{ $integration['property_id'] }}">{{ $integration['property_id'] }}</span>
                                         </div>
                                     @endif
@@ -435,12 +492,18 @@
                                     @else
                                         <!-- Connected stage -->
                                         <div class="w-full flex flex-col gap-2.5 mt-auto">
-                                            @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword', 'gtm']) && !empty($integration['property_id']))
+                                            @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword', 'gtm', 'gbp']) && !empty($integration['property_id']))
                                                 <button type="button" 
                                                         wire:click="openReportModal('{{ $integration['id'] }}')"
-                                                        class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">
-                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                        wire:loading.attr="disabled"
+                                                        wire:target="openReportModal('{{ $integration['id'] }}')"
+                                                        class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                    <svg wire:loading.remove wire:target="openReportModal('{{ $integration['id'] }}')" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                         <path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/>
+                                                    </svg>
+                                                    <svg wire:loading wire:target="openReportModal('{{ $integration['id'] }}')" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
                                                     View Full Report
                                                 </button>
@@ -563,7 +626,7 @@
 
                 <!-- View Report Modal -->
                 @if ($showReportModal)
-                    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-slate-905/60 backdrop-blur-sm animate-fadeIn">
+                    <div x-data x-show="$wire.showReportModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none bg-slate-905/60 backdrop-blur-sm animate-fadeIn">
                         <div class="relative w-full max-w-4xl mx-auto my-6 p-4">
                             <div class="relative flex flex-col w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl outline-none focus:outline-none max-h-[90vh] overflow-y-auto">
                                 <!-- Modal Header -->
@@ -582,12 +645,14 @@
                                                 Keyword.com - Detailed Report
                                             @elseif($activeReportIntegrationId === 'gtm')
                                                 Google Tag Manager - Container Summary
+                                            @elseif($activeReportIntegrationId === 'gbp')
+                                                Google Business Profile - Detailed Report
                                             @else
                                                 Google Analytics 4 - Detailed Report
                                             @endif
                                         </h3>
                                         <p class="text-[11px] text-slate-400 mt-1">
-                                            Property ID: <span class="font-semibold text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['property_id'] ?? '—' }}</span> &bull; Source: <span class="text-slate-655 dark:text-slate-350">{{ $activeReportData['metadata']['source'] ?? '—' }}</span>
+                                            Property ID: <span class="font-semibold text-slate-655 dark:text-slate-350">{{ !empty($activeReportPropertyId) ? $activeReportPropertyId : ($activeReportData['metadata']['property_id'] ?? '—') }}</span> &bull; Source: <span class="text-slate-655 dark:text-slate-350">{{ $activeReportIntegrationId ? strtoupper($activeReportIntegrationId) : ($activeReportData['metadata']['source'] ?? '—') }}</span>
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-3">
@@ -600,7 +665,7 @@
                                                  @endforeach
                                              </select>
                                          </div>
-                                        <button type="button" wire:click="closeReportModal" class="text-slate-400 hover:text-slate-655 dark:hover:text-slate-250 focus:outline-none transition p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                                        <button type="button" x-on:click="$wire.showReportModal = false;" class="text-slate-400 hover:text-slate-655 dark:hover:text-slate-250 focus:outline-none transition p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
@@ -1252,7 +1317,7 @@
                                 
                                 <!-- Modal Footer -->
                                 <div class="flex items-center justify-end p-4 border-t border-slate-100 dark:border-slate-800/60 rounded-b-3xl sticky bottom-0 bg-white dark:bg-slate-900 z-10">
-                                    <button type="button" wire:click="closeReportModal" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition">
+                                    <button type="button" x-on:click="$wire.showReportModal = false;" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition">
                                         Close Report
                                     </button>
                                 </div>

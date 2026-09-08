@@ -81,12 +81,15 @@ class ManageClients extends Component
     public string $activeConfigIntegrationId = '';
     public string $selectedPropertyId = '';
     public string $youtubeChannelId = '';
+    public string $googleAdsAccountId = '';
+    public string $googleAdsDeveloperToken = '';
 
     // Report Modal State
     public bool $showReportModal = false;
     public string $activeReportIntegrationId = '';
     public array $activeReportData = [];
     public string $selectedReportMonth = '';
+    public string $activeReportPropertyId = '';
 
     // ClickUp Mapping State
     public ?int $mappingClientId = null;
@@ -614,6 +617,74 @@ class ManageClients extends Component
         $this->credentialsFile = null;
     }
 
+
+
+    public function getGoogleAdsAccounts(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'gads')
+            ->first();
+
+        if (!$integration) {
+            return [];
+        }
+
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
+
+        $apiCredentials = $integration->api_credentials ?? [];
+        $developerToken = $apiCredentials['developer_token'] ?? env('GOOGLE_ADS_DEVELOPER_TOKEN', '');
+        if (empty($developerToken)) {
+            \Illuminate\Support\Facades\Log::error('Missing Developer Token in api_credentials and .env for listing accounts.');
+            return [];
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->withHeaders(['developer-token' => $developerToken])
+                ->timeout(15)
+                ->get('https://googleads.googleapis.com/v17/customers:listAccessibleCustomers');
+
+            if ($response->successful()) {
+                $resourceNames = $response->json('resourceNames') ?? [];
+                $accountsList = [];
+                
+                foreach ($resourceNames as $resourceName) {
+                    $accountId = str_replace('customers/', '', $resourceName);
+                    $formattedId = substr($accountId, 0, 3) . '-' . substr($accountId, 3, 3) . '-' . substr($accountId, 6);
+                    $accountsList[] = [
+                        'id' => $accountId,
+                        'name' => "Google Ads Account ({$formattedId})"
+                    ];
+                }
+                
+                return $accountsList;
+            } else {
+                \Illuminate\Support\Facades\Log::error('Google Ads Accounts Fetch Failed: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Google Ads Accounts Exception: ' . $e->getMessage());
+        }
+
+        return [];
+    }
+
+    public function saveGoogleAdsAccount(): void
+    {
+        $this->savePropertyId($this->activeConfigIntegrationId);
+    }
+
+    public function updatedGoogleAdsAccountId($value): void
+    {
+        $this->selectedPropertyId = $value;
+    }
+
     public function saveCredentials(): void
     {
         if (!$this->selectedWebsiteId || !$this->activeConfigIntegrationId) {
@@ -665,6 +736,13 @@ class ManageClients extends Component
                 } else {
                     throw new \Exception("Missing 'client_id' or 'client_secret' in credentials JSON file.");
                 }
+            }
+
+            if ($this->activeConfigIntegrationId === 'gads') {
+                if (empty($this->googleAdsDeveloperToken)) {
+                    throw new \Exception("Google Ads Developer Token is required.");
+                }
+                $parsedData['developer_token'] = $this->googleAdsDeveloperToken;
             }
 
             // Create local storage directory structure and write files
@@ -1560,6 +1638,140 @@ class ManageClients extends Component
                 \Illuminate\Support\Facades\Log::error('GTM API Exception: ' . $e->getMessage());
                 $reportData = ['error' => 'GTM API failed. Please ensure the container ID is correct.'];
             }
+        } elseif ($accessToken && $propertyId && $integrationId === 'gbp') {
+            try {
+                $locationId = $propertyId;
+                if (!str_starts_with($locationId, 'locations/')) {
+                    $locationId = 'locations/' . $locationId;
+                }
+        
+                $url = "https://businessprofileperformance.googleapis.com/v1/{$locationId}:fetchMultiDailyMetricsTimeSeries";
+                
+                $response = \Illuminate\Support\Facades\Http::withToken($accessToken)->get($url, [
+                    'dailyMetrics' => [
+                        'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
+                        'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
+                        'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
+                        'BUSINESS_IMPRESSIONS_MOBILE_SEARCH',
+                        'CALL_CLICKS',
+                        'WEBSITE_CLICKS',
+                        'BUSINESS_DIRECTION_REQUESTS'
+                    ],
+                    'dailyRange.startDate.year' => (int)date('Y', strtotime($startDateStr)),
+                    'dailyRange.startDate.month' => (int)date('m', strtotime($startDateStr)),
+                    'dailyRange.startDate.day' => (int)date('d', strtotime($startDateStr)),
+                    'dailyRange.endDate.year' => (int)date('Y', strtotime($endDateStr)),
+                    'dailyRange.endDate.month' => (int)date('m', strtotime($endDateStr)),
+                    'dailyRange.endDate.day' => (int)date('d', strtotime($endDateStr)),
+                ]);
+        
+                if ($response->successful()) {
+                    $data = $response->json();
+                    
+                    // Format the data for the UI
+                    $totalViews = 0;
+                    $interactions = 0;
+                    $calls = 0;
+        
+                    if (isset($data['multiDailyMetricTimeSeries'])) {
+                        foreach ($data['multiDailyMetricTimeSeries'] as $series) {
+                            $metric = $series['dailyMetric'];
+                            $count = 0;
+                            
+                            if (isset($series['timeSeries']['datedValues'])) {
+                                foreach ($series['timeSeries']['datedValues'] as $value) {
+                                    $count += (int)($value['value'] ?? 0);
+                                }
+                            }
+        
+                            if (str_starts_with($metric, 'BUSINESS_IMPRESSIONS_')) {
+                                $totalViews += $count;
+                            }
+                            
+                            if (in_array($metric, ['CALL_CLICKS', 'WEBSITE_CLICKS', 'BUSINESS_DIRECTION_REQUESTS'])) {
+                                $interactions += $count;
+                            }
+        
+                            if ($metric === 'CALL_CLICKS') {
+                                $calls += $count;
+                            }
+                        }
+                    }
+        
+                    $reportData = [
+                        'summary' => [
+                            'views' => $totalViews,
+                            'searches' => (int)($totalViews * 0.4), // Proxy
+                            'interactions' => $interactions,
+                            'calls' => $calls,
+                        ],
+                        'raw' => $data
+                    ];
+                } else {
+                    $errorMsg = $response->json('error.message') ?? 'Please ensure the Location ID is correct.';
+                    \Illuminate\Support\Facades\Log::warning('GBP API call failed: ' . $response->body());
+                    $reportData = ['error' => 'GBP API failed: ' . $errorMsg];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('GBP API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'GBP API failed. Please ensure the Location ID is correct.'];
+            }
+        } elseif ($accessToken && $propertyId && $integrationId === 'gads') {
+            try {
+                $apiCredentials = $integration->api_credentials ?? [];
+                $developerToken = $apiCredentials['developer_token'] ?? env('GOOGLE_ADS_DEVELOPER_TOKEN', '');
+                
+                if (empty($developerToken)) {
+                    throw new \Exception("Google Ads Developer Token is missing.");
+                }
+
+                $customerId = str_replace('-', '', $propertyId);
+                $url = "https://googleads.googleapis.com/v17/customers/{$customerId}/googleAds:search";
+                $query = "SELECT metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM campaign WHERE segments.date >= '{$startDateStr}' AND segments.date <= '{$endDateStr}'";
+
+                $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                    ->withHeaders([
+                        'developer-token' => $developerToken,
+                        'login-customer-id' => $customerId
+                    ])
+                    ->post($url, ['query' => $query]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    
+                    $clicks = 0;
+                    $impressions = 0;
+                    $costMicros = 0;
+                    $conversions = 0;
+
+                    if (isset($data['results'])) {
+                        foreach ($data['results'] as $row) {
+                            $metrics = $row['metrics'] ?? [];
+                            $clicks += (int)($metrics['clicks'] ?? 0);
+                            $impressions += (int)($metrics['impressions'] ?? 0);
+                            $costMicros += (int)($metrics['costMicros'] ?? 0);
+                            $conversions += (float)($metrics['conversions'] ?? 0);
+                        }
+                    }
+
+                    $reportData = [
+                        'summary' => [
+                            'clicks' => $clicks,
+                            'impressions' => $impressions,
+                            'cost' => round($costMicros / 1000000, 2),
+                            'conversions' => $conversions,
+                        ],
+                        'raw' => $data
+                    ];
+                } else {
+                    $errorMsg = $response->json('error.message') ?? 'Please ensure the Customer ID is correct.';
+                    \Illuminate\Support\Facades\Log::warning('Google Ads API call failed: ' . $response->body());
+                    $reportData = ['error' => 'Google Ads API failed: ' . $errorMsg];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Google Ads API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'Google Ads API failed: ' . $e->getMessage()];
+            }
         } else {
             if ($integrationId === 'gsc') {
                 $reportData = ['error' => 'Google Search Console API failed. Please ensure the property ID is correct and has data.'];
@@ -1569,6 +1781,10 @@ class ManageClients extends Component
                 $reportData = ['error' => 'Keyword.com API failed. Please ensure the API Key and Project ID are correct.'];
             } elseif ($integrationId === 'gtm') {
                 $reportData = ['error' => 'Google Tag Manager API failed. Please ensure the container ID is correct.'];
+            } elseif ($integrationId === 'gbp') {
+                $reportData = ['error' => 'Google Business Profile API failed. Please ensure the Location ID is selected and correct.'];
+            } elseif ($integrationId === 'gads') {
+                $reportData = ['error' => 'Google Ads API failed. Please ensure the Customer ID is selected and correct.'];
             } else {
                 $reportData = ['error' => 'Google Analytics 4 API failed. Please ensure the property ID is correct and has data.'];
             }
@@ -1709,6 +1925,9 @@ class ManageClients extends Component
 
         $this->activeReportIntegrationId = $integrationId;
         
+        $creds = $integration->auth_credentials ?? [];
+        $this->activeReportPropertyId = $creds['property_id'] ?? ($creds['site_url'] ?? ($creds['channel_id'] ?? ($creds['project_id'] ?? ($creds['container_id'] ?? ($creds['location_id'] ?? '')))));
+
         $year = date('Y');
         $monthFull = \Illuminate\Support\Str::lower(date('F'));
         $this->selectedReportMonth = "{$year}-{$monthFull}";
@@ -1748,6 +1967,7 @@ class ManageClients extends Component
     {
         $this->showReportModal = false;
         $this->activeReportIntegrationId = '';
+        $this->activeReportPropertyId = '';
         $this->activeReportData = [];
         $this->selectedReportMonth = '';
     }
@@ -2083,6 +2303,65 @@ class ManageClients extends Component
         ];
     }
 
+    public function getGBPLocations(): array
+    {
+        if (!$this->selectedWebsiteId) {
+            return [];
+        }
+
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', 'gbp')
+            ->first();
+
+        if (!$integration) {
+            return [];
+        }
+
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                ->timeout(15)
+                ->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
+
+            if ($response->successful()) {
+                $accounts = $response->json('accounts') ?? [];
+                $locationsList = [];
+                
+                foreach ($accounts as $account) {
+                    $accountId = $account['name'];
+                    
+                    $locResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                        ->timeout(15)
+                        ->get("https://mybusinessbusinessinformation.googleapis.com/v1/{$accountId}/locations", [
+                            'readMask' => 'name,title'
+                        ]);
+                        
+                    if ($locResponse->successful()) {
+                        $locations = $locResponse->json('locations') ?? [];
+                        foreach ($locations as $location) {
+                            $locationsList[] = [
+                                'id' => str_replace('locations/', '', $location['name']),
+                                'name' => ($location['title'] ?? 'Unknown Location')
+                            ];
+                        }
+                    }
+                }
+                
+                return $locationsList;
+            } else {
+                \Illuminate\Support\Facades\Log::error('GBP Locations API Fetch Failed: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('GBP Locations API Exception: ' . $e->getMessage());
+        }
+
+        return [];
+    }
+
     public string $keywordProjectId = '';
 
     public function getKeywordProjects(): array
@@ -2136,7 +2415,7 @@ class ManageClients extends Component
     public function updatedKeywordProjectId($value): void
     {
         if (empty($value)) return;
-        $this->saveKeywordProject();
+        // $this->saveKeywordProject();
     }
 
     public function savePropertyId(string $integrationId): void
@@ -2195,7 +2474,7 @@ class ManageClients extends Component
         $integrationId = $isGSC ? 'gsc' : 'ga4';
 
         if ($isGSC) {
-            $this->saveGSCSite($integrationId);
+            // $this->saveGSCSite($integrationId);
         }
     }
 
@@ -2219,7 +2498,7 @@ class ManageClients extends Component
         if (empty($value) || !$this->selectedWebsiteId) {
             return;
         }
-        $this->saveYoutubeChannel();
+        // $this->saveYoutubeChannel();
     }
 
     public function render(ClickUpService $clickUpService)
@@ -2341,6 +2620,7 @@ class ManageClients extends Component
                     $types = [
                         'ga4' => ['name' => 'Google Analytics 4', 'category' => 'Analytics'],
                         'gsc' => ['name' => 'Google Search Console', 'category' => 'SEO'],
+                        'gbp' => ['name' => 'Google Business Profile', 'category' => 'Marketing'],
                         'gads' => ['name' => 'Google Ads', 'category' => 'Marketing'],
                         'youtube' => ['name' => 'YouTube', 'category' => 'Video Marketing'],
                         'keyword' => ['name' => 'Keyword.com', 'category' => 'SEO Ranking'],
@@ -2350,6 +2630,32 @@ class ManageClients extends Component
                     foreach ($types as $typeId => $meta) {
                         $dbRecord = $existingIntegrations->get($typeId);
                         if ($dbRecord) {
+                            $reportData = [];
+                            if ($dbRecord->status === 'connected') {
+                                try {
+                                    $year = date('Y');
+                                    $monthFull = \Illuminate\Support\Str::lower(date('F'));
+                                    
+                                    $userName = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($clientDetails->user->name ?? 'client'));
+                                    $emailParts = explode('@', $clientDetails->user->email ?? '');
+                                    $emailPrefix = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($emailParts[0] ?? ''));
+                                    $clientFolder = "{$userName}-{$emailPrefix}";
+                                    
+                                    $websiteRecord = $clientWebsites->where('id', $this->selectedWebsiteId)->first();
+                                    $websiteFolder = $websiteRecord ? \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($websiteRecord->site_name)) : '';
+                                    if (empty($websiteFolder)) {
+                                        $websiteFolder = 'site-' . $this->selectedWebsiteId;
+                                    }
+                                    
+                                    $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$typeId}/{$year}/{$monthFull}.json");
+                                    if (file_exists($filePath)) {
+                                        $reportData = json_decode(file_get_contents($filePath), true) ?? [];
+                                    }
+                                } catch (\Exception $e) {
+                                    \Illuminate\Support\Facades\Log::error("Error preloading report JSON file for {$typeId}: " . $e->getMessage());
+                                }
+                            }
+
                             $clientIntegrations[] = [
                                 'id' => $typeId,
                                 'db_id' => $dbRecord->id,
@@ -2364,6 +2670,7 @@ class ManageClients extends Component
                                 'sites_total' => 1,
                                 'account_identifier' => !empty($dbRecord->account_identifier) ? $dbRecord->account_identifier : ($clientDetails->user->email ?? 'Connected Account'),
                                 'property_id' => $dbRecord->auth_credentials['property_id'] ?? null,
+                                'report_data' => $reportData,
                             ];
                         } else {
                             $clientIntegrations[] = [
@@ -2545,7 +2852,7 @@ class ManageClients extends Component
         if (empty($value) || !$this->selectedWebsiteId) {
             return;
         }
-        $this->saveGtmContainer();
+        // $this->saveGtmContainer();
     }
 
 }

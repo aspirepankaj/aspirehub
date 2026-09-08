@@ -137,7 +137,15 @@ class ManageMaintenanceReports extends Component
         // Dynamic list of months from db to filter
         $availableMonths = MaintenanceReport::select('maintenance_month')
             ->distinct()
-            ->pluck('maintenance_month');
+            ->pluck('maintenance_month')
+            ->sortByDesc(function ($month) {
+                try {
+                    return \Carbon\Carbon::parse($month)->timestamp;
+                } catch (\Exception $e) {
+                    return 0;
+                }
+            })
+            ->values();
 
         $totalReportsCount = MaintenanceReport::count();
         $reportsThisMonthCount = MaintenanceReport::whereMonth('created_at', now()->month)

@@ -269,9 +269,7 @@ class ClientSupport extends Component
             }])
             ->where('client_id', $client?->id);
 
-        if ($this->activeTab !== 'all') {
-            $query->where('status', $this->activeTab);
-        }
+        // activeTab filtering removed to allow client-side filtering via Alpine.js
 
         if (!empty($this->search)) {
             $query->where(function ($q) {

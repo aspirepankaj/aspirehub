@@ -26,12 +26,16 @@ class ClientMarketingReports extends Component
     public array $youtubeData = [];
     public array $keywordData = [];
     public array $gtmData = [];
+    public array $gbpData = [];
+    public array $gadsData = [];
     
     // Comparison reports
     public array $compareGa4Data = [];
     public array $compareGscData = [];
     public array $compareYoutubeData = [];
     public array $compareKeywordData = [];
+    public array $compareGbpData = [];
+    public array $compareGadsData = [];
     
     // Dropdown list holders
     public $websites = [];
@@ -125,11 +129,15 @@ class ClientMarketingReports extends Component
         $this->youtubeData = [];
         $this->keywordData = [];
         $this->gtmData = [];
+        $this->gbpData = [];
+        $this->gadsData = [];
 
         $this->compareGa4Data = [];
         $this->compareGscData = [];
         $this->compareYoutubeData = [];
         $this->compareKeywordData = [];
+        $this->compareGbpData = [];
+        $this->compareGadsData = [];
 
         if (!$this->selectedWebsiteId || !$this->selectedMonth) {
             return;
@@ -182,6 +190,18 @@ class ClientMarketingReports extends Component
                 $this->keywordData = json_decode(file_get_contents($keywordPath), true) ?? [];
             }
 
+            // Load GBP data
+            $gbpPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gbp/{$year}/{$month}.json");
+            if (file_exists($gbpPath)) {
+                $this->gbpData = json_decode(file_get_contents($gbpPath), true) ?? [];
+            }
+
+            // Load GADS data
+            $gadsPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$year}/{$month}.json");
+            if (file_exists($gadsPath)) {
+                $this->gadsData = json_decode(file_get_contents($gadsPath), true) ?? [];
+            }
+
             // Load Comparison Data if selected
             if (!empty($this->compareMonth)) {
                 $cParts = explode('-', $this->compareMonth);
@@ -207,6 +227,16 @@ class ClientMarketingReports extends Component
                 if (file_exists($cKeywordPath)) {
                     $this->compareKeywordData = json_decode(file_get_contents($cKeywordPath), true) ?? [];
                 }
+
+                $cGbpPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gbp/{$cYear}/{$cMonth}.json");
+                if (file_exists($cGbpPath)) {
+                    $this->compareGbpData = json_decode(file_get_contents($cGbpPath), true) ?? [];
+                }
+
+                $cGadsPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$cYear}/{$cMonth}.json");
+                if (file_exists($cGadsPath)) {
+                    $this->compareGadsData = json_decode(file_get_contents($cGadsPath), true) ?? [];
+                }
             }
 
             // Set activeReportData if looking at specific tab
@@ -220,6 +250,10 @@ class ClientMarketingReports extends Component
                 $this->activeReportData = $this->keywordData;
             } elseif ($this->activeReportIntegrationId === 'gtm') {
                 $this->activeReportData = $this->gtmData;
+            } elseif ($this->activeReportIntegrationId === 'gbp') {
+                $this->activeReportData = $this->gbpData;
+            } elseif ($this->activeReportIntegrationId === 'gads') {
+                $this->activeReportData = $this->gadsData;
             }
         } catch (\Exception $e) {
             Log::error('Error loading client marketing report JSON: ' . $e->getMessage());

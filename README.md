@@ -204,3 +204,127 @@ Automated testing is configured to run using an in-memory SQLite database (`:mem
 php artisan test
 ```
 This will verify route redirections, admin-only authentication checks, and layout loads.
+
+---
+
+## YouTube Analytics Setup Guide
+
+To configure YouTube integration, follow these steps to retrieve your YouTube OAuth Credentials:
+
+### Step 1: Create a Project in Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **New Project** or select your existing integrations project.
+3. Navigate to **APIs & Services > Library**.
+4. Search for and **Enable** the following APIs:
+   - **YouTube Data API v3**
+   - **YouTube Analytics API**
+
+### Step 2: Configure the OAuth Consent Screen
+1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
+2. Under the **Scopes** section, add the following scopes:
+   - `https://www.googleapis.com/auth/youtube.readonly`
+   - `https://www.googleapis.com/auth/yt-analytics.readonly`
+3. Save and continue.
+
+### Step 3: Generate OAuth Credentials
+1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
+2. Under **Authorized redirect URIs**, add the callback URI:
+   - `http://127.0.0.1:8000/admin/integrations/google/callback`
+3. Click **Create** and download the `.json` file.
+4. Upload this file in the CRM under the YouTube integration section along with the YouTube Channel ID.
+5. Run the background task to sync data: `php artisan sync:youtube-metrics`
+
+========================================================================
+
+## Google Business Profile (GBP) Setup Guide
+
+To configure Google Business Profile (GBP) integration:
+
+### Step 1: Create a Project in Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **New Project** or select your existing integrations project.
+3. Navigate to **APIs & Services > Library**.
+4. Search for and **Enable** the **Google My Business API**.
+   - *Note: Access to the GBP API requires special whitelisting via the Google Business Profile API form.*
+
+### Step 2: Configure the OAuth Consent Screen
+1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
+2. Under the **Scopes** section, add the following scope:
+   - `https://www.googleapis.com/auth/business.manage`
+3. Save and continue.
+
+### Step 3: Generate OAuth Credentials
+1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
+2. Under **Authorized redirect URIs**, add the callback URI:
+   - `http://127.0.0.1:8000/admin/integrations/google/callback`
+3. Click **Create** and download the `.json` file.
+4. Upload this file in the CRM under the GBP integration section along with the Location ID.
+5. Run the background task to sync data: `php artisan sync:gbp-metrics`
+
+========================================================================
+
+## Google Ads Setup Guide
+
+To configure Google Ads integration:
+
+### Step 1: Create a Project in Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **New Project** or select your existing integrations project.
+3. Navigate to **APIs & Services > Library**.
+4. Search for and **Enable** the **Google Ads API**.
+
+### Step 2: Obtain Developer Token from Google Ads Manager
+1. Log into your **Google Ads Manager Account (MCC)**.
+2. Navigate to **Tools & Settings > Setup > API Center**.
+3. Copy your **Developer Token**.
+
+### Step 3: Configure the OAuth Consent Screen
+1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
+2. Under the **Scopes** section, add the following scope:
+   - `https://www.googleapis.com/auth/adwords`
+3. Save and continue.
+
+### Step 4: Generate OAuth Credentials
+1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
+2. Under **Authorized redirect URIs**, add the callback URI:
+   - `http://127.0.0.1:8000/admin/integrations/google/callback`
+3. Click **Create** and download the `.json` file.
+4. Upload this file in the CRM under the Google Ads integration section, provide the Customer ID, and paste the **Developer Token** into the dedicated field.
+5. Run the background task to sync data: `php artisan sync:google-ads-metrics`
+
+========================================================================
+
+## Google Tag Manager (GTM) Setup Guide
+
+To configure Google Tag Manager integration:
+
+### Step 1: Create a Project in Google Cloud Console
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **New Project** or select your existing integrations project.
+3. Navigate to **APIs & Services > Library**.
+4. Search for and **Enable** the **Tag Manager API**.
+
+### Step 2: Configure the OAuth Consent Screen
+1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
+2. Under the **Scopes** section, add the following scope:
+   - `https://www.googleapis.com/auth/tagmanager.readonly`
+3. Save and continue.
+
+### Step 3: Generate OAuth Credentials
+1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
+2. Click **Create** and download the `.json` file.
+3. Upload this file in the CRM under the GTM integration section along with the Container ID. (No sync command needed, fetches in real-time).
+
+========================================================================
+
+## Keyword.com Setup Guide
+
+To configure Keyword.com integration, you do not need Google Cloud Console.
+
+### Step 1: Get API Token
+1. Log into your **Keyword.com** dashboard.
+2. Navigate to Settings and generate a personal **API Token**.
+
+### Step 2: Link in CRM
+1. Go to the CRM under the Keyword.com integration section.
+2. Enter your **API Token** and the specific **Project ID**. (No sync command needed, fetches in real-time).

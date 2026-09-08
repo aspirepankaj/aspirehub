@@ -25,7 +25,7 @@
     <!-- Main Layout Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[620px]">
         <!-- Left Sidebar: Ticket Filter & List (4 Columns) -->
-        <div class="lg:col-span-4 space-y-4">
+        <div class="lg:col-span-4 space-y-4" x-data="{ localTab: 'all' }">
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm space-y-3">
                 <div class="relative">
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search ticket #, subject or client..."
@@ -217,8 +217,9 @@
                 <!-- Status Filter Pills -->
                 <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1">
                     @foreach(['all' => 'All', 'open' => 'Open', 'in_progress' => 'In Progress', 'resolved' => 'Resolved', 'closed' => 'Closed'] as $statusKey => $statusLabel)
-                        <button type="button" wire:click="$set('activeTab', '{{ $statusKey }}')"
-                                class="px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition {{ $activeTab === $statusKey ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
+                        <button type="button" @click="localTab = '{{ $statusKey }}'"
+                                :class="localTab === '{{ $statusKey }}' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition">
                             {{ $statusLabel }}
                         </button>
                     @endforeach
@@ -229,6 +230,7 @@
             <div class="space-y-2.5 max-h-[580px] overflow-y-auto pr-1">
                 @forelse($tickets as $t)
                     <div wire:click="selectTicket({{ $t->id }})"
+                         x-show="localTab === 'all' || localTab === '{{ $t->status }}'"
                          class="p-4 rounded-2xl border transition-all cursor-pointer {{ $selectedTicketId === $t->id ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500/50 shadow-md ring-1 ring-indigo-500/30' : 'bg-white/70 dark:bg-slate-900/50 border-slate-200/60 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700' }}">
                         <div class="flex items-start justify-between gap-2 mb-1">
                             <div class="flex items-center gap-1.5">

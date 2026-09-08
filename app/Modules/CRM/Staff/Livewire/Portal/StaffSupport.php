@@ -196,9 +196,7 @@ class StaffSupport extends Component
                   ->orWhere('assigned_staff_id', $staffId);
             });
 
-        if ($this->activeTab !== 'all') {
-            $query->where('status', $this->activeTab);
-        }
+        // activeTab filtering removed to allow client-side filtering via Alpine.js
 
         if (!empty($this->search)) {
             $query->where(function ($q) {
