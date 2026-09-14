@@ -50,7 +50,14 @@ class StaffDocuments extends Component
     public ?string $previewTitle = null;
     public ?string $previewTextContent = null;
 
+    public int $perPage = 20;
+
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
     {
         $this->resetPage();
     }
@@ -376,7 +383,7 @@ class StaffDocuments extends Component
             $query->where('website_id', $this->websiteFilter);
         }
 
-        $documents = $query->latest()->paginate(10);
+        $documents = $query->latest()->paginate($this->perPage);
         $pageIds = $documents->pluck('id')->toArray();
 
         $clients = Client::with('user')

@@ -1,13 +1,12 @@
 <div @keydown.escape.window="$wire.closeTicket()" class="space-y-6">
-    <!-- Breadcrumbs & Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <x-admin.breadcrumbs :items="['Support Center' => null]" />
-            <h1 class="text-2xl font-black text-slate-900 dark:text-white mt-1">Support Center</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Oversee all client tickets, assign staff members, and reply to support inquiries.
-            </p>
-        </div>
+    {{-- Breadcrumbs --}}
+    <x-admin.breadcrumbs :items="['Support Center' => null]" />
+
+    {{-- Page Header --}}
+    <div class="flex items-center justify-between gap-4 mb-5">
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">
+            Oversee all client tickets, assign staff members, and reply to support inquiries
+        </p>
     </div>
 
     <!-- Flash Notification -->
@@ -341,7 +340,7 @@
                     <div class="relative flex-1 min-h-0 bg-slate-50/30 dark:bg-slate-950/20 flex flex-col">
                         <!-- Fixed Centered Logo Watermark (Stays in center of chat viewport at all times) -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] dark:opacity-[0.09] select-none z-0">
-                            <img src="{{ asset('aspire-hub-1.svg') }}" class="w-48 sm:w-64 max-w-[50%] h-auto filter grayscale" alt="Watermark" />
+                            <img src="{{ asset('aspire-triangle.svg') }}" class="w-48 sm:w-64 max-w-[50%] h-auto opacity-20" alt="Watermark" />
                         </div>
 
                         <!-- Chat Thread (Smooth auto-scroll) -->

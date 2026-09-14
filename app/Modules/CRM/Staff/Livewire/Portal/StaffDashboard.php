@@ -54,6 +54,6 @@ class StaffDashboard extends Component
             'reportsCount' => $reportsCount,
             'recentReports' => $recentReports,
             'recentActivities' => $recentActivities,
-        ])->layoutData(['title' => 'Staff Dashboard - Aspire Hub']);
+        ])->layoutData(['title' => 'Staff Dashboard - Aspire Digital Solutions']);
     }
 }

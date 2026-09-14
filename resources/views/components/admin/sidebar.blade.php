@@ -7,7 +7,7 @@
     <!-- Brand / Title -->
     <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200/50 dark:border-slate-800/50">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center py-1">
-            <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto" alt="Aspire Hub" />
+            <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto" alt="Aspire Digital Solutions" />
         </a>
         <button @click="mobileSidebar = false" class="lg:hidden p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

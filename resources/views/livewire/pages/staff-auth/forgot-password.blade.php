@@ -78,7 +78,7 @@ new #[Layout('layouts.auth')] class extends Component
             <label for="email" class="block text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('Staff Email Address') }}</label>
             <input wire:model="email" id="email" 
                    type="email" name="email" required autofocus 
-                   placeholder="staff@aspirehub.com"
+                   placeholder="staff@aspiredigitalsolutions.com"
                    class="block mt-1.5 w-full px-4.5 py-3 rounded-xl bg-white/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-150" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>

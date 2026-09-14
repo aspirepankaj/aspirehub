@@ -433,6 +433,6 @@ class EditMaintenanceReport extends Component
             'clients' => $clients,
             'websites' => $websites,
             'developers' => $developers,
-        ])->layoutData(['title' => 'Edit Maintenance Report - Aspire Hub']);
+        ])->layoutData(['title' => 'Edit Maintenance Report - Aspire Digital Solutions']);
     }
 }

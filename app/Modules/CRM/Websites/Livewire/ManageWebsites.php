@@ -38,6 +38,12 @@ class ManageWebsites extends Component
     public string $statusFilter = '';
     public string $serviceTypeFilter = '';
     public string $planFilter = '';
+    public int $perPage = 20;
+
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
 
     // ─── Bulk Selection ──────────────────────────────────────────────────────────
     public array $selectedWebsites = [];
@@ -394,11 +400,19 @@ class ManageWebsites extends Component
             ->when($this->serviceTypeFilter, fn($q) => $q->whereHas('serviceTypes', fn($sq) => $sq->where('service_type_id', $this->serviceTypeFilter)))
             ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('adspv_plans.id', $this->planFilter)))
             ->latest()
-            ->paginate(12)
+            ->paginate($this->perPage)
             ->onEachSide(1);
 
         $hasActiveFilters = $this->search || $this->statusFilter || $this->serviceTypeFilter || $this->planFilter;
         $pageIds = $websites->pluck('id')->toArray();
+
+        // Statistics Summary Counts
+        $totalClientsCount = Client::whereHas('websites')->count();
+        $activeClientsCount = Client::whereHas('websites')->where('status', 'active')->count();
+        $inactiveClientsCount = Client::whereHas('websites')->where('status', 'inactive')->count();
+        $totalWebsitesCount = Website::count();
+        $activeWebsitesCount = Website::where('status', 'active')->count();
+        $inactiveWebsitesCount = Website::where('status', 'inactive')->count();
 
         return view('modules.crm.websites.manage-websites', [
             'websites'                  => $websites,
@@ -410,6 +424,12 @@ class ManageWebsites extends Component
             'websiteDetails'            => null,
             'websiteMaintenanceReports' => collect(),
             'websiteActivityLogs'       => collect(),
-        ])->layoutData(['title' => 'Websites Management - Aspire Hub']);
+            'totalClientsCount'        => $totalClientsCount,
+            'activeClientsCount'       => $activeClientsCount,
+            'inactiveClientsCount'     => $inactiveClientsCount,
+            'totalWebsitesCount'       => $totalWebsitesCount,
+            'activeWebsitesCount'      => $activeWebsitesCount,
+            'inactiveWebsitesCount'    => $inactiveWebsitesCount,
+        ])->layoutData(['title' => 'Websites Management - Aspire Digital Solutions']);
     }
 }

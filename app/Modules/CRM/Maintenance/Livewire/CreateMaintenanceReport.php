@@ -471,6 +471,6 @@ class CreateMaintenanceReport extends Component
             'clients' => $clients,
             'websites' => $websites,
             'developers' => $developers,
-        ])->layoutData(['title' => 'Create Maintenance Report - Aspire Hub']);
+        ])->layoutData(['title' => 'Create Maintenance Report - Aspire Digital Solutions']);
     }
 }

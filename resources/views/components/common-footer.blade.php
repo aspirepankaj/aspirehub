@@ -30,7 +30,7 @@
 <footer class="py-4 px-4 sm:px-6 lg:px-8 border-t border-slate-200/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 font-medium">
         <div class="flex items-center gap-1.5 flex-wrap justify-center sm:justify-start">
-            <span>&copy; {{ date('Y') }} <strong class="font-extrabold text-slate-800 dark:text-slate-200">Aspire Hub</strong>. All rights reserved.</span>
+            <span>&copy; {{ date('Y') }} <strong class="font-extrabold text-slate-800 dark:text-slate-200">Aspire Digital Solutions</strong>. All rights reserved.</span>
             <span class="hidden md:inline text-slate-300 dark:text-slate-700">•</span>
             <span class="text-slate-400 dark:text-slate-500">Next-Gen Enterprise Management System.</span>
         </div>

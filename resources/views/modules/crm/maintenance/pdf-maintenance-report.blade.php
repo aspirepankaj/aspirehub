@@ -22,16 +22,15 @@
         .watermark {
             position: fixed;
             top: 45%;
-            left: 5%;
-            width: 90%;
+            left: 30%;
+            width: 40%;
             text-align: center;
-            opacity: 0.03;
+            opacity: 0.15;
             z-index: -1000;
-            transform: rotate(-40deg);
-            font-size: 76px;
-            font-weight: 900;
-            color: #135266;
-            letter-spacing: 5px;
+        }
+        .watermark img {
+            width: 250px;
+            height: auto;
         }
         /* Top Brand Accent Stripe */
         .brand-accent-bar {
@@ -295,7 +294,7 @@
 
     <!-- Watermark Background -->
     <div class="watermark">
-        ASPIRE HUB
+        <img src="{{ public_path('aspire-triangle.svg') }}" alt="Watermark">
     </div>
 
     <!-- Top Branding Line -->
@@ -312,7 +311,7 @@
                 <table style="border-collapse: collapse; border: 0; float: right;">
                     <tr>
                         <td align="right" style="padding-bottom: 8px;">
-                            <span style="font-size: 16px; font-weight: 800; color: #135266; letter-spacing: 0.5px; text-transform: uppercase;">Aspire Hub</span>
+                            <span style="font-size: 16px; font-weight: 800; color: #135266; letter-spacing: 0.5px; text-transform: uppercase;">Aspire Digital Solutions</span>
                         </td>
                     </tr>
                     <tr>
@@ -661,7 +660,7 @@
                         </div>
                     @else
                         <div style="padding: 12px; background: #f7fafc; border: 1px solid #edf2f7; border-radius: 6px; font-size: 11px; color: #718096;">
-                            Attachment: <strong>{{ $att->file_name }}</strong> (Available for download in Aspire Hub portal)
+                            Attachment: <strong>{{ $att->file_name }}</strong> (Available for download in Aspire Digital Solutions portal)
                         </div>
                     @endif
                 </div>

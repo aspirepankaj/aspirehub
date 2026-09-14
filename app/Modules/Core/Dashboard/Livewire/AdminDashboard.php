@@ -87,6 +87,6 @@ class AdminDashboard extends Component
     public function render()
     {
         return view('modules.core.dashboard.admin-dashboard')
-            ->layoutData(['title' => 'Admin Dashboard - Aspire Hub']);
+            ->layoutData(['title' => 'Admin Dashboard - Aspire Digital Solutions']);
     }
 }

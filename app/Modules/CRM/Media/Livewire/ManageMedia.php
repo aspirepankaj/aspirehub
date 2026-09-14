@@ -28,6 +28,12 @@ class ManageMedia extends Component
         'files.*' => 'file|mimes:pdf,xls,xlsx,txt,mp4,avi,mov,wmv,flv,mkv,webm,doc,docx,zip,csv,ppt,pptx,jpg,jpeg,png,gif,webp,svg|max:102400', // 100MB Max per file
     ];
 
+    public function setCategory($cat)
+    {
+        $this->category = $cat;
+        $this->resetPage();
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();
@@ -132,6 +138,6 @@ class ManageMedia extends Component
 
         return view('modules.crm.media.manage-media', [
             'mediaFiles' => $mediaFiles,
-        ])->layout($layout)->layoutData(['title' => 'Media Library - Aspire Hub']);
+        ])->layout($layout)->layoutData(['title' => 'Media Library - Aspire Digital Solutions']);
     }
 }

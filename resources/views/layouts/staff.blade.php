@@ -23,7 +23,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="robots" content="noindex, nofollow">
 
-        <title>{{ $title ?? 'Aspire Hub Staff' }}</title>
+        <title>{{ $title ?? 'Aspire Digital Solutions Staff' }}</title>
 
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

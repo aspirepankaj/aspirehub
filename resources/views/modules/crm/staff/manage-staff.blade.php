@@ -13,16 +13,6 @@
          STAFF DETAIL VIEW
          ========================================== --}}
 
-        <!-- Back Button -->
-        <div class="mb-4">
-            <a href="{{ route('admin.staff') }}" wire:navigate class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to staff
-            </a>
-        </div>
-
         <!-- Staff Header Card -->
         <div class="bg-white/93 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="flex items-center gap-4">
@@ -399,10 +389,79 @@
     </div>
 
     {{-- ══════════════════════════════════════════════
+         STATISTICS SUMMARY GRID
+         ══════════════════════════════════════════════ --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {{-- Card 1: Total Staff --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Staff</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalStaffCount }}</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1">
+                    <span class="text-emerald-500 font-bold">{{ $activeStaffCount }} active</span>
+                    <span>•</span>
+                    <span class="text-slate-400 font-bold">{{ $inactiveStaffCount }} inactive</span>
+                </p>
+            </div>
+            <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 100 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </div>
+        </div>
+
+        {{-- Card 2: Active Staff --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Staff</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $activeStaffCount }}</h3>
+                <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">active staff members</p>
+            </div>
+            <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        {{-- Card 3: Inactive Staff --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactive Staff</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $inactiveStaffCount }}</h3>
+                <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1.5">inactive / paused</p>
+            </div>
+            <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+            </div>
+        </div>
+
+        {{-- Card 4: Assigned Clients --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Assigned Clients</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalAssignedClientsCount }}</h3>
+                <p class="text-[11px] text-indigo-500 dark:text-indigo-400 font-semibold mt-1.5 flex items-center gap-1">
+                    <span class="text-emerald-500 font-bold">{{ $activeAssignedClientsCount }} active</span>
+                    <span>•</span>
+                    <span class="text-slate-400 font-bold">{{ $inactiveAssignedClientsCount }} inactive</span>
+                </p>
+            </div>
+            <div class="p-3 bg-sky-50 dark:bg-sky-950/20 text-sky-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══════════════════════════════════════════════
          FILTERS — 4-Column layout
     ══════════════════════════════════════════════ --}}
     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
 
             {{-- Search (25%) --}}
             <div class="relative flex items-center">
@@ -460,6 +519,22 @@
                     @foreach($departments as $d)
                         <option value="{{ $d }}" class="dark:bg-slate-900">{{ $d }}</option>
                     @endforeach
+                </select>
+                <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+
+            {{-- Per Page Filter --}}
+            <div class="relative flex items-center">
+                <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                <select wire:model.live="perPage"
+                        class="block w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150 appearance-none">
+                    <option value="20" class="dark:bg-slate-900">20 per page</option>
+                    <option value="50" class="dark:bg-slate-900">50 per page</option>
+                    <option value="100" class="dark:bg-slate-900">100 per page</option>
                 </select>
                 <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />

@@ -16,7 +16,7 @@ class ResetPasswordNotification extends BaseResetPassword
         $url = $this->resetUrl($notifiable);
 
         return (new MailMessage)
-            ->subject(Lang::get('Reset Your Aspire Hub Password'))
+            ->subject(Lang::get('Reset Your Aspire Digital Solutions Password'))
             ->view('emails.reset-password', [
                 'url'        => $url,
                 'count'      => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire', 60),

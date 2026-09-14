@@ -82,6 +82,6 @@ class UserNotificationsPage extends Component
         return view('livewire.user-notifications-page', [
             'notifications' => $notifications,
             'unreadCount' => $unreadCount,
-        ])->layout($layout, ['title' => 'Notifications - Aspire Hub']);
+        ])->layout($layout, ['title' => 'Notifications - Aspire Digital Solutions']);
     }
 }

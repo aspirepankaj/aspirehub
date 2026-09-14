@@ -46,14 +46,21 @@ class GoogleIntegrationController extends Controller
         $clientId = $config['client_id'];
         $redirectUri = $config['redirect_uris'][0] ?? route('admin.integrations.google.callback');
 
-        $scopes = [
-            'https://www.googleapis.com/auth/analytics.readonly',
-            'https://www.googleapis.com/auth/webmasters.readonly',
-            'https://www.googleapis.com/auth/youtube.readonly',
-            'https://www.googleapis.com/auth/yt-analytics.readonly',
-            'https://www.googleapis.com/auth/tagmanager.readonly',
-            'https://www.googleapis.com/auth/business.manage',
-            'https://www.googleapis.com/auth/adwords'
+        $scopesMap = [
+            'ga4' => ['https://www.googleapis.com/auth/analytics.readonly'],
+            'gsc' => ['https://www.googleapis.com/auth/webmasters.readonly'],
+            'youtube' => [
+                'https://www.googleapis.com/auth/youtube.readonly',
+                'https://www.googleapis.com/auth/yt-analytics.readonly'
+            ],
+            'gtm' => ['https://www.googleapis.com/auth/tagmanager.readonly'],
+            'gmb' => ['https://www.googleapis.com/auth/business.manage'],
+            'gads' => ['https://www.googleapis.com/auth/adwords'],
+        ];
+
+        $scopes = $scopesMap[$integration->integration_type] ?? [
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile',
         ];
 
         $query = http_build_query([

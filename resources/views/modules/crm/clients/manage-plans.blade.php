@@ -2,7 +2,7 @@
 
 <div>
     {{-- Breadcrumbs --}}
-    <x-admin.breadcrumbs :items="['Clients' => route('admin.clients'), 'Plans' => null]" />
+    <x-admin.breadcrumbs :items="['Plans' => null]" />
 
     {{-- Page Header --}}
     <div class="flex items-center justify-between gap-4 mb-5">

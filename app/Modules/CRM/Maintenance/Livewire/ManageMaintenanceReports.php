@@ -23,7 +23,9 @@ class ManageMaintenanceReports extends Component
     public string $developerFilter = '';
     public string $monthFilter = '';
     public string $sendFilter = '';
+    public int $perPage = 20;
 
+    public function updatingPerPage(): void { $this->resetPage(); }
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingClientFilter(): void
     {
@@ -99,11 +101,11 @@ class ManageMaintenanceReports extends Component
         }
     }
 
-    public static function downloadPdf($id)
+    public function downloadPdf($id)
     {
         $report = MaintenanceReport::with(['client.user', 'website', 'developer', 'plugins', 'attachments'])->findOrFail($id);
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('modules.crm.maintenance.pdf-maintenance-report', compact('report'));
-        return $pdf->download("Maintenance-Report-{$report->id}-" . str_replace(' ', '-', $report->maintenance_month) . ".pdf");
+        return $pdf->stream("Maintenance-Report-{$report->id}-" . str_replace(' ', '-', $report->maintenance_month) . ".pdf");
     }
 
     public function render()
@@ -125,7 +127,7 @@ class ManageMaintenanceReports extends Component
             ->when($this->sendFilter === 'sent', fn($q) => $q->whereNotNull('last_sent_at'))
             ->when($this->sendFilter === 'unsent', fn($q) => $q->whereNull('last_sent_at'))
             ->latest()
-            ->paginate(12)
+            ->paginate($this->perPage)
             ->onEachSide(1);
 
         $clients = Client::with('user')->orderBy('company_name')->get();
@@ -183,6 +185,6 @@ class ManageMaintenanceReports extends Component
             'averageDesktopScore' => $averageDesktopScore,
             'scoreChange' => $scoreChange,
             'hasActiveFilters' => $hasActiveFilters,
-        ])->layoutData(['title' => 'Maintenance Reports - Aspire Hub']);
+        ])->layoutData(['title' => 'Maintenance Reports - Aspire Digital Solutions']);
     }
 }

@@ -19,6 +19,7 @@ class ManageDesignations extends Component
 
     // Search & Filter
     public string $search = '';
+    public int $perPage = 20;
 
     // Bulk selection
     public array $selectedDesignations = [];
@@ -28,6 +29,13 @@ class ManageDesignations extends Component
     public ?int $editingDesignationId = null;
 
     public function updatingSearch(): void
+    {
+        $this->selectedDesignations = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
     {
         $this->selectedDesignations = [];
         $this->selectAll = false;
@@ -136,7 +144,7 @@ class ManageDesignations extends Component
         $designations = Designation::withCount('staff')
             ->where('name', 'like', '%' . $this->search . '%')
             ->latest()
-            ->paginate(10);
+            ->paginate($this->perPage);
 
         $hasActiveFilters = !empty($this->search);
         $pageIds = $designations->pluck('id')->toArray();
@@ -145,6 +153,6 @@ class ManageDesignations extends Component
             'designations'     => $designations,
             'hasActiveFilters' => $hasActiveFilters,
             'pageIds'          => $pageIds,
-        ])->layoutData(['title' => 'Designations Management - Aspire Hub']);
+        ])->layoutData(['title' => 'Designations Management - Aspire Digital Solutions']);
     }
 }

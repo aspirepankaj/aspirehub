@@ -1,4 +1,7 @@
 <div @keydown.escape.window="$wire.closeTicket()" class="space-y-6">
+    {{-- Breadcrumbs --}}
+    <x-admin.breadcrumbs :items="['Support Center' => null]" />
+
     <!-- Top Bar Header -->
     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-5 shadow-sm flex items-center justify-between gap-4">
         <div>
@@ -147,7 +150,7 @@
                     <div class="relative flex-1 min-h-0 bg-slate-50/30 dark:bg-slate-950/20">
                         <!-- Fixed Centered Logo Watermark (Stays in center of chat viewport at all times) -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] dark:opacity-[0.09] select-none z-0">
-                            <img src="{{ asset('aspire-hub-1.svg') }}" class="w-48 sm:w-64 max-w-[50%] h-auto filter grayscale" alt="Watermark" />
+                            <img src="{{ asset('aspire-triangle.svg') }}" class="w-48 sm:w-64 max-w-[50%] h-auto opacity-20" alt="Watermark" />
                         </div>
 
                         <!-- Chat Conversation Thread (Smooth auto-scroll) -->

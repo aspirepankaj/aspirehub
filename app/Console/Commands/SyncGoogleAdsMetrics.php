@@ -31,10 +31,8 @@ class SyncGoogleAdsMetrics extends Command
             return;
         }
 
-        $year = date('Y');
-        $monthStr = Str::lower(date('F'));
-        $startDate = date('Y-m-01');
-        $endDate = date('Y-m-t'); // last day of current month
+        $startDate = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+        $endDate = \Carbon\Carbon::now()->format('Y-m-d');
         
         $developerToken = env('GOOGLE_ADS_DEVELOPER_TOKEN', '');
         if (empty($developerToken)) {

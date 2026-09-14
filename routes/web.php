@@ -13,7 +13,7 @@ Route::get('dashboard', function () {
         return redirect()->route('staff.dashboard');
     }
     return redirect()->route('client.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::get('profile', function () {
     $user = auth()->user();

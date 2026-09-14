@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="robots" content="noindex, nofollow">
 
-        <title>{{ $title ?? 'Aspire Hub - Portal' }}</title>
+        <title>{{ $title ?? 'Aspire Digital Solutions - Portal' }}</title>
 
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,7 +59,7 @@
         <div class="relative min-h-screen flex flex-col justify-center items-center p-4 z-10">
             <!-- Brand Logo / Title -->
             <div class="mb-8 text-center flex flex-col items-center">
-                <img src="{{ asset('aspire-hub-1.svg') }}" class="h-12 w-auto mb-2" alt="Aspire Hub" />
+                <img src="{{ asset('aspire-hub-1.svg') }}" class="h-12 w-auto mb-2" alt="Aspire Digital Solutions" />
                 <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest font-semibold">Enterprise SaaS Platform</p>
             </div>
 
@@ -70,7 +70,7 @@
 
             <!-- Footer -->
             <div class="mt-8 text-xs text-slate-400 dark:text-slate-600 font-medium">
-                &copy; {{ date('Y') }} Aspire Hub &bull; Enterprise CRM Platform
+                &copy; {{ date('Y') }} Aspire Digital Solutions &bull; Enterprise CRM Platform
             </div>
         </div>
     </body>

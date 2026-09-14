@@ -10,8 +10,8 @@
     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm">
         <div class="flex flex-col gap-3">
 
-            {{-- Row 1: Search + Action Type --}}
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {{-- Row 1: Search + Action Type + PerPage --}}
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 {{-- Search --}}
                 <div class="sm:col-span-2 relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
@@ -38,6 +38,22 @@
                         <option value="updated" class="dark:bg-slate-900">Updated</option>
                         <option value="deleted" class="dark:bg-slate-900">Deleted</option>
                     </select>
+                </div>
+
+                {{-- Per Page --}}
+                <div class="relative flex items-center">
+                    <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                    </svg>
+                    <select wire:model.live="perPage"
+                            class="block w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/40 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm transition duration-150 appearance-none cursor-pointer">
+                        <option value="20" class="dark:bg-slate-900">20 per page</option>
+                        <option value="50" class="dark:bg-slate-900">50 per page</option>
+                        <option value="100" class="dark:bg-slate-900">100 per page</option>
+                    </select>
+                    <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
                 </div>
             </div>
 

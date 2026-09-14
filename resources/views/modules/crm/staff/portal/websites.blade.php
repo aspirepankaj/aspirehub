@@ -31,16 +31,6 @@
     @endif
 
     @if($websiteDetails)
-        <!-- Back Button -->
-        <div class="mb-4">
-            <a href="{{ route('staff.websites') }}" wire:navigate class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to websites
-            </a>
-        </div>
-
         {{-- Website Header Card --}}
         <div class="bg-white/93 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="flex items-center gap-4">
@@ -321,9 +311,78 @@
         </div>
     </div>
 
+    {{-- ══════════════════════════════════════════════
+         STATISTICS SUMMARY GRID
+         ══════════════════════════════════════════════ --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {{-- Card 1: Website Clients --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Website Clients</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalClientsCount }}</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1">
+                    <span class="text-emerald-500 font-bold">{{ $activeClientsCount }} active</span>
+                    <span>•</span>
+                    <span class="text-slate-400 font-bold">{{ $inactiveClientsCount }} inactive</span>
+                </p>
+            </div>
+            <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+        </div>
+
+        {{-- Card 2: Active Websites --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Websites</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $activeWebsitesCount }}</h3>
+                <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">active websites</p>
+            </div>
+            <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        {{-- Card 3: Inactive Websites --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactive Websites</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $inactiveWebsitesCount }}</h3>
+                <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1.5">inactive / paused</p>
+            </div>
+            <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+            </div>
+        </div>
+
+        {{-- Card 4: Total Websites --}}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Websites</p>
+                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
+                <p class="text-[11px] text-indigo-500 dark:text-indigo-400 font-semibold mt-1.5 flex items-center gap-1">
+                    <span class="text-emerald-500 font-bold">{{ $activeWebsitesCount }} active</span>
+                    <span>•</span>
+                    <span class="text-slate-400 font-bold">{{ $inactiveWebsitesCount }} inactive</span>
+                </p>
+            </div>
+            <div class="p-3 bg-sky-50 dark:bg-sky-950/20 text-sky-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
     {{-- FILTERS --}}
     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
             {{-- Search --}}
             <div class="relative flex items-center">
                 <svg wire:loading.remove wire:target="search" class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -371,6 +430,16 @@
                     @foreach($plans as $planOpt)
                         <option value="{{ $planOpt->id }}">{{ $planOpt->name }}</option>
                     @endforeach
+                </select>
+            </div>
+
+            {{-- Per Page Filter --}}
+            <div class="relative flex items-center">
+                <select wire:model.live="perPage"
+                        class="block w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-855 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150">
+                    <option value="20">20 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
                 </select>
             </div>
         </div>

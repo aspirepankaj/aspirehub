@@ -31,6 +31,7 @@ class ManageAdmins extends Component
     public string $search = '';
     public string $statusFilter = '';
     public ?int $roleFilter = null;
+    public int $perPage = 20;
 
     // Bulk actions
     public array $selectedAdmins = [];
@@ -41,6 +42,13 @@ class ManageAdmins extends Component
     public ?int $editingUserId = null;
 
     public function updatingSearch(): void
+    {
+        $this->selectedAdmins = [];
+        $this->selectAll = false;
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
     {
         $this->selectedAdmins = [];
         $this->selectAll = false;
@@ -259,7 +267,7 @@ class ManageAdmins extends Component
                 $query->where('is_active', $this->statusFilter === 'active');
             })
             ->latest()
-            ->paginate(10)
+            ->paginate($this->perPage)
             ->onEachSide(1);
 
         $hasActiveFilters = $this->search !== '' || $this->statusFilter !== '';
@@ -269,6 +277,6 @@ class ManageAdmins extends Component
             'admins'           => $admins,
             'hasActiveFilters' => $hasActiveFilters,
             'pageIds'          => $pageIds,
-        ])->layoutData(['title' => 'Admin Management - Aspire Hub']);
+        ])->layoutData(['title' => 'Admin Management - Aspire Digital Solutions']);
     }
 }

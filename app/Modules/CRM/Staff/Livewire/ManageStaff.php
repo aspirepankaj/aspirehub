@@ -4,6 +4,7 @@ namespace App\Modules\CRM\Staff\Livewire;
 
 use App\Models\User;
 use App\Modules\CRM\Staff\Models\Staff;
+use App\Modules\CRM\Clients\Models\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -25,6 +26,12 @@ class ManageStaff extends Component
     public array $designation_ids = [];
     public array $departments_list = [];
     public string $department = '';
+    public int $perPage = 20;
+
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
     public $profile_image;
     public ?string $existing_profile_image = null;
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']
@@ -483,7 +490,7 @@ class ManageStaff extends Component
                 });
             })
             ->latest()
-            ->paginate(10)
+            ->paginate($this->perPage)
             ->onEachSide(1);
 
         $hasActiveFilters = $this->search || $this->statusFilter || $this->designationFilter || $this->departmentFilter;
@@ -501,16 +508,30 @@ class ManageStaff extends Component
         $hasActiveFilters = $this->search || $this->statusFilter;
         $pageIds = $Staff->pluck('id')->toArray();
 
+        // Statistics Summary Counts
+        $totalStaffCount = Staff::count();
+        $activeStaffCount = Staff::where('status', 'active')->count();
+        $inactiveStaffCount = Staff::where('status', 'inactive')->count();
+        $totalAssignedClientsCount = Client::whereHas('assignedStaff')->count();
+        $activeAssignedClientsCount = Client::whereHas('assignedStaff')->where('status', 'active')->count();
+        $inactiveAssignedClientsCount = Client::whereHas('assignedStaff')->where('status', 'inactive')->count();
+
         return view('modules.crm.staff.manage-staff', [
-            'Staff'                   => $Staff,
-            'designations'            => $designations,
-            'hasActiveFilters'        => $hasActiveFilters,
-            'pageIds'                 => $pageIds,
-            'staffDetails'            => null,
-            'staffWebsites'           => collect(),
-            'staffMaintenanceReports' => collect(),
-            'staffActivityLogs'       => collect(),
-        ])->layoutData(['title' => 'Staff Management - Aspire Hub']);
+            'Staff'                         => $Staff,
+            'designations'                  => $designations,
+            'hasActiveFilters'              => $hasActiveFilters,
+            'pageIds'                       => $pageIds,
+            'staffDetails'                  => null,
+            'staffWebsites'                 => collect(),
+            'staffMaintenanceReports'       => collect(),
+            'staffActivityLogs'             => collect(),
+            'totalStaffCount'               => $totalStaffCount,
+            'activeStaffCount'              => $activeStaffCount,
+            'inactiveStaffCount'            => $inactiveStaffCount,
+            'totalAssignedClientsCount'     => $totalAssignedClientsCount,
+            'activeAssignedClientsCount'    => $activeAssignedClientsCount,
+            'inactiveAssignedClientsCount'  => $inactiveAssignedClientsCount,
+        ])->layoutData(['title' => 'Staff Management - Aspire Digital Solutions']);
     }
 
 }

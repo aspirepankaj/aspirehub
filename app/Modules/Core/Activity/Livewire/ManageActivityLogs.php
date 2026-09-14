@@ -16,8 +16,14 @@ class ManageActivityLogs extends Component
     public string $actionFilter = '';
     public string $dateFrom = '';
     public string $dateTo = '';
+    public int $perPage = 20;
 
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
     {
         $this->resetPage();
     }
@@ -67,13 +73,13 @@ class ManageActivityLogs extends Component
                 $q->whereDate('created_at', '<=', $this->dateTo);
             })
             ->latest()
-            ->paginate(15);
+            ->paginate($this->perPage);
 
         $hasActiveFilters = $this->search || $this->actionFilter || $this->dateFrom || $this->dateTo;
 
         return view('modules.core.activity.manage-activity-logs', [
             'logs' => $logs,
             'hasActiveFilters' => $hasActiveFilters,
-        ])->layoutData(['title' => 'System Activity Logs - Aspire Hub']);
+        ])->layoutData(['title' => 'System Activity Logs - Aspire Digital Solutions']);
     }
 }

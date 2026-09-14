@@ -12,16 +12,6 @@
         {{-- ==========================================
              CLIENT DETAIL DASHBOARD VIEW
              ========================================== --}}
-        <!-- Back Button -->
-        <div class="mb-4">
-            <a href="{{ route('staff.clients') }}" wire:navigate class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 text-sm font-semibold transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to clients
-            </a>
-        </div>
-
         <!-- Client Header Card -->
         <div class="bg-white/93 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 sm:p-6 mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 overflow-hidden">
             <div class="flex items-center gap-3 sm:gap-4 min-w-0 w-full">
@@ -267,11 +257,6 @@
                                                 </h4>
                                                 <div class="mt-1.5 flex flex-wrap items-center gap-2">
                                                     <span class="text-xs text-slate-400 dark:text-slate-500">{{ $integration['category'] }}</span>
-                                                    @if(in_array($integration['id'], ['gsc', 'youtube', 'keyword']))
-                                                        <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md text-[9px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm">Last 7 Days</span>
-                                                    @elseif($integration['id'] === 'ga4')
-                                                        <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md text-[9px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm">Last 30 Days</span>
-                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -656,15 +641,12 @@
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-3">
-                                         <!-- Month Filter Selector -->
-                                         <div class="flex items-center gap-2">
-                                             <label for="report-month-select" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0">Report Month:</label>
-                                             <select id="report-month-select" wire:model.live="selectedReportMonth" class="text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-slate-700 dark:text-slate-200 py-1.5 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer">
-                                                 @foreach ($this->getAvailableReportMonths() as $opt)
-                                                     <option value="{{ $opt['value'] }}">{{ $opt['label'] }}</option>
-                                                 @endforeach
-                                             </select>
-                                         </div>
+                                         <!-- GA4 Style Date Range Picker Popover -->
+                                         @php
+                                             $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                                             $maxDateBound = \Carbon\Carbon::now()->addDays(90)->format('Y-m-d');
+                                         @endphp
+                                         @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
                                         <button type="button" x-on:click="$wire.showReportModal = false;" class="text-slate-400 hover:text-slate-655 dark:hover:text-slate-250 focus:outline-none transition p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -687,13 +669,13 @@
                                             <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
                                                 <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
                                                 <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                                                    {{ number_format($activeReportData['summary']['clicks'] ?? 0) }}
+                                                    {{ $this->formatAbbreviated($activeReportData['summary']['clicks'] ?? 0) }}
                                                 </span>
                                             </div>
                                             <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
                                                 <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
                                                 <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                                                    {{ number_format($activeReportData['summary']['impressions'] ?? 0) }}
+                                                    {{ $this->formatAbbreviated($activeReportData['summary']['impressions'] ?? 0) }}
                                                 </span>
                                             </div>
                                             <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
@@ -1774,9 +1756,78 @@
             </button>
         </div>
 
+        {{-- ══════════════════════════════════════════════
+             STATISTICS SUMMARY GRID
+             ══════════════════════════════════════════════ --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 mt-4">
+            {{-- Card 1: Total Clients --}}
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Clients</p>
+                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalClientsCount }}</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1">
+                        <span class="text-emerald-500 font-bold">{{ $activeClientsCount }} active</span>
+                        <span>•</span>
+                        <span class="text-slate-400 font-bold">{{ $inactiveClientsCount }} inactive</span>
+                    </p>
+                </div>
+                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Card 2: Active Clients --}}
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Clients</p>
+                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $activeClientsCount }}</h3>
+                    <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">active accounts</p>
+                </div>
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Card 3: Inactive Clients --}}
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactive Clients</p>
+                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $inactiveClientsCount }}</h3>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1.5">inactive / paused</p>
+                </div>
+                <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Card 4: Total Websites --}}
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Websites</p>
+                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
+                    <p class="text-[11px] text-indigo-500 dark:text-indigo-400 font-semibold mt-1.5 flex items-center gap-1">
+                        <span class="text-emerald-500 font-bold">{{ $activeWebsitesCount }} active</span>
+                        <span>•</span>
+                        <span class="text-slate-400 font-bold">{{ $inactiveWebsitesCount }} inactive</span>
+                    </p>
+                </div>
+                <div class="p-3 bg-sky-50 dark:bg-sky-950/20 text-sky-500 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
         {{-- Filters --}}
         <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-4 mb-5 shadow-sm relative z-30">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
 
                 {{-- Search --}}
                 <div class="relative flex items-center">
@@ -1823,6 +1874,22 @@
                         @foreach($plans as $planOpt)
                             <option value="{{ $planOpt->id }}" class="dark:bg-slate-900">{{ $planOpt->name }}</option>
                         @endforeach
+                    </select>
+                    <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+
+                {{-- Per Page Filter --}}
+                <div class="relative flex items-center">
+                    <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                    </svg>
+                    <select wire:model.live="perPage"
+                            class="block w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-pink-500/40 focus:border-pink-400 text-sm transition duration-150 appearance-none">
+                        <option value="20" class="dark:bg-slate-900">20 per page</option>
+                        <option value="50" class="dark:bg-slate-900">50 per page</option>
+                        <option value="100" class="dark:bg-slate-900">100 per page</option>
                     </select>
                     <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />

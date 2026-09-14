@@ -49,27 +49,43 @@
 
         {{-- Filter Buttons --}}
         <div class="flex items-center gap-2 flex-wrap">
-            <button type="button" wire:click="$set('category', '')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold transition {{ $category === '' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
-                All Media
+            <button type="button" wire:click="setCategory('')" wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-70 disabled:cursor-not-allowed {{ $category === '' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
+                <svg wire:loading wire:target="setCategory('')" class="w-3.5 h-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>All Media</span>
             </button>
-            <button type="button" wire:click="$set('category', 'image')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold transition {{ $category === 'image' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
-                Images
+            <button type="button" wire:click="setCategory('image')" wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-70 disabled:cursor-not-allowed {{ $category === 'image' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
+                <svg wire:loading wire:target="setCategory('image')" class="w-3.5 h-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Images</span>
             </button>
-            <button type="button" wire:click="$set('category', 'video')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold transition {{ $category === 'video' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
-                Videos
+            <button type="button" wire:click="setCategory('video')" wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-70 disabled:cursor-not-allowed {{ $category === 'video' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
+                <svg wire:loading wire:target="setCategory('video')" class="w-3.5 h-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Videos</span>
             </button>
-            <button type="button" wire:click="$set('category', 'document')"
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold transition {{ $category === 'document' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
-                Documents
+            <button type="button" wire:click="setCategory('document')" wire:loading.attr="disabled"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-70 disabled:cursor-not-allowed {{ $category === 'document' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
+                <svg wire:loading wire:target="setCategory('document')" class="w-3.5 h-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Documents</span>
             </button>
         </div>
     </div>
 
     <!-- Media Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div wire:loading.class="opacity-50 pointer-events-none transition-opacity duration-200" wire:target="setCategory, search" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         @forelse($mediaFiles as $media)
             <div class="group relative bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
                 <div class="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-2 relative overflow-hidden cursor-pointer" @click="$dispatch('open-media-modal', { id: {{ $media->id }}, file_name: '{{ addslashes($media->file_name) }}', file_path: '{{ asset('storage/' . $media->file_path) }}', size: '{{ number_format($media->size / 1024, 1) }} KB', date: '{{ $media->created_at ? $media->created_at->format('d M Y, h:i A') : 'N/A' }}', ext: '{{ strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION)) }}', isImage: {{ Str::startsWith($media->mime_type ?? '', 'image/') ? 'true' : 'false' }} })">

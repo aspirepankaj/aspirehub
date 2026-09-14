@@ -16,11 +16,17 @@ class ManageServiceTypes extends Component
     public string $name = '';
     public string $color = '#4f46e5';
     public string $search = '';
+    public int $perPage = 20;
 
     // Edit tracking
     public ?int $editingTypeId = null;
 
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
     {
         $this->resetPage();
     }
@@ -120,10 +126,10 @@ class ManageServiceTypes extends Component
                       ->orWhere('color', 'like', '%' . $this->search . '%');
             })
             ->latest()
-            ->paginate(10);
+            ->paginate($this->perPage);
 
         return view('modules.crm.websites.manage-service-types', [
             'types' => $types,
-        ])->layoutData(['title' => 'Manage Service Types - Aspire Hub']);
+        ])->layoutData(['title' => 'Manage Service Types - Aspire Digital Solutions']);
     }
 }

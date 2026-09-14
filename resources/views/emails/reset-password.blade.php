@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Your Password — Aspire Hub</title>
+    <title>Reset Your Password — Aspire Digital Solutions</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -229,7 +229,7 @@
         <!-- Brand above card -->
         <div class="brand-top">
             <div class="brand-logo">AH</div>
-            <span class="brand-name">Aspire Hub</span>
+            <span class="brand-name">Aspire Digital Solutions</span>
         </div>
 
         <div class="card">
@@ -248,7 +248,7 @@
             <div class="card-body">
                 <p class="greeting">Hello {{ $notifiable->name ?? 'there' }},</p>
                 <p class="body-text">
-                    We received a request to reset the password associated with your Aspire Hub account. Click the button below to choose a new password. This link is valid for {{ $count }} minutes.
+                    We received a request to reset the password associated with your Aspire Digital Solutions account. Click the button below to choose a new password. This link is valid for {{ $count }} minutes.
                 </p>
 
                 <div class="btn-wrapper">
@@ -272,13 +272,13 @@
                 </div>
 
                 <div class="divider"></div>
-                <p class="security-note">If you're having trouble clicking the button, copy and paste the URL above into your browser. For security, this request was made from the Aspire Hub platform.</p>
+                <p class="security-note">If you're having trouble clicking the button, copy and paste the URL above into your browser. For security, this request was made from the Aspire Digital Solutions platform.</p>
             </div>
 
             <!-- Footer -->
             <div class="card-footer">
-                <p><strong>Aspire Hub</strong> — Enterprise SaaS Platform</p>
-                <p>&copy; {{ date('Y') }} Aspire Hub. All rights reserved.</p>
+                <p><strong>Aspire Digital Solutions</strong> — Enterprise SaaS Platform</p>
+                <p>&copy; {{ date('Y') }} Aspire Digital Solutions. All rights reserved.</p>
             </div>
         </div>
 

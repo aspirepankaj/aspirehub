@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Maintenance Report — Aspire Hub</title>
+    <title>Monthly Maintenance Report — Aspire Digital Solutions</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -293,7 +293,7 @@
         <!-- Brand above card -->
         <div class="brand-top">
             <div class="brand-logo">AH</div>
-            <span class="brand-name">Aspire Hub</span>
+            <span class="brand-name">Aspire Digital Solutions</span>
         </div>
 
         <div class="card">
@@ -384,12 +384,12 @@
 
             <!-- Footer -->
             <div class="card-footer">
-                <p><strong>Aspire Hub</strong> — Enterprise Website Maintenance Platform</p>
-                <p>&copy; {{ date('Y') }} Aspire Hub. All rights reserved. This report was generated automatically.</p>
+                <p><strong>Aspire Digital Solutions</strong> — Enterprise Website Maintenance Platform</p>
+                <p>&copy; {{ date('Y') }} Aspire Digital Solutions. All rights reserved. This report was generated automatically.</p>
             </div>
         </div>
 
-        <p class="bottom-note">You are receiving this because you are a registered client of Aspire Hub services.</p>
+        <p class="bottom-note">You are receiving this because you are a registered client of Aspire Digital Solutions services.</p>
     </div>
 </body>
 </html>

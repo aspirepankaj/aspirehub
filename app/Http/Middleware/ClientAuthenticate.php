@@ -23,6 +23,11 @@ class ClientAuthenticate
             return redirect()->route('login');
         }
 
+        // Allow access if user is currently being impersonated by an Admin or Staff
+        if (session()->has('impersonator_id')) {
+            return $next($request);
+        }
+
         // 2. If logged in but not a client, redirect them to their respective portal dashboard
         if (!$user->client || $user->client->status !== 'active') {
             if ($user->admin && $user->admin->is_active) {

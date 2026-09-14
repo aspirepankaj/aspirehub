@@ -36,6 +36,9 @@ class ManageDocuments extends Component
     public string $search = '';
     public string $clientFilter = '';
     public string $websiteFilter = '';
+    public int $perPage = 20;
+
+    public function updatingPerPage(): void { $this->resetPage(); }
 
     // Track active page select
     public bool $selectAll = false;
@@ -343,7 +346,7 @@ class ManageDocuments extends Component
             $query->where('website_id', $this->websiteFilter);
         }
 
-        $documents = $query->latest()->paginate(10);
+        $documents = $query->latest()->paginate($this->perPage);
         $pageIds = $documents->pluck('id')->toArray();
 
         $clients = Client::with('user')->orderBy(
@@ -378,6 +381,6 @@ class ManageDocuments extends Component
             'allWebsites' => $allWebsites,
             'pageIds' => $pageIds,
             'hasActiveFilters' => $hasActiveFilters,
-        ])->layoutData(['title' => 'Resources Library - Aspire Hub']);
+        ])->layoutData(['title' => 'Resources Library - Aspire Digital Solutions']);
     }
 }

@@ -16,8 +16,14 @@ class ManageEmailLogs extends Component
     public string $statusFilter = '';
     public string $dateFrom = '';
     public string $dateTo = '';
+    public int $perPage = 20;
 
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
     {
         $this->resetPage();
     }
@@ -68,13 +74,13 @@ class ManageEmailLogs extends Component
                 $q->whereDate('created_at', '<=', $this->dateTo);
             })
             ->latest()
-            ->paginate(15);
+            ->paginate($this->perPage);
 
         $hasActiveFilters = $this->search || $this->statusFilter || $this->dateFrom || $this->dateTo;
 
         return view('modules.core.activity.manage-email-logs', [
             'logs' => $logs,
             'hasActiveFilters' => $hasActiveFilters,
-        ])->layoutData(['title' => 'Email Dispatch Logs - Aspire Hub']);
+        ])->layoutData(['title' => 'Email Dispatch Logs - Aspire Digital Solutions']);
     }
 }

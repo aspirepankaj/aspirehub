@@ -37,6 +37,12 @@ class StaffWebsites extends Component
     public string $statusFilter = '';
     public string $serviceTypeFilter = '';
     public string $planFilter = '';
+    public int $perPage = 20;
+
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
 
     // ─── Bulk Selection ──────────────────────────────────────────────────────────
     public array $selectedWebsites = [];
@@ -394,10 +400,18 @@ class StaffWebsites extends Component
             ->when($this->serviceTypeFilter, fn($q) => $q->whereHas('serviceTypes', fn($sq) => $sq->where('service_type_id', $this->serviceTypeFilter)))
             ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('adspv_plans.id', $this->planFilter)))
             ->latest()
-            ->paginate(12);
+            ->paginate($this->perPage);
 
         $hasActiveFilters = $this->search || $this->statusFilter || $this->serviceTypeFilter || $this->planFilter;
         $pageIds = $websites->pluck('id')->toArray();
+
+        // Statistics Summary Counts scoped to staff assigned clients
+        $totalClientsCount = Client::whereIn('id', $assignedClientIds)->whereHas('websites')->count();
+        $activeClientsCount = Client::whereIn('id', $assignedClientIds)->whereHas('websites')->where('status', 'active')->count();
+        $inactiveClientsCount = Client::whereIn('id', $assignedClientIds)->whereHas('websites')->where('status', 'inactive')->count();
+        $totalWebsitesCount = Website::whereIn('client_id', $assignedClientIds)->count();
+        $activeWebsitesCount = Website::whereIn('client_id', $assignedClientIds)->where('status', 'active')->count();
+        $inactiveWebsitesCount = Website::whereIn('client_id', $assignedClientIds)->where('status', 'inactive')->count();
 
         return view('modules.crm.staff.portal.websites', [
             'websites'                  => $websites,
@@ -409,6 +423,12 @@ class StaffWebsites extends Component
             'websiteDetails'            => null,
             'websiteMaintenanceReports' => collect(),
             'websiteActivityLogs'       => collect(),
+            'totalClientsCount'        => $totalClientsCount,
+            'activeClientsCount'       => $activeClientsCount,
+            'inactiveClientsCount'     => $inactiveClientsCount,
+            'totalWebsitesCount'       => $totalWebsitesCount,
+            'activeWebsitesCount'      => $activeWebsitesCount,
+            'inactiveWebsitesCount'    => $inactiveWebsitesCount,
         ])->layoutData(['title' => 'Monitored Websites - Staff Portal']);
     }
 }

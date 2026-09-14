@@ -9,15 +9,24 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 
+use App\Traits\LoadsMarketingReports;
+
 #[Layout('layouts.staff')]
 class StaffClients extends Component
 {
     use WithPagination;
     use WithFileUploads;
+    use LoadsMarketingReports;
 
     public string $search = '';
     public string $statusFilter = '';
     public string $planFilter = '';
+    public int $perPage = 20;
+
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
     
     // Client Detail modal or view tracking
     public ?int $selectedClientId = null;
@@ -338,7 +347,7 @@ class StaffClients extends Component
                 ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
                 ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)))
                 ->latest('id')
-                ->paginate(10)
+                ->paginate($this->perPage)
                 ->onEachSide(1);
         }
 
@@ -356,6 +365,29 @@ class StaffClients extends Component
             return false;
         })->count();
 
+        // Statistics counts based on activeViewTab ('my_clients' vs 'all_clients')
+        $baseClientsQuery = Client::query();
+        if ($this->activeViewTab === 'my_clients') {
+            $baseClientsQuery->whereHas('assignedStaff', function ($q) use ($staffId) {
+                $q->where('staff_id', $staffId);
+            });
+        }
+
+        $totalClientsCount = (clone $baseClientsQuery)->count();
+        $activeClientsCount = (clone $baseClientsQuery)->where('status', 'active')->count();
+        $inactiveClientsCount = (clone $baseClientsQuery)->where('status', 'inactive')->count();
+
+        $baseWebsitesQuery = \App\Modules\CRM\Websites\Models\Website::query();
+        if ($this->activeViewTab === 'my_clients') {
+            $baseWebsitesQuery->whereHas('client.assignedStaff', function ($q) use ($staffId) {
+                $q->where('staff_id', $staffId);
+            });
+        }
+
+        $totalWebsitesCount = (clone $baseWebsitesQuery)->count();
+        $activeWebsitesCount = (clone $baseWebsitesQuery)->where('status', 'active')->count();
+        $inactiveWebsitesCount = (clone $baseWebsitesQuery)->where('status', 'inactive')->count();
+
         return view('modules.crm.staff.portal.clients', [
             'clients' => $clients,
             'clientDetails' => $clientDetails,
@@ -371,6 +403,12 @@ class StaffClients extends Component
             'isAssignedToStaff' => $isAssignedToStaff,
             'plans' => $plans,
             'hasActiveFilters' => $hasActiveFilters,
+            'totalClientsCount' => $totalClientsCount,
+            'activeClientsCount' => $activeClientsCount,
+            'inactiveClientsCount' => $inactiveClientsCount,
+            'totalWebsitesCount' => $totalWebsitesCount,
+            'activeWebsitesCount' => $activeWebsitesCount,
+            'inactiveWebsitesCount' => $inactiveWebsitesCount,
         ])->layoutData(['title' => 'My Clients - Staff Portal']);
     }
 
@@ -652,7 +690,7 @@ class StaffClients extends Component
                 $selectedDate = now();
             }
         }
-        $startDateStr = now()->subDays(7)->format('Y-m-d');
+        $startDateStr = now()->subDays(90)->format('Y-m-d');
         $endDateStr = now()->format('Y-m-d');
 
         if ($accessToken && $propertyId && $integrationId === 'gsc') {
@@ -662,6 +700,9 @@ class StaffClients extends Component
                 $endDate = $endDateStr;
 
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
+                    $pool->as('daily')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['date'], 'rowLimit' => 25000, 'dataState' => 'all'
+                    ]),
                     $pool->as('queries')->withToken($accessToken)->timeout(15)->post($endpoint, [
                         'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10, 'dataState' => 'all'
                     ]),
@@ -679,6 +720,7 @@ class StaffClients extends Component
                 $queriesRes = $responses['queries'];
                 if ($queriesRes->successful()) {
                     $queriesJson = $queriesRes->json();
+                    $dailyJson = $responses['daily']->successful() ? $responses['daily']->json() : [];
                     $pagesJson = $responses['pages']->successful() ? $responses['pages']->json() : [];
                     $devicesJson = $responses['devices']->successful() ? $responses['devices']->json() : [];
                     $countriesJson = $responses['countries']->successful() ? $responses['countries']->json() : [];
@@ -690,6 +732,15 @@ class StaffClients extends Component
                             'property_id' => $propertyId,
                             'report_type' => 'Search Traffic & Top Queries',
                         ],
+                        'daily_traffic' => array_map(function ($row) {
+                            return [
+                                'date' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                                'ctr' => round(($row['ctr'] ?? 0) * 100, 2),
+                                'position' => round($row['position'] ?? 0, 1),
+                            ];
+                        }, $dailyJson['rows'] ?? []),
                         'summary' => [
                             'clicks' => collect($queriesJson['rows'] ?? [])->sum('clicks'),
                             'impressions' => collect($queriesJson['rows'] ?? [])->sum('impressions'),
@@ -738,7 +789,7 @@ class StaffClients extends Component
             }
         } elseif ($accessToken && $propertyId && $integrationId === 'ga4') {
             try {
-                $gaStartDate = date('Y-m-01');
+                $gaStartDate = $startDateStr;
                 // Fetch reports in parallel using Http::pool
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
                     $pool->as('summary')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
@@ -967,6 +1018,9 @@ class StaffClients extends Component
                                 'date' => $row['dimensionValues'][0]['value'] ?? '',
                                 'users' => (int) ($row['metricValues'][0]['value'] ?? 0),
                                 'pageviews' => (int) ($row['metricValues'][1]['value'] ?? 0),
+                                'sessions' => (int) ($row['metricValues'][2]['value'] ?? 0),
+                                'bounce_rate' => (float) ($row['metricValues'][3]['value'] ?? 0),
+                                'avg_session_duration' => (float) ($row['metricValues'][4]['value'] ?? 0),
                             ];
                         }, $summaryJson['rows'] ?? [])
                     ];
@@ -1414,14 +1468,44 @@ class StaffClients extends Component
             $year = $selectedDate->format('Y');
             $monthFull = \Illuminate\Support\Str::lower($selectedDate->format('F'));
 
-            $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
-            
-            $dir = dirname($filePath);
-            if (!file_exists($dir)) {
-                mkdir($dir, 0755, true);
-            }
+            if (isset($reportData['daily_traffic']) && is_array($reportData['daily_traffic']) && count($reportData['daily_traffic']) > 0) {
+                $grouped = [];
+                foreach ($reportData['daily_traffic'] as $row) {
+                    $d = $row['date'] ?? null;
+                    if ($d && strlen($d) >= 8) {
+                        $dtStr = (strpos($d, '-') !== false) ? $d : substr($d, 0, 4) . '-' . substr($d, 4, 2) . '-' . substr($d, 6, 2);
+                        try {
+                            $cDate = \Carbon\Carbon::parse($dtStr);
+                            $y = $cDate->format('Y');
+                            $m = \Illuminate\Support\Str::lower($cDate->format('F'));
+                            $grouped["{$y}|{$m}"][] = $row;
+                        } catch (\Exception $e) {
+                            $grouped["{$year}|{$monthFull}"][] = $row;
+                        }
+                    } else {
+                        $grouped["{$year}|{$monthFull}"][] = $row;
+                    }
+                }
 
-            file_put_contents($filePath, json_encode($reportData, JSON_PRETTY_PRINT));
+                foreach ($grouped as $key => $rows) {
+                    list($y, $m) = explode('|', $key);
+                    $mPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$y}/{$m}.json");
+                    $mDir = dirname($mPath);
+                    if (!file_exists($mDir)) {
+                        mkdir($mDir, 0755, true);
+                    }
+                    $mReportData = $reportData;
+                    $mReportData['daily_traffic'] = $rows;
+                    file_put_contents($mPath, json_encode($mReportData, JSON_PRETTY_PRINT));
+                }
+            } else {
+                $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
+                $dir = dirname($filePath);
+                if (!file_exists($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                file_put_contents($filePath, json_encode($reportData, JSON_PRETTY_PRINT));
+            }
 
             $integration->update([
                 'last_sync_at' => now(),
@@ -1535,38 +1619,8 @@ class StaffClients extends Component
         $creds = $integration->auth_credentials ?? [];
         $this->activeReportPropertyId = $creds['property_id'] ?? ($creds['site_url'] ?? ($creds['channel_id'] ?? ($creds['project_id'] ?? ($creds['container_id'] ?? ($creds['location_id'] ?? '')))));
 
-        $year = date('Y');
-        $monthFull = \Illuminate\Support\Str::lower(date('F'));
-        $this->selectedReportMonth = "{$year}-{$monthFull}";
-
-        try {
-            $clientDetails = Client::with('user')->findOrFail($this->selectedClientId);
-            $website = \App\Modules\CRM\Websites\Models\Website::findOrFail($this->selectedWebsiteId);
-
-            $userName = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($clientDetails->user->name ?? 'client'));
-            $emailParts = explode('@', $clientDetails->user->email ?? '');
-            $emailPrefix = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($emailParts[0] ?? ''));
-            $clientFolder = "{$userName}-{$emailPrefix}";
-
-            $websiteFolder = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($website->site_name));
-            if (empty($websiteFolder)) {
-                $websiteFolder = 'site-' . $website->id;
-            }
-
-            $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
-            
-            if (file_exists($filePath)) {
-                $this->activeReportData = json_decode(file_get_contents($filePath), true) ?? [];
-            } else {
-                $this->refreshIntegration($integrationId);
-                if (file_exists($filePath)) {
-                    $this->activeReportData = json_decode(file_get_contents($filePath), true) ?? [];
-                }
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error loading report JSON file: ' . $e->getMessage());
-        }
-
+        $this->initDateRange();
+        $this->loadReportDataForActiveModal();
         $this->showReportModal = true;
     }
 
@@ -1576,16 +1630,25 @@ class StaffClients extends Component
         $this->activeReportIntegrationId = '';
         $this->activeReportPropertyId = '';
         $this->activeReportData = [];
-        $this->selectedReportMonth = '';
     }
 
-    public function updatedSelectedReportMonth(string $value): void
+    public function updatedDateFrom(): void
     {
-        if (empty($value) || !str_contains($value, '-')) {
+        $this->loadReportDataForActiveModal();
+    }
+
+    public function updatedDateTo(): void
+    {
+        $this->loadReportDataForActiveModal();
+    }
+
+    public function loadReportDataForActiveModal(): void
+    {
+        if (!$this->selectedWebsiteId || !$this->activeReportIntegrationId || !$this->selectedClientId) {
             return;
         }
 
-        list($year, $month) = explode('-', $value);
+        $this->initDateRange();
 
         try {
             $clientDetails = Client::with('user')->findOrFail($this->selectedClientId);
@@ -1601,15 +1664,9 @@ class StaffClients extends Component
                 $websiteFolder = 'site-' . $website->id;
             }
 
-            $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$this->activeReportIntegrationId}/{$year}/{$month}.json");
-            
-            if (file_exists($filePath)) {
-                $this->activeReportData = json_decode(file_get_contents($filePath), true) ?? [];
-            } else {
-                $this->activeReportData = [];
-            }
+            $this->activeReportData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $this->activeReportIntegrationId, $this->dateFrom, $this->dateTo);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error loading selected month JSON file: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error loading report JSON file: ' . $e->getMessage());
         }
     }
 
@@ -1681,7 +1738,7 @@ class StaffClients extends Component
         srand($seed);
 
         $queries = [
-            'aspire hub', 'crm software', 'business management tools', 
+            'Aspire Digital Solutions', 'crm software', 'business management tools', 
             'best crm 2026', 'sales automation', 'customer portal software'
         ];
 
@@ -2012,10 +2069,7 @@ class StaffClients extends Component
             // Ignore
         }
 
-        return [
-            ['id' => '342678819', 'name' => 'Aspire Hub GA4 (Main Property)'],
-            ['id' => '409871233', 'name' => 'Aspire Hub Staging Property'],
-        ];
+        return [];
     }
 
     public function savePropertyId(string $integrationId): void

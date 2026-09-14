@@ -77,6 +77,11 @@ class Client extends Model
         return $this->hasMany(\App\Modules\Support\Models\SupportTicket::class, 'client_id');
     }
 
+    public function clickUpFolders(): HasMany
+    {
+        return $this->hasMany(\App\Modules\CRM\ClickUp\Models\ClickUpFolder::class, 'client_id');
+    }
+
     protected function getActivityDescription(string $action): string
     {
         $userName = auth()->user()->name ?? 'System';

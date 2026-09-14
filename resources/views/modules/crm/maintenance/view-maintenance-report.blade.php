@@ -71,8 +71,17 @@
                 </div>
                 <div>
                     <h5 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Website</h5>
-                    <p class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-1 hover:underline">
-                        <a href="{{ $report->website->domain }}" target="_blank">{{ $report->website->site_name }}</a>
+                    <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ $report->website->site_name }}</p>
+                    <p class="text-[13px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline mt-0.5">
+                        @php
+                            $websiteUrl = $report->website->url ?? '';
+                            if ($websiteUrl && !str_starts_with($websiteUrl, 'http')) {
+                                $websiteUrl = 'https://' . $websiteUrl;
+                            }
+                        @endphp
+                        @if($websiteUrl)
+                            <a href="{{ $websiteUrl }}" target="_blank">{{ $websiteUrl }}</a>
+                        @endif
                     </p>
                 </div>
                 <div>

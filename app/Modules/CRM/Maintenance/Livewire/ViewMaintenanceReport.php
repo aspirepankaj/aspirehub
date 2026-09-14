@@ -70,6 +70,6 @@ class ViewMaintenanceReport extends Component
     {
         return view('modules.crm.maintenance.view-maintenance-report', [
             'report' => $this->report,
-        ])->layoutData(['title' => 'View Maintenance Report #' . $this->reportId . ' - Aspire Hub']);
+        ])->layoutData(['title' => 'View Maintenance Report #' . $this->reportId . ' - Aspire Digital Solutions']);
     }
 }

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noindex, nofollow">
 
-        <title>Aspire Hub</title>
+        <title>Aspire Digital Solutions</title>
 
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,7 +66,7 @@ border: 1px solid rgba(255, 255, 255, 0.43);
             <main class="flex flex-col items-center justify-center p-6 text-center w-full max-w-2xl mx-auto mt-[-10vh]">
                 <!-- Logo -->
                 <div class="mb-14 sm:mb-20">
-                    <img src="{{ asset('aspire-hub-1.svg') }}" class="h-32 sm:h-56 w-auto mx-auto drop-shadow-xl hover:scale-105 transition-transform duration-300" alt="Aspire Hub" />
+                    <img src="{{ asset('aspire-hub-1.svg') }}" class="h-32 sm:h-56 w-auto mx-auto drop-shadow-xl hover:scale-105 transition-transform duration-300" alt="Aspire Digital Solutions" />
                 </div>
 
                 <!-- Admin Button -->
@@ -99,7 +99,7 @@ border: 1px solid rgba(255, 255, 255, 0.43);
 
             <!-- Footer -->
             <footer class="absolute bottom-6 w-full text-center text-xs text-slate-400 dark:text-slate-500 font-semibold px-4">
-                &copy; {{ date('Y') }} Aspire Hub &bull; Custom Enterprise System
+                &copy; {{ date('Y') }} Aspire Digital Solutions &bull; Custom Enterprise System
             </footer>
         </div>
     </body>

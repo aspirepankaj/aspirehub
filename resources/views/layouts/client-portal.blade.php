@@ -22,7 +22,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ $title ?? 'Client Portal' }} - Aspire Hub</title>
+    <title>{{ $title ?? 'Client Portal' }} - Aspire Digital Solutions</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,7 +94,7 @@
         <div class="flex-1 overflow-y-auto custom-scrollbar">
             <div class="px-6 py-6 flex items-center justify-between">
                 <div class="flex flex-col gap-1">
-                    <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start dark:brightness-0 dark:invert" alt="Aspire Hub" />
+                    <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start dark:brightness-0 dark:invert" alt="Aspire Digital Solutions" />
                     <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase pl-1 mt-0.5">Client Portal</div>
                 </div>
                 <button type="button" @click="mobileSidebar = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lg:hidden">

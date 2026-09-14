@@ -16,10 +16,12 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 
+use App\Traits\LoadsMarketingReports;
+
 #[Layout('layouts.admin')]
 class ManageClients extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithPagination, WithFileUploads, LoadsMarketingReports;
 
     // Form inputs
     public string $name = '';
@@ -44,6 +46,12 @@ class ManageClients extends Component
     public string $search = '';
     public string $statusFilter = '';
     public string $planFilter = '';
+    public int $perPage = 20;
+
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
     
     // Sorting
     public string $sortField = 'id';
@@ -987,7 +995,7 @@ class ManageClients extends Component
                 $selectedDate = now();
             }
         }
-        $startDateStr = now()->subDays(7)->format('Y-m-d');
+        $startDateStr = now()->subDays(90)->format('Y-m-d');
         $endDateStr = now()->format('Y-m-d');
 
         if ($accessToken && $propertyId && $integrationId === 'gsc') {
@@ -997,6 +1005,9 @@ class ManageClients extends Component
                 $endDate = $endDateStr;
 
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
+                    $pool->as('daily')->withToken($accessToken)->timeout(15)->post($endpoint, [
+                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['date'], 'rowLimit' => 25000, 'dataState' => 'all'
+                    ]),
                     $pool->as('queries')->withToken($accessToken)->timeout(15)->post($endpoint, [
                         'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10, 'dataState' => 'all'
                     ]),
@@ -1014,6 +1025,7 @@ class ManageClients extends Component
                 $queriesRes = $responses['queries'];
                 if ($queriesRes->successful()) {
                     $queriesJson = $queriesRes->json();
+                    $dailyJson = $responses['daily']->successful() ? $responses['daily']->json() : [];
                     $pagesJson = $responses['pages']->successful() ? $responses['pages']->json() : [];
                     $devicesJson = $responses['devices']->successful() ? $responses['devices']->json() : [];
                     $countriesJson = $responses['countries']->successful() ? $responses['countries']->json() : [];
@@ -1025,6 +1037,15 @@ class ManageClients extends Component
                             'property_id' => $propertyId,
                             'report_type' => 'Search Traffic & Top Queries',
                         ],
+                        'daily_traffic' => array_map(function ($row) {
+                            return [
+                                'date' => $row['keys'][0] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                                'ctr' => round(($row['ctr'] ?? 0) * 100, 2),
+                                'position' => round($row['position'] ?? 0, 1),
+                            ];
+                        }, $dailyJson['rows'] ?? []),
                         'summary' => [
                             'clicks' => collect($queriesJson['rows'] ?? [])->sum('clicks'),
                             'impressions' => collect($queriesJson['rows'] ?? [])->sum('impressions'),
@@ -1073,7 +1094,7 @@ class ManageClients extends Component
             }
         } elseif ($accessToken && $propertyId && $integrationId === 'ga4') {
             try {
-                $gaStartDate = date('Y-m-01');
+                $gaStartDate = $startDateStr;
                 // Fetch reports in parallel using Http::pool
                 $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
                     $pool->as('summary')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
@@ -1302,6 +1323,9 @@ class ManageClients extends Component
                                 'date' => $row['dimensionValues'][0]['value'] ?? '',
                                 'users' => (int) ($row['metricValues'][0]['value'] ?? 0),
                                 'pageviews' => (int) ($row['metricValues'][1]['value'] ?? 0),
+                                'sessions' => (int) ($row['metricValues'][2]['value'] ?? 0),
+                                'bounce_rate' => (float) ($row['metricValues'][3]['value'] ?? 0),
+                                'avg_session_duration' => (float) ($row['metricValues'][4]['value'] ?? 0),
                             ];
                         }, $summaryJson['rows'] ?? [])
                     ];
@@ -1807,14 +1831,44 @@ class ManageClients extends Component
             $year = $selectedDate->format('Y');
             $monthFull = \Illuminate\Support\Str::lower($selectedDate->format('F'));
 
-            $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
-            
-            $dir = dirname($filePath);
-            if (!file_exists($dir)) {
-                mkdir($dir, 0755, true);
-            }
+            if (isset($reportData['daily_traffic']) && is_array($reportData['daily_traffic']) && count($reportData['daily_traffic']) > 0) {
+                $grouped = [];
+                foreach ($reportData['daily_traffic'] as $row) {
+                    $d = $row['date'] ?? null;
+                    if ($d && strlen($d) >= 8) {
+                        $dtStr = (strpos($d, '-') !== false) ? $d : substr($d, 0, 4) . '-' . substr($d, 4, 2) . '-' . substr($d, 6, 2);
+                        try {
+                            $cDate = \Carbon\Carbon::parse($dtStr);
+                            $y = $cDate->format('Y');
+                            $m = \Illuminate\Support\Str::lower($cDate->format('F'));
+                            $grouped["{$y}|{$m}"][] = $row;
+                        } catch (\Exception $e) {
+                            $grouped["{$year}|{$monthFull}"][] = $row;
+                        }
+                    } else {
+                        $grouped["{$year}|{$monthFull}"][] = $row;
+                    }
+                }
 
-            file_put_contents($filePath, json_encode($reportData, JSON_PRETTY_PRINT));
+                foreach ($grouped as $key => $rows) {
+                    list($y, $m) = explode('|', $key);
+                    $mPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$y}/{$m}.json");
+                    $mDir = dirname($mPath);
+                    if (!file_exists($mDir)) {
+                        mkdir($mDir, 0755, true);
+                    }
+                    $mReportData = $reportData;
+                    $mReportData['daily_traffic'] = $rows;
+                    file_put_contents($mPath, json_encode($mReportData, JSON_PRETTY_PRINT));
+                }
+            } else {
+                $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
+                $dir = dirname($filePath);
+                if (!file_exists($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                file_put_contents($filePath, json_encode($reportData, JSON_PRETTY_PRINT));
+            }
 
             $integration->update([
                 'last_sync_at' => now(),
@@ -1928,38 +1982,8 @@ class ManageClients extends Component
         $creds = $integration->auth_credentials ?? [];
         $this->activeReportPropertyId = $creds['property_id'] ?? ($creds['site_url'] ?? ($creds['channel_id'] ?? ($creds['project_id'] ?? ($creds['container_id'] ?? ($creds['location_id'] ?? '')))));
 
-        $year = date('Y');
-        $monthFull = \Illuminate\Support\Str::lower(date('F'));
-        $this->selectedReportMonth = "{$year}-{$monthFull}";
-
-        try {
-            $clientDetails = Client::with('user')->findOrFail($this->selectedClientDetailId);
-            $website = \App\Modules\CRM\Websites\Models\Website::findOrFail($this->selectedWebsiteId);
-
-            $userName = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($clientDetails->user->name ?? 'client'));
-            $emailParts = explode('@', $clientDetails->user->email ?? '');
-            $emailPrefix = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($emailParts[0] ?? ''));
-            $clientFolder = "{$userName}-{$emailPrefix}";
-
-            $websiteFolder = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($website->site_name));
-            if (empty($websiteFolder)) {
-                $websiteFolder = 'site-' . $website->id;
-            }
-
-            $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
-            
-            if (file_exists($filePath)) {
-                $this->activeReportData = json_decode(file_get_contents($filePath), true) ?? [];
-            } else {
-                $this->refreshIntegration($integrationId);
-                if (file_exists($filePath)) {
-                    $this->activeReportData = json_decode(file_get_contents($filePath), true) ?? [];
-                }
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error loading report JSON file: ' . $e->getMessage());
-        }
-
+        $this->initDateRange();
+        $this->loadReportDataForActiveModal();
         $this->showReportModal = true;
     }
 
@@ -1969,16 +1993,25 @@ class ManageClients extends Component
         $this->activeReportIntegrationId = '';
         $this->activeReportPropertyId = '';
         $this->activeReportData = [];
-        $this->selectedReportMonth = '';
     }
 
-    public function updatedSelectedReportMonth(string $value): void
+    public function updatedDateFrom(): void
     {
-        if (empty($value) || !str_contains($value, '-')) {
+        $this->loadReportDataForActiveModal();
+    }
+
+    public function updatedDateTo(): void
+    {
+        $this->loadReportDataForActiveModal();
+    }
+
+    public function loadReportDataForActiveModal(): void
+    {
+        if (!$this->selectedWebsiteId || !$this->activeReportIntegrationId || !$this->selectedClientDetailId) {
             return;
         }
 
-        list($year, $month) = explode('-', $value);
+        $this->initDateRange();
 
         try {
             $clientDetails = Client::with('user')->findOrFail($this->selectedClientDetailId);
@@ -1994,15 +2027,9 @@ class ManageClients extends Component
                 $websiteFolder = 'site-' . $website->id;
             }
 
-            $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$this->activeReportIntegrationId}/{$year}/{$month}.json");
-            
-            if (file_exists($filePath)) {
-                $this->activeReportData = json_decode(file_get_contents($filePath), true) ?? [];
-            } else {
-                $this->activeReportData = [];
-            }
+            $this->activeReportData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $this->activeReportIntegrationId, $this->dateFrom, $this->dateTo);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error loading selected month JSON file: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error loading report JSON file: ' . $e->getMessage());
         }
     }
 
@@ -2094,7 +2121,7 @@ class ManageClients extends Component
         srand($seed);
 
         $queries = [
-            'aspire hub', 'crm software', 'business management tools', 
+            'Aspire Digital Solutions', 'crm software', 'business management tools', 
             'best crm 2026', 'sales automation', 'customer portal software'
         ];
 
@@ -2255,10 +2282,7 @@ class ManageClients extends Component
             // Ignore
         }
 
-        return [
-            ['id' => '342678819', 'name' => 'Aspire Hub GA4 (Main Property)'],
-            ['id' => '409871233', 'name' => 'Aspire Hub Staging Property'],
-        ];
+        return [];
     }
 
     public function getYoutubeChannels(): array
@@ -2611,6 +2635,10 @@ class ManageClients extends Component
             }
 
             if ($this->activeTab === 'integrations') {
+                if ((!$this->selectedWebsiteId || !$clientWebsites->pluck('id')->contains($this->selectedWebsiteId)) && $clientWebsites->isNotEmpty()) {
+                    $this->selectedWebsiteId = $clientWebsites->first()->id;
+                }
+
                 if ($this->selectedWebsiteId) {
                     $existingIntegrations = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
                         ->get()
@@ -2699,7 +2727,7 @@ class ManageClients extends Component
                     ->get();
             }
         } else {
-            $query = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
+            $query = Client::with(['user', 'phones', 'plans', 'assignedStaff.user', 'clickUpFolders'])
                 ->withCount('websites')
                 ->where(function ($query) {
                     $query->where('company_name', 'like', '%' . $this->search . '%')
@@ -2717,7 +2745,7 @@ class ManageClients extends Component
                 $query->orderBy($this->sortField, $this->sortDirection);
             }
 
-            $clients = $query->paginate(10)->onEachSide(1);
+            $clients = $query->paginate($this->perPage)->onEachSide(1);
 
             $hasActiveFilters = $this->search || $this->statusFilter || $this->planFilter;
             $pageIds = $clients->pluck('id')->toArray();
@@ -2759,6 +2787,14 @@ class ManageClients extends Component
         $mappingClient = $this->mappingClientId ? Client::with('user')->find($this->mappingClientId) : null;
         $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
 
+        // Metric Statistics Counts
+        $totalClientsCount = Client::count();
+        $activeClientsCount = Client::where('status', 'active')->count();
+        $inactiveClientsCount = Client::where('status', 'inactive')->count();
+        $totalWebsitesCount = \App\Modules\CRM\Websites\Models\Website::count();
+        $activeWebsitesCount = \App\Modules\CRM\Websites\Models\Website::where('status', 'active')->count();
+        $inactiveWebsitesCount = \App\Modules\CRM\Websites\Models\Website::where('status', 'inactive')->count();
+
         return view('modules.crm.clients.manage-clients', [
             'clients'                  => $clients,
             'plans'                    => $plans,
@@ -2780,7 +2816,13 @@ class ManageClients extends Component
             'mappingClient'            => $mappingClient,
             'clientSupportTickets'     => $clientSupportTickets,
             'clientIntegrations'       => $clientIntegrations,
-        ])->layoutData(['title' => 'Clients Management - Aspire Hub']);
+            'totalClientsCount'        => $totalClientsCount,
+            'activeClientsCount'       => $activeClientsCount,
+            'inactiveClientsCount'     => $inactiveClientsCount,
+            'totalWebsitesCount'       => $totalWebsitesCount,
+            'activeWebsitesCount'      => $activeWebsitesCount,
+            'inactiveWebsitesCount'    => $inactiveWebsitesCount,
+        ])->layoutData(['title' => 'Clients Management - Aspire Digital Solutions']);
     }
 
     public $gtmContainerId = '';

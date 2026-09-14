@@ -1,17 +1,23 @@
 @section('page_title', 'Documents Library')
 
 <div>
-    {{-- Breadcrumbs & Add Action --}}
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <x-admin.breadcrumbs :items="['Documents Library' => null]" />
+    {{-- Breadcrumbs --}}
+    <x-admin.breadcrumbs :items="['Documents Library' => null]" />
+
+    {{-- Page Header --}}
+    <div class="flex items-center justify-between gap-4 mb-5">
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">
+            Access and manage client documents and website resources
+        </p>
 
         <button type="button" 
                 @click="$dispatch('open-modal', { name: 'add-doc-modal' })"
-                class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Add New Document
+            <span>Add New Document</span>
         </button>
     </div>
 
@@ -37,7 +43,7 @@
 
     {{-- Filters Card --}}
     <div class="relative z-30 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 rounded-2xl p-5 mb-6 shadow-sm">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             {{-- Search Title/File --}}
             <div class="relative">
                 <input type="text" 
@@ -197,6 +203,22 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Per Page Dropdown --}}
+            <div class="relative flex items-center">
+                <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                <select wire:model.live="perPage" 
+                        class="block w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-pink-500/40 focus:border-pink-400 text-sm transition duration-150 appearance-none cursor-pointer">
+                    <option value="20" class="dark:bg-slate-900">20 per page</option>
+                    <option value="50" class="dark:bg-slate-900">50 per page</option>
+                    <option value="100" class="dark:bg-slate-900">100 per page</option>
+                </select>
+                <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
         </div>
 
         @if($hasActiveFilters)

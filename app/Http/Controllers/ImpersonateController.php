@@ -12,8 +12,11 @@ class ImpersonateController extends Controller
     {
         $currentUser = auth()->user();
 
-        // Security check: Only active administrators can initiate impersonation
-        if (!$currentUser || !$currentUser->admin || !$currentUser->admin->is_active) {
+        $isAdmin = $currentUser && $currentUser->admin && $currentUser->admin->is_active;
+        $isStaff = $currentUser && $currentUser->staff && $currentUser->staff->status === 'active';
+
+        // Security check: Only active administrators or active staff can initiate impersonation
+        if (!$isAdmin && !$isStaff) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -37,7 +40,7 @@ class ImpersonateController extends Controller
             'action'        => 'impersonated',
             'loggable_type' => User::class,
             'loggable_id'   => $targetUser->id,
-            'description'   => "{$currentUser->name} (Administrator) switched session to {$targetUser->name} ({$targetRoleName}).",
+            'description'   => "{$currentUser->name} (" . ($isAdmin ? 'Administrator' : 'Staff') . ") switched session to {$targetUser->name} ({$targetRoleName}).",
             'meta'          => [
                 'ip'                => request()->ip(),
                 'agent'             => request()->userAgent(),
@@ -49,7 +52,12 @@ class ImpersonateController extends Controller
             ]
         ]);
 
-        // Store the original admin ID in the session
+        // Ensure target user is marked as verified so verification middleware doesn't block
+        if (is_null($targetUser->email_verified_at)) {
+            $targetUser->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        // Store the original admin/staff ID in the session
         session()->put('impersonator_id', $currentUser->id);
 
         // Log in as target user
@@ -63,7 +71,17 @@ class ImpersonateController extends Controller
             $targetUser->staff->update(['last_login_at' => now()]);
         }
 
-        // Redirect to dashboard (routes/web.php handles role redirection)
+        // Redirect directly to the appropriate dashboard
+        if ($targetUser->client) {
+            return redirect()->route('client.dashboard')->with('success', "Logged in as {$targetUser->name}");
+        }
+        if ($targetUser->staff) {
+            return redirect()->route('staff.dashboard')->with('success', "Logged in as {$targetUser->name}");
+        }
+        if ($targetUser->admin) {
+            return redirect()->route('admin.dashboard')->with('success', "Logged in as {$targetUser->name}");
+        }
+
         return redirect()->route('dashboard')->with('success', "Logged in as {$targetUser->name}");
     }
 

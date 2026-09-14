@@ -1,4 +1,7 @@
 <div>
+    {{-- Breadcrumbs --}}
+    <x-admin.breadcrumbs :items="['ClickUp Tickets' => null]" />
+
     <!-- Page Header -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

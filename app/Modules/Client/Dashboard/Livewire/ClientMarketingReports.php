@@ -11,13 +11,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+use App\Traits\LoadsMarketingReports;
+
 #[Layout('layouts.client-portal')]
 class ClientMarketingReports extends Component
 {
+    use LoadsMarketingReports;
+
     public ?int $selectedWebsiteId = null;
     public string $activeReportIntegrationId = 'overview';
-    public string $selectedMonth = '';
-    public string $compareMonth = '';
     
     // Loaded reports
     public array $activeReportData = [];
@@ -39,11 +41,17 @@ class ClientMarketingReports extends Component
     
     // Dropdown list holders
     public $websites = [];
-    public $availableMonths = [];
     public $integrations = [];
+    
+    // Legacy / active month properties
+    public string $selectedMonth = '';
+    public string $compareMonth = '';
+    public array $availableMonths = [];
 
     public function mount()
     {
+        $this->initDateRange();
+
         $client = Client::where('user_id', Auth::id())->first();
         if (!$client) {
             return;
@@ -66,17 +74,32 @@ class ClientMarketingReports extends Component
 
     public function updatedActiveReportIntegrationId()
     {
-        $this->loadMonthsForActiveIntegration();
+        $this->loadReportData();
     }
 
-    public function updatedSelectedMonth()
+    public function updatedDateFrom()
     {
         $this->loadReportData();
     }
 
-    public function updatedCompareMonth()
+    public function updatedDateTo()
     {
         $this->loadReportData();
+    }
+
+    public function updatedCompareDateFrom()
+    {
+        $this->loadReportData();
+    }
+
+    public function updatedCompareDateTo()
+    {
+        $this->loadReportData();
+    }
+
+    public function updatedCompareFormat()
+    {
+        // triggers re-render automatically
     }
 
     protected function loadIntegrationsAndMonths()
@@ -90,34 +113,7 @@ class ClientMarketingReports extends Component
             ->keyBy('integration_type')
             ->toArray();
 
-        // Overview is default. If no overview or not selected, fallback.
         $this->activeReportIntegrationId = 'overview';
-
-        $this->loadMonthsForActiveIntegration();
-    }
-
-    protected function loadMonthsForActiveIntegration()
-    {
-        $this->availableMonths = $this->getAvailableReportMonths();
-        
-        $isCurrentMonthValid = false;
-        if (!empty($this->selectedMonth) && !empty($this->availableMonths)) {
-            foreach ($this->availableMonths as $monthOpt) {
-                if ($monthOpt['value'] === $this->selectedMonth) {
-                    $isCurrentMonthValid = true;
-                    break;
-                }
-            }
-        }
-
-        if (!$isCurrentMonthValid) {
-            if (!empty($this->availableMonths)) {
-                $this->selectedMonth = $this->availableMonths[0]['value'];
-            } else {
-                $this->selectedMonth = date('Y') . '-' . Str::lower(date('F'));
-            }
-        }
-
         $this->loadReportData();
     }
 
@@ -132,21 +128,11 @@ class ClientMarketingReports extends Component
         $this->gbpData = [];
         $this->gadsData = [];
 
-        $this->compareGa4Data = [];
-        $this->compareGscData = [];
-        $this->compareYoutubeData = [];
-        $this->compareKeywordData = [];
-        $this->compareGbpData = [];
-        $this->compareGadsData = [];
-
-        if (!$this->selectedWebsiteId || !$this->selectedMonth) {
+        if (!$this->selectedWebsiteId) {
             return;
         }
 
-        // Split "2026-august"
-        $parts = explode('-', $this->selectedMonth);
-        $year = $parts[0] ?? date('Y');
-        $month = $parts[1] ?? Str::lower(date('F'));
+        $this->initDateRange();
 
         try {
             $clientDetails = Client::where('user_id', Auth::id())->first();
@@ -166,77 +152,29 @@ class ClientMarketingReports extends Component
                 $websiteFolder = 'site-' . $website->id;
             }
 
-            // Load GA4 data
-            $ga4Path = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/ga4/{$year}/{$month}.json");
-            if (file_exists($ga4Path)) {
-                $this->ga4Data = json_decode(file_get_contents($ga4Path), true) ?? [];
-            }
+            // Load data filtered by date range
+            $this->ga4Data = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $this->dateFrom, $this->dateTo);
+            $this->gscData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $this->dateFrom, $this->dateTo);
+            $this->youtubeData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $this->dateFrom, $this->dateTo);
+            $this->keywordData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->dateFrom, $this->dateTo);
+            $this->gbpData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->dateFrom, $this->dateTo);
+            $this->gadsData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->dateFrom, $this->dateTo);
 
-            // Load GSC data
-            $gscPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gsc/{$year}/{$month}.json");
-            if (file_exists($gscPath)) {
-                $this->gscData = json_decode(file_get_contents($gscPath), true) ?? [];
-            }
-
-            // Load YouTube data
-            $youtubePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/youtube/{$year}/{$month}.json");
-            if (file_exists($youtubePath)) {
-                $this->youtubeData = json_decode(file_get_contents($youtubePath), true) ?? [];
-            }
-
-            // Load Keyword data
-            $keywordPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/keyword/{$year}/{$month}.json");
-            if (file_exists($keywordPath)) {
-                $this->keywordData = json_decode(file_get_contents($keywordPath), true) ?? [];
-            }
-
-            // Load GBP data
-            $gbpPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gbp/{$year}/{$month}.json");
-            if (file_exists($gbpPath)) {
-                $this->gbpData = json_decode(file_get_contents($gbpPath), true) ?? [];
-            }
-
-            // Load GADS data
-            $gadsPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$year}/{$month}.json");
-            if (file_exists($gadsPath)) {
-                $this->gadsData = json_decode(file_get_contents($gadsPath), true) ?? [];
-            }
-
-            // Load Comparison Data if selected
-            if (!empty($this->compareMonth)) {
-                $cParts = explode('-', $this->compareMonth);
-                $cYear = $cParts[0] ?? date('Y');
-                $cMonth = $cParts[1] ?? Str::lower(date('F'));
-
-                $cGa4Path = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/ga4/{$cYear}/{$cMonth}.json");
-                if (file_exists($cGa4Path)) {
-                    $this->compareGa4Data = json_decode(file_get_contents($cGa4Path), true) ?? [];
-                }
-
-                $cGscPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gsc/{$cYear}/{$cMonth}.json");
-                if (file_exists($cGscPath)) {
-                    $this->compareGscData = json_decode(file_get_contents($cGscPath), true) ?? [];
-                }
-
-                $cYoutubePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/youtube/{$cYear}/{$cMonth}.json");
-                if (file_exists($cYoutubePath)) {
-                    $this->compareYoutubeData = json_decode(file_get_contents($cYoutubePath), true) ?? [];
-                }
-
-                $cKeywordPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/keyword/{$cYear}/{$cMonth}.json");
-                if (file_exists($cKeywordPath)) {
-                    $this->compareKeywordData = json_decode(file_get_contents($cKeywordPath), true) ?? [];
-                }
-
-                $cGbpPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gbp/{$cYear}/{$cMonth}.json");
-                if (file_exists($cGbpPath)) {
-                    $this->compareGbpData = json_decode(file_get_contents($cGbpPath), true) ?? [];
-                }
-
-                $cGadsPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$cYear}/{$cMonth}.json");
-                if (file_exists($cGadsPath)) {
-                    $this->compareGadsData = json_decode(file_get_contents($cGadsPath), true) ?? [];
-                }
+            // Load comparison data
+            if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) {
+                $this->compareGa4Data = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $this->compareDateFrom, $this->compareDateTo);
+                $this->compareGscData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $this->compareDateFrom, $this->compareDateTo);
+                $this->compareYoutubeData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $this->compareDateFrom, $this->compareDateTo);
+                $this->compareKeywordData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->compareDateFrom, $this->compareDateTo);
+                $this->compareGbpData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->compareDateFrom, $this->compareDateTo);
+                $this->compareGadsData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->compareDateFrom, $this->compareDateTo);
+            } else {
+                $this->compareGa4Data = [];
+                $this->compareGscData = [];
+                $this->compareYoutubeData = [];
+                $this->compareKeywordData = [];
+                $this->compareGbpData = [];
+                $this->compareGadsData = [];
             }
 
             // Set activeReportData if looking at specific tab
@@ -327,40 +265,48 @@ class ClientMarketingReports extends Component
 
     public function renderCompareDiff($primaryVal, $compareVal, bool $higherIsBetter = true): string
     {
-        if (empty($this->compareMonth)) {
+        if (empty($this->compareDateFrom)) {
             return '';
         }
 
-        $p = (float)preg_replace('/[^0-9.]/', '', (string)$primaryVal);
-        $c = (float)preg_replace('/[^0-9.]/', '', (string)$compareVal);
+        $p = (float)preg_replace('/[^0-9.-]/', '', (string)$primaryVal);
+        $c = (float)preg_replace('/[^0-9.-]/', '', (string)$compareVal);
 
         if ($c <= 0 && $p <= 0) {
             return '';
         }
 
-        if ($c <= 0) {
-            $pctStr = '+100%';
-            $isPos = true;
+        $diff = $p - $c;
+        $isPos = $higherIsBetter ? ($diff >= 0) : ($diff <= 0);
+
+        if ($this->compareFormat === 'absolute') {
+            $absStr = ($diff > 0 ? '+' : '') . number_format($diff, 1);
+            $displayStr = $absStr;
         } else {
-            $pct = (($p - $c) / $c) * 100;
-            $pctStr = ($pct >= 0 ? '+' : '') . number_format($pct, 1) . '%';
-            $isPos = $higherIsBetter ? ($pct >= 0) : ($pct <= 0);
+            if ($c <= 0) {
+                $displayStr = '+100%';
+                $isPos = true;
+            } else {
+                $pct = ($diff / $c) * 100;
+                $displayStr = ($pct >= 0 ? '+' : '') . number_format($pct, 1) . '%';
+            }
         }
 
-        $badgeClass = $isPos ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400' : 'text-rose-600 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400';
+        $badgeClass = $isPos ? 'text-teal-700 bg-teal-50 dark:bg-teal-900/40 dark:text-teal-400' : 'text-rose-600 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400';
         $icon = $isPos ? '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>' : '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>';
         $formattedCompare = is_numeric($compareVal) ? number_format((float)$compareVal) : $compareVal;
 
         return '<div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
             <span class="text-slate-400 dark:text-slate-500 text-[10px] font-medium">vs ' . $formattedCompare . '</span>
-            <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold ' . $badgeClass . '">' . $icon . $pctStr . '</span>
+            <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-sm text-[10px] font-bold ' . $badgeClass . '">' . $icon . $displayStr . '</span>
         </div>';
     }
 
     public function selectIntegration(string $typeId)
     {
         $this->activeReportIntegrationId = $typeId;
-        $this->compareMonth = '';
+        $this->compareDateFrom = '';
+        $this->compareDateTo = '';
         
         $this->availableMonths = $this->getAvailableReportMonths();
         if (!empty($this->availableMonths)) {

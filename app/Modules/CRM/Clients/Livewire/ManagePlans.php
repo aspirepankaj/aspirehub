@@ -106,6 +106,6 @@ class ManagePlans extends Component
 
         return view('modules.crm.clients.manage-plans', [
             'plans' => $plans,
-        ])->layoutData(['title' => 'Plans Management - Aspire Hub']);
+        ])->layoutData(['title' => 'Plans Management - Aspire Digital Solutions']);
     }
 }
