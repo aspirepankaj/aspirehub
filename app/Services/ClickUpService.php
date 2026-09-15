@@ -132,128 +132,133 @@ class ClickUpService
     }
 
     /**
-     * Fetch all ClickUp tasks for a specific Client by their assigned folders (Parallel Async Requests)
+     * Fetch all ClickUp tasks for a specific Client by their assigned folders (Parallel Async Requests with 5-min Cache)
      */
-    public function fetchClientTasks(int $clientId): array
+    public function fetchClientTasks(int $clientId, bool $forceRefresh = false): array
     {
-        $folders = ClickUpFolder::where('client_id', $clientId)->get();
+        $cacheKey = "client_clickup_tasks_{$clientId}";
 
-        if ($folders->isEmpty()) {
-            return [];
+        if ($forceRefresh) {
+            \Illuminate\Support\Facades\Cache::forget($cacheKey);
         }
 
-        // 1. Fetch Lists for all assigned folders concurrently (Parallel HTTP Pool)
-        $listResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($folders) {
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($clientId) {
+            $folders = ClickUpFolder::where('client_id', $clientId)->get();
+
+            if ($folders->isEmpty()) {
+                return [];
+            }
+
+            // 1. Fetch Lists for all assigned folders concurrently (Parallel HTTP Pool)
+            $listResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($folders) {
+                foreach ($folders as $folder) {
+                    $pool->as('folder_' . $folder->id)->withHeaders([
+                        'Authorization' => $this->apiToken,
+                        'Accept'        => 'application/json',
+                    ])->timeout(10)->get("{$this->baseUrl}/folder/{$folder->id}/list");
+                }
+            });
+
+            // Collect all list targets
+            $listTargets = [];
             foreach ($folders as $folder) {
-                $pool->as('folder_' . $folder->id)->withHeaders([
-                    'Authorization' => $this->apiToken,
-                    'Accept'        => 'application/json',
-                ])->timeout(10)->get("{$this->baseUrl}/folder/{$folder->id}/list");
-            }
-        });
+                $folderId = (string) $folder->id;
+                $res = $listResponses['folder_' . $folderId] ?? null;
 
-        // Collect all list targets
-        $listTargets = [];
-        foreach ($folders as $folder) {
-            $folderId = (string) $folder->id;
-            $res = $listResponses['folder_' . $folderId] ?? null;
-
-            if ($res && $res->successful()) {
-                $lists = $res->json('lists') ?? [];
-                foreach ($lists as $listData) {
-                    $listId = (string) $listData['id'];
-                    $listName = trim($listData['name'] ?? 'Tasks List');
-                    $listTargets[] = [
-                        'list_id'     => $listId,
-                        'list_name'   => $listName,
-                        'folder_id'   => $folderId,
-                        'folder_name' => $folder->name,
-                    ];
-                }
-            }
-        }
-
-        if (empty($listTargets)) {
-            return [];
-        }
-
-        // 2. Fetch Tasks for all lists concurrently (Parallel HTTP Pool)
-        $taskResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($listTargets) {
-            foreach ($listTargets as $target) {
-                $pool->as('list_' . $target['list_id'])->withHeaders([
-                    'Authorization' => $this->apiToken,
-                    'Accept'        => 'application/json',
-                ])->timeout(10)->get("{$this->baseUrl}/list/{$target['list_id']}/task", [
-                    'include_closed' => 'true',
-                    'subtasks'       => 'true',
-                ]);
-            }
-        });
-
-        // 3. Process all task responses
-        $allTasks = [];
-        foreach ($listTargets as $target) {
-            $res = $taskResponses['list_' . $target['list_id']] ?? null;
-
-            if ($res && $res->successful()) {
-                $rawTasks = $res->json('tasks') ?? [];
-
-                foreach ($rawTasks as $t) {
-                    $statusName = strtolower($t['status']['status'] ?? 'open');
-                    $statusType = strtolower($t['status']['type'] ?? '');
-
-                    $assignees = array_map(function ($a) {
-                        return [
-                            'id'             => $a['id'] ?? null,
-                            'username'       => $a['username'] ?? $a['email'] ?? 'User',
-                            'email'          => $a['email'] ?? '',
-                            'profilePicture' => $a['profilePicture'] ?? null,
-                            'initials'       => $a['initials'] ?? null,
-                            'color'          => $a['color'] ?? null,
+                if ($res && $res->successful()) {
+                    $lists = $res->json('lists') ?? [];
+                    foreach ($lists as $listData) {
+                        $listId = (string) $listData['id'];
+                        $listName = trim($listData['name'] ?? 'Tasks List');
+                        $listTargets[] = [
+                            'list_id'     => $listId,
+                            'list_name'   => $listName,
+                            'folder_id'   => $folderId,
+                            'folder_name' => $folder->name,
                         ];
-                    }, $t['assignees'] ?? []);
-
-                    $allTasks[] = [
-                        'id'           => (string) $t['id'],
-                        'name'         => trim($t['name'] ?? 'Untitled Task'),
-                        'description'  => Str::limit(strip_tags($t['text_content'] ?? $t['description'] ?? ''), 120),
-                        'status'       => $t['status']['status'] ?? 'open',
-                        'status_color' => $t['status']['color'] ?? '#87909c',
-                        'url'          => $t['url'] ?? "https://app.clickup.com/t/{$t['id']}",
-                        'assignees'    => $assignees,
-                        'folder_id'    => $target['folder_id'],
-                        'folder_name'  => $target['folder_name'],
-                        'list_id'      => $target['list_id'],
-                        'list_name'    => $target['list_name'],
-                        'created_timestamp' => isset($t['date_created']) ? (int) $t['date_created'] : 0,
-                        'due_date'          => isset($t['due_date']) && $t['due_date'] ? date('M d, Y', (int) ($t['due_date'] / 1000)) : null,
-                        'date_created'      => isset($t['date_created']) && $t['date_created'] ? date('M d, Y', (int) ($t['date_created'] / 1000)) : null,
-                    ];
+                    }
                 }
             }
-        }
 
-        // Group tasks by folder_id, sort each folder's tasks by latest created_timestamp, and cap at max 50 per folder
-        $tasksByFolder = [];
-        foreach ($allTasks as $task) {
-            $fId = $task['folder_id'];
-            $tasksByFolder[$fId][] = $task;
-        }
+            if (empty($listTargets)) {
+                return [];
+            }
 
-        $finalTasks = [];
-        foreach ($tasksByFolder as $fId => $fTasks) {
-            usort($fTasks, function ($a, $b) {
+            // 2. Fetch Tasks for all lists concurrently (Parallel HTTP Pool)
+            $taskResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($listTargets) {
+                foreach ($listTargets as $target) {
+                    $pool->as('list_' . $target['list_id'])->withHeaders([
+                        'Authorization' => $this->apiToken,
+                        'Accept'        => 'application/json',
+                    ])->timeout(10)->get("{$this->baseUrl}/list/{$target['list_id']}/task", [
+                        'include_closed' => 'true',
+                        'subtasks'       => 'true',
+                    ]);
+                }
+            });
+
+            // 3. Process all task responses
+            $allTasks = [];
+            foreach ($listTargets as $target) {
+                $res = $taskResponses['list_' . $target['list_id']] ?? null;
+
+                if ($res && $res->successful()) {
+                    $rawTasks = $res->json('tasks') ?? [];
+
+                    foreach ($rawTasks as $t) {
+                        $assignees = array_map(function ($a) {
+                            return [
+                                'id'             => $a['id'] ?? null,
+                                'username'       => $a['username'] ?? $a['email'] ?? 'User',
+                                'email'          => $a['email'] ?? '',
+                                'profilePicture' => $a['profilePicture'] ?? null,
+                                'initials'       => $a['initials'] ?? null,
+                                'color'          => $a['color'] ?? null,
+                            ];
+                        }, $t['assignees'] ?? []);
+
+                        $allTasks[] = [
+                            'id'           => (string) $t['id'],
+                            'name'         => trim($t['name'] ?? 'Untitled Task'),
+                            'description'  => Str::limit(strip_tags($t['text_content'] ?? $t['description'] ?? ''), 120),
+                            'status'       => $t['status']['status'] ?? 'open',
+                            'status_color' => $t['status']['color'] ?? '#87909c',
+                            'url'          => $t['url'] ?? "https://app.clickup.com/t/{$t['id']}",
+                            'assignees'    => $assignees,
+                            'folder_id'    => $target['folder_id'],
+                            'folder_name'  => $target['folder_name'],
+                            'list_id'      => $target['list_id'],
+                            'list_name'    => $target['list_name'],
+                            'created_timestamp' => isset($t['date_created']) ? (int) $t['date_created'] : 0,
+                            'due_date'          => isset($t['due_date']) && $t['due_date'] ? date('M d, Y', (int) ($t['due_date'] / 1000)) : null,
+                            'date_created'      => isset($t['date_created']) && $t['date_created'] ? date('M d, Y', (int) ($t['date_created'] / 1000)) : null,
+                        ];
+                    }
+                }
+            }
+
+            // Group tasks by folder_id, sort each folder's tasks by latest created_timestamp, and cap at max 50 per folder
+            $tasksByFolder = [];
+            foreach ($allTasks as $task) {
+                $fId = $task['folder_id'];
+                $tasksByFolder[$fId][] = $task;
+            }
+
+            $finalTasks = [];
+            foreach ($tasksByFolder as $fId => $fTasks) {
+                usort($fTasks, function ($a, $b) {
+                    return ($b['created_timestamp'] ?? 0) <=> ($a['created_timestamp'] ?? 0);
+                });
+                $sliced = array_slice($fTasks, 0, 50);
+                $finalTasks = array_merge($finalTasks, $sliced);
+            }
+
+            // Overall sort by latest created_timestamp
+            usort($finalTasks, function ($a, $b) {
                 return ($b['created_timestamp'] ?? 0) <=> ($a['created_timestamp'] ?? 0);
             });
-            $sliced = array_slice($fTasks, 0, 50);
-            $finalTasks = array_merge($finalTasks, $sliced);
-        }
 
-        // Overall sort by latest created_timestamp
-        usort($finalTasks, function ($a, $b) {
-            return ($b['created_timestamp'] ?? 0) <=> ($a['created_timestamp'] ?? 0);
+            return $finalTasks;
         });
-
-        return $finalTasks;
     }
 }

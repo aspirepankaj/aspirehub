@@ -2269,7 +2269,11 @@
                             class="block w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 text-sm transition duration-150 appearance-none">
                         <option value="" class="dark:bg-slate-900">All Plans</option>
                         @foreach($plans as $planOpt)
-                            <option value="{{ $planOpt->id }}" class="dark:bg-slate-900">{{ $planOpt->name }}</option>
+                            @php
+                                $pId = is_object($planOpt) ? $planOpt->id : (is_array($planOpt) ? ($planOpt['id'] ?? '') : $planOpt);
+                                $pName = is_object($planOpt) ? $planOpt->name : (is_array($planOpt) ? ($planOpt['name'] ?? '') : $planOpt);
+                            @endphp
+                            <option value="{{ $pId }}" class="dark:bg-slate-900">{{ $pName }}</option>
                         @endforeach
                     </select>
                     <svg class="absolute right-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2737,10 +2741,14 @@
                         <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Subscribed Plans</label>
                         <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
                             @foreach($plans as $planOpt)
+                                @php
+                                    $pId = is_object($planOpt) ? $planOpt->id : (is_array($planOpt) ? ($planOpt['id'] ?? '') : $planOpt);
+                                    $pName = is_object($planOpt) ? $planOpt->name : (is_array($planOpt) ? ($planOpt['name'] ?? '') : $planOpt);
+                                @endphp
                                 <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
-                                    <input type="checkbox" wire:model="plan_ids" value="{{ $planOpt->id }}"
+                                    <input type="checkbox" wire:model="plan_ids" value="{{ $pId }}"
                                            class="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
-                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $planOpt->name }}</span>
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $pName }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -3014,10 +3022,14 @@
                         <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Subscribed Plans</label>
                         <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
                             @foreach($plans as $planOpt)
+                                @php
+                                    $pId = is_object($planOpt) ? $planOpt->id : (is_array($planOpt) ? ($planOpt['id'] ?? '') : $planOpt);
+                                    $pName = is_object($planOpt) ? $planOpt->name : (is_array($planOpt) ? ($planOpt['name'] ?? '') : $planOpt);
+                                @endphp
                                 <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
-                                    <input type="checkbox" wire:model="plan_ids" value="{{ $planOpt->id }}"
+                                    <input type="checkbox" wire:model="plan_ids" value="{{ $pId }}"
                                            class="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
-                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $planOpt->name }}</span>
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $pName }}</span>
                                 </label>
                             @endforeach
                         </div>

@@ -352,18 +352,26 @@ class ManageWebsites extends Component
                 $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
             }
 
-            $websiteMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'client.user'])
-                ->where('website_id', $this->selectedWebsiteDetailId)
-                ->latest()
-                ->paginate(10, ['*'], 'maintenancepage')
-                ->onEachSide(1);
+            $websiteMaintenanceCount = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::where('website_id', $this->selectedWebsiteDetailId)->count();
 
-            $websiteActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
-                ->where('loggable_type', Website::class)
-                ->where('loggable_id', $this->selectedWebsiteDetailId)
-                ->latest()
-                ->paginate(10, ['*'], 'activitypage')
-                ->onEachSide(1);
+            $websiteMaintenanceReports = collect();
+            if ($this->activeTab === 'maintenance') {
+                $websiteMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'client.user'])
+                    ->where('website_id', $this->selectedWebsiteDetailId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'maintenancepage')
+                    ->onEachSide(1);
+            }
+
+            $websiteActivityLogs = collect();
+            if ($this->activeTab === 'activity log' || $this->activeTab === 'activity') {
+                $websiteActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+                    ->where('loggable_type', Website::class)
+                    ->where('loggable_id', $this->selectedWebsiteDetailId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'activitypage')
+                    ->onEachSide(1);
+            }
 
             return view('modules.crm.websites.manage-websites', [
                 'websites'                  => collect(),
@@ -374,6 +382,7 @@ class ManageWebsites extends Component
                 'pageIds'                   => [],
                 'websiteDetails'            => $websiteDetails,
                 'websiteMaintenanceReports' => $websiteMaintenanceReports,
+                'websiteMaintenanceCount'   => $websiteMaintenanceCount,
                 'websiteActivityLogs'       => $websiteActivityLogs,
             ])->layoutData(['title' => $websiteDetails->site_name . ' — Website Detail']);
         }
@@ -407,12 +416,12 @@ class ManageWebsites extends Component
         $pageIds = $websites->pluck('id')->toArray();
 
         // Statistics Summary Counts
-        $totalClientsCount = Client::whereHas('websites')->count();
-        $activeClientsCount = Client::whereHas('websites')->where('status', 'active')->count();
-        $inactiveClientsCount = Client::whereHas('websites')->where('status', 'inactive')->count();
-        $totalWebsitesCount = Website::count();
-        $activeWebsitesCount = Website::where('status', 'active')->count();
-        $inactiveWebsitesCount = Website::where('status', 'inactive')->count();
+        $totalClientsCount = \Illuminate\Support\Facades\Cache::remember('crm_ws_total_clients', 60, fn() => Client::whereHas('websites')->count());
+        $activeClientsCount = \Illuminate\Support\Facades\Cache::remember('crm_ws_active_clients', 60, fn() => Client::whereHas('websites')->where('status', 'active')->count());
+        $inactiveClientsCount = \Illuminate\Support\Facades\Cache::remember('crm_ws_inactive_clients', 60, fn() => Client::whereHas('websites')->where('status', 'inactive')->count());
+        $totalWebsitesCount = \Illuminate\Support\Facades\Cache::remember('crm_ws_total_websites', 60, fn() => Website::count());
+        $activeWebsitesCount = \Illuminate\Support\Facades\Cache::remember('crm_ws_active_websites', 60, fn() => Website::where('status', 'active')->count());
+        $inactiveWebsitesCount = \Illuminate\Support\Facades\Cache::remember('crm_ws_inactive_websites', 60, fn() => Website::where('status', 'inactive')->count());
 
         return view('modules.crm.websites.manage-websites', [
             'websites'                  => $websites,

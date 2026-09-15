@@ -354,18 +354,26 @@ class StaffWebsites extends Component
                 $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
             }
 
-            $websiteMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'client.user'])
-                ->where('website_id', $this->selectedWebsiteDetailId)
-                ->latest()
-                ->paginate(10, ['*'], 'maintenancepage')
-                ->onEachSide(1);
+            $websiteMaintenanceCount = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::where('website_id', $this->selectedWebsiteDetailId)->count();
 
-            $websiteActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
-                ->where('loggable_type', Website::class)
-                ->where('loggable_id', $this->selectedWebsiteDetailId)
-                ->latest()
-                ->paginate(10, ['*'], 'activitypage')
-                ->onEachSide(1);
+            $websiteMaintenanceReports = collect();
+            if ($this->activeTab === 'maintenance') {
+                $websiteMaintenanceReports = \App\Modules\CRM\Maintenance\Models\MaintenanceReport::with(['developer', 'client.user'])
+                    ->where('website_id', $this->selectedWebsiteDetailId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'maintenancepage')
+                    ->onEachSide(1);
+            }
+
+            $websiteActivityLogs = collect();
+            if ($this->activeTab === 'activity log' || $this->activeTab === 'activity') {
+                $websiteActivityLogs = \App\Modules\Core\Activity\Models\ActivityLog::with('user')
+                    ->where('loggable_type', Website::class)
+                    ->where('loggable_id', $this->selectedWebsiteDetailId)
+                    ->latest()
+                    ->paginate(10, ['*'], 'activitypage')
+                    ->onEachSide(1);
+            }
 
             return view('modules.crm.staff.portal.websites', [
                 'websites'                  => collect(),
@@ -376,6 +384,7 @@ class StaffWebsites extends Component
                 'pageIds'                   => [],
                 'websiteDetails'            => $websiteDetails,
                 'websiteMaintenanceReports' => $websiteMaintenanceReports,
+                'websiteMaintenanceCount'   => $websiteMaintenanceCount,
                 'websiteActivityLogs'       => $websiteActivityLogs,
             ])->layoutData(['title' => $websiteDetails->site_name . ' — Website Detail']);
         }
@@ -406,12 +415,13 @@ class StaffWebsites extends Component
         $pageIds = $websites->pluck('id')->toArray();
 
         // Statistics Summary Counts scoped to staff assigned clients
-        $totalClientsCount = Client::whereIn('id', $assignedClientIds)->whereHas('websites')->count();
-        $activeClientsCount = Client::whereIn('id', $assignedClientIds)->whereHas('websites')->where('status', 'active')->count();
-        $inactiveClientsCount = Client::whereIn('id', $assignedClientIds)->whereHas('websites')->where('status', 'inactive')->count();
-        $totalWebsitesCount = Website::whereIn('client_id', $assignedClientIds)->count();
-        $activeWebsitesCount = Website::whereIn('client_id', $assignedClientIds)->where('status', 'active')->count();
-        $inactiveWebsitesCount = Website::whereIn('client_id', $assignedClientIds)->where('status', 'inactive')->count();
+        $cachePrefix = "crm_staff_ws_{$staffId}_";
+        $totalClientsCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'total_clients', 60, fn() => Client::whereIn('id', $assignedClientIds)->whereHas('websites')->count());
+        $activeClientsCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'active_clients', 60, fn() => Client::whereIn('id', $assignedClientIds)->whereHas('websites')->where('status', 'active')->count());
+        $inactiveClientsCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'inactive_clients', 60, fn() => Client::whereIn('id', $assignedClientIds)->whereHas('websites')->where('status', 'inactive')->count());
+        $totalWebsitesCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'total_websites', 60, fn() => Website::whereIn('client_id', $assignedClientIds)->count());
+        $activeWebsitesCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'active_websites', 60, fn() => Website::whereIn('client_id', $assignedClientIds)->where('status', 'active')->count());
+        $inactiveWebsitesCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'inactive_websites', 60, fn() => Website::whereIn('client_id', $assignedClientIds)->where('status', 'inactive')->count());
 
         return view('modules.crm.staff.portal.websites', [
             'websites'                  => $websites,

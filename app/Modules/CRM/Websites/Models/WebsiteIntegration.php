@@ -24,6 +24,16 @@ class WebsiteIntegration extends Model
         'last_sync_at' => 'datetime',
     ];
 
+    public function getAttribute($key)
+    {
+        try {
+            return parent::getAttribute($key);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            \Illuminate\Support\Facades\Log::warning("WebsiteIntegration ID " . ($this->id ?? 'new') . " attribute '{$key}' decryption failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
     public function website(): BelongsTo
     {
         return $this->belongsTo(Website::class, 'website_id');

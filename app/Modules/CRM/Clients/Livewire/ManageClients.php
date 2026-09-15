@@ -603,7 +603,7 @@ class ManageClients extends Component
         }
 
         try {
-            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientDetailId);
+            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientDetailId, true);
             $this->clickUpTasksLoaded = true;
             session()->flash('success', "ClickUp tickets refreshed successfully!");
         } catch (\Exception $e) {
@@ -2751,49 +2751,104 @@ class ManageClients extends Component
             $pageIds = $clients->pluck('id')->toArray();
         }
 
-        $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
-        $staffMembers = \App\Modules\CRM\Staff\Models\Staff::with(['user', 'designations'])
-            ->where('status', 'active')
-            ->get()
-            ->sortBy(fn($s) => $s->user?->name)
-            ->map(fn($s) => [
-                'id' => $s->id,
-                'name' => $s->user?->name ?? 'Unknown Staff',
-                'role' => $s->designations->pluck('name')->implode(', ')
-            ])
-            ->values();
-
-        // ClickUp Data for Mapping Modal
-        $clickUpSpaces = ClickUpSpace::withCount('folders')->orderBy('name')->get();
-
-        if (!empty($this->clickUpSpaceId)) {
-            $clickUpFoldersQuery = ClickUpFolder::with('client.user')
-                ->where('clickup_space_id', $this->clickUpSpaceId);
-
-            if (!empty($this->clickUpFolderSearch)) {
-                $searchTerm = '%' . trim($this->clickUpFolderSearch) . '%';
-                $clickUpFoldersQuery->where('name', 'like', $searchTerm);
+        if ($this->selectedClientDetailId) {
+            // Data required only if modals are active during detail view
+            if ($this->editingClientId !== null || (property_exists($this, 'showAddModal') && $this->showAddModal)) {
+                $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
+                $staffMembers = \App\Modules\CRM\Staff\Models\Staff::with(['user', 'designations'])
+                    ->where('status', 'active')
+                    ->get()
+                    ->sortBy(fn($s) => $s->user?->name)
+                    ->map(fn($s) => [
+                        'id' => $s->id,
+                        'name' => $s->user?->name ?? 'Unknown Staff',
+                        'role' => $s->designations->pluck('name')->implode(', ')
+                    ])
+                    ->values();
+            } else {
+                $plans = collect();
+                $staffMembers = collect();
             }
 
-            $clickUpFolders = $clickUpFoldersQuery->get()->sortBy(function ($folder) {
-                $isAssigned = ($folder->client_id === $this->mappingClientId) 
-                    || in_array((string) $folder->id, $this->selectedClickUpFolderIds, true);
-                return [$isAssigned ? 0 : 1, strtolower($folder->name)];
-            })->values();
+            if ($this->mappingClientId !== null) {
+                $clickUpSpaces = ClickUpSpace::withCount('folders')->orderBy('name')->get();
+                $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
+
+                if (!empty($this->clickUpSpaceId)) {
+                    $clickUpFoldersQuery = ClickUpFolder::with('client.user')
+                        ->where('clickup_space_id', $this->clickUpSpaceId);
+
+                    if (!empty($this->clickUpFolderSearch)) {
+                        $searchTerm = '%' . trim($this->clickUpFolderSearch) . '%';
+                        $clickUpFoldersQuery->where('name', 'like', $searchTerm);
+                    }
+
+                    $clickUpFolders = $clickUpFoldersQuery->get()->sortBy(function ($folder) {
+                        $isAssigned = ($folder->client_id === $this->mappingClientId) 
+                            || in_array((string) $folder->id, $this->selectedClickUpFolderIds, true);
+                        return [$isAssigned ? 0 : 1, strtolower($folder->name)];
+                    })->values();
+                } else {
+                    $clickUpFolders = collect();
+                }
+                $mappingClient = Client::with('user')->find($this->mappingClientId);
+            } else {
+                $clickUpSpaces = collect();
+                $clickUpFolders = collect();
+                $allClickUpFolders = collect();
+                $mappingClient = null;
+            }
+
+            $totalClientsCount = 0;
+            $activeClientsCount = 0;
+            $inactiveClientsCount = 0;
+            $totalWebsitesCount = 0;
+            $activeWebsitesCount = 0;
+            $inactiveWebsitesCount = 0;
         } else {
-            $clickUpFolders = collect();
+            $plans = \App\Modules\CRM\Clients\Models\Plan::orderBy('name')->get();
+            $staffMembers = \App\Modules\CRM\Staff\Models\Staff::with(['user', 'designations'])
+                ->where('status', 'active')
+                ->get()
+                ->sortBy(fn($s) => $s->user?->name)
+                ->map(fn($s) => [
+                    'id' => $s->id,
+                    'name' => $s->user?->name ?? 'Unknown Staff',
+                    'role' => $s->designations->pluck('name')->implode(', ')
+                ])
+                ->values();
+
+            $clickUpSpaces = ClickUpSpace::withCount('folders')->orderBy('name')->get();
+
+            if (!empty($this->clickUpSpaceId)) {
+                $clickUpFoldersQuery = ClickUpFolder::with('client.user')
+                    ->where('clickup_space_id', $this->clickUpSpaceId);
+
+                if (!empty($this->clickUpFolderSearch)) {
+                    $searchTerm = '%' . trim($this->clickUpFolderSearch) . '%';
+                    $clickUpFoldersQuery->where('name', 'like', $searchTerm);
+                }
+
+                $clickUpFolders = $clickUpFoldersQuery->get()->sortBy(function ($folder) {
+                    $isAssigned = ($folder->client_id === $this->mappingClientId) 
+                        || in_array((string) $folder->id, $this->selectedClickUpFolderIds, true);
+                    return [$isAssigned ? 0 : 1, strtolower($folder->name)];
+                })->values();
+            } else {
+                $clickUpFolders = collect();
+            }
+
+            $mappingClient = $this->mappingClientId ? Client::with('user')->find($this->mappingClientId) : null;
+            $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
+
+            // Metric Statistics Counts
+            $totalClientsCount = \Illuminate\Support\Facades\Cache::remember('crm_stats_total_clients', 60, fn() => Client::count());
+            $activeClientsCount = \Illuminate\Support\Facades\Cache::remember('crm_stats_active_clients', 60, fn() => Client::where('status', 'active')->count());
+            $inactiveClientsCount = \Illuminate\Support\Facades\Cache::remember('crm_stats_inactive_clients', 60, fn() => Client::where('status', 'inactive')->count());
+            $totalWebsitesCount = \Illuminate\Support\Facades\Cache::remember('crm_stats_total_websites', 60, fn() => \App\Modules\CRM\Websites\Models\Website::count());
+            $activeWebsitesCount = \Illuminate\Support\Facades\Cache::remember('crm_stats_active_websites', 60, fn() => \App\Modules\CRM\Websites\Models\Website::where('status', 'active')->count());
+            $inactiveWebsitesCount = \Illuminate\Support\Facades\Cache::remember('crm_stats_inactive_websites', 60, fn() => \App\Modules\CRM\Websites\Models\Website::where('status', 'inactive')->count());
         }
-
-        $mappingClient = $this->mappingClientId ? Client::with('user')->find($this->mappingClientId) : null;
-        $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
-
-        // Metric Statistics Counts
-        $totalClientsCount = Client::count();
-        $activeClientsCount = Client::where('status', 'active')->count();
-        $inactiveClientsCount = Client::where('status', 'inactive')->count();
-        $totalWebsitesCount = \App\Modules\CRM\Websites\Models\Website::count();
-        $activeWebsitesCount = \App\Modules\CRM\Websites\Models\Website::where('status', 'active')->count();
-        $inactiveWebsitesCount = \App\Modules\CRM\Websites\Models\Website::where('status', 'inactive')->count();
 
         return view('modules.crm.clients.manage-clients', [
             'clients'                  => $clients,

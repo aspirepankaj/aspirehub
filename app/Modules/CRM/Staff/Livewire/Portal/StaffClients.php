@@ -146,7 +146,7 @@ class StaffClients extends Component
         }
 
         try {
-            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientId);
+            $this->clientClickUpTasks = $clickUpService->fetchClientTasks($this->selectedClientId, true);
             $this->clickUpTasksLoaded = true;
             session()->flash('success', "ClickUp tickets refreshed successfully!");
         } catch (\Exception $e) {
@@ -366,27 +366,34 @@ class StaffClients extends Component
         })->count();
 
         // Statistics counts based on activeViewTab ('my_clients' vs 'all_clients')
-        $baseClientsQuery = Client::query();
-        if ($this->activeViewTab === 'my_clients') {
-            $baseClientsQuery->whereHas('assignedStaff', function ($q) use ($staffId) {
-                $q->where('staff_id', $staffId);
-            });
+        if ($this->selectedClientId) {
+            $totalClientsCount = 0;
+            $activeClientsCount = 0;
+            $inactiveClientsCount = 0;
+            $totalWebsitesCount = 0;
+            $activeWebsitesCount = 0;
+            $inactiveWebsitesCount = 0;
+        } else {
+            $cachePrefix = "crm_staff_{$staffId}_{$this->activeViewTab}_";
+            
+            $baseClientsQuery = Client::query();
+            if ($this->activeViewTab === 'my_clients') {
+                $baseClientsQuery->whereHas('assignedStaff', fn($q) => $q->where('staff_id', $staffId));
+            }
+
+            $totalClientsCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'total_clients', 60, fn() => (clone $baseClientsQuery)->count());
+            $activeClientsCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'active_clients', 60, fn() => (clone $baseClientsQuery)->where('status', 'active')->count());
+            $inactiveClientsCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'inactive_clients', 60, fn() => (clone $baseClientsQuery)->where('status', 'inactive')->count());
+
+            $baseWebsitesQuery = \App\Modules\CRM\Websites\Models\Website::query();
+            if ($this->activeViewTab === 'my_clients') {
+                $baseWebsitesQuery->whereHas('client.assignedStaff', fn($q) => $q->where('staff_id', $staffId));
+            }
+
+            $totalWebsitesCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'total_websites', 60, fn() => (clone $baseWebsitesQuery)->count());
+            $activeWebsitesCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'active_websites', 60, fn() => (clone $baseWebsitesQuery)->where('status', 'active')->count());
+            $inactiveWebsitesCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'inactive_websites', 60, fn() => (clone $baseWebsitesQuery)->where('status', 'inactive')->count());
         }
-
-        $totalClientsCount = (clone $baseClientsQuery)->count();
-        $activeClientsCount = (clone $baseClientsQuery)->where('status', 'active')->count();
-        $inactiveClientsCount = (clone $baseClientsQuery)->where('status', 'inactive')->count();
-
-        $baseWebsitesQuery = \App\Modules\CRM\Websites\Models\Website::query();
-        if ($this->activeViewTab === 'my_clients') {
-            $baseWebsitesQuery->whereHas('client.assignedStaff', function ($q) use ($staffId) {
-                $q->where('staff_id', $staffId);
-            });
-        }
-
-        $totalWebsitesCount = (clone $baseWebsitesQuery)->count();
-        $activeWebsitesCount = (clone $baseWebsitesQuery)->where('status', 'active')->count();
-        $inactiveWebsitesCount = (clone $baseWebsitesQuery)->where('status', 'inactive')->count();
 
         return view('modules.crm.staff.portal.clients', [
             'clients' => $clients,

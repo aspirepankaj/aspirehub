@@ -126,7 +126,7 @@
                        class="py-4 px-1 border-b-2 font-bold text-sm whitespace-nowrap transition {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
                         {{ $tabLabel }}
                         @if($tabKey === 'maintenance')
-                            <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ $websiteMaintenanceReports->total() }}</span>
+                            <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{{ method_exists($websiteMaintenanceReports, 'total') ? $websiteMaintenanceReports->total() : ($websiteMaintenanceCount ?? 0) }}</span>
                         @endif
                     </a>
                 @endforeach
