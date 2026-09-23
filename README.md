@@ -1,337 +1,327 @@
-# Aspire Hub
+<div align="center">
 
-**Aspire Hub** is a custom enterprise SaaS platform built with modern Laravel architecture and domain-driven modularity.
+# ⚡ Aspire Hub
+### Next-Gen Modular Multi-Tenant Enterprise Client Portal & Agency SaaS Platform
+
+[![Laravel](https://img.shields.io/badge/Laravel-12%20%7C%2013-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3%20%7C%208.4-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
+[![Livewire](https://img.shields.io/badge/Livewire-3.x%20Volt-4E56A6?style=for-the-badge&logo=livewire&logoColor=white)](https://livewire.laravel.com/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4+-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Vite](https://img.shields.io/badge/Vite-Build_Tool-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+
+<p align="center">
+  <b>Enterprise-grade CRM • Marketing Analytics Hub • Automated Client Reporting • Task Synchronization</b>
+</p>
+
+[Quick Start](#-quick-start--installation) •
+[Portal URLs](#-portal-access-endpoints) •
+[Architecture](#-domain-driven-modular-architecture) •
+[Integrations](#-third-party-integrations-hub) •
+[CLI Commands](#-cli--background-sync-commands)
 
 ---
 
-## Tech Stack
+</div>
 
-- **Backend**: Laravel 12/13 (PHP 8.4+)
-- **Frontend**: Livewire 3 (Volt), Tailwind CSS, Alpine.js
-- **Database**: MySQL (Local) / Microsoft SQL Server (Staging/Prod)
+## 📌 Overview
 
----
+**Aspire Hub** is a mission-critical digital agency operations portal designed for seamless client management, automated white-label maintenance reports, comprehensive multi-channel marketing analytics, and bi-directional project synchronization.
 
-## Prerequisites
-
-Ensure you have the following installed on your local environment:
-- **PHP**: version `8.4` or higher
-- **Composer**: version `2.8` or higher
-- **Node.js & npm**: version `22.x` / `10.x` or higher
-- **Database**: MySQL (running locally on port `3306`)
+### 🌟 Core Capabilities
+- 🏢 **Multi-Tenant Client Portal**: Dedicated client experience with website health metrics, billing, documents, and real-time project ticket tracker.
+- 📊 **Unified Marketing Intelligence**: Integrated dashboards for Google Analytics 4, Search Console, YouTube Analytics, Google Business Profile, Google Ads, and Keyword.com.
+- ⚡ **Full ClickUp Integration**: Deep two-way workspace mapping syncing spaces, folders, lists, and tasks with granular assignee status and progress.
+- 📄 **Automated PDF Reports**: High-fidelity maintenance & SEO audit reports generated and dispatched directly to clients via queue-backed email pipelines.
+- 🔐 **Enterprise Security**: Role-based access control (RBAC), multi-guard authentication, encrypted credential storage, and granular permission enforcement.
 
 ---
 
-## Step-by-Step Installation & Setup
+## 🛠️ Technology Stack
 
-Follow these commands to get the application running on your local machine:
+| Layer | Technologies |
+| :--- | :--- |
+| **Backend Framework** | Laravel 12 / 13 (Modern Service Architecture) |
+| **Language** | PHP `^8.3` / `^8.4` (Strict Typing, Attributes) |
+| **Frontend Reactive Engine** | Livewire 3 (Volt), Alpine.js |
+| **Styling & Design System** | Tailwind CSS with Dark/Light Adaptive Mode |
+| **Build & Bundler** | Vite 8+ |
+| **Databases Supported** | MySQL 8.0+ (Local / Prod) • MSSQL (Enterprise Staging) |
+| **Caching & Queues** | Database Cache Driver / Redis High-Performance Broker |
+| **Mailing System** | Native Symfony Mailer with SMTP & Gmail TLS/SSL |
 
-### 1. Install Dependencies
-Run Composer to install all PHP packages and npm to install node dependencies:
+---
+
+## 📋 System Prerequisites
+
+Ensure your development workstation meets the minimum environment specifications:
+
+- **PHP**: `>= 8.3.0` (with `pdo_mysql`, `curl`, `openssl`, `mbstring`, `fileinfo`)
+- **Composer**: `^2.8`
+- **Node.js**: `>= 20.x` & **npm**: `>= 10.x`
+- **Database Engine**: MySQL 8.x or MariaDB 10.4+ (Default port: `3306`)
+
+---
+
+## 🚀 Quick Start & Installation
+
+### 1. Clone & Install Dependencies
 ```bash
+# Clone the repository
+git clone https://github.com/aspirepankaj/aspirehub.git
+cd aspirehub
+
+# Install Composer PHP dependencies
 composer install
+
+# Install Frontend Node modules
 npm install
 ```
 
-### 2. Configure Environment Files
-Copy the example environment file to create your local `.env`:
+### 2. Environment Configuration
 ```bash
+# Duplicate example environment file
 cp .env.example .env
-```
 
-### 3. Generate Application Key
-Generate a secure encryption key for the application:
-```bash
+# Generate secure application encryption key
 php artisan key:generate
 ```
 
-### 4. Database Setup
-1. Create a database named `aspire_hub_lv` in your local MySQL instance.
-2. Verify the database credentials in your `.env` file:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=aspire_hub_lv
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-
-### 5. Run Database Migrations
-Run the migrations to create the standard Laravel tables and our custom enterprise tables (prefixed with `adspv_`):
-```bash
-php artisan migrate
+### 3. Database Setup
+Create a fresh database named `aspire_hub_lv` in your MySQL server, then verify your `.env` connection:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=aspire_hub_lv
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-### 6. Seed Default Administrator Account
-Seed the database to create the default administrator role, permissions, and active admin account:
+### 4. Run Migrations & Seed Default Data
+Create the schema and populate foundational roles, permissions, and default system administrator:
 ```bash
+# Run database migrations
+php artisan migrate
+
+# Seed administrative credentials & roles
 php artisan db:seed
 ```
 
-**Admin Portal Credentials:**
-- **Email**: `admin@aspirehub.com`
-- **Password**: `password`
+> [!TIP]
+> **Default Admin Account:**
+> - **Email**: `admin@aspirehub.com`
+> - **Password**: `password`
 
-### 7. Compile Frontend Assets
-Build or compile the assets using Vite:
+### 5. Compile Frontend Assets
 ```bash
-# Run in development mode (hot-reloads changes)
+# Development mode (Hot-Module-Replacement / HMR)
 npm run dev
 
-# Or build for production
+# Or build optimized production bundles
 npm run build
 ```
 
-### 8. Run Local Server
-Start the Laravel development server:
+### 6. Launch Application Server
 ```bash
+# Standard command
 php artisan serve
 
-OR
-
+# Windows environment with specific PHP 8.3+ binary path:
 $env:Path = "C:\php83;" + $env:Path
 php artisan serve
-
-
 ```
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
-- **Client Login URL**: [http://127.0.0.1:8000/login](http://127.0.0.1:8000/login)
-- **Admin Portal URL**: [http://127.0.0.1:8000/adminadspnl](http://127.0.0.1:8000/adminadspnl) (Requires Admin login)
-- **Staff Portal URL**: [http://127.0.0.1:8000/staffadspnl](http://127.0.0.1:8000/staffadspnl) (Prepared placeholder)
 
 ---
 
-## Email & SMTP Configuration
-The platform uses **Laravel's native mail infrastructure** (with Symfony Mailer). No external Composer packages are required.
+## 🌐 Portal Access Endpoints
 
-To enable sending PDF maintenance reports directly to client emails, update the following keys in your `.env` file using your Google Gmail account & App Password:
+Once the dev server is active, access the respective portals:
+
+| Portal | URL | Credentials / Note |
+| :--- | :--- | :--- |
+| 🛡️ **Admin Portal** | [`http://127.0.0.1:8000/adminadspnl`](http://127.0.0.1:8000/adminadspnl) | `admin@aspirehub.com` / `password` |
+| 👤 **Client Dashboard** | [`http://127.0.0.1:8000/login`](http://127.0.0.1:8000/login) | Client account credentials |
+| 👥 **Staff Portal** | [`http://127.0.0.1:8000/staffadspnl`](http://127.0.0.1:8000/staffadspnl) | Assigned agency staff members |
+
+---
+
+## 🏛️ Domain-Driven Modular Architecture
+
+The repository enforces a clean **Modular DDD Structure** for scalability and maintainability:
+
+```plaintext
+app/Modules/
+├── Core/                      # Platform Foundation
+│   ├── Authentication/        # Multi-guard auth, roles, permissions, policies
+│   ├── Dashboard/             # System overview analytics & metric widgets
+│   ├── Settings/              # Application, branding & system parameters
+│   ├── Notifications/         # Real-time alerts, broadcast channels
+│   └── ActivityLogs/          # Audit logging & administrative security events
+│
+├── CRM/                       # Agency Client Management
+│   ├── Clients/               # Client profiles, plans, contacts, folder mapping
+│   ├── Websites/              # Managed domains, CMS links, integration tokens
+│   ├── ClickUp/               # Spaces, Folders, Lists & Task synchronization
+│   ├── Staff/                 # Agency team members, designations & assignments
+│   └── Documents/             # Contracts, proposals, and secure file vaults
+│
+├── Marketing/                 # Performance & Analytics Hub
+│   ├── GoogleAnalytics/       # GA4 properties, sessions, bounce rate, channels
+│   ├── SearchConsole/         # Keywords, rankings, CTR, top landing pages
+│   ├── GoogleAds/             # Campaign performance, ad spend, conversion rates
+│   ├── GoogleBusinessProfile/ # Reviews, search queries, customer actions
+│   ├── YouTube/               # Video views, subscriber velocity, watch hours
+│   └── Keyword/               # Daily ranking tracker via Keyword.com API
+│
+├── Maintenance/               # Website Health & Automated Audits
+│   ├── Reports/               # Performance scores, security audits, backups
+│   └── Schedulers/            # Automated report generation & client dispatch
+│
+└── Shared/                    # Cross-cutting Concerns
+    ├── Traits/                # Auditable, EncryptedAttributes, HasSlugs
+    ├── Components/            # Reusable Livewire & Blade UI building blocks
+    └── Services/              # Third-party API wrappers & HTTP utilities
+```
+
+---
+
+## 🔌 Third-Party Integrations Hub
+
+<details>
+<summary><b>1. 🎯 ClickUp Workspace Integration</b> (Click to expand)</summary>
+
+Connects agency spaces, folders, and client-assigned tasks into the CRM.
+
+1. Add your ClickUp credentials in `.env`:
+   ```env
+   CLICKUP_API_TOKEN=pk_your_clickup_api_token
+   CLICKUP_TEAM_ID=your_clickup_workspace_team_id
+   ```
+2. Navigate to **Admin Panel > Clients > Client Profile > ClickUp Tickets**.
+3. Use **Map With ClickUp** to assign specific space folders to each client.
+</details>
+
+<details>
+<summary><b>2. 📈 Google Analytics 4 (GA4)</b> (Click to expand)</summary>
+
+1. Visit [Google Cloud Console](https://console.cloud.google.com/) and create a project.
+2. Enable:
+   - **Google Analytics Admin API**
+   - **Google Analytics Data API**
+3. Configure OAuth Consent Screen with scope:
+   - `https://www.googleapis.com/auth/analytics.readonly`
+4. Create an **OAuth Client ID (Web Application)**:
+   - Redirect URI: `http://127.0.0.1:8000/admin/integrations/google/callback`
+5. Download credentials as JSON and upload in **Client Website Integrations > Google Analytics 4**.
+</details>
+
+<details>
+<summary><b>3. 🔍 Google Search Console (GSC)</b> (Click to expand)</summary>
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), enable:
+   - **Google Search Console API**
+2. Add OAuth Scope:
+   - `https://www.googleapis.com/auth/webmasters.readonly`
+3. Set Redirect URI: `http://127.0.0.1:8000/admin/integrations/google/callback`
+4. Download the client JSON credentials and attach to the target client website.
+</details>
+
+<details>
+<summary><b>4. 📹 YouTube Analytics</b> (Click to expand)</summary>
+
+1. In Google Cloud Console, enable:
+   - **YouTube Data API v3**
+   - **YouTube Analytics API**
+2. Scopes required:
+   - `https://www.googleapis.com/auth/youtube.readonly`
+   - `https://www.googleapis.com/auth/yt-analytics.readonly`
+3. Upload credentials JSON under YouTube Integration and specify Channel ID.
+4. Sync metrics: `php artisan sync:youtube-metrics`
+</details>
+
+<details>
+<summary><b>5. 📍 Google Business Profile (GBP)</b> (Click to expand)</summary>
+
+1. In Google Cloud Console, enable **Google My Business API**.
+   *(Note: Requires whitelisted business verification access).*
+2. Scope required: `https://www.googleapis.com/auth/business.manage`
+3. Provide JSON credentials along with your GBP Location ID.
+4. Sync metrics: `php artisan sync:gbp-metrics`
+</details>
+
+<details>
+<summary><b>6. 📢 Google Ads API</b> (Click to expand)</summary>
+
+1. Enable **Google Ads API** in Google Cloud Console.
+2. Scope required: `https://www.googleapis.com/auth/adwords`
+3. Obtain your **Developer Token** from Google Ads Manager Account (MCC) -> **Tools & Settings > API Center**.
+4. Configure Customer ID and Developer Token in the portal.
+5. Sync metrics: `php artisan sync:google-ads-metrics`
+</details>
+
+<details>
+<summary><b>7. 🏷️ Google Tag Manager (GTM)</b> (Click to expand)</summary>
+
+1. Enable **Tag Manager API** in Google Cloud Console.
+2. Scope: `https://www.googleapis.com/auth/tagmanager.readonly`
+3. Upload JSON credentials with the Container ID. Metrics load dynamically in real-time.
+</details>
+
+<details>
+<summary><b>8. 🎯 Keyword.com Rank Tracker</b> (Click to expand)</summary>
+
+1. Log into your **Keyword.com** dashboard.
+2. Go to **Settings > API** and generate an API Token.
+3. In the CRM, enter your **API Token** and **Project ID** to start streaming live rankings.
+</details>
+
+---
+
+## 📧 Email & SMTP Configuration
+
+Aspire Hub utilizes Laravel's native mail infrastructure (Symfony Mailer). Configure your SMTP provider in `.env` to enable automated PDF dispatch:
 
 ```env
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=465
 MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-gmail-app-password
-MAIL_ENCRYPTION=tls
+MAIL_PASSWORD="your-16-character-app-password"
+MAIL_ENCRYPTION=ssl
 MAIL_FROM_ADDRESS="your-email@gmail.com"
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 ---
 
-## Folder Architecture
+## ⚡ CLI & Background Sync Commands
 
-The project is structured under **Domain Driven Modular Architecture**:
-```
-app/
-└── Modules/
-    ├── Core/
-    │   ├── Authentication/ (Login, Logout, Guard validations)
-    │   ├── Dashboard/      (Active Admin Dashboard Livewire Component)
-    │   ├── Settings/       (Prepared placeholders)
-    │   ├── Notifications/  (Prepared placeholders)
-    │   └── ActivityLogs/   (Prepared placeholders)
-    ├── CRM/
-    │   ├── Clients/        (Prepared placeholders)
-    │   ├── Staff/          (Prepared placeholders)
-    │   ├── Websites/       (Prepared placeholders)
-    │   └── Documents/      (Prepared placeholders)
-    ├── Marketing/          (Prepared placeholder)
-    ├── Maintenance/        (Prepared placeholder)
-    ├── Support/            (Prepared placeholder)
-    ├── Integrations/       (Prepared placeholder)
-    └── Shared/             (Shared components, base classes, traits, enums)
-```
-
----## Google Analytics 4 (GA4) Setup Guide
-
-To configure Google Analytics 4 integration in the Admin or Staff panel, follow these steps to retrieve your Google OAuth Credentials:
-
-### Step 1: Create a Project in Google Cloud Console
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a **New Project** (e.g., *Aspire Hub Integrations*).
-3. Navigate to **APIs & Services > Library**.
-4. Search for and **Enable** the following APIs:
-   - **Google Analytics Admin API** (required to fetch analytics properties list)
-   - **Google Analytics Data API** (required to fetch and run reporting data queries)
-
-### Step 2: Configure the OAuth Consent Screen
-1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab on the left sidebar.
-2. Select **User Type: External** and click **Create**.
-3. Fill in the required application details:
-   - **App name**: (e.g., *Aspire Hub*)
-   - **User support email**
-   - **Developer contact information**
-4. Under the **Scopes** section, add the following scopes for GA4 access:
-   - `https://www.googleapis.com/auth/analytics.readonly` (to read Google Analytics data)
-5. Save and continue.
-
-### Step 3: Generate OAuth Credentials (Client ID & Client Secret)
-1. Go to the **Credentials** tab on the left sidebar.
-2. Click **Create Credentials** at the top and select **OAuth client ID**.
-3. Set the **Application type** to **Web application**.
-4. Under **Authorized redirect URIs**, add the callback URI for your application:
-   - `http://127.0.0.1:8000/admin/integrations/google/callback`
-5. Click **Create**. You will be presented with your **Client ID** and **Client Secret**.
-6. Download the credentials as a `.json` file. This file will be uploaded under the integrations tab in the Admin or Staff Portal to complete the connection setup.
-
-========================================================================
-
-## Google Search Console (GSC) Setup Guide
-
-To configure Google Search Console integration, follow these similar steps to retrieve your GSC OAuth Credentials:
-
-### Step 1: Create a Project in Google Cloud Console
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a **New Project** or select your existing integrations project.
-3. Navigate to **APIs & Services > Library**.
-4. Search for and **Enable** the following API:
-   - **Google Search Console API** (required to fetch search queries, pages, and performance data)
-
-### Step 2: Configure the OAuth Consent Screen
-1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
-2. Under the **Scopes** section, make sure to add the following scope for GSC access:
-   - `https://www.googleapis.com/auth/webmasters.readonly` (to read Google Search Console data)
-3. Save and continue.
-
-### Step 3: Generate OAuth Credentials
-1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
-2. Under **Authorized redirect URIs**, add the callback URI:
-   - `http://127.0.0.1:8000/admin/integrations/google/callback`
-3. Click **Create** and download the `.json` file.
-4. Upload this file in the Admin or Staff Portal under the Google Search Console integration section.
+| Command | Purpose |
+| :--- | :--- |
+| `php artisan migrate:fresh --seed` | Full database reset and seed clean state |
+| `php artisan sync:youtube-metrics` | Polls and stores latest YouTube channel metrics |
+| `php artisan sync:gbp-metrics` | Syncs Google Business Profile interactions |
+| `php artisan sync:google-ads-metrics` | Syncs Google Ads spend, CPC, and conversion data |
+| `php artisan test` | Runs the automated test suite with in-memory SQLite |
+| `php artisan optimize:clear` | Flushes all application, configuration, route & view caches |
 
 ---
 
-## Running Tests
+## 🛡️ Quality Assurance & Testing
 
-Automated testing is configured to run using an in-memory SQLite database (`:memory:`) automatically. To run the automated feature tests, execute:
+Run unit and feature tests against the automated in-memory SQLite database:
+
 ```bash
 php artisan test
 ```
-This will verify route redirections, admin-only authentication checks, and layout loads.
+
+Verifies multi-guard auth policies, customer authorization boundaries, and livewire component lifecycle validations.
 
 ---
 
-## YouTube Analytics Setup Guide
+<div align="center">
 
-To configure YouTube integration, follow these steps to retrieve your YouTube OAuth Credentials:
+Made with ❤️ by the **Aspire Hub Team** • All Rights Reserved
 
-### Step 1: Create a Project in Google Cloud Console
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a **New Project** or select your existing integrations project.
-3. Navigate to **APIs & Services > Library**.
-4. Search for and **Enable** the following APIs:
-   - **YouTube Data API v3**
-   - **YouTube Analytics API**
-
-### Step 2: Configure the OAuth Consent Screen
-1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
-2. Under the **Scopes** section, add the following scopes:
-   - `https://www.googleapis.com/auth/youtube.readonly`
-   - `https://www.googleapis.com/auth/yt-analytics.readonly`
-3. Save and continue.
-
-### Step 3: Generate OAuth Credentials
-1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
-2. Under **Authorized redirect URIs**, add the callback URI:
-   - `http://127.0.0.1:8000/admin/integrations/google/callback`
-3. Click **Create** and download the `.json` file.
-4. Upload this file in the CRM under the YouTube integration section along with the YouTube Channel ID.
-5. Run the background task to sync data: `php artisan sync:youtube-metrics`
-
-========================================================================
-
-## Google Business Profile (GBP) Setup Guide
-
-To configure Google Business Profile (GBP) integration:
-
-### Step 1: Create a Project in Google Cloud Console
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a **New Project** or select your existing integrations project.
-3. Navigate to **APIs & Services > Library**.
-4. Search for and **Enable** the **Google My Business API**.
-   - *Note: Access to the GBP API requires special whitelisting via the Google Business Profile API form.*
-
-### Step 2: Configure the OAuth Consent Screen
-1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
-2. Under the **Scopes** section, add the following scope:
-   - `https://www.googleapis.com/auth/business.manage`
-3. Save and continue.
-
-### Step 3: Generate OAuth Credentials
-1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
-2. Under **Authorized redirect URIs**, add the callback URI:
-   - `http://127.0.0.1:8000/admin/integrations/google/callback`
-3. Click **Create** and download the `.json` file.
-4. Upload this file in the CRM under the GBP integration section along with the Location ID.
-5. Run the background task to sync data: `php artisan sync:gbp-metrics`
-
-========================================================================
-
-## Google Ads Setup Guide
-
-To configure Google Ads integration:
-
-### Step 1: Create a Project in Google Cloud Console
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a **New Project** or select your existing integrations project.
-3. Navigate to **APIs & Services > Library**.
-4. Search for and **Enable** the **Google Ads API**.
-
-### Step 2: Obtain Developer Token from Google Ads Manager
-1. Log into your **Google Ads Manager Account (MCC)**.
-2. Navigate to **Tools & Settings > Setup > API Center**.
-3. Copy your **Developer Token**.
-
-### Step 3: Configure the OAuth Consent Screen
-1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
-2. Under the **Scopes** section, add the following scope:
-   - `https://www.googleapis.com/auth/adwords`
-3. Save and continue.
-
-### Step 4: Generate OAuth Credentials
-1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
-2. Under **Authorized redirect URIs**, add the callback URI:
-   - `http://127.0.0.1:8000/admin/integrations/google/callback`
-3. Click **Create** and download the `.json` file.
-4. Upload this file in the CRM under the Google Ads integration section, provide the Customer ID, and paste the **Developer Token** into the dedicated field.
-5. Run the background task to sync data: `php artisan sync:google-ads-metrics`
-
-========================================================================
-
-## Google Tag Manager (GTM) Setup Guide
-
-To configure Google Tag Manager integration:
-
-### Step 1: Create a Project in Google Cloud Console
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a **New Project** or select your existing integrations project.
-3. Navigate to **APIs & Services > Library**.
-4. Search for and **Enable** the **Tag Manager API**.
-
-### Step 2: Configure the OAuth Consent Screen
-1. In the Google Cloud Console, navigate to the **OAuth Consent Screen** tab.
-2. Under the **Scopes** section, add the following scope:
-   - `https://www.googleapis.com/auth/tagmanager.readonly`
-3. Save and continue.
-
-### Step 3: Generate OAuth Credentials
-1. Go to the **Credentials** tab and create an **OAuth client ID** for a **Web application**.
-2. Click **Create** and download the `.json` file.
-3. Upload this file in the CRM under the GTM integration section along with the Container ID. (No sync command needed, fetches in real-time).
-
-========================================================================
-
-## Keyword.com Setup Guide
-
-To configure Keyword.com integration, you do not need Google Cloud Console.
-
-### Step 1: Get API Token
-1. Log into your **Keyword.com** dashboard.
-2. Navigate to Settings and generate a personal **API Token**.
-
-### Step 2: Link in CRM
-1. Go to the CRM under the Keyword.com integration section.
-2. Enter your **API Token** and the specific **Project ID**. (No sync command needed, fetches in real-time).
+</div>
