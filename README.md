@@ -87,6 +87,13 @@ npm run build
 Start the Laravel development server:
 ```bash
 php artisan serve
+
+OR
+
+$env:Path = "C:\php83;" + $env:Path
+php artisan serve
+
+
 ```
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 - **Client Login URL**: [http://127.0.0.1:8000/login](http://127.0.0.1:8000/login)
