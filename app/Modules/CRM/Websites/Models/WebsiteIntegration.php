@@ -34,6 +34,26 @@ class WebsiteIntegration extends Model
         }
     }
 
+    public function fromEncryptedString($value)
+    {
+        try {
+            return parent::fromEncryptedString($value);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            \Illuminate\Support\Facades\Log::warning("WebsiteIntegration ID " . ($this->id ?? 'new') . " decryption failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    protected function castAttribute($key, $value)
+    {
+        try {
+            return parent::castAttribute($key, $value);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            \Illuminate\Support\Facades\Log::warning("WebsiteIntegration ID " . ($this->id ?? 'new') . " castAttribute '{$key}' decryption failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
     public function website(): BelongsTo
     {
         return $this->belongsTo(Website::class, 'website_id');

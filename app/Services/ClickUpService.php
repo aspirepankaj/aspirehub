@@ -27,10 +27,16 @@ class ClickUpService
      */
     protected function client()
     {
-        return Http::withHeaders([
+        $client = Http::withHeaders([
             'Authorization' => $this->apiToken,
             'Accept'        => 'application/json',
         ])->timeout(15);
+
+        if (app()->environment('local')) {
+            $client->withoutVerifying();
+        }
+
+        return $client;
     }
 
     /**
@@ -150,12 +156,17 @@ class ClickUpService
             }
 
             // 1. Fetch Lists for all assigned folders concurrently (Parallel HTTP Pool)
-            $listResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($folders) {
+            $isLocal = app()->environment('local');
+            $listResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($folders, $isLocal) {
                 foreach ($folders as $folder) {
-                    $pool->as('folder_' . $folder->id)->withHeaders([
+                    $req = $pool->as('folder_' . $folder->id)->withHeaders([
                         'Authorization' => $this->apiToken,
                         'Accept'        => 'application/json',
-                    ])->timeout(10)->get("{$this->baseUrl}/folder/{$folder->id}/list");
+                    ])->timeout(15);
+                    if ($isLocal) {
+                        $req->withoutVerifying();
+                    }
+                    $req->get("{$this->baseUrl}/folder/{$folder->id}/list");
                 }
             });
 
@@ -165,7 +176,7 @@ class ClickUpService
                 $folderId = (string) $folder->id;
                 $res = $listResponses['folder_' . $folderId] ?? null;
 
-                if ($res && $res->successful()) {
+                if ($res instanceof \Illuminate\Http\Client\Response && $res->successful()) {
                     $lists = $res->json('lists') ?? [];
                     foreach ($lists as $listData) {
                         $listId = (string) $listData['id'];
@@ -177,6 +188,8 @@ class ClickUpService
                             'folder_name' => $folder->name,
                         ];
                     }
+                } elseif ($res instanceof \Throwable) {
+                    Log::warning("ClickUp list fetch failed for folder {$folderId}: " . $res->getMessage());
                 }
             }
 
@@ -185,12 +198,16 @@ class ClickUpService
             }
 
             // 2. Fetch Tasks for all lists concurrently (Parallel HTTP Pool)
-            $taskResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($listTargets) {
+            $taskResponses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($listTargets, $isLocal) {
                 foreach ($listTargets as $target) {
-                    $pool->as('list_' . $target['list_id'])->withHeaders([
+                    $req = $pool->as('list_' . $target['list_id'])->withHeaders([
                         'Authorization' => $this->apiToken,
                         'Accept'        => 'application/json',
-                    ])->timeout(10)->get("{$this->baseUrl}/list/{$target['list_id']}/task", [
+                    ])->timeout(15);
+                    if ($isLocal) {
+                        $req->withoutVerifying();
+                    }
+                    $req->get("{$this->baseUrl}/list/{$target['list_id']}/task", [
                         'include_closed' => 'true',
                         'subtasks'       => 'true',
                     ]);
@@ -202,7 +219,7 @@ class ClickUpService
             foreach ($listTargets as $target) {
                 $res = $taskResponses['list_' . $target['list_id']] ?? null;
 
-                if ($res && $res->successful()) {
+                if ($res instanceof \Illuminate\Http\Client\Response && $res->successful()) {
                     $rawTasks = $res->json('tasks') ?? [];
 
                     foreach ($rawTasks as $t) {
@@ -234,6 +251,10 @@ class ClickUpService
                             'date_created'      => isset($t['date_created']) && $t['date_created'] ? date('M d, Y', (int) ($t['date_created'] / 1000)) : null,
                         ];
                     }
+                } elseif ($res instanceof \Throwable) {
+                    Log::warning("ClickUp task fetch failed for list {$target['list_id']}: " . $res->getMessage());
+                } elseif ($res instanceof \Illuminate\Http\Client\Response && !$res->successful()) {
+                    Log::warning("ClickUp task fetch unsuccessful for list {$target['list_id']}: " . $res->body());
                 }
             }
 

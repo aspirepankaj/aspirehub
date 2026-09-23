@@ -2770,10 +2770,10 @@ class ManageClients extends Component
                 $staffMembers = collect();
             }
 
-            if ($this->mappingClientId !== null) {
-                $clickUpSpaces = ClickUpSpace::withCount('folders')->orderBy('name')->get();
-                $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
+            $clickUpSpaces = ClickUpSpace::withCount('folders')->orderBy('name')->get();
+            $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
 
+            if ($this->mappingClientId !== null) {
                 if (!empty($this->clickUpSpaceId)) {
                     $clickUpFoldersQuery = ClickUpFolder::with('client.user')
                         ->where('clickup_space_id', $this->clickUpSpaceId);
@@ -2793,9 +2793,7 @@ class ManageClients extends Component
                 }
                 $mappingClient = Client::with('user')->find($this->mappingClientId);
             } else {
-                $clickUpSpaces = collect();
                 $clickUpFolders = collect();
-                $allClickUpFolders = collect();
                 $mappingClient = null;
             }
 

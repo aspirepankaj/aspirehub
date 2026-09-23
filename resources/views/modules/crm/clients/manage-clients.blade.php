@@ -3192,6 +3192,9 @@
                         autoSpaceId = String(assignedFolder.clickup_space_id);
                     }
                 }
+                if (!autoSpaceId && clickUpSpaces.length > 0) {
+                    autoSpaceId = String(clickUpSpaces[0].id);
+                }
                 clickUpSpaceId = autoSpaceId;
              ">
             
