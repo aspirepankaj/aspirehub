@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Modules\CRM\Staff\Livewire\Portal\StaffDashboard;
 use App\Modules\CRM\Staff\Livewire\Portal\StaffClients;
+use App\Modules\CRM\Staff\Livewire\Portal\StaffClientReport;
 use App\Modules\CRM\Staff\Livewire\Portal\StaffWebsites;
 use App\Modules\CRM\Staff\Livewire\Portal\StaffMaintenance;
 use App\Modules\CRM\Staff\Livewire\Portal\StaffCreateMaintenanceReport;
@@ -16,6 +17,7 @@ use App\Modules\CRM\Staff\Livewire\Portal\StaffClickUpTickets;
 Route::get('/', StaffDashboard::class)->name('dashboard');
 Route::get('/clients', StaffClients::class)->name('clients');
 Route::get('/clients/ADSCL-{id}', StaffClients::class)->name('clients.detail');
+Route::get('/clients/ADSCL-{id}/report/{integration}', StaffClientReport::class)->name('clients.report');
 Route::get('/clickup-tickets', StaffClickUpTickets::class)->name('clickup-tickets');
 Route::get('/websites', StaffWebsites::class)->name('websites');
 Route::get('/websites/ADSWS-{id}', StaffWebsites::class)->name('websites.detail');

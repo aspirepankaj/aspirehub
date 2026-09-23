@@ -1,4 +1,4 @@
-<div x-data="{
+<div wire:ignore x-data="{
     open: false,
     dateFrom: @entangle('dateFrom').live,
     dateTo: @entangle('dateTo').live,
@@ -6,6 +6,8 @@
     compareDateTo: @entangle('compareDateTo').live,
     includeTodayLive: @entangle('includeToday').live,
     compareFormatLive: @entangle('compareFormat').live,
+    
+    enableCompare: false,
     
     minDate: '{{ $minDateBound ?? \Carbon\Carbon::now()->subDays(365)->format('Y-m-d') }}',
     maxDate: '{{ $maxDateBound ?? \Carbon\Carbon::now()->format('Y-m-d') }}',
@@ -15,9 +17,10 @@
     tempCompareStart: '',
     tempCompareEnd: '',
     includeToday: false,
-    comparePreset: 'last_period',
+    comparePreset: 'custom',
     format: 'percentage',
     
+    activeTarget: 'range',
     hoverDate: null,
     selectedPreset: 'last_30',
     selectingStep: 0,
@@ -30,6 +33,7 @@
         this.tempCompareEnd = this.compareDateTo || '';
         this.includeToday = this.includeTodayLive || false;
         this.format = this.compareFormatLive || 'percentage';
+        this.enableCompare = !!this.tempCompareStart;
         
         this.syncPresetFromDates();
         if (this.tempStart) {
@@ -55,11 +59,13 @@
             this.tempCompareEnd = this.compareDateTo || '';
             this.includeToday = this.includeTodayLive || false;
             this.format = this.compareFormatLive || 'percentage';
+            this.enableCompare = !!this.tempCompareStart;
             
             this.syncPresetFromDates();
             if (this.tempStart) {
                 this.viewDate = new Date(this.tempStart);
             }
+            this.activeTarget = 'range';
             this.selectingStep = 0;
         }
         this.open = !this.open;
@@ -120,21 +126,37 @@
         const iso = this.formatIso(y, m, d);
         if (iso < this.minDate || iso > this.maxDate) return;
 
-        if (this.selectingStep === 0) {
-            this.tempStart = iso;
-            this.tempEnd = iso;
-            this.selectingStep = 1;
-        } else {
-            if (iso < this.tempStart) {
-                this.tempEnd = this.tempStart;
-                this.tempStart = iso;
+        if (this.activeTarget === 'compare') {
+            if (this.selectingStep === 0) {
+                this.tempCompareStart = iso;
+                this.tempCompareEnd = iso;
+                this.selectingStep = 1;
             } else {
-                this.tempEnd = iso;
+                if (iso < this.tempCompareStart) {
+                    this.tempCompareEnd = this.tempCompareStart;
+                    this.tempCompareStart = iso;
+                } else {
+                    this.tempCompareEnd = iso;
+                }
+                this.selectingStep = 0;
             }
-            this.selectingStep = 0;
+        } else {
+            if (this.selectingStep === 0) {
+                this.tempStart = iso;
+                this.tempEnd = iso;
+                this.selectingStep = 1;
+            } else {
+                if (iso < this.tempStart) {
+                    this.tempEnd = this.tempStart;
+                    this.tempStart = iso;
+                } else {
+                    this.tempEnd = iso;
+                }
+                this.selectingStep = 0;
+            }
+            this.selectedPreset = 'custom';
+            this.includeToday = false;
         }
-        this.selectedPreset = 'custom';
-        this.includeToday = false;
     },
 
     hoverCalendarDate(y, m, d) {
@@ -147,19 +169,23 @@
         const iso = this.formatIso(y, m, d);
         if (iso < this.minDate || iso > this.maxDate) return '';
 
-        const activeEnd = (this.selectingStep === 1 && this.hoverDate) ? this.hoverDate : this.tempEnd;
-        const rangeMin = (this.tempStart && activeEnd) ? (this.tempStart < activeEnd ? this.tempStart : activeEnd) : null;
-        const rangeMax = (this.tempStart && activeEnd) ? (this.tempStart < activeEnd ? activeEnd : this.tempStart) : null;
+        const isCompare = this.activeTarget === 'compare';
+        const start = isCompare ? this.tempCompareStart : this.tempStart;
+        const end = isCompare ? this.tempCompareEnd : this.tempEnd;
 
-        const isStart = (iso === this.tempStart);
-        const isEnd = (iso === this.tempEnd || (this.selectingStep === 1 && iso === this.hoverDate));
+        const activeEnd = (this.selectingStep === 1 && this.hoverDate) ? this.hoverDate : end;
+        const rangeMin = (start && activeEnd) ? (start < activeEnd ? start : activeEnd) : null;
+        const rangeMax = (start && activeEnd) ? (start < activeEnd ? activeEnd : start) : null;
+
+        const isStart = (iso === start);
+        const isEnd = (iso === end || (this.selectingStep === 1 && iso === this.hoverDate));
 
         if (isStart || isEnd) {
-            return 'background-color: #135266; color: #ffffff; font-weight: bold; border-radius: 4px;';
+            return isCompare ? 'background-color: #f59e0b; color: #ffffff; font-weight: bold; border-radius: 4px;' : 'background-color: #135266; color: #ffffff; font-weight: bold; border-radius: 4px;';
         }
 
         if (rangeMin && rangeMax && iso > rangeMin && iso < rangeMax) {
-            return 'background-color: #e2e8f0; color: #1e293b; border-radius: 0; width: 100%;';
+            return isCompare ? 'background-color: #fef3c7; color: #b45309; border-radius: 0; width: 100%;' : 'background-color: #e2e8f0; color: #1e293b; border-radius: 0; width: 100%;';
         }
 
         return '';
@@ -286,18 +312,19 @@
         if (this.tempStart && this.tempEnd) {
             this.dateFrom = this.tempStart;
             this.dateTo = this.tempEnd;
-            this.compareDateFrom = this.tempCompareStart;
-            this.compareDateTo = this.tempCompareEnd;
+            this.compareDateFrom = this.enableCompare ? this.tempCompareStart : '';
+            this.compareDateTo = this.enableCompare ? this.tempCompareEnd : '';
             this.includeTodayLive = this.includeToday;
             this.compareFormatLive = this.format;
             
-            $wire.set('dateFrom', this.tempStart);
-            $wire.set('dateTo', this.tempEnd);
-            $wire.set('compareDateFrom', this.tempCompareStart);
-            $wire.set('compareDateTo', this.tempCompareEnd);
-            $wire.set('includeToday', this.includeToday);
-            $wire.set('compareFormat', this.format);
-            $wire.$refresh(); 
+            $wire.applyDateFilter(
+                this.tempStart,
+                this.tempEnd,
+                this.enableCompare ? this.tempCompareStart : '',
+                this.enableCompare ? this.tempCompareEnd : '',
+                this.includeToday,
+                this.format
+            );
         }
         this.closePopover();
     }
@@ -404,38 +431,34 @@
                     </select>
 
                     <div class="flex items-center gap-2">
-                        <input type="date" :min="minDate" :max="maxDate" x-model="tempStart" @change="selectedPreset = 'custom'"
-                               class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none" />
-                        <input type="date" :min="minDate" :max="maxDate" x-model="tempEnd" @change="selectedPreset = 'custom'"
-                               class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none" />
+                        <input type="text" readonly :value="tempStart" @click="activeTarget = 'range'; selectingStep = 0"
+                               class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none cursor-pointer" :class="{'ring-2 ring-[#135266]': activeTarget === 'range'}" />
+                        <input type="text" readonly :value="tempEnd" @click="activeTarget = 'range'; selectingStep = 0"
+                               class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none cursor-pointer" :class="{'ring-2 ring-[#135266]': activeTarget === 'range'}" />
                     </div>
                     
-                    <label class="flex items-center gap-2 mt-4 cursor-pointer">
-                        <input type="checkbox" x-model="includeToday" class="w-4 h-4 border-slate-300 rounded cursor-pointer" style="color: #135266;">
-                        <span class="text-sm text-slate-800 dark:text-slate-200">Include Today</span>
-                    </label>
+
                 </div>
 
                 <!-- Compare To -->
                 <div>
-                    <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm mb-2 tracking-tight">Compare To</h4>
-                    <select x-model="comparePreset"
-                            class="w-full text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2.5 py-2 text-slate-800 dark:text-slate-200 outline-none mb-3">
-                        <option value="last_period">Last Period</option>
-                        <option value="previous_year">Previous Year</option>
-                        <option value="custom">Custom</option>
-                    </select>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" x-model="enableCompare" class="w-4 h-4 border-slate-300 rounded cursor-pointer" style="color: #135266;">
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm tracking-tight">Compare To</h4>
+                    </div>
 
-                    <div class="flex items-center gap-2" :class="{'opacity-60 pointer-events-none': comparePreset !== 'custom'}">
-                        <input type="date" x-model="tempCompareStart"
-                               class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none" />
-                        <input type="date" x-model="tempCompareEnd"
-                               class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none" />
+                    <div x-show="enableCompare" class="mt-2">
+                        <div class="flex items-center gap-2">
+                            <input type="text" readonly :value="tempCompareStart" @click="activeTarget = 'compare'; selectingStep = 0"
+                                   class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none cursor-pointer" :class="{'ring-2 ring-amber-500': activeTarget === 'compare'}" />
+                            <input type="text" readonly :value="tempCompareEnd" @click="activeTarget = 'compare'; selectingStep = 0"
+                                   class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none cursor-pointer" :class="{'ring-2 ring-amber-500': activeTarget === 'compare'}" />
+                        </div>
                     </div>
                 </div>
 
                 <!-- Format -->
-                <div>
+                <div x-show="enableCompare">
                     <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm mb-2 tracking-tight flex items-center gap-1.5">
                         Format
                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

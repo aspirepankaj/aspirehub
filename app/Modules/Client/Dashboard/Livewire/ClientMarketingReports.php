@@ -102,6 +102,18 @@ class ClientMarketingReports extends Component
         // triggers re-render automatically
     }
 
+    public function applyDateFilter($dateFrom, $dateTo, $compareFrom, $compareTo, $includeToday, $format)
+    {
+        $this->dateFrom = $dateFrom;
+        $this->dateTo = $dateTo;
+        $this->compareDateFrom = $compareFrom;
+        $this->compareDateTo = $compareTo;
+        $this->includeToday = filter_var($includeToday, FILTER_VALIDATE_BOOLEAN);
+        $this->compareFormat = $format;
+        
+        $this->loadReportData();
+    }
+
     protected function loadIntegrationsAndMonths()
     {
         if (!$this->selectedWebsiteId) {
@@ -131,8 +143,6 @@ class ClientMarketingReports extends Component
         if (!$this->selectedWebsiteId) {
             return;
         }
-
-        $this->initDateRange();
 
         try {
             $clientDetails = Client::where('user_id', Auth::id())->first();
@@ -178,20 +188,26 @@ class ClientMarketingReports extends Component
             }
 
             // Set activeReportData if looking at specific tab
-            if ($this->activeReportIntegrationId === 'ga4') {
+            if ($this->activeReportIntegrationId === 'ga4' || $this->activeReportIntegrationId === 'overview') {
                 $this->activeReportData = $this->ga4Data;
+                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGa4Data;
             } elseif ($this->activeReportIntegrationId === 'gsc') {
                 $this->activeReportData = $this->gscData;
+                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGscData;
             } elseif ($this->activeReportIntegrationId === 'youtube') {
                 $this->activeReportData = $this->youtubeData;
+                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareYoutubeData;
             } elseif ($this->activeReportIntegrationId === 'keyword') {
                 $this->activeReportData = $this->keywordData;
+                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareKeywordData;
             } elseif ($this->activeReportIntegrationId === 'gtm') {
                 $this->activeReportData = $this->gtmData;
             } elseif ($this->activeReportIntegrationId === 'gbp') {
                 $this->activeReportData = $this->gbpData;
+                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGbpData;
             } elseif ($this->activeReportIntegrationId === 'gads') {
                 $this->activeReportData = $this->gadsData;
+                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGadsData;
             }
         } catch (\Exception $e) {
             Log::error('Error loading client marketing report JSON: ' . $e->getMessage());
@@ -308,11 +324,9 @@ class ClientMarketingReports extends Component
         $this->compareDateFrom = '';
         $this->compareDateTo = '';
         
-        $this->availableMonths = $this->getAvailableReportMonths();
-        if (!empty($this->availableMonths)) {
-            $this->selectedMonth = $this->availableMonths[0]['value'];
-        } else {
-            $this->selectedMonth = date('Y') . '-' . Str::lower(date('F'));
+        if ($typeId === 'overview') {
+            $this->dateFrom = \Carbon\Carbon::now()->subDays(28)->format('Y-m-d');
+            $this->dateTo = \Carbon\Carbon::now()->format('Y-m-d');
         }
 
         $this->loadReportData();
@@ -323,3 +337,4 @@ class ClientMarketingReports extends Component
         return view('modules.client.dashboard.client-marketing-reports')->layoutData(['title' => 'Marketing Reports']);
     }
 }
+

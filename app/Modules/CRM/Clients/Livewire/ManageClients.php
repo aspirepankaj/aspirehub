@@ -1340,110 +1340,12 @@ class ManageClients extends Component
             }
         } elseif ($accessToken && $propertyId && $integrationId === 'youtube') {
             try {
-                $startDate = $startDateStr;
-                $endDate = $endDateStr;
-                
-                // 1. Fetch channel stats from Data API v3
-                $channelResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                    ->get("https://www.googleapis.com/youtube/v3/channels", [
-                        'part' => 'statistics,snippet',
-                        'id' => $propertyId
-                    ]);
-
-                if ($channelResponse->successful() && !empty($channelResponse->json('items'))) {
-                    $channel = $channelResponse->json('items')[0];
-                    $stats = $channel['statistics'] ?? [];
-                    
-                    // 2. Fetch watch time and avg duration from Analytics API
-                    $analyticsResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
-                            'ids' => 'channel==MINE',
-                            'startDate' => $startDate,
-                            'endDate' => $endDate,
-                            'metrics' => 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost'
-                        ]);
-                        
-                    $monthlyViews = 0;
-                    $watchTimeHrs = 0;
-                    $avgViewDurationSec = 0;
-                    $subscribersGained = 0;
-                    $subscribersLost = 0;
-                    if ($analyticsResponse->successful() && !empty($analyticsResponse->json('rows'))) {
-                        $analyticsData = $analyticsResponse->json('rows')[0];
-                        // views is index 0, estimatedMinutesWatched is index 1, averageViewDuration is index 2, subscribersGained is 3, subscribersLost is 4
-                        $monthlyViews = $analyticsData[0] ?? 0;
-                        $watchTimeHrs = ($analyticsData[1] ?? 0) / 60;
-                        $avgViewDurationSec = $analyticsData[2] ?? 0;
-                        $subscribersGained = $analyticsData[3] ?? 0;
-                        $subscribersLost = $analyticsData[4] ?? 0;
-                    }
-                    $netSubscribers = $subscribersGained - $subscribersLost;
-                    
-                    $durationMin = floor($avgViewDurationSec / 60);
-                    $durationSec = round($avgViewDurationSec % 60);
-                    $durationFormatted = $durationMin > 0 ? "{$durationMin}m {$durationSec}s" : "{$durationSec}s";
-
-                    // 3. Fetch top videos from Analytics API
-                    $topVideosResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
-                            'ids' => 'channel==MINE',
-                            'startDate' => $startDate,
-                            'endDate' => $endDate,
-                            'metrics' => 'views,estimatedMinutesWatched',
-                            'dimensions' => 'video',
-                            'sort' => '-views',
-                            'maxResults' => 3
-                        ]);
-                        
-                    $topVideos = [];
-                    if ($topVideosResponse->successful() && !empty($topVideosResponse->json('rows'))) {
-                        $videoRows = $topVideosResponse->json('rows');
-                        $videoIds = array_map(fn($row) => $row[0], $videoRows);
-                        
-                        // 4. Fetch titles for these top video IDs from Data API v3
-                        $titlesResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                            ->get("https://www.googleapis.com/youtube/v3/videos", [
-                                'part' => 'snippet',
-                                'id' => implode(',', $videoIds)
-                            ]);
-                            
-                        $titlesMap = [];
-                        if ($titlesResponse->successful() && !empty($titlesResponse->json('items'))) {
-                            foreach ($titlesResponse->json('items') as $videoItem) {
-                                $titlesMap[$videoItem['id']] = $videoItem['snippet']['title'] ?? 'Unknown Video';
-                            }
-                        }
-                        
-                        foreach ($videoRows as $row) {
-                            $vid = $row[0];
-                            $vViews = $row[1] ?? 0;
-                            $vMinutes = $row[2] ?? 0;
-                            $topVideos[] = [
-                                'title' => $titlesMap[$vid] ?? 'Video (' . $vid . ')',
-                                'views' => (int)$vViews,
-                                'watch_time' => $vMinutes / 60
-                            ];
-                        }
-                    }
-
-                    $reportData = [
-                        'summary' => [
-                            'views' => (int) $monthlyViews,
-                            'subscribers' => (int) $netSubscribers,
-                            'video_count' => (int) ($stats['videoCount'] ?? 0),
-                            'watch_time' => $watchTimeHrs,
-                            'avg_view_duration' => $durationFormatted
-                        ],
-                        'top_videos' => $topVideos
-                    ];
-                } else {
-                    $errorMsg = $channelResponse->json('error.message') ?? 'Please ensure the channel ID is correct.';
-                    \Illuminate\Support\Facades\Log::warning('YouTube API call failed: ' . $channelResponse->body());
-                    $reportData = ['error' => 'YouTube Data API failed: ' . $errorMsg];
-                }
+                \Illuminate\Support\Facades\Artisan::call('sync:youtube-metrics', ['integration_id' => $integration->id]);
+                session()->flash('success', 'YouTube metrics synced successfully.');
+                return;
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('YouTube API Exception: ' . $e->getMessage());
-                $reportData = ['error' => 'YouTube API failed. Please ensure the Analytics API is enabled.'];
+                \Illuminate\Support\Facades\Log::error('YouTube Sync API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'YouTube Sync failed.'];
             }
         } elseif ($apiKey && $propertyId && $integrationId === 'keyword') {
             try {
@@ -1470,25 +1372,40 @@ class ManageClients extends Component
 
                 if ($response->successful()) {
                     $json = $response->json();
-                                        $items = isset($json['data']) ? $json['data'] : $json;
-                    
-                    // Keyword API v2 returns live snapshot, no date filtering needed.
-                    // $items remains as is.
+                    $items = isset($json['data']) ? $json['data'] : $json;
                     
                     $totalKeywords = count($items);
+                    $top3 = 0;
                     $top10 = 0;
+                    $top15 = 0;
+                    $top50 = 0;
+                    $top100 = 0;
+                    $unranked = 0;
+                    
                     $upMovements = 0;
                     $downMovements = 0;
                     $totalVisibility = 0;
+                    
                     $keywordsList = [];
                     $pagesMap = [];
+                    
+                    $top3PagesMap = [];
+                    $top10PagesMap = [];
+                    $top15PagesMap = [];
                     
                     foreach ($items as $item) {
                         $attr = $item['attributes'] ?? [];
                         if (empty($attr)) continue;
                         
                         $rank = $attr['grank'] ?? 0;
+                        
+                        // Calculate Ranking Distribution
+                        if ($rank > 0 && $rank <= 3) $top3++;
                         if ($rank > 0 && $rank <= 10) $top10++;
+                        if ($rank > 0 && $rank <= 15) $top15++;
+                        if ($rank > 0 && $rank <= 50) $top50++;
+                        if ($rank > 0 && $rank <= 100) $top100++;
+                        if ($rank == 0 || $rank > 100) $unranked++;
                         
                         $change = $attr['trends']['month'] ?? 0;
                         if ($change > 0) $upMovements++;
@@ -1508,6 +1425,17 @@ class ManageClients extends Component
                             $urlPath = parse_url($rankingUrl, PHP_URL_PATH) ?? $rankingUrl;
                             if (empty($urlPath)) $urlPath = '/';
                             
+                            // Track Top Pages
+                            if ($rank > 0 && $rank <= 3) {
+                                $top3PagesMap[$rankingUrl] = true;
+                            }
+                            if ($rank > 0 && $rank <= 10) {
+                                $top10PagesMap[$rankingUrl] = true;
+                            }
+                            if ($rank > 0 && $rank <= 15) {
+                                $top15PagesMap[$rankingUrl] = true;
+                            }
+                            
                             if (!isset($pagesMap[$rankingUrl])) {
                                 $pagesMap[$rankingUrl] = [
                                     'url' => $rankingUrl,
@@ -1522,6 +1450,10 @@ class ManageClients extends Component
                             $pagesMap[$rankingUrl]['total_rank'] += ($attr['grank'] ?? 0);
                         }
                     }
+                    
+                    $top3Pages = count($top3PagesMap);
+                    $top10Pages = count($top10PagesMap);
+                    $top15Pages = count($top15PagesMap);
                     
                     // Sort keywords by rank (best rank first)
                     usort($keywordsList, function($a, $b) {
@@ -1551,13 +1483,27 @@ class ManageClients extends Component
                         ],
                         'summary' => [
                             'total_keywords' => $totalKeywords,
+                            'top_3' => $top3,
                             'top_10' => $top10,
+                            'top_15' => $top15,
+                            'top_50' => $top50,
+                            'top_100' => $top100,
+                            'top_3_pages' => $top3Pages,
+                            'top_10_pages' => $top10Pages,
+                            'top_15_pages' => $top15Pages,
                             'up_movements' => $upMovements,
                             'down_movements' => $downMovements,
                             'share_of_voice' => round($totalVisibility / max(1, $totalKeywords), 2) . '%'
                         ],
-                        'keywords' => array_slice($keywordsList, 0, 500), // limit to top 500 for UI performance
-                        'pages' => array_slice($pagesList, 0, 500) // limit to top 500 for UI performance
+                        'ranking_distribution' => [
+                            'top_1_3' => $top3,
+                            'top_4_10' => $top10 - $top3,
+                            'top_11_50' => $top50 - $top10,
+                            'top_51_100' => $top100 - $top50,
+                            'unranked' => $unranked
+                        ],
+                        'keywords' => array_slice($keywordsList, 0, 500),
+                        'pages' => array_slice($pagesList, 0, 500)
                     ];
                 } else {
                     $reportData = ['error' => 'Keyword API failed with status ' . $response->status()];
@@ -1830,6 +1776,41 @@ class ManageClients extends Component
 
             $year = $selectedDate->format('Y');
             $monthFull = \Illuminate\Support\Str::lower($selectedDate->format('F'));
+            
+            // For Keyword.com, build daily history by reading the existing file and appending today's snapshot
+            if ($integrationId === 'keyword' && !isset($reportData['error'])) {
+                $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
+                $dailyTraffic = [];
+                if (file_exists($filePath)) {
+                    $existingData = json_decode(file_get_contents($filePath), true);
+                    if (isset($existingData['daily_traffic'])) {
+                        $dailyTraffic = $existingData['daily_traffic'];
+                    }
+                }
+                
+                $today = now()->format('Y-m-d');
+                $found = false;
+                foreach ($dailyTraffic as &$dt) {
+                    if (isset($dt['date']) && $dt['date'] === $today) {
+                        $dt['top_3'] = $reportData['summary']['top_3'] ?? 0;
+                        $dt['top_10'] = $reportData['summary']['top_10'] ?? 0;
+                        $dt['top_15'] = $reportData['summary']['top_15'] ?? 0;
+                        $dt['top_50'] = $reportData['summary']['top_50'] ?? 0;
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $dailyTraffic[] = [
+                        'date' => $today,
+                        'top_3' => $reportData['summary']['top_3'] ?? 0,
+                        'top_10' => $reportData['summary']['top_10'] ?? 0,
+                        'top_15' => $reportData['summary']['top_15'] ?? 0,
+                        'top_50' => $reportData['summary']['top_50'] ?? 0,
+                    ];
+                }
+                $reportData['daily_traffic'] = $dailyTraffic;
+            }
 
             if (isset($reportData['daily_traffic']) && is_array($reportData['daily_traffic']) && count($reportData['daily_traffic']) > 0) {
                 $grouped = [];
@@ -2005,6 +1986,16 @@ class ManageClients extends Component
         $this->loadReportDataForActiveModal();
     }
 
+    public function updatedCompareDateFrom(): void
+    {
+        $this->loadReportDataForActiveModal();
+    }
+
+    public function updatedCompareDateTo(): void
+    {
+        $this->loadReportDataForActiveModal();
+    }
+
     public function loadReportDataForActiveModal(): void
     {
         if (!$this->selectedWebsiteId || !$this->activeReportIntegrationId || !$this->selectedClientDetailId) {
@@ -2028,6 +2019,10 @@ class ManageClients extends Component
             }
 
             $this->activeReportData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $this->activeReportIntegrationId, $this->dateFrom, $this->dateTo);
+
+            if ($this->compareEnabled && !empty($this->compareDateFrom) && !empty($this->compareDateTo)) {
+                $this->activeReportData['compare_data'] = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $this->activeReportIntegrationId, $this->compareDateFrom, $this->compareDateTo);
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error loading report JSON file: ' . $e->getMessage());
         }

@@ -50,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('media-picker', \App\Modules\CRM\Media\Livewire\MediaPicker::class);
         \Livewire\Livewire::component('manage-support-tickets', \App\Modules\Support\Livewire\ManageSupportTickets::class);
 
+        \Livewire\Livewire::component('admin-client-report', \App\Modules\CRM\Clients\Livewire\AdminClientReport::class);
+
         \Livewire\Livewire::component('client-dashboard', \App\Modules\Client\Dashboard\Livewire\ClientDashboard::class);
         \Livewire\Livewire::component('client-websites', \App\Modules\Client\Dashboard\Livewire\ClientMyWebsites::class);
         \Livewire\Livewire::component('client-profile', \App\Modules\Client\Dashboard\Livewire\ClientProfile::class);
@@ -61,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
 
         \Livewire\Livewire::component('staff-dashboard', \App\Modules\CRM\Staff\Livewire\Portal\StaffDashboard::class);
         \Livewire\Livewire::component('staff-clients', \App\Modules\CRM\Staff\Livewire\Portal\StaffClients::class);
+        \Livewire\Livewire::component('staff-client-report', \App\Modules\CRM\Staff\Livewire\Portal\StaffClientReport::class);
         \Livewire\Livewire::component('staff-websites', \App\Modules\CRM\Staff\Livewire\Portal\StaffWebsites::class);
         \Livewire\Livewire::component('staff-clickup-tickets', \App\Modules\CRM\Staff\Livewire\Portal\StaffClickUpTickets::class);
         \Livewire\Livewire::component('staff-maintenance', \App\Modules\CRM\Staff\Livewire\Portal\StaffMaintenance::class);

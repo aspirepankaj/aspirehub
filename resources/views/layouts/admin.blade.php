@@ -68,6 +68,7 @@ border: 1px solid rgba(255, 255, 255, 0.43);
                 border: 1px solid rgba(255, 255, 255, 25%);
             }
         </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     </head>
 
     <body class="font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">

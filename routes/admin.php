@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Modules\Core\Dashboard\Livewire\AdminDashboard;
 use App\Modules\CRM\Clients\Livewire\ManageClients;
+use App\Modules\CRM\Clients\Livewire\AdminClientReport;
 use App\Modules\CRM\Websites\Livewire\ManageWebsites;
 use App\Modules\CRM\Staff\Livewire\ManageStaff;
 use App\Modules\CRM\Maintenance\Livewire\ManageMaintenanceReports;
@@ -18,6 +19,7 @@ Route::get('/', function () {
 // Clients page using custom Livewire component
 Route::get('/clients', ManageClients::class)->name('clients');
 Route::get('/clients/ADSCL-{id}', ManageClients::class)->name('clients.detail');
+Route::get('/clients/ADSCL-{id}/report/{integration}', AdminClientReport::class)->name('clients.report');
 Route::get('/clients/plans', \App\Modules\CRM\Clients\Livewire\ManagePlans::class)->name('clients.plans');
 
 use App\Modules\CRM\Staff\Livewire\ManageDesignations;

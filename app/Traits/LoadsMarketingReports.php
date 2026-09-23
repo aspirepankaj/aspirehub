@@ -6,13 +6,23 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Str;
 
+use Livewire\Attributes\Url;
+
 trait LoadsMarketingReports
 {
+    #[Url]
     public string $dateFrom = '';
+    #[Url]
     public string $dateTo = '';
+    #[Url]
     public string $compareDateFrom = '';
+    #[Url]
     public string $compareDateTo = '';
+    #[Url]
+    public bool $compareEnabled = false;
+    #[Url]
     public bool $includeToday = false;
+    #[Url]
     public string $compareFormat = 'percentage';
 
     public function initDateRange()
@@ -22,6 +32,23 @@ trait LoadsMarketingReports
         }
         if (empty($this->dateTo)) {
             $this->dateTo = Carbon::now()->subDays(1)->format('Y-m-d');
+        }
+    }
+
+    public function applyDateFilter($dateFrom, $dateTo, $compareFrom, $compareTo, $includeToday, $format)
+    {
+        $this->dateFrom = $dateFrom;
+        $this->dateTo = $dateTo;
+        $this->compareDateFrom = $compareFrom;
+        $this->compareDateTo = $compareTo;
+        $this->includeToday = filter_var($includeToday, FILTER_VALIDATE_BOOLEAN);
+        $this->compareFormat = $format;
+        
+        // Call whichever data loading method exists in the component
+        if (method_exists($this, 'loadReport')) {
+            $this->loadReport();
+        } elseif (method_exists($this, 'loadReportData')) {
+            $this->loadReportData();
         }
     }
 
@@ -57,17 +84,31 @@ trait LoadsMarketingReports
 
         $allData = [];
         $mergedDaily = [];
+        $allMonthlyJsons = [];
 
         foreach ($months as $m) {
             $path = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationType}/{$m['year']}/{$m['month']}.json");
             if (!file_exists($path)) {
-                continue;
+                // Fallback: newly synced integrations fetch 90 days of data but only save to the current month's file.
+                $currentMonthPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationType}/" . date('Y') . "/" . strtolower(date('F')) . ".json");
+                if (file_exists($currentMonthPath)) {
+                    $path = $currentMonthPath;
+                } else {
+                    continue;
+                }
             }
 
             $jsonData = json_decode(file_get_contents($path), true);
             if (!is_array($jsonData)) {
                 continue;
             }
+
+            // Prevent processing the exact same file twice if fallback was used
+            $fileHash = md5($path);
+            if (isset($allMonthlyJsons[$fileHash])) {
+                continue;
+            }
+            $allMonthlyJsons[$fileHash] = true;
 
             if (empty($allData)) {
                 $allData = $jsonData;
@@ -89,6 +130,128 @@ trait LoadsMarketingReports
 
         if (empty($allData)) {
             return [];
+        }
+
+        // Fill in missing dates for the selected date range
+        $filledDaily = [];
+        try {
+            $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+            foreach ($period as $date) {
+                $d = $date->format('Y-m-d');
+                if (isset($mergedDaily[$d])) {
+                    $filledDaily[$d] = $mergedDaily[$d];
+                } else {
+                    $filledDaily[$d] = [
+                        'date' => $d,
+                        'pageviews' => 0,
+                        'users' => 0,
+                        'sessions' => 0,
+                        'bounce_rate' => 0,
+                        'avg_session_duration' => 0,
+                        'clicks' => 0,
+                        'impressions' => 0,
+                        'position' => 0,
+                        'views' => 0,
+                        'watch_time' => 0,
+                        'subscribers' => 0,
+                        'avg_view_duration' => 0,
+                        'top_10' => null,
+                        'top_15' => null,
+                        'top_50' => null
+                    ];
+                }
+            }
+            $mergedDaily = $filledDaily;
+        } catch (\Exception $e) {
+            // fallback
+        }
+
+        // ── Proportionally scale aggregate arrays based on filtered date range ──
+        // The monthly JSON files contain identical aggregate data (from the same GA4 API call).
+        // We scale key_events, traffic_sources, pages_report, etc. proportionally based on
+        // the ratio of sessions in the selected date range vs. total sessions in the full data.
+        if ($integrationType === 'ga4' && !empty($mergedDaily)) {
+            // Calculate total sessions from the filtered daily data
+            $filteredSessions = 0;
+            foreach ($mergedDaily as $d) {
+                $filteredSessions += (int)($d['sessions'] ?? 0);
+            }
+
+            // Get total sessions from the original overall_summary (full period)
+            $originalTotalSessions = (int)($allData['overall_summary']['sessions'] ?? 0);
+
+            // Calculate the scale factor
+            $scaleFactor = ($originalTotalSessions > 0) ? ($filteredSessions / $originalTotalSessions) : 1;
+
+            // Scale key_events
+            if (!empty($allData['key_events'])) {
+                foreach ($allData['key_events'] as &$ev) {
+                    $ev['event_count'] = (int)round(($ev['event_count'] ?? 0) * $scaleFactor);
+                }
+                unset($ev);
+            }
+
+            // Scale traffic_sources
+            if (!empty($allData['traffic_sources'])) {
+                foreach ($allData['traffic_sources'] as &$src) {
+                    $src['sessions'] = (int)round(($src['sessions'] ?? 0) * $scaleFactor);
+                }
+                unset($src);
+            }
+
+            // Scale pages_report
+            if (!empty($allData['pages_report'])) {
+                foreach ($allData['pages_report'] as &$pg) {
+                    $pg['pageviews'] = (int)round(($pg['pageviews'] ?? 0) * $scaleFactor);
+                    $pg['users'] = (int)round(($pg['users'] ?? 0) * $scaleFactor);
+                }
+                unset($pg);
+            }
+
+            // Scale device_demographics
+            if (!empty($allData['device_demographics'])) {
+                foreach ($allData['device_demographics'] as &$dev) {
+                    if (isset($dev['active_users'])) {
+                        $dev['active_users'] = (int)round($dev['active_users'] * $scaleFactor);
+                    } elseif (isset($dev['sessions'])) {
+                        $dev['sessions'] = (int)round($dev['sessions'] * $scaleFactor);
+                    }
+                }
+                unset($dev);
+                // Recalculate percentages
+                $keyToUse = isset($allData['device_demographics'][0]['active_users']) ? 'active_users' : 'sessions';
+                $totalDev = array_sum(array_column($allData['device_demographics'], $keyToUse));
+                foreach ($allData['device_demographics'] as &$dev) {
+                    $val = $dev[$keyToUse] ?? 0;
+                    $dev['percentage'] = $totalDev > 0 ? round(($val / $totalDev) * 100, 1) . '%' : '0%';
+                }
+                unset($dev);
+            }
+
+            // Scale geographic_sources
+            if (!empty($allData['geographic_sources'])) {
+                foreach ($allData['geographic_sources'] as &$geo) {
+                    $geo['active_users'] = (int)round(($geo['active_users'] ?? 0) * $scaleFactor);
+                    $geo['sessions'] = (int)round(($geo['sessions'] ?? 0) * $scaleFactor);
+                }
+                unset($geo);
+            }
+        } elseif ($integrationType === 'youtube' && !empty($mergedDaily)) {
+            // Proportionally scale youtube top videos
+            $filteredViews = 0;
+            foreach ($mergedDaily as $d) {
+                $filteredViews += (int)($d['views'] ?? 0);
+            }
+            $originalTotalViews = (int)($allData['summary']['views'] ?? 0);
+            $scaleFactor = ($originalTotalViews > 0) ? ($filteredViews / $originalTotalViews) : 1;
+
+            if (!empty($allData['top_videos'])) {
+                foreach ($allData['top_videos'] as &$vid) {
+                    $vid['views'] = (int)round(($vid['views'] ?? 0) * $scaleFactor);
+                    $vid['watch_time'] = round(($vid['watch_time'] ?? 0) * $scaleFactor, 2);
+                }
+                unset($vid);
+            }
         }
 
         // Re-aggregate totals based on filtered mergedDaily
@@ -158,14 +321,36 @@ trait LoadsMarketingReports
                 $totalViews = 0;
                 $totalWatch = 0;
                 $totalSubs = 0;
+                $totalAvgViewDuration = 0;
+                $validDays = 0;
+
                 foreach ($mergedDaily as $d) {
                     $totalViews += (int)($d['views'] ?? 0);
                     $totalWatch += (float)($d['watch_time'] ?? 0);
                     $totalSubs += (int)($d['subscribers'] ?? 0);
+                    
+                    if (isset($d['avg_view_duration']) && $d['avg_view_duration'] > 0) {
+                        $totalAvgViewDuration += (int)$d['avg_view_duration'];
+                        $validDays++;
+                    }
                 }
+                
                 $allData['summary']['views'] = $totalViews;
                 $allData['summary']['watch_time'] = $totalWatch;
                 $allData['summary']['subscribers'] = $totalSubs;
+
+                if ($validDays > 0) {
+                    $finalAvgViewDuration = round($totalAvgViewDuration / $validDays);
+                    $formattedDuration = gmdate("H:i:s", $finalAvgViewDuration);
+                    if (str_starts_with($formattedDuration, '00:00:')) {
+                        $formattedDuration = (int)substr($formattedDuration, 6) . 's';
+                    } elseif (str_starts_with($formattedDuration, '00:')) {
+                        $formattedDuration = (int)substr($formattedDuration, 3, 2) . 'm ' . (int)substr($formattedDuration, 6) . 's';
+                    }
+                    $allData['summary']['avg_view_duration'] = $formattedDuration;
+                } else {
+                    $allData['summary']['avg_view_duration'] = '0s';
+                }
             }
         }
 

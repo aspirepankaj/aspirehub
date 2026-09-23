@@ -1042,110 +1042,12 @@ class StaffClients extends Component
             }
         } elseif ($accessToken && $propertyId && $integrationId === 'youtube') {
             try {
-                $startDate = $startDateStr;
-                $endDate = $endDateStr;
-                
-                // 1. Fetch channel stats from Data API v3
-                $channelResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                    ->get("https://www.googleapis.com/youtube/v3/channels", [
-                        'part' => 'statistics,snippet',
-                        'id' => $propertyId
-                    ]);
-
-                if ($channelResponse->successful() && !empty($channelResponse->json('items'))) {
-                    $channel = $channelResponse->json('items')[0];
-                    $stats = $channel['statistics'] ?? [];
-                    
-                    // 2. Fetch watch time and avg duration from Analytics API
-                    $analyticsResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
-                            'ids' => 'channel==MINE',
-                            'startDate' => $startDate,
-                            'endDate' => $endDate,
-                            'metrics' => 'views,estimatedMinutesWatched,averageViewDuration,subscribersGained,subscribersLost'
-                        ]);
-                        
-                    $monthlyViews = 0;
-                    $watchTimeHrs = 0;
-                    $avgViewDurationSec = 0;
-                    $subscribersGained = 0;
-                    $subscribersLost = 0;
-                    if ($analyticsResponse->successful() && !empty($analyticsResponse->json('rows'))) {
-                        $analyticsData = $analyticsResponse->json('rows')[0];
-                        // views is index 0, estimatedMinutesWatched is index 1, averageViewDuration is index 2, subscribersGained is 3, subscribersLost is 4
-                        $monthlyViews = $analyticsData[0] ?? 0;
-                        $watchTimeHrs = ($analyticsData[1] ?? 0) / 60;
-                        $avgViewDurationSec = $analyticsData[2] ?? 0;
-                        $subscribersGained = $analyticsData[3] ?? 0;
-                        $subscribersLost = $analyticsData[4] ?? 0;
-                    }
-                    $netSubscribers = $subscribersGained - $subscribersLost;
-                    
-                    $durationMin = floor($avgViewDurationSec / 60);
-                    $durationSec = round($avgViewDurationSec % 60);
-                    $durationFormatted = $durationMin > 0 ? "{$durationMin}m {$durationSec}s" : "{$durationSec}s";
-
-                    // 3. Fetch top videos from Analytics API
-                    $topVideosResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                        ->get("https://youtubeanalytics.googleapis.com/v2/reports", [
-                            'ids' => 'channel==MINE',
-                            'startDate' => $startDate,
-                            'endDate' => $endDate,
-                            'metrics' => 'views,estimatedMinutesWatched',
-                            'dimensions' => 'video',
-                            'sort' => '-views',
-                            'maxResults' => 3
-                        ]);
-                        
-                    $topVideos = [];
-                    if ($topVideosResponse->successful() && !empty($topVideosResponse->json('rows'))) {
-                        $videoRows = $topVideosResponse->json('rows');
-                        $videoIds = array_map(fn($row) => $row[0], $videoRows);
-                        
-                        // 4. Fetch titles for these top video IDs from Data API v3
-                        $titlesResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15)
-                            ->get("https://www.googleapis.com/youtube/v3/videos", [
-                                'part' => 'snippet',
-                                'id' => implode(',', $videoIds)
-                            ]);
-                            
-                        $titlesMap = [];
-                        if ($titlesResponse->successful() && !empty($titlesResponse->json('items'))) {
-                            foreach ($titlesResponse->json('items') as $videoItem) {
-                                $titlesMap[$videoItem['id']] = $videoItem['snippet']['title'] ?? 'Unknown Video';
-                            }
-                        }
-                        
-                        foreach ($videoRows as $row) {
-                            $vid = $row[0];
-                            $vViews = $row[1] ?? 0;
-                            $vMinutes = $row[2] ?? 0;
-                            $topVideos[] = [
-                                'title' => $titlesMap[$vid] ?? 'Video (' . $vid . ')',
-                                'views' => (int)$vViews,
-                                'watch_time' => $vMinutes / 60
-                            ];
-                        }
-                    }
-
-                    $reportData = [
-                        'summary' => [
-                            'views' => (int) $monthlyViews,
-                            'subscribers' => (int) $netSubscribers,
-                            'video_count' => (int) ($stats['videoCount'] ?? 0),
-                            'watch_time' => $watchTimeHrs,
-                            'avg_view_duration' => $durationFormatted
-                        ],
-                        'top_videos' => $topVideos
-                    ];
-                } else {
-                    $errorMsg = $channelResponse->json('error.message') ?? 'Please ensure the channel ID is correct.';
-                    \Illuminate\Support\Facades\Log::warning('YouTube API call failed: ' . $channelResponse->body());
-                    $reportData = ['error' => 'YouTube Data API failed: ' . $errorMsg];
-                }
+                \Illuminate\Support\Facades\Artisan::call('sync:youtube-metrics', ['integration_id' => $integration->id]);
+                session()->flash('success', 'YouTube metrics synced successfully.');
+                return;
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('YouTube API Exception: ' . $e->getMessage());
-                $reportData = ['error' => 'YouTube API failed. Please ensure the Analytics API is enabled.'];
+                \Illuminate\Support\Facades\Log::error('YouTube Sync API Exception: ' . $e->getMessage());
+                $reportData = ['error' => 'YouTube Sync failed.'];
             }
         } elseif ($apiKey && $propertyId && $integrationId === 'keyword') {
             try {
