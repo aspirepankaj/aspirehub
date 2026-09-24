@@ -939,7 +939,11 @@ class ManageClients extends Component
             }
 
             try {
-                $response = \Illuminate\Support\Facades\Http::asForm()->post('https://oauth2.googleapis.com/token', [
+                $http = \Illuminate\Support\Facades\Http::asForm();
+                if (app()->environment('local')) {
+                    $http = $http->withoutVerifying();
+                }
+                $response = $http->post('https://oauth2.googleapis.com/token', [
                     'refresh_token' => $auth['refresh_token'],
                     'client_id' => $config['client_id'],
                     'client_secret' => $config['client_secret'],
@@ -1004,31 +1008,38 @@ class ManageClients extends Component
                 $startDate = $startDateStr;
                 $endDate = $endDateStr;
 
-                $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
-                    $pool->as('daily')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['date'], 'rowLimit' => 25000, 'dataState' => 'all'
-                    ]),
-                    $pool->as('queries')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10, 'dataState' => 'all'
-                    ]),
-                    $pool->as('pages')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 10, 'dataState' => 'all'
-                    ]),
-                    $pool->as('devices')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 10, 'dataState' => 'all'
-                    ]),
-                    $pool->as('countries')->withToken($accessToken)->timeout(15)->post($endpoint, [
-                        'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 10, 'dataState' => 'all'
-                    ]),
-                ]);
+                $responses = \Illuminate\Support\Facades\Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($accessToken, $endpoint, $startDate, $endDate) {
+                    $makeReq = function($name) use ($pool, $accessToken) {
+                        $req = $pool->as($name)->withToken($accessToken)->timeout(15);
+                        return app()->environment('local') ? $req->withoutVerifying() : $req;
+                    };
+                    return [
+                        $makeReq('daily')->post($endpoint, [
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['date'], 'rowLimit' => 25000, 'dataState' => 'all'
+                        ]),
+                        $makeReq('queries')->post($endpoint, [
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10, 'dataState' => 'all'
+                        ]),
+                        $makeReq('pages')->post($endpoint, [
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 10, 'dataState' => 'all'
+                        ]),
+                        $makeReq('devices')->post($endpoint, [
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 10, 'dataState' => 'all'
+                        ]),
+                        $makeReq('countries')->post($endpoint, [
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 10, 'dataState' => 'all'
+                        ]),
+                    ];
+                });
 
-                $queriesRes = $responses['queries'];
-                if ($queriesRes->successful()) {
+                $isSuccess = fn($res) => ($res instanceof \Illuminate\Http\Client\Response) && $res->successful();
+                $queriesRes = $responses['queries'] ?? null;
+                if ($isSuccess($queriesRes)) {
                     $queriesJson = $queriesRes->json();
-                    $dailyJson = $responses['daily']->successful() ? $responses['daily']->json() : [];
-                    $pagesJson = $responses['pages']->successful() ? $responses['pages']->json() : [];
-                    $devicesJson = $responses['devices']->successful() ? $responses['devices']->json() : [];
-                    $countriesJson = $responses['countries']->successful() ? $responses['countries']->json() : [];
+                    $dailyJson = $isSuccess($responses['daily'] ?? null) ? $responses['daily']->json() : [];
+                    $pagesJson = $isSuccess($responses['pages'] ?? null) ? $responses['pages']->json() : [];
+                    $devicesJson = $isSuccess($responses['devices'] ?? null) ? $responses['devices']->json() : [];
+                    $countriesJson = $isSuccess($responses['countries'] ?? null) ? $responses['countries']->json() : [];
 
                     $reportData = [
                         'metadata' => [
@@ -1096,73 +1107,81 @@ class ManageClients extends Component
             try {
                 $gaStartDate = $startDateStr;
                 // Fetch reports in parallel using Http::pool
-                $responses = \Illuminate\Support\Facades\Http::pool(fn (\Illuminate\Http\Client\Pool $pool) => [
-                    $pool->as('summary')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
-                        'metrics' => [
-                            ['name' => 'activeUsers'],
-                            ['name' => 'screenPageViews'],
-                            ['name' => 'sessions'],
-                            ['name' => 'bounceRate'],
-                            ['name' => 'averageSessionDuration']
-                        ],
-                        'dimensions' => [['name' => 'date']],
-                        'metricAggregations' => ['TOTAL']
-                    ]),
-                    $pool->as('pages')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
-                        'metrics' => [
-                            ['name' => 'screenPageViews'],
-                            ['name' => 'activeUsers']
-                        ],
-                        'dimensions' => [['name' => 'pagePath']],
-                        'limit' => 15
-                    ]),
-                    $pool->as('trafficSources')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
-                        'metrics' => [
-                            ['name' => 'sessions'],
-                            ['name' => 'bounceRate']
-                        ],
-                        'dimensions' => [['name' => 'sessionSourceMedium']],
-                        'limit' => 15
-                    ]),
-                    $pool->as('devices')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
-                        'metrics' => [
-                            ['name' => 'activeUsers']
-                        ],
-                        'dimensions' => [['name' => 'deviceCategory']],
-                        'limit' => 10
-                    ]),
-                    $pool->as('geo')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
-                        'metrics' => [
-                            ['name' => 'activeUsers'],
-                            ['name' => 'sessions']
-                        ],
-                        'dimensions' => [['name' => 'country']],
-                        'limit' => 15
-                    ]),
-                    $pool->as('keywords')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
-                        'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
-                        'metrics' => [
-                            ['name' => 'activeUsers'],
-                            ['name' => 'sessions']
-                        ],
-                        'dimensions' => [['name' => 'sessionGoogleAdsKeyword']],
-                        'limit' => 15
-                    ]),
-                ]);
+                $responses = \Illuminate\Support\Facades\Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($accessToken, $propertyId, $gaStartDate) {
+                    $makeReq = function($name) use ($pool, $accessToken) {
+                        $req = $pool->as($name)->withToken($accessToken)->timeout(15);
+                        return app()->environment('local') ? $req->withoutVerifying() : $req;
+                    };
+                    return [
+                        $makeReq('summary')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                            'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
+                            'metrics' => [
+                                ['name' => 'activeUsers'],
+                                ['name' => 'screenPageViews'],
+                                ['name' => 'sessions'],
+                                ['name' => 'bounceRate'],
+                                ['name' => 'averageSessionDuration']
+                            ],
+                            'dimensions' => [['name' => 'date']],
+                            'metricAggregations' => ['TOTAL']
+                        ]),
+                        $makeReq('pages')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                            'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
+                            'metrics' => [
+                                ['name' => 'screenPageViews'],
+                                ['name' => 'activeUsers']
+                            ],
+                            'dimensions' => [['name' => 'pagePath']],
+                            'limit' => 15
+                        ]),
+                        $makeReq('trafficSources')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                            'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
+                            'metrics' => [
+                                ['name' => 'sessions'],
+                                ['name' => 'bounceRate']
+                            ],
+                            'dimensions' => [['name' => 'sessionSourceMedium']],
+                            'limit' => 15
+                        ]),
+                        $makeReq('devices')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                            'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
+                            'metrics' => [
+                                ['name' => 'activeUsers']
+                            ],
+                            'dimensions' => [['name' => 'deviceCategory']],
+                            'limit' => 10
+                        ]),
+                        $makeReq('geo')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                            'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
+                            'metrics' => [
+                                ['name' => 'activeUsers'],
+                                ['name' => 'sessions']
+                            ],
+                            'dimensions' => [['name' => 'country']],
+                            'limit' => 15
+                        ]),
+                        $makeReq('keywords')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                            'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => 'today']],
+                            'metrics' => [
+                                ['name' => 'activeUsers'],
+                                ['name' => 'sessions']
+                            ],
+                            'dimensions' => [['name' => 'sessionGoogleAdsKeyword']],
+                            'limit' => 15
+                        ]),
+                    ];
+                });
 
-                $summaryResponse = $responses['summary'];
-                $pagesResponse = $responses['pages'];
-                $trafficSourcesRes = $responses['trafficSources'];
-                $devicesRes = $responses['devices'];
-                $geoRes = $responses['geo'];
-                $keywordsRes = $responses['keywords'];
+                $summaryResponse = $responses['summary'] ?? null;
+                $pagesResponse = $responses['pages'] ?? null;
+                $trafficSourcesRes = $responses['trafficSources'] ?? null;
+                $devicesRes = $responses['devices'] ?? null;
+                $geoRes = $responses['geo'] ?? null;
+                $keywordsRes = $responses['keywords'] ?? null;
 
-                if ($summaryResponse->successful() && $pagesResponse->successful()) {
+                $isSuccess = fn($res) => ($res instanceof \Illuminate\Http\Client\Response) && $res->successful();
+
+                if ($isSuccess($summaryResponse) && $isSuccess($pagesResponse)) {
                     $summaryJson = $summaryResponse->json();
                     $pagesJson = $pagesResponse->json();
                     
@@ -1330,8 +1349,12 @@ class ManageClients extends Component
                         }, $summaryJson['rows'] ?? [])
                     ];
                 } else {
-                    $errorMsg = $summaryResponse->json('error.message') ?? $pagesResponse->json('error.message') ?? 'Please ensure the property ID is correct and has data.';
-                    \Illuminate\Support\Facades\Log::warning('GA4 API calls failed. Summary: ' . $summaryResponse->body() . ' Pages: ' . $pagesResponse->body());
+                    $summaryMsg = ($summaryResponse instanceof \Illuminate\Http\Client\Response) ? $summaryResponse->json('error.message') : null;
+                    $pagesMsg = ($pagesResponse instanceof \Illuminate\Http\Client\Response) ? $pagesResponse->json('error.message') : null;
+                    $errorMsg = $summaryMsg ?? $pagesMsg ?? 'Please ensure the property ID is correct and has data.';
+                    $summaryBody = ($summaryResponse instanceof \Illuminate\Http\Client\Response) ? $summaryResponse->body() : (is_object($summaryResponse) ? get_class($summaryResponse) : 'N/A');
+                    $pagesBody = ($pagesResponse instanceof \Illuminate\Http\Client\Response) ? $pagesResponse->body() : (is_object($pagesResponse) ? get_class($pagesResponse) : 'N/A');
+                    \Illuminate\Support\Facades\Log::warning('GA4 API calls failed. Summary: ' . $summaryBody . ' Pages: ' . $pagesBody);
                     $reportData = ['error' => 'Google Analytics 4 API failed: ' . $errorMsg];
                 }
             } catch (\Exception $e) {
@@ -1352,7 +1375,11 @@ class ManageClients extends Component
                 // Find actual group ID (string) if numeric project_id is saved
                 $actualGroupId = $propertyId;
                 if (is_numeric($propertyId)) {
-                    $groupsResponse = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10)->get('https://app.keyword.com/api/v2/groups/active');
+                    $httpGroups = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10);
+                    if (app()->environment('local')) {
+                        $httpGroups = $httpGroups->withoutVerifying();
+                    }
+                    $groupsResponse = $httpGroups->get('https://app.keyword.com/api/v2/groups/active');
                     if ($groupsResponse->successful()) {
                         $groups = $groupsResponse->json()['data'] ?? ($groupsResponse->json() ?? []);
                         foreach ($groups as $g) {
@@ -1366,9 +1393,11 @@ class ManageClients extends Component
 
                 // Dynamic fetch from Keyword.com API
                 $url = "https://app.keyword.com/api/v2/groups/" . rawurlencode($actualGroupId) . "/keywords?per_page=1000";
-                $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
-                    ->timeout(15)
-                    ->get($url);
+                $httpKw = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(15);
+                if (app()->environment('local')) {
+                    $httpKw = $httpKw->withoutVerifying();
+                }
+                $response = $httpKw->get($url);
 
                 if ($response->successful()) {
                     $json = $response->json();
@@ -2159,16 +2188,21 @@ class ManageClients extends Component
             ->where('integration_type', 'gsc')
             ->first();
 
-        if (!$integration || empty($integration->auth_credentials['access_token'])) {
+        if (!$integration) {
             return [];
         }
 
-        $accessToken = $integration->auth_credentials['access_token'];
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-                ->timeout(5)
-                ->get('https://searchconsole.googleapis.com/webmasters/v3/sites');
+            $http = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(10);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://searchconsole.googleapis.com/webmasters/v3/sites');
 
             if ($response->successful()) {
                 $sites = $response->json()['siteEntry'] ?? [];
@@ -2189,6 +2223,8 @@ class ManageClients extends Component
                 });
                 
                 return $sitesList;
+            } else {
+                \Illuminate\Support\Facades\Log::warning('GSC getGSCSites failed: ' . $response->body());
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error fetching GSC sites: ' . $e->getMessage());
@@ -2248,16 +2284,21 @@ class ManageClients extends Component
             ->where('integration_type', 'ga4')
             ->first();
 
-        if (!$integration || empty($integration->auth_credentials['access_token'])) {
+        if (!$integration) {
             return [];
         }
 
-        $accessToken = $integration->auth_credentials['access_token'];
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-                ->timeout(5)
-                ->get('https://analyticsadmin.googleapis.com/v1beta/accountSummaries');
+            $http = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(10);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://analyticsadmin.googleapis.com/v1beta/accountSummaries');
 
             if ($response->successful()) {
                 $summaries = $response->json()['accountSummaries'] ?? [];
@@ -2274,7 +2315,7 @@ class ManageClients extends Component
                 return $propertiesList;
             }
         } catch (\Exception $e) {
-            // Ignore
+            \Illuminate\Support\Facades\Log::error('GA4 Properties API Exception: ' . $e->getMessage());
         }
 
         return [];
@@ -2300,19 +2341,25 @@ class ManageClients extends Component
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-                ->timeout(15)
-                ->get('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true');
+            $http = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true');
 
             if ($response->successful()) {
                 $channels = $response->json('items') ?? [];
-                return collect($channels)->map(fn($c) => [
-                    'id' => $c['id'],
-                    'name' => $c['snippet']['title'] ?? 'Unknown Channel',
-                ])->toArray();
+                if (!empty($channels)) {
+                    return collect($channels)->map(fn($c) => [
+                        'id' => $c['id'],
+                        'name' => $c['snippet']['title'] ?? 'Unknown Channel',
+                    ])->toArray();
+                }
+            } else {
+                \Illuminate\Support\Facades\Log::warning('YouTube channels API response: ' . $response->body());
             }
         } catch (\Exception $e) {
-            // Ignore
+            \Illuminate\Support\Facades\Log::error('YouTube channels API error: ' . $e->getMessage());
         }
 
         // Mock fallback for local testing if API fails
@@ -2400,9 +2447,11 @@ class ManageClients extends Component
         $apiKey = $integration->api_credentials['api_key'];
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
-                ->timeout(5)
-                ->get('https://app.keyword.com/api/v2/groups/active');
+            $http = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://app.keyword.com/api/v2/groups/active');
 
             if ($response->successful()) {
                 $projects = $response->json() ?? []; 
@@ -2411,9 +2460,11 @@ class ManageClients extends Component
                     'id' => $p['id'] ?? uniqid(),
                     'name' => $p['attributes']['name'] ?? $p['id'] ?? 'Unknown Project',
                 ])->toArray();
+            } else {
+                \Illuminate\Support\Facades\Log::warning('Keyword.com getKeywordProjects failed: ' . $response->body());
             }
         } catch (\Exception $e) {
-            // Ignore
+            \Illuminate\Support\Facades\Log::error('Keyword.com API Exception: ' . $e->getMessage());
         }
 
         // Mock fallback

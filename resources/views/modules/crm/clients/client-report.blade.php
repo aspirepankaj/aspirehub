@@ -32,8 +32,10 @@
                 </p>
             </div>
         </div>
-        {{-- Date Range Picker & Back Button --}}
+        {{-- Date Range Picker, Send Report & Back Button --}}
         <div class="flex items-center gap-3">
+            @include('partials.marketing-report-send-modal')
+
             <a href="javascript:history.back()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
@@ -149,16 +151,21 @@
                             <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Daily Traffic
                         </div>
                     </div>
-                    <div class="h-64" wire:key="line-gsc-traffic-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                    <div class="h-64" wire:ignore wire:key="line-gsc-traffic-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                        chart: null,
                         init() {
-                            const ctx = document.getElementById('line-gsc-traffic-{{ $idx }}').getContext('2d');
+                            if (!this.$refs.canvas) return;
+                            if (this.chart) {
+                                this.chart.destroy();
+                            }
+                            const ctx = this.$refs.canvas.getContext('2d');
                             let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
                             let traffic = (rawData && rawData.daily_traffic) ? rawData.daily_traffic : [];
                             let labels = traffic.map(t => t.date);
                             let clicks = traffic.map(t => t.clicks);
                             let impressions = traffic.map(t => t.impressions);
                             
-                            new Chart(ctx, {
+                            this.chart = new Chart(ctx, {
                                 type: 'line',
                                 data: {
                                     labels: labels,
@@ -196,7 +203,7 @@
                             });
                         }
                     }">
-                        <canvas id="line-gsc-traffic-{{ $idx }}"></canvas>
+                        <canvas x-ref="canvas" id="line-gsc-traffic-{{ $idx }}"></canvas>
                     </div>
                 </div>
             </div>
@@ -567,14 +574,15 @@ $format = $compareFormat ?? 'percentage';
 <div wire:key="wrapper-19-multi" class="grid grid-cols-1 gap-6 mb-6">
 @endif
 
-<div>
-@if(count($reportSets) > 1)
-<div wire:key="wrapper-8-multi" class="flex flex-col lg:flex-row gap-6">
-@else
-<div wire:key="wrapper-8-single" class="flex flex-col gap-6">
-@endif
-@foreach($reportSets as $idx => $rSet)
-<div wire:key="ga4-section-2-{{ $idx }}" class="flex-1 w-full overflow-hidden">
+    <!-- Left: Traffic by Channel / Key Events Distribution -->
+    <div>
+        @if(count($reportSets) > 1)
+        <div wire:key="wrapper-8-multi" class="flex flex-col lg:flex-row gap-6">
+        @else
+        <div wire:key="wrapper-8-single" class="flex flex-col gap-6">
+        @endif
+        @foreach($reportSets as $idx => $rSet)
+        <div wire:key="ga4-section-2-{{ $idx }}" class="flex-1 w-full overflow-hidden">
             @php $reportDataScope = $rSet['data']; @endphp
             @if(count($reportSets) > 1)
                 <div class="col-span-full mb-3 mt-4">
@@ -583,88 +591,95 @@ $format = $compareFormat ?? 'percentage';
                     </span>
                 </div>
             @endif
-<div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6">
-                    @php
-                        $donutTitle = !empty($reportDataScope['key_events']) ? 'Key Events Distribution' : 'Traffic by Channel';
-                        $donutItems = !empty($reportDataScope['key_events'])
-                            ? array_map(fn($e) => ['label' => str_replace('_', ' ', $e['event_name']), 'value' => $e['event_count']], array_slice($reportDataScope['key_events'], 0, 8))
-                            : array_map(fn($s) => ['label' => $s['source_medium'], 'value' => $s['sessions']], array_slice($reportDataScope['traffic_sources'] ?? [], 0, 8));
-                        $donutTotal = array_sum(array_column($donutItems, 'value'));
-                        $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Key Events' : 'Sessions';
-                    @endphp
-                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
-                        <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> {{ $donutTitle }}
-                    </div>
-                    <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-8">
-                        <div wire:key="stable-donut-{{ $idx }}" class="flex justify-center w-full"><div class="relative w-48 h-48 shrink-0" wire:key="donut-key-events-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}">
-                            <canvas id="donut-key-events-{{ $idx }}" x-data="{
-                                init() {
-                                    const ctx = document.getElementById('donut-key-events-{{ $idx }}').getContext('2d');
-                                    let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
-                                    let items = [];
-                                    let usingFallback = false;
-                                    if (rawData && rawData.key_events && rawData.key_events.length > 0) {
-                                        items = rawData.key_events.map(e => ({ label: e.event_name, value: e.event_count }));
-                                    } else if (rawData && rawData.traffic_sources && rawData.traffic_sources.length > 0) {
-                                        items = rawData.traffic_sources.slice(0, 8).map(e => ({ label: e.source_medium, value: e.sessions }));
-                                        usingFallback = true;
-                                    } else {
-                                        items = [{ label: 'No Data', value: 1 }];
-                                    }
-                                    let labels = items.map(e => e.label);
-                                    let data = items.map(e => e.value);
-                                    let colors = ['#3b82f6','#10b981','#f59e0b','#ec4899','#6366f1','#94a3b8','#8b5cf6','#0ea5e9'];
-                                    new Chart(ctx, {
-                                        type: 'doughnut',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{ data: data, backgroundColor: colors.slice(0, data.length), borderWidth: 0 }]
-                                        },
-                                        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
-                                    });
+            <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
+                @php
+                    $donutTitle = !empty($reportDataScope['key_events']) ? 'Key Events Distribution' : 'Traffic by Channel';
+                    $donutItems = !empty($reportDataScope['key_events'])
+                        ? array_map(fn($e) => ['label' => str_replace('_', ' ', $e['event_name']), 'value' => $e['event_count']], array_slice($reportDataScope['key_events'], 0, 8))
+                        : array_map(fn($s) => ['label' => $s['source_medium'], 'value' => $s['sessions']], array_slice($reportDataScope['traffic_sources'] ?? [], 0, 8));
+                    $donutTotal = array_sum(array_column($donutItems, 'value'));
+                    $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Key Events' : 'Sessions';
+                @endphp
+                <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
+                    <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> {{ $donutTitle }}
+                </div>
+                <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-8">
+                    <div wire:key="stable-donut-{{ $idx }}" class="flex justify-center w-full">
+                        <div class="relative w-48 h-48 shrink-0" wire:ignore wire:key="donut-key-events-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                            chart: null,
+                            init() {
+                                if (!this.$refs.donutCanvas) return;
+                                if (this.chart) {
+                                    this.chart.destroy();
                                 }
-                            }"></canvas>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                const ctx = this.$refs.donutCanvas.getContext('2d');
+                                let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
+                                let items = [];
+                                let usingFallback = false;
+                                if (rawData && rawData.key_events && rawData.key_events.length > 0) {
+                                    items = rawData.key_events.map(e => ({ label: e.event_name, value: e.event_count }));
+                                } else if (rawData && rawData.traffic_sources && rawData.traffic_sources.length > 0) {
+                                    items = rawData.traffic_sources.slice(0, 8).map(e => ({ label: e.source_medium, value: e.sessions }));
+                                    usingFallback = true;
+                                } else {
+                                    items = [{ label: 'No Data', value: 1 }];
+                                }
+                                let labels = items.map(e => e.label);
+                                let data = items.map(e => e.value);
+                                let colors = ['#3b82f6','#10b981','#f59e0b','#ec4899','#6366f1','#94a3b8','#8b5cf6','#0ea5e9'];
+                                this.chart = new Chart(ctx, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [{ data: data, backgroundColor: colors.slice(0, data.length), borderWidth: 0 }]
+                                    },
+                                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+                                });
+                            }
+                        }">
+                            <canvas x-ref="donutCanvas" id="donut-key-events-{{ $idx }}"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                 <span class="text-3xl font-black text-slate-800">
                                     {{ number_format($donutTotal) }}
                                 </span>
                                 <span class="text-[10px] font-bold text-slate-400 uppercase">{{ $donutTotalLabel }}</span>
                             </div>
                         </div>
-                        <div class="flex flex-col gap-2 text-xs font-medium text-slate-500 w-full pr-4">
-                            @php
-                                $colors = ['bg-blue-500', 'bg-emerald-500', 'bg-yellow-500', 'bg-pink-500', 'bg-indigo-500', 'bg-slate-400', 'bg-purple-500', 'bg-sky-500'];
-                            @endphp
-                            @foreach($donutItems as $index => $item)
-                                @php $percent = $donutTotal > 0 ? round(($item['value'] / $donutTotal) * 100, 1) : 0; @endphp
-                                <div class="flex items-center justify-between w-full p-2 hover:bg-slate-50 rounded-lg transition-colors">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-2 h-2 {{ $colors[$index % count($colors)] }} rounded-full"></div>
-                                        <span class="capitalize text-slate-600">{{ $item['label'] }}</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <span class="font-bold text-slate-800">{{ number_format($item['value']) }}</span>
-                                        <span class="text-slate-400 text-[10px] w-8 text-right">{{ $percent }}%</span>
-                                    </div>
+                    </div>
+                    <div class="flex flex-col gap-2 text-xs font-medium text-slate-500 w-full pr-4">
+                        @php
+                            $colors = ['bg-blue-500', 'bg-emerald-500', 'bg-yellow-500', 'bg-pink-500', 'bg-indigo-500', 'bg-slate-400', 'bg-purple-500', 'bg-sky-500'];
+                        @endphp
+                        @foreach($donutItems as $index => $item)
+                            @php $percent = $donutTotal > 0 ? round(($item['value'] / $donutTotal) * 100, 1) : 0; @endphp
+                            <div class="flex items-center justify-between w-full p-2 hover:bg-slate-50 rounded-lg transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 {{ $colors[$index % count($colors)] }} rounded-full"></div>
+                                    <span class="capitalize text-slate-600">{{ $item['label'] }}</span>
                                 </div>
-                            @endforeach
-                        </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-slate-800">{{ number_format($item['value']) }}</span>
+                                    <span class="text-slate-400 text-[10px] w-8 text-right">{{ $percent }}%</span>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-</div>
-</div>
+            </div>
+        </div>
         @endforeach
-</div>
-</div>
+        </div>
+    </div>
 
-<div>
-@if(count($reportSets) > 1)
-<div wire:key="wrapper-9-multi" class="flex flex-col lg:flex-row gap-6">
-@else
-<div wire:key="wrapper-9-single" class="flex flex-col gap-6">
-@endif
-@foreach($reportSets as $idx => $rSet)
-<div wire:key="ga4-section-3-{{ $idx }}" class="flex-1 w-full overflow-hidden">
+    <!-- Right: Visitors by Channel Bar Chart -->
+    <div>
+        @if(count($reportSets) > 1)
+        <div wire:key="wrapper-9-multi" class="flex flex-col lg:flex-row gap-6">
+        @else
+        <div wire:key="wrapper-9-single" class="flex flex-col gap-6">
+        @endif
+        @foreach($reportSets as $idx => $rSet)
+        <div wire:key="ga4-section-3-{{ $idx }}" class="flex-1 w-full overflow-hidden">
             @php $reportDataScope = $rSet['data']; @endphp
             @if(count($reportSets) > 1)
                 <div class="col-span-full mb-3 mt-4">
@@ -673,15 +688,21 @@ $format = $compareFormat ?? 'percentage';
                     </span>
                 </div>
             @endif
-<div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                            <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> Visitors by Channel
-                        </div>
+            <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> Visitors by Channel
                     </div>
-                    <div wire:key="stable-bar-{{ $idx }}" class="w-full"><div class="h-64" wire:key="bar-channels-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                </div>
+                <div wire:key="stable-bar-{{ $idx }}" class="w-full">
+                    <div class="h-64" wire:ignore wire:key="bar-channels-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                        chart: null,
                         init() {
-                            const ctx = document.getElementById('bar-channels-{{ $idx }}').getContext('2d');
+                            if (!this.$refs.barCanvas) return;
+                            if (this.chart) {
+                                this.chart.destroy();
+                            }
+                            const ctx = this.$refs.barCanvas.getContext('2d');
                             let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
                             let sources = (rawData && rawData.traffic_sources) ? rawData.traffic_sources : [];
                             let labels = sources.map(c => c.source_medium).slice(0, 6);
@@ -692,7 +713,7 @@ $format = $compareFormat ?? 'percentage';
                                 data = [620, 480, 310, 180, 40, 20];
                             }
 
-                            new Chart(ctx, {
+                            this.chart = new Chart(ctx, {
                                 type: 'bar',
                                 data: {
                                     labels: labels,
@@ -715,14 +736,14 @@ $format = $compareFormat ?? 'percentage';
                             });
                         }
                     }">
-                        <canvas id="bar-channels-{{ $idx }}"></canvas>
+                        <canvas x-ref="barCanvas" id="bar-channels-{{ $idx }}"></canvas>
                     </div>
-                </div></div>
-            
-</div>
+                </div>
+            </div>
+        </div>
         @endforeach
-</div>
-</div>
+        </div>
+    </div>
 </div>
 
 
@@ -1117,17 +1138,21 @@ $format = $compareFormat ?? 'percentage';
                     </div>
                     @else
                     <div wire:key="stable-yt-{{ $idx }}" class="w-full"><div class="h-64 relative" wire:ignore wire:key="line-youtube-traffic-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                        chart: null,
                         init() {
                             setTimeout(() => {
                                 let canvas = this.$refs.canvas;
                                 if (!canvas) return;
+                                if (this.chart) {
+                                    this.chart.destroy();
+                                }
                                 const ctx = canvas.getContext('2d');
                                 let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
                                 let traffic = (rawData && rawData.daily_traffic) ? rawData.daily_traffic : [];
                                 let labels = traffic.map(t => t.date);
                                 let views = traffic.map(t => t.views);
                                 
-                                new Chart(ctx, {
+                                this.chart = new Chart(ctx, {
                                     type: 'line',
                                     data: {
                                         labels: labels,
@@ -1309,10 +1334,14 @@ $format = $compareFormat ?? 'percentage';
                         </div>
                     </div>
                     <div wire:key="stable-kw-{{ $idx }}" class="w-full"><div class="h-64 relative" wire:ignore wire:key="bar-keyword-dist-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                        chart: null,
                         init() {
                             setTimeout(() => {
                                 let canvas = this.$refs.canvas;
                                 if (!canvas) return;
+                                if (this.chart) {
+                                    this.chart.destroy();
+                                }
                                 const ctx = canvas.getContext('2d');
                                 let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
                                 let history = (rawData && rawData.daily_traffic) ? rawData.daily_traffic : [];
@@ -1334,7 +1363,7 @@ $format = $compareFormat ?? 'percentage';
                                     return null;
                                 });
                                 
-                                new Chart(ctx, {
+                                this.chart = new Chart(ctx, {
                                     type: 'bar',
                                     data: {
                                         labels: labels,

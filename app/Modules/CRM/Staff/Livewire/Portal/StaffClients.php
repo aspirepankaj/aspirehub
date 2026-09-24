@@ -641,7 +641,11 @@ class StaffClients extends Component
             }
 
             try {
-                $response = \Illuminate\Support\Facades\Http::asForm()->post('https://oauth2.googleapis.com/token', [
+                $http = \Illuminate\Support\Facades\Http::asForm();
+                if (app()->environment('local')) {
+                    $http = $http->withoutVerifying();
+                }
+                $response = $http->post('https://oauth2.googleapis.com/token', [
                     'refresh_token' => $auth['refresh_token'],
                     'client_id' => $config['client_id'],
                     'client_secret' => $config['client_secret'],
@@ -1054,7 +1058,11 @@ class StaffClients extends Component
                 // Find actual group ID (string) if numeric project_id is saved
                 $actualGroupId = $propertyId;
                 if (is_numeric($propertyId)) {
-                    $groupsResponse = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10)->get('https://app.keyword.com/api/v2/groups/active');
+                    $httpGroups = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10);
+                    if (app()->environment('local')) {
+                        $httpGroups = $httpGroups->withoutVerifying();
+                    }
+                    $groupsResponse = $httpGroups->get('https://app.keyword.com/api/v2/groups/active');
                     if ($groupsResponse->successful()) {
                         $groups = $groupsResponse->json()['data'] ?? ($groupsResponse->json() ?? []);
                         foreach ($groups as $g) {
@@ -1068,9 +1076,11 @@ class StaffClients extends Component
 
                 // Dynamic fetch from Keyword.com API
                 $url = "https://app.keyword.com/api/v2/groups/" . rawurlencode($actualGroupId) . "/keywords?per_page=1000";
-                $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
-                    ->timeout(15)
-                    ->get($url);
+                $httpKw = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(15);
+                if (app()->environment('local')) {
+                    $httpKw = $httpKw->withoutVerifying();
+                }
+                $response = $httpKw->get($url);
 
                 if ($response->successful()) {
                     $json = $response->json();
@@ -1683,16 +1693,21 @@ class StaffClients extends Component
             ->where('integration_type', 'gsc')
             ->first();
 
-        if (!$integration || empty($integration->auth_credentials['access_token'])) {
+        if (!$integration) {
             return [];
         }
 
-        $accessToken = $integration->auth_credentials['access_token'];
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-                ->timeout(5)
-                ->get('https://searchconsole.googleapis.com/webmasters/v3/sites');
+            $http = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(10);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://searchconsole.googleapis.com/webmasters/v3/sites');
 
             if ($response->successful()) {
                 $sites = $response->json()['siteEntry'] ?? [];
@@ -1882,9 +1897,11 @@ class StaffClients extends Component
         $apiKey = $integration->api_credentials['api_key'];
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
-                ->timeout(5)
-                ->get('https://app.keyword.com/api/v2/groups/active');
+            $http = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(10);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://app.keyword.com/api/v2/groups/active');
 
             if ($response->successful()) {
                 $projects = $response->json() ?? []; 
@@ -1893,9 +1910,11 @@ class StaffClients extends Component
                     'id' => $p['id'] ?? uniqid(),
                     'name' => $p['attributes']['name'] ?? $p['id'] ?? 'Unknown Project',
                 ])->toArray();
+            } else {
+                \Illuminate\Support\Facades\Log::warning('Keyword.com getKeywordProjects failed: ' . $response->body());
             }
         } catch (\Exception $e) {
-            // Ignore
+            \Illuminate\Support\Facades\Log::error('Keyword.com API Exception: ' . $e->getMessage());
         }
 
         // Mock fallback
@@ -1949,16 +1968,21 @@ class StaffClients extends Component
             ->where('integration_type', 'ga4')
             ->first();
 
-        if (!$integration || empty($integration->auth_credentials['access_token'])) {
+        if (!$integration) {
             return [];
         }
 
-        $accessToken = $integration->auth_credentials['access_token'];
+        $accessToken = $this->getValidAccessToken($integration);
+        if (!$accessToken) {
+            return [];
+        }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-                ->timeout(5)
-                ->get('https://analyticsadmin.googleapis.com/v1beta/accountSummaries');
+            $http = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(10);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://analyticsadmin.googleapis.com/v1beta/accountSummaries');
 
             if ($response->successful()) {
                 $summaries = $response->json()['accountSummaries'] ?? [];

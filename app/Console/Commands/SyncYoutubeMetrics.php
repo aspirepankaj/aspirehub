@@ -83,7 +83,12 @@ class SyncYoutubeMetrics extends Command
 
     private function getAccessToken($config, $refreshToken)
     {
-        $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
+        $http = Http::asForm();
+        if (app()->environment('local')) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http->post('https://oauth2.googleapis.com/token', [
             'client_id' => $config['client_id'],
             'client_secret' => $config['client_secret'],
             'refresh_token' => $refreshToken,
@@ -100,8 +105,13 @@ class SyncYoutubeMetrics extends Command
 
     private function fetchYoutubeMetrics($token, $channelId, $startDate, $endDate)
     {
+        $http = Http::withToken($token);
+        if (app()->environment('local')) {
+            $http = $http->withoutVerifying();
+        }
+
         // 1. Fetch Timeline (Daily Traffic)
-        $timelineResponse = Http::withToken($token)->get('https://youtubeanalytics.googleapis.com/v2/reports', [
+        $timelineResponse = $http->get('https://youtubeanalytics.googleapis.com/v2/reports', [
             'ids' => "channel=={$channelId}",
             'startDate' => $startDate,
             'endDate' => $endDate,
@@ -145,7 +155,7 @@ class SyncYoutubeMetrics extends Command
         elseif (str_starts_with($formattedDuration, '00:')) $formattedDuration = (int)substr($formattedDuration, 3, 2) . 'm ' . (int)substr($formattedDuration, 6) . 's';
 
         // 2. Fetch Top Videos
-        $topVideosResponse = Http::withToken($token)->get('https://youtubeanalytics.googleapis.com/v2/reports', [
+        $topVideosResponse = $http->get('https://youtubeanalytics.googleapis.com/v2/reports', [
             'ids' => "channel=={$channelId}",
             'startDate' => $startDate,
             'endDate' => $endDate,
@@ -174,7 +184,7 @@ class SyncYoutubeMetrics extends Command
 
             // 3. Fetch Video Details (Thumbnails & Titles) from Data API
             if (!empty($videoIds)) {
-                $videoDetailsResponse = Http::withToken($token)->get('https://www.googleapis.com/youtube/v3/videos', [
+                $videoDetailsResponse = $http->get('https://www.googleapis.com/youtube/v3/videos', [
                     'id' => implode(',', $videoIds),
                     'part' => 'snippet'
                 ]);

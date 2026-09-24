@@ -98,6 +98,8 @@ class StaffClientReport extends Component
                 $this->activeReportData['compare_data'] = $compareData;
             }
 
+            $this->syncDefaultReportModalData();
+
         } catch (\Exception $e) {
             Log::error('StaffClientReport: Error loading report: ' . $e->getMessage());
         }

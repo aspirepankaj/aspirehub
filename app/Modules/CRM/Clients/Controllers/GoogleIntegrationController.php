@@ -105,7 +105,12 @@ class GoogleIntegrationController extends Controller
                 ->with('error', 'Integration credentials not found.');
         }
 
-        $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
+        $http = Http::asForm();
+        if (app()->environment('local')) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http->post('https://oauth2.googleapis.com/token', [
             'code' => $request->code,
             'client_id' => $config['client_id'],
             'client_secret' => $config['client_secret'],
@@ -144,7 +149,11 @@ class GoogleIntegrationController extends Controller
     private function fetchGoogleAccountEmail(string $accessToken): string
     {
         try {
-            $response = Http::withToken($accessToken)->get('https://www.googleapis.com/oauth2/v2/userinfo');
+            $http = Http::withToken($accessToken);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://www.googleapis.com/oauth2/v2/userinfo');
             if ($response->successful()) {
                 return $response->json()['email'] ?? 'Google Account';
             }

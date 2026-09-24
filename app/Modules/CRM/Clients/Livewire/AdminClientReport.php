@@ -99,6 +99,8 @@ class AdminClientReport extends Component
                 $this->activeReportData['compare_data'] = $compareData;
             }
 
+            $this->syncDefaultReportModalData();
+
         } catch (\Exception $e) {
             Log::error('AdminClientReport: Error loading report: ' . $e->getMessage());
         }

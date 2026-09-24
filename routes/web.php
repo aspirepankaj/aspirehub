@@ -31,6 +31,10 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth'])->group(function () {
     Route::get('/impersonate/stop', [App\Http\Controllers\ImpersonateController::class, 'stop'])->name('impersonate.stop');
     Route::get('/impersonate/{userId}', [App\Http\Controllers\ImpersonateController::class, 'start'])->name('impersonate.start');
+    
+    // In-memory Marketing Report PDF Preview & Download
+    Route::get('/reports/marketing/{client}/{website}/preview', [App\Http\Controllers\MarketingReportPdfController::class, 'previewPdf'])->name('marketing.report.pdf.preview');
+    Route::get('/reports/marketing/{client}/{website}/download', [App\Http\Controllers\MarketingReportPdfController::class, 'downloadPdf'])->name('marketing.report.pdf.download');
 });
 
 Route::get('storage/{path}', function ($path) {

@@ -88,7 +88,12 @@ class SyncGoogleAdsMetrics extends Command
 
     private function getAccessToken($config, $refreshToken)
     {
-        $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
+        $http = Http::asForm();
+        if (app()->environment('local')) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http->post('https://oauth2.googleapis.com/token', [
             'client_id' => $config['client_id'],
             'client_secret' => $config['client_secret'],
             'refresh_token' => $refreshToken,
@@ -110,7 +115,12 @@ class SyncGoogleAdsMetrics extends Command
         
         $query = "SELECT metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}'";
 
-        $response = Http::withToken($token)
+        $http = Http::withToken($token);
+        if (app()->environment('local')) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http
             ->withHeaders([
                 'developer-token' => $developerToken,
                 'login-customer-id' => $customerId // Assume direct access for simplicity, if MCC is used, this might need adjusting

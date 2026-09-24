@@ -183,15 +183,19 @@
             </div>
         @endif
 
-        <!-- Date Range Calendar Selectors (-90 Days to +90 Days) -->
-        <!-- GA4 Style Date Range Picker Popover -->
-        @if($activeReportIntegrationId !== 'overview')
-            @php
-                $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
-                $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
-            @endphp
-            @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
-        @endif
+        <div class="flex items-center gap-3">
+            @include('partials.marketing-report-send-modal')
+
+            <!-- Date Range Calendar Selectors (-90 Days to +90 Days) -->
+            <!-- GA4 Style Date Range Picker Popover -->
+            @if($activeReportIntegrationId !== 'overview')
+                @php
+                    $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                    $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+                @endphp
+                @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+            @endif
+        </div>
     </div>
 
     <!-- Integration Views (Uses Admin/Staff Layout) -->

@@ -25,6 +25,14 @@ trait LoadsMarketingReports
     #[Url]
     public string $compareFormat = 'percentage';
 
+    public bool $showSendReportModal = false;
+    public string $reportRecipientEmail = '';
+    public string $reportEmailSubject = '';
+    public string $reportEmailMessage = '';
+    public bool $isSendingReport = false;
+    public string $reportModalSuccessMessage = '';
+    public string $reportModalErrorMessage = '';
+
     public function initDateRange()
     {
         if (empty($this->dateFrom)) {
@@ -49,6 +57,8 @@ trait LoadsMarketingReports
             $this->loadReport();
         } elseif (method_exists($this, 'loadReportData')) {
             $this->loadReportData();
+        } elseif (method_exists($this, 'loadReportDataForActiveModal')) {
+            $this->loadReportDataForActiveModal();
         }
     }
 
@@ -367,5 +377,128 @@ trait LoadsMarketingReports
             return round($number / 1000, 1) . 'K';
         }
         return number_format((float)$number);
+    }
+
+    public function getActiveClientAndWebsite(): array
+    {
+        $client = null;
+        $website = null;
+
+        if (!empty($this->client) && is_object($this->client)) {
+            $client = $this->client;
+        } elseif (!empty($this->clientId)) {
+            $client = \App\Modules\CRM\Clients\Models\Client::with('user')->find($this->clientId);
+        } elseif (!empty($this->selectedClientDetailId)) {
+            $client = \App\Modules\CRM\Clients\Models\Client::with('user')->find($this->selectedClientDetailId);
+        } elseif (!empty($this->selectedClientId)) {
+            $client = \App\Modules\CRM\Clients\Models\Client::with('user')->find($this->selectedClientId);
+        } elseif (\Illuminate\Support\Facades\Auth::check()) {
+            $client = \App\Modules\CRM\Clients\Models\Client::with('user')->where('user_id', \Illuminate\Support\Facades\Auth::id())->first();
+        }
+
+        if (!empty($this->website) && is_object($this->website)) {
+            $website = $this->website;
+        } else {
+            $wId = $this->websiteId ?? ($this->selectedWebsiteId ?? null);
+            if ($wId) {
+                $website = \App\Modules\CRM\Websites\Models\Website::find($wId);
+            } elseif ($client) {
+                $website = \App\Modules\CRM\Websites\Models\Website::where('client_id', $client->id)->first();
+            }
+        }
+
+        return [$client, $website];
+    }
+
+    public function syncDefaultReportModalData(): void
+    {
+        [$client, $website] = $this->getActiveClientAndWebsite();
+        if ($client && $client->user && empty($this->reportRecipientEmail)) {
+            $this->reportRecipientEmail = $client->user->email ?? '';
+        }
+        if ($website && empty($this->reportEmailSubject)) {
+            $monthName = \Carbon\Carbon::parse(!empty($this->dateFrom) ? $this->dateFrom : now())->format('F Y');
+            $this->reportEmailSubject = "Monthly SEO & Marketing Report - {$monthName} - {$website->site_name}";
+        }
+    }
+
+    public function openSendReportModal(): void
+    {
+        [$client, $website] = $this->getActiveClientAndWebsite();
+        if (!$client || !$website) {
+            session()->flash('error', 'Client or website details could not be found.');
+            return;
+        }
+
+        $this->reportRecipientEmail = $client->user->email ?? '';
+        
+        $monthName = \Carbon\Carbon::parse($this->dateFrom ?: now())->format('F Y');
+        $this->reportEmailSubject = "Monthly SEO & Marketing Report - {$monthName} - {$website->site_name}";
+        $this->reportEmailMessage = "";
+        $this->reportModalSuccessMessage = '';
+        $this->reportModalErrorMessage = '';
+        $this->showSendReportModal = true;
+    }
+
+    public function closeSendReportModal(): void
+    {
+        $this->showSendReportModal = false;
+        $this->reportModalSuccessMessage = '';
+        $this->reportModalErrorMessage = '';
+    }
+
+    public function sendMarketingReport(): void
+    {
+        [$client, $website] = $this->getActiveClientAndWebsite();
+        if (empty($this->reportRecipientEmail) && $client && $client->user) {
+            $this->reportRecipientEmail = $client->user->email ?? '';
+        }
+        if (empty($this->reportEmailSubject) && $website) {
+            $monthName = \Carbon\Carbon::parse($this->dateFrom ?: now())->format('F Y');
+            $this->reportEmailSubject = "Monthly SEO & Marketing Report - {$monthName} - {$website->site_name}";
+        }
+
+        $this->validate([
+            'reportRecipientEmail' => 'required|email',
+            'reportEmailSubject' => 'required|string|max:255',
+        ]);
+
+        $this->isSendingReport = true;
+        $this->reportModalSuccessMessage = '';
+        $this->reportModalErrorMessage = '';
+
+        try {
+            if (!$client || !$website) {
+                throw new \Exception('Client or website information could not be resolved.');
+            }
+
+            $activeFrom = !empty($this->dateFrom) ? $this->dateFrom : Carbon::now()->subDays(28)->format('Y-m-d');
+            $activeTo = !empty($this->dateTo) ? $this->dateTo : Carbon::now()->subDays(1)->format('Y-m-d');
+
+            $service = app(\App\Services\MarketingReportPdfService::class);
+            $result = $service->sendReportEmail(
+                client: $client,
+                website: $website,
+                dateFrom: $activeFrom,
+                dateTo: $activeTo,
+                recipientEmail: $this->reportRecipientEmail,
+                subject: $this->reportEmailSubject,
+                personalMessage: $this->reportEmailMessage,
+                compareDateFrom: $this->compareDateFrom,
+                compareDateTo: $this->compareDateTo
+            );
+
+            if ($result['success']) {
+                $this->reportModalSuccessMessage = $result['message'];
+                session()->flash('success', $result['message']);
+            } else {
+                $this->reportModalErrorMessage = $result['message'];
+                session()->flash('error', $result['message']);
+            }
+        } catch (\Throwable $e) {
+            $this->reportModalErrorMessage = 'Failed to send report: ' . $e->getMessage();
+        } finally {
+            $this->isSendingReport = false;
+        }
     }
 }
