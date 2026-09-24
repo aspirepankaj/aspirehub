@@ -457,23 +457,7 @@
                     </div>
                 </div>
 
-                <!-- Format -->
-                <div x-show="enableCompare">
-                    <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm mb-2 tracking-tight flex items-center gap-1.5">
-                        Format
-                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </h4>
-                    <div class="flex flex-col gap-2.5 mt-2">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="format" value="percentage" name="formatToggle" class="w-4 h-4 border-slate-300 cursor-pointer" style="color: #135266;">
-                            <span class="text-sm text-slate-600 dark:text-slate-300">Percentage change</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="format" value="absolute" name="formatToggle" class="w-4 h-4 border-slate-300 cursor-pointer" style="color: #135266;">
-                            <span class="text-sm text-slate-600 dark:text-slate-300">Absolute change</span>
-                        </label>
-                    </div>
-                </div>
+
 
                 <!-- Actions -->
                 <div class="mt-auto flex gap-3 pt-4">

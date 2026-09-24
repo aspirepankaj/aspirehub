@@ -38,7 +38,13 @@
                             @endforeach
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-550">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            <!-- Normal Chevron -->
+                            <svg wire:loading.remove wire:target="selectedWebsiteId" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            <!-- Spinner -->
+                            <svg wire:loading wire:target="selectedWebsiteId" class="w-4 h-4 animate-spin text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
                         </div>
                     </div>
                 @else
@@ -163,6 +169,16 @@
                             <span>Google Ads</span>
                         </button>
                     @endif
+                    @if($isGtmConnected)
+                        <button wire:click="selectIntegration('gtm')" wire:loading.attr="disabled" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'gtm' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
+                            <svg wire:loading.remove wire:target="selectIntegration('gtm')" class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                            <svg wire:loading wire:target="selectIntegration('gtm')" class="w-4 h-4 text-indigo-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Tag Manager</span>
+                        </button>
+                    @endif
                 </div>
             </div>
         @endif
@@ -179,38 +195,55 @@
     </div>
 
     <!-- Integration Views (Uses Admin/Staff Layout) -->
-    @if($activeReportIntegrationId === 'overview')
-        <div class="space-y-12">
-        @if($isGa4Connected)
-            <div><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Analytics 4</h3>
-            @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'ga4', 'activeReportData' => $ga4Data])</div>
+    <div class="relative min-h-[400px] w-full mt-4">
+        @if(!($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isGtmConnected))
+            {{-- Data not found / No Integrations --}}
+            <div class="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
+                <div class="w-20 h-20 mb-4 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">No Data Found</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto">There are no marketing integrations or data available for this website. Please check your integrations or select a different website.</p>
+            </div>
+        @else
+            @if($activeReportIntegrationId === 'overview')
+                <div class="space-y-12" wire:key="integration-view-overview">
+                @if($isGa4Connected)
+                    <div wire:key="overview-ga4"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Analytics 4</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'ga4', 'activeReportData' => $ga4Data])</div>
+                @endif
+                @if($isGscConnected)
+                    <div wire:key="overview-gsc"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Search Console</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gsc', 'activeReportData' => $gscData])</div>
+                @endif
+                @if($isYoutubeConnected)
+                    <div wire:key="overview-youtube"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">YouTube</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'youtube', 'activeReportData' => $youtubeData])</div>
+                @endif
+                @if($isKeywordConnected)
+                    <div wire:key="overview-keyword"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Keyword.com</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'keyword', 'activeReportData' => $keywordData])</div>
+                @endif
+                @if($isGbpConnected)
+                    <div wire:key="overview-gbp"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Business Profile</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gbp', 'activeReportData' => $gbpData])</div>
+                @endif
+                @if($isGtmConnected)
+                    <div wire:key="overview-gtm"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Tag Manager</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gtm', 'activeReportData' => $gtmData])</div>
+                @endif
+                @if($isGadsConnected)
+                    <div wire:key="overview-gads"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Ads</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gads', 'activeReportData' => $gadsData])</div>
+                @endif
+                </div>
+            @else
+                <div wire:key="integration-view-single-{{ $activeReportIntegrationId }}">
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true])
+                </div>
+            @endif
         @endif
-        @if($isGscConnected)
-            <div><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Search Console</h3>
-            @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gsc', 'activeReportData' => $gscData])</div>
-        @endif
-        @if($isYoutubeConnected)
-            <div><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">YouTube</h3>
-            @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'youtube', 'activeReportData' => $youtubeData])</div>
-        @endif
-        @if($isKeywordConnected)
-            <div><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Keyword.com</h3>
-            @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'keyword', 'activeReportData' => $keywordData])</div>
-        @endif
-        @if($isGbpConnected)
-            <div><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Business Profile</h3>
-            @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gbp', 'activeReportData' => $gbpData])</div>
-        @endif
-        @if($isGtmConnected)
-            <div><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Tag Manager</h3>
-            @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gtm', 'activeReportData' => $gtmData])</div>
-        @endif
-        @if($isGadsConnected)
-            <div><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Ads</h3>
-            @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gads', 'activeReportData' => $gadsData])</div>
-        @endif
-        </div>
-    @else
-        @include('modules.crm.clients.client-report', ['hideHeader' => true])
-    @endif
+    </div>
 </div>

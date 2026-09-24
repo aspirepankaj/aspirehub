@@ -32,13 +32,20 @@
                 </p>
             </div>
         </div>
-        {{-- Date Range Picker --}}
-        <div>
-            @php
-                $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
-                $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
-            @endphp
-            @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+        {{-- Date Range Picker & Back Button --}}
+        <div class="flex items-center gap-3">
+            <a href="javascript:history.back()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back
+            </a>
+            
+            <div>
+                @php
+                    $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                    $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+                @endphp
+                @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+            </div>
         </div>
     </div>
     @endif
@@ -645,6 +652,7 @@ $format = $compareFormat ?? 'percentage';
                     </div>
                 </div>
 </div>
+</div>
         @endforeach
 </div>
 </div>
@@ -709,7 +717,7 @@ $format = $compareFormat ?? 'percentage';
                     }">
                         <canvas id="bar-channels-{{ $idx }}"></canvas>
                     </div>
-                </div></div></div>
+                </div></div>
             
 </div>
         @endforeach
