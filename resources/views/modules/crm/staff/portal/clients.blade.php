@@ -1355,6 +1355,7 @@
                                     @endforeach
 </div>
 </div>
+                                    @endforeach
 
                                     @elseif ($activeReportIntegrationId === 'youtube')
                                         <!-- 1. Stats Summary Widgets (YouTube) -->
