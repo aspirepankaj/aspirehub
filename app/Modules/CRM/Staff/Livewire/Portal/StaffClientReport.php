@@ -108,6 +108,8 @@ class StaffClientReport extends Component
     public function render()
     {
         return view('modules.crm.clients.client-report', [
+            'client' => $this->client,
+            'website' => $this->website,
             'pageTitle' => $this->clientName . ' — ' . strtoupper($this->integration) . ' Report',
         ]);
     }

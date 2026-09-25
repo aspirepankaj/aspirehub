@@ -1,5 +1,20 @@
 @php
-    [$modalClient, $modalWebsite] = method_exists($this, 'getActiveClientAndWebsite') ? $this->getActiveClientAndWebsite() : [$client ?? null, $website ?? null];
+    $modalClient = $client ?? $this->client ?? null;
+    $modalWebsite = $website ?? $this->website ?? null;
+
+    if ((!$modalClient || !$modalWebsite) && method_exists($this, 'getActiveClientAndWebsite')) {
+        [$activeC, $activeW] = $this->getActiveClientAndWebsite();
+        $modalClient = $modalClient ?? $activeC;
+        $modalWebsite = $modalWebsite ?? $activeW;
+    }
+
+    if (!$modalClient && !empty($this->clientId)) {
+        $modalClient = \App\Modules\CRM\Clients\Models\Client::with('user')->find($this->clientId);
+    }
+    if (!$modalWebsite && !empty($this->websiteId)) {
+        $modalWebsite = \App\Modules\CRM\Websites\Models\Website::find($this->websiteId);
+    }
+
     $activeFrom = !empty($this->dateFrom) ? $this->dateFrom : ($dateFrom ?? \Carbon\Carbon::now()->subDays(28)->format('Y-m-d'));
     $activeTo = !empty($this->dateTo) ? $this->dateTo : ($dateTo ?? \Carbon\Carbon::now()->subDays(1)->format('Y-m-d'));
     $activeCFrom = !empty($this->compareDateFrom) ? $this->compareDateFrom : ($compareDateFrom ?? '');
@@ -19,10 +34,12 @@
     $defaultSubject = !empty($this->reportEmailSubject) ? $this->reportEmailSubject : ("Monthly SEO & Marketing Report - {$monthName}" . ($modalWebsite ? " - {$modalWebsite->site_name}" : ''));
 @endphp
 
-<div x-data="{
+<div data-preview-route="{{ $previewRoute }}"
+     data-download-route="{{ $downloadRoute }}"
+     x-data="{
     openModal: false,
-    isLoadingPdf: true,
-    previewUrl: 'about:blank',
+    isLoadingPdf: false,
+    previewUrl: '',
     downloadUrl: '#',
     basePreview: '{{ $previewRoute }}',
     baseDownload: '{{ $downloadRoute }}',
@@ -31,19 +48,27 @@
     emailInput: '{{ addslashes($defaultEmail) }}',
     subjectInput: '{{ addslashes($defaultSubject) }}',
     messageInput: '',
+    dateDisplay: '',
     open() {
-        this.isLoadingPdf = true;
-        let from = ($wire && $wire.dateFrom) ? $wire.dateFrom : '{{ $activeFrom }}';
-        let to = ($wire && $wire.dateTo) ? $wire.dateTo : '{{ $activeTo }}';
-        let cfrom = ($wire && $wire.compareDateFrom) ? $wire.compareDateFrom : '{{ $activeCFrom }}';
-        let cto = ($wire && $wire.compareDateTo) ? $wire.compareDateTo : '{{ $activeCTo }}';
+        let rootContainer = this.$el ? (this.$el.closest('[data-preview-route]') || this.$el) : null;
+        let routePreview = (rootContainer && rootContainer.getAttribute('data-preview-route')) ? rootContainer.getAttribute('data-preview-route') : (this.basePreview || '{{ $previewRoute }}');
+        let routeDownload = (rootContainer && rootContainer.getAttribute('data-download-route')) ? rootContainer.getAttribute('data-download-route') : (this.baseDownload || '{{ $downloadRoute }}');
+
+        let from = ($wire && typeof $wire.get === 'function' && $wire.get('dateFrom')) ? $wire.get('dateFrom') : (($wire && $wire.dateFrom) ? $wire.dateFrom : '{{ $activeFrom }}');
+        let to = ($wire && typeof $wire.get === 'function' && $wire.get('dateTo')) ? $wire.get('dateTo') : (($wire && $wire.dateTo) ? $wire.dateTo : '{{ $activeTo }}');
+        let cfrom = ($wire && typeof $wire.get === 'function' && $wire.get('compareDateFrom')) ? $wire.get('compareDateFrom') : (($wire && $wire.compareDateFrom) ? $wire.compareDateFrom : '{{ $activeCFrom }}');
+        let cto = ($wire && typeof $wire.get === 'function' && $wire.get('compareDateTo')) ? $wire.get('compareDateTo') : (($wire && $wire.compareDateTo) ? $wire.compareDateTo : '{{ $activeCTo }}');
         
-        let query = '?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+        let ts = Date.now();
+        let query = '?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&_v=' + ts;
         if (cfrom) query += '&cfrom=' + encodeURIComponent(cfrom);
         if (cto) query += '&cto=' + encodeURIComponent(cto);
 
-        this.previewUrl = this.basePreview ? (this.basePreview + query) : '#';
-        this.downloadUrl = this.baseDownload ? (this.baseDownload + query) : '#';
+        let targetPreview = routePreview ? (routePreview + query) : '#';
+        let targetDownload = routeDownload ? (routeDownload + query) : '#';
+
+        this.downloadUrl = targetDownload;
+        this.dateDisplay = from + ' - ' + to;
 
         if (!this.emailInput && this.defaultEmail) {
             this.emailInput = this.defaultEmail;
@@ -61,10 +86,13 @@
             }
         }
 
+        this.isLoadingPdf = true;
         this.openModal = true;
+        this.previewUrl = targetPreview;
     },
     close() {
         this.openModal = false;
+        this.previewUrl = '';
     }
 }" x-cloak class="inline-block">
 
@@ -90,7 +118,7 @@
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
          @keydown.escape.window="close()">
         
-        <div class="relative w-full max-w-6xl h-[92vh] max-h-[900px] flex flex-col bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+        <div class="relative w-full max-w-7xl lg:max-w-[95vw] h-[92vh] max-h-[920px] flex flex-col bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
              @click.outside="close()">
             
             {{-- Modal Top Bar --}}
@@ -107,17 +135,17 @@
                             <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-white/20 text-teal-100">Live Preview</span>
                         </h3>
                         <p class="text-xs text-teal-100/80">
-                            {{ $modalWebsite->site_name ?? 'Website' }} &bull; {{ \Carbon\Carbon::parse($activeFrom)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($activeTo)->format('M d, Y') }}
+                            {{ $modalWebsite->site_name ?? 'Website' }} &bull; <span x-text="dateDisplay || '{{ \Carbon\Carbon::parse($activeFrom)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($activeTo)->format('M d, Y') }}'"></span>
                         </p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <a :href="previewUrl" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white/15 hover:bg-white/25 text-white rounded-lg transition" title="Open full screen in new tab">
+                    <a :href="previewUrl ? (previewUrl + '&pdf=1') : '#'" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white/15 hover:bg-white/25 text-white rounded-lg transition" title="Open full screen PDF in new tab">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
-                        <span>Full Screen</span>
+                        <span>Full Screen PDF</span>
                     </a>
                     <button type="button" @click="close()" class="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/15 transition cursor-pointer">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,17 +246,15 @@
                         </div>
 
                         {{-- PDF Preview Iframe --}}
-                        <template x-if="openModal">
-                            <iframe :src="previewUrl" 
-                                    @load="isLoadingPdf = false" 
-                                    class="w-full h-full border-0 bg-white" 
-                                    type="application/pdf">
-                                <p class="p-4 text-center text-sm text-slate-500">
-                                    Your browser does not support inline PDF viewing. 
-                                    <a :href="previewUrl" target="_blank" class="text-teal-600 underline">Click here to open the report.</a>
-                                </p>
-                            </iframe>
-                        </template>
+                        <iframe x-show="previewUrl"
+                                :src="previewUrl" 
+                                @load="isLoadingPdf = false" 
+                                class="w-full h-full border-0 bg-white">
+                            <p class="p-4 text-center text-sm text-slate-500">
+                                Your browser does not support inline viewing. 
+                                <a :href="previewUrl" target="_blank" class="text-teal-600 underline">Click here to open the report.</a>
+                            </p>
+                        </iframe>
                     </div>
                 </div>
 

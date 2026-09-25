@@ -33,6 +33,7 @@ trait LoadsMarketingReports
     public string $reportModalSuccessMessage = '';
     public string $reportModalErrorMessage = '';
 
+
     public function initDateRange()
     {
         if (empty($this->dateFrom)) {

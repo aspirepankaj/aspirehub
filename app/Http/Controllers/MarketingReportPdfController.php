@@ -19,7 +19,7 @@ class MarketingReportPdfController extends Controller
     }
 
     /**
-     * Stream PDF in browser for inline preview or iframe.
+     * Stream PDF or HTML Report in browser for inline preview or iframe.
      */
     public function previewPdf(Request $request, int $clientId, int $websiteId)
     {
@@ -31,12 +31,28 @@ class MarketingReportPdfController extends Controller
         $compareDateFrom = $request->filled('cfrom') ? $request->query('cfrom') : null;
         $compareDateTo = $request->filled('cto') ? $request->query('cto') : null;
 
-        $pdf = $this->reportService->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+        if ($request->boolean('pdf')) {
+            $pdf = $this->reportService->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
 
-        $siteSlug = Str::slug($website->site_name ?: 'Website');
-        $dateSlug = Carbon::parse($dateFrom)->format('M-Y');
+            $siteSlug = Str::slug($website->site_name ?: 'Website');
+            $dateSlug = Carbon::parse($dateFrom)->format('M-Y');
 
-        return $pdf->stream("Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf");
+            return response($pdf->output(), 200, [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => "inline; filename=\"Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf\"",
+                'Cache-Control'       => 'no-cache, no-store, must-revalidate, max-age=0',
+                'Pragma'              => 'no-cache',
+                'Expires'             => '0',
+            ]);
+        }
+
+        $reportData = $this->reportService->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+
+        return response()->view('modules.crm.marketing.pdf-marketing-report', $reportData, 200, [
+            'Cache-Control' => 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
+        ]);
     }
 
     /**
