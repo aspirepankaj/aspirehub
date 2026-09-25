@@ -184,8 +184,6 @@
         @endif
 
         <div class="flex items-center gap-3">
-            @include('partials.marketing-report-send-modal')
-
             <!-- Date Range Calendar Selectors (-90 Days to +90 Days) -->
             <!-- GA4 Style Date Range Picker Popover -->
             @if($activeReportIntegrationId !== 'overview')
