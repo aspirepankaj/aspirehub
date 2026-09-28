@@ -30,8 +30,17 @@
     ]) : '';
 
     $defaultEmail = !empty($this->reportRecipientEmail) ? $this->reportRecipientEmail : ($modalClient->user->email ?? '');
+    
     $monthName = \Carbon\Carbon::parse(!empty($this->dateFrom) ? $this->dateFrom : now())->format('F Y');
-    $defaultSubject = !empty($this->reportEmailSubject) ? $this->reportEmailSubject : ("Monthly SEO & Marketing Report - {$monthName}" . ($modalWebsite ? " - {$modalWebsite->site_name}" : ''));
+    $subject = "Monthly SEO & Marketing Report - {$monthName}";
+    if (!empty($activeCFrom)) {
+        $compareMonthName = \Carbon\Carbon::parse($activeCFrom)->format('F Y');
+        $subject .= " vs {$compareMonthName}";
+    }
+    if ($modalWebsite) {
+        $subject .= " - {$modalWebsite->site_name}";
+    }
+    $defaultSubject = !empty($this->reportEmailSubject) ? $this->reportEmailSubject : $subject;
 @endphp
 
 <div data-preview-route="{{ $previewRoute }}"
@@ -70,11 +79,27 @@
         this.downloadUrl = targetDownload;
         this.dateDisplay = from + ' - ' + to;
 
+        const getMonthYear = (dateStr) => {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            return months[d.getMonth()] + ' ' + d.getFullYear();
+        };
+
+        let dynSubject = 'Monthly SEO & Marketing Report - ' + getMonthYear(from);
+        if (cfrom) {
+            dynSubject += ' vs ' + getMonthYear(cfrom);
+        }
+        let siteName = '{{ $modalWebsite ? addslashes($modalWebsite->site_name) : "" }}';
+        if (siteName) {
+            dynSubject += ' - ' + siteName;
+        }
+
         if (!this.emailInput && this.defaultEmail) {
             this.emailInput = this.defaultEmail;
         }
-        if (!this.subjectInput && this.defaultSubject) {
-            this.subjectInput = this.defaultSubject;
+        if (!this.subjectInput || this.subjectInput.startsWith('Monthly SEO & Marketing Report -')) {
+            this.subjectInput = dynSubject;
         }
         
         if ($wire) {

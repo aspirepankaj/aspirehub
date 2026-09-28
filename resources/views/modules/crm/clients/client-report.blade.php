@@ -1531,6 +1531,7 @@ $format = $compareFormat ?? 'percentage';
 </div>
 </div>
 
+
         @elseif ($activeReportIntegrationId === 'youtube')
 @php
             $reportSets = [];

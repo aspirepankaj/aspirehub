@@ -151,14 +151,22 @@
             <div class="card-header">
                 <div class="badge">Performance Report</div>
                 <h1>{{ $website->site_name }}</h1>
-                <p>{{ $reportData['formattedDateRange'] }}</p>
+                <p>
+                    {{ $reportData['formattedDateRange'] }}
+                    @if(!empty($reportData['isExplicitCompare']))
+                        <br>vs {{ $reportData['formattedCompareRange'] }}
+                    @endif
+                </p>
             </div>
 
             <div class="card-body">
                 <p class="greeting">Hi {{ $client->user->name ?? 'Valued Client' }},</p>
                 <p class="text">
                     Your monthly performance and SEO analysis is ready. Below is a quick overview of key highlights for 
-                    <strong>{{ $website->site_name }}</strong> during <strong>{{ $reportData['formattedDateRange'] }}</strong>.
+                    <strong>{{ $website->site_name }}</strong> during <strong>{{ $reportData['formattedDateRange'] }}</strong>
+                    @if(!empty($reportData['isExplicitCompare']))
+                        compared to <strong>{{ $reportData['formattedCompareRange'] }}</strong>
+                    @endif.
                 </p>
 
                 @if(!empty($personalMessage))

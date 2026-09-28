@@ -465,7 +465,13 @@ trait LoadsMarketingReports
         }
         if (empty($this->reportEmailSubject) && $website) {
             $monthName = \Carbon\Carbon::parse($this->dateFrom ?: now())->format('F Y');
-            $this->reportEmailSubject = "Monthly SEO & Marketing Report - {$monthName} - {$website->site_name}";
+            $subject = "Monthly SEO & Marketing Report - {$monthName}";
+            if (!empty($this->compareDateFrom)) {
+                $compareMonthName = \Carbon\Carbon::parse($this->compareDateFrom)->format('F Y');
+                $subject .= " vs {$compareMonthName}";
+            }
+            $subject .= " - {$website->site_name}";
+            $this->reportEmailSubject = $subject;
         }
 
         $this->validate([

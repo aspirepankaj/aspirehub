@@ -85,8 +85,10 @@ class MarketingReportPdfService
         $compareKeyword = [];
         $compareYoutube = [];
 
+        $isExplicitCompare = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
+
         // If comparison dates were not explicitly passed, compute prior period of same length for MoM
-        if (empty($this->compareDateFrom) || empty($this->compareDateTo)) {
+        if (!$isExplicitCompare) {
             try {
                 $start = Carbon::parse($dateFrom);
                 $end = Carbon::parse($dateTo);
@@ -126,11 +128,22 @@ class MarketingReportPdfService
         $donutChartSvg = '';
         $visitorsBarChartSvg = '';
         $channelTimeSeriesSvg = '';
+        $compareDonutChartSvg = '';
+        $compareVisitorsBarChartSvg = '';
+        $compareChannelTimeSeriesSvg = '';
+        
         if ($hasGa4) {
             $channelsList = array_slice($ga4Data['traffic_sources'] ?? [], 0, 8);
             $donutChartSvg = $this->generateDonutChartSvg($channelsList, 410, 190);
             $visitorsBarChartSvg = $this->generateVisitorsBarChartSvg($channelsList, 410, 190);
             $channelTimeSeriesSvg = $this->generateChannelTimeSeriesSvg($ga4Data['daily_traffic'] ?? [], $channelsList, 410, 190);
+
+            if ($isExplicitCompare) {
+                $compareChannelsList = array_slice($compareGa4['traffic_sources'] ?? [], 0, 8);
+                $compareDonutChartSvg = $this->generateDonutChartSvg($compareChannelsList, 410, 190);
+                $compareVisitorsBarChartSvg = $this->generateVisitorsBarChartSvg($compareChannelsList, 410, 190);
+                $compareChannelTimeSeriesSvg = $this->generateChannelTimeSeriesSvg($compareGa4['daily_traffic'] ?? [], $compareChannelsList, 410, 190);
+            }
         }
 
         // GSC Metric Trend Lines
@@ -138,6 +151,8 @@ class MarketingReportPdfService
         $gscImpressionsMomSvg = '';
         $gscClicksYoySvg = '';
         $gscImpressionsYoySvg = '';
+        $compareGscClicksMomSvg = '';
+        $compareGscImpressionsMomSvg = '';
         if ($hasGsc && !empty($gscData)) {
             $gscClicksMomSvg = $this->generateMetricTrendLineSvg($gscData['daily_traffic'] ?? [], $compareGsc['daily_traffic'] ?? [], 'clicks', 680, 52, '#4ea6b7');
             $gscImpressionsMomSvg = $this->generateMetricTrendLineSvg($gscData['daily_traffic'] ?? [], $compareGsc['daily_traffic'] ?? [], 'impressions', 680, 52, '#4ea6b7');
@@ -145,6 +160,11 @@ class MarketingReportPdfService
             $yoyDailyGsc = !empty($yoyGsc['daily_traffic']) ? $yoyGsc['daily_traffic'] : ($compareGsc['daily_traffic'] ?? []);
             $gscClicksYoySvg = $this->generateMetricTrendLineSvg($gscData['daily_traffic'] ?? [], $yoyDailyGsc, 'clicks', 680, 52, '#4ea6b7');
             $gscImpressionsYoySvg = $this->generateMetricTrendLineSvg($gscData['daily_traffic'] ?? [], $yoyDailyGsc, 'impressions', 680, 52, '#4ea6b7');
+            
+            if ($isExplicitCompare) {
+                $compareGscClicksMomSvg = $this->generateMetricTrendLineSvg($compareGsc['daily_traffic'] ?? [], [], 'clicks', 680, 52, '#4ea6b7');
+                $compareGscImpressionsMomSvg = $this->generateMetricTrendLineSvg($compareGsc['daily_traffic'] ?? [], [], 'impressions', 680, 52, '#4ea6b7');
+            }
         }
 
         // GBP Metric Trend Lines
@@ -154,6 +174,9 @@ class MarketingReportPdfService
         $gbpCallsYoySvg = '';
         $gbpDirectionsYoySvg = '';
         $gbpClicksYoySvg = '';
+        $compareGbpCallsMomSvg = '';
+        $compareGbpDirectionsMomSvg = '';
+        $compareGbpClicksMomSvg = '';
         if ($hasGbp && !empty($gbpData)) {
             $dailyGbp = $gbpData['daily_metrics'] ?? [];
             $compareDailyGbp = $compareGbp['daily_metrics'] ?? [];
@@ -164,6 +187,12 @@ class MarketingReportPdfService
             $gbpCallsYoySvg = $this->generateMetricTrendLineSvg($dailyGbp, $compareDailyGbp, 'calls', 680, 48, '#4ea6b7');
             $gbpDirectionsYoySvg = $this->generateMetricTrendLineSvg($dailyGbp, $compareDailyGbp, 'directions', 680, 48, '#4ea6b7');
             $gbpClicksYoySvg = $this->generateMetricTrendLineSvg($dailyGbp, $compareDailyGbp, 'clicks', 680, 48, '#4ea6b7');
+            
+            if ($isExplicitCompare) {
+                $compareGbpCallsMomSvg = $this->generateMetricTrendLineSvg($compareDailyGbp, [], 'calls', 680, 48, '#4ea6b7');
+                $compareGbpDirectionsMomSvg = $this->generateMetricTrendLineSvg($compareDailyGbp, [], 'directions', 680, 48, '#4ea6b7');
+                $compareGbpClicksMomSvg = $this->generateMetricTrendLineSvg($compareDailyGbp, [], 'clicks', 680, 48, '#4ea6b7');
+            }
         }
 
         $sparklineUpSvg = $this->generateSparklineSvg('up', 65, 26);
@@ -187,6 +216,7 @@ class MarketingReportPdfService
             'dateTo' => $dateTo,
             'compareDateFrom' => $this->compareDateFrom,
             'compareDateTo' => $this->compareDateTo,
+            'isExplicitCompare' => $isExplicitCompare,
             'formattedDateRange' => $formattedDateRange,
             'formattedCompareRange' => $formattedCompareRange,
             'hasGa4' => $hasGa4 || (!$hasGsc && !$hasKeyword && !$hasGbp),
@@ -208,16 +238,24 @@ class MarketingReportPdfService
             'donutChartSvg' => $donutChartSvg,
             'visitorsBarChartSvg' => $visitorsBarChartSvg,
             'channelTimeSeriesSvg' => $channelTimeSeriesSvg,
+            'compareDonutChartSvg' => $compareDonutChartSvg,
+            'compareVisitorsBarChartSvg' => $compareVisitorsBarChartSvg,
+            'compareChannelTimeSeriesSvg' => $compareChannelTimeSeriesSvg,
             'gscClicksMomSvg' => $gscClicksMomSvg,
             'gscImpressionsMomSvg' => $gscImpressionsMomSvg,
             'gscClicksYoySvg' => $gscClicksYoySvg,
             'gscImpressionsYoySvg' => $gscImpressionsYoySvg,
+            'compareGscClicksMomSvg' => $compareGscClicksMomSvg,
+            'compareGscImpressionsMomSvg' => $compareGscImpressionsMomSvg,
             'gbpCallsMomSvg' => $gbpCallsMomSvg,
             'gbpDirectionsMomSvg' => $gbpDirectionsMomSvg,
             'gbpClicksMomSvg' => $gbpClicksMomSvg,
             'gbpCallsYoySvg' => $gbpCallsYoySvg,
             'gbpDirectionsYoySvg' => $gbpDirectionsYoySvg,
             'gbpClicksYoySvg' => $gbpClicksYoySvg,
+            'compareGbpCallsMomSvg' => $compareGbpCallsMomSvg,
+            'compareGbpDirectionsMomSvg' => $compareGbpDirectionsMomSvg,
+            'compareGbpClicksMomSvg' => $compareGbpClicksMomSvg,
             'sparklineUpSvg' => $sparklineUpSvg,
             'sparklineDownSvg' => $sparklineDownSvg,
             'logoBase64' => $this->getLogoBase64(),
@@ -626,9 +664,14 @@ class MarketingReportPdfService
     public function generatePdf(Client $client, Website $website, string $dateFrom, string $dateTo, ?string $compareDateFrom = null, ?string $compareDateTo = null): \Barryvdh\DomPDF\PDF
     {
         $reportData = $this->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+        $isExplicitCompare = !empty($compareDateFrom) && !empty($compareDateTo);
 
         $pdf = Pdf::loadView('modules.crm.marketing.pdf-marketing-report', $reportData);
-        $pdf->setPaper([0, 0, 960, 1600]);
+        if ($isExplicitCompare) {
+            $pdf->setPaper([0, 0, 1920, 1600]);
+        } else {
+            $pdf->setPaper([0, 0, 960, 1600]);
+        }
         $pdf->setOptions([
             'isHtml5ParserEnabled' => true,
             'isRemoteEnabled' => true,
