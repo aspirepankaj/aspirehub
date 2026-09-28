@@ -1215,10 +1215,10 @@ class ManageClients extends Component
                         $makeReq('events')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
                             'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
                             'metrics' => [
-                                ['name' => 'conversions']
+                                ['name' => 'eventCount']
                             ],
                             'dimensions' => [['name' => 'eventName'], ['name' => 'sessionDefaultChannelGroup']],
-                            'limit' => 15
+                            'limit' => 100
                         ]),
                         $makeReq('keywords')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
                             'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],

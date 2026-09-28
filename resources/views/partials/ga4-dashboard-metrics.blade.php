@@ -113,9 +113,9 @@
                                         </div>
 
                                         <!-- Geographic Country Sources -->
-                                        <!-- Key Events Charts -->
+                                        <!-- Events Charts -->
                                         <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Key Events</h4>
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Events</h4>
                                             
                                             <div class="flex flex-col gap-6">
                                                 @php
@@ -239,7 +239,7 @@
                                                         <!-- Doughnut CSS -->
                                                         </div>
                                                 @empty
-                                                    <div class="col-span-full py-10 text-center text-slate-400 text-xs">No key events recorded in this period.</div>
+                                                    <div class="col-span-full py-10 text-center text-slate-400 text-xs">No Events recorded in this period.</div>
                                                 @endforelse
                                             </div>
                                         </div>

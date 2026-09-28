@@ -959,7 +959,7 @@
                                     @endforeach
 
 <!-- Charts Section -->
-<!-- Key Events / Traffic Sources Donut Chart -->
+<!-- Events / Traffic Sources Donut Chart -->
 @foreach($reportSets as $idx => $rSet)
 <div wire:key="ga4-section-2-{{ $idx }}">
                                         @php $reportDataScope = $rSet['data']; @endphp
@@ -977,7 +977,7 @@
 <div wire:key="wrapper-19-multi" class="grid grid-cols-1 gap-6 mb-6">
 @endif
 
-    <!-- Left: Traffic by Channel / Key Events Distribution -->
+    <!-- Left: Traffic by Channel / Events Distribution -->
     <div>
         @if(count($reportSets) > 1)
         <div wire:key="wrapper-8-multi" class="flex flex-col lg:flex-row gap-6">
@@ -996,12 +996,12 @@
             @endif
             <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
                 @php
-                    $donutTitle = !empty($reportDataScope['key_events']) ? 'Key Events Distribution' : 'Traffic by Channel';
+                    $donutTitle = !empty($reportDataScope['key_events']) ? 'Events Distribution' : 'Traffic by Channel';
                     $donutItems = !empty($reportDataScope['key_events'])
                         ? array_map(fn($e) => ['label' => str_replace('_', ' ', $e['event_name']), 'value' => $e['event_count']], array_slice($reportDataScope['key_events'], 0, 8))
                         : array_map(fn($s) => ['label' => $s['source_medium'], 'value' => $s['sessions']], array_slice($reportDataScope['traffic_sources'] ?? [], 0, 8));
                     $donutTotal = array_sum(array_column($donutItems, 'value'));
-                    $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Key Events' : 'Sessions';
+                    $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Events' : 'Sessions';
                 @endphp
                 <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
                     <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> {{ $donutTitle }}
@@ -1369,9 +1369,9 @@
                                                 </span>
                                             </div>
                                         @endif
-<!-- Key Events Charts -->
+<!-- Events Charts -->
                                         <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2">
-                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Key Events</h4>
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Events</h4>
                                             
                                             <div class="flex flex-col gap-6">
                                                 @php
@@ -1492,7 +1492,7 @@
                                                     
                                                         </div>
                                                 @empty
-                                                    <div class="col-span-full py-10 text-center text-slate-400 text-xs">No key events recorded in this period.</div>
+                                                    <div class="col-span-full py-10 text-center text-slate-400 text-xs">No Events recorded in this period.</div>
                                                 @endforelse
                                             </div>
                                         </div>

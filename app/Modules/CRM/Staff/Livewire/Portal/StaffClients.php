@@ -961,14 +961,13 @@ class StaffClients extends Component
                         'dimensions' => [['name' => 'deviceCategory']],
                         'limit' => 10
                     ]),
-                    $pool->as('geo')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                    $pool->as('events')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
                         'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
                         'metrics' => [
-                            ['name' => 'activeUsers'],
-                            ['name' => 'sessions']
+                            ['name' => 'eventCount']
                         ],
                         'dimensions' => [['name' => 'eventName'], ['name' => 'sessionDefaultChannelGroup']],
-                        'limit' => 15
+                        'limit' => 100
                     ]),
                     $pool->as('keywords')->withToken($accessToken)->timeout(15)->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
                         'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
@@ -985,7 +984,7 @@ class StaffClients extends Component
                 $pagesResponse = $responses['pages'];
                 $trafficSourcesRes = $responses['trafficSources'];
                 $devicesRes = $responses['devices'];
-                $geoRes = $responses['geo'];
+                $eventsRes = $responses['events'] ?? null;
                 $keywordsRes = $responses['keywords'];
 
                 if ($summaryResponse->successful() && $pagesResponse->successful()) {

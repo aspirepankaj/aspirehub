@@ -668,127 +668,9 @@
                     }
                 }
             }
-            $evPalette = ['#3b82f6', '#a855f7', '#f59e0b', '#10b981', '#ec4899', '#6366f1', '#0ea5e9', '#14b8a6'];
-
-            /**
-             * Build an SVG donut using arc paths — no transforms needed, fully DomPDF compatible.
-             */
-            $makeArcDonut = function(array $channels, int $total, int $size = 88) use ($evPalette) {
-                $cx = $size / 2;
-                $cy = $size / 2;
-                $outerR = $size * 0.44;
-                $innerR = $size * 0.28;
-
-                $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$size}\" height=\"{$size}\">\n";
-
-                if ($total > 0) {
-                    $startDeg = -90.0;
-                    $ci = 0;
-                    foreach ($channels as $ch) {
-                        $cnt = (int)($ch['count'] ?? 0);
-                        if ($cnt <= 0) { $ci++; continue; }
-                        $fraction = $cnt / $total;
-                        $sweepDeg = $fraction * 360;
-                        // Avoid full-circle bug
-                        if ($sweepDeg >= 360) $sweepDeg = 359.99;
-                        $endDeg = $startDeg + $sweepDeg;
-
-                        $startRad = deg2rad($startDeg);
-                        $endRad   = deg2rad($endDeg);
-                        $largeArc = ($sweepDeg > 180) ? 1 : 0;
-                        $color = $evPalette[$ci % count($evPalette)];
-
-                        $x1o = round($cx + $outerR * cos($startRad), 3);
-                        $y1o = round($cy + $outerR * sin($startRad), 3);
-                        $x2o = round($cx + $outerR * cos($endRad), 3);
-                        $y2o = round($cy + $outerR * sin($endRad), 3);
-                        $x1i = round($cx + $innerR * cos($endRad), 3);
-                        $y1i = round($cy + $innerR * sin($endRad), 3);
-                        $x2i = round($cx + $innerR * cos($startRad), 3);
-                        $y2i = round($cy + $innerR * sin($startRad), 3);
-
-                        $d = "M {$x1o} {$y1o} A {$outerR} {$outerR} 0 {$largeArc} 1 {$x2o} {$y2o} "
-                           . "L {$x1i} {$y1i} A {$innerR} {$innerR} 0 {$largeArc} 0 {$x2i} {$y2i} Z";
-                        $svg .= "  <path d=\"{$d}\" fill=\"{$color}\"/>\n";
-
-                        $startDeg = $endDeg;
-                        $ci++;
-                    }
-                } else {
-                    $svg .= "  <circle cx=\"{$cx}\" cy=\"{$cy}\" r=\"{$outerR}\" fill=\"#e2e8f0\"/>\n";
-                }
-
-                // White inner circle (donut hole)
-                $svg .= "  <circle cx=\"{$cx}\" cy=\"{$cy}\" r=\"{$innerR}\" fill=\"#ffffff\"/>\n";
-                // Center: total number
-                $svg .= "  <text x=\"{$cx}\" y=\"" . round($cy - 3, 1) . "\" font-family=\"DejaVu Sans\" font-size=\"14\" font-weight=\"bold\" fill=\"#1e293b\" text-anchor=\"middle\">{$total}</text>\n";
-                $svg .= "  <text x=\"{$cx}\" y=\"" . round($cy + 11, 1) . "\" font-family=\"DejaVu Sans\" font-size=\"5.5\" fill=\"#94a3b8\" text-anchor=\"middle\">EVENTS</text>\n";
-                $svg .= "</svg>";
-
-                return 'data:image/svg+xml;base64,' . base64_encode($svg);
-            };
+            if(!isset($allEventsSets)) { $allEventsSets = []; }
+            $allEventsSets[] = $eventsNorm;
         @endphp
-        @if(!empty($eventsNorm))
-        <div>
-            <div class="section-badge" style="margin-top: 14px;">Events</div>
-
-        @foreach($eventsNorm as $evName => $evChannels)
-            @php
-                usort($evChannels, fn($a,$b) => ($b['count'] ?? 0) <=> ($a['count'] ?? 0));
-                $evTotal = array_sum(array_column($evChannels, 'count'));
-                $donutImg = $makeArcDonut($evChannels, $evTotal);
-            @endphp
-            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; background: #ffffff; margin-bottom: 10px; page-break-inside: avoid;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        {{-- Left: arc donut SVG --}}
-                        <td style="width: 108px; vertical-align: middle; text-align: center; padding-right: 16px;">
-                            <img src="{{ $donutImg }}" width="88" height="88" alt="Key Events" style="display: block; margin: 0 auto;" />
-                        </td>
-                        {{-- Right: event name + channel rows --}}
-                        <td style="vertical-align: top;">
-                            <div style="font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
-                                {{ $evName }}
-                            </div>
-                            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-                                <colgroup>
-                                    <col style="width: 14px;" />
-                                    <col />
-                                    <col style="width: 36px;" />
-                                    <col style="width: 58px;" />
-                                </colgroup>
-                                @foreach(array_slice($evChannels, 0, 8) as $ci => $ch)
-                                    @php
-                                        $chCnt = (int)($ch['count'] ?? 0);
-                                        $chPct = $evTotal > 0 ? round(($chCnt / $evTotal) * 100, 1) : 0;
-                                        $dotColor = $evPalette[$ci % count($evPalette)];
-                                        // inline SVG dot — reliable in DomPDF
-                                        $dotSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="9" height="9"><circle cx="4.5" cy="4.5" r="4.5" fill="' . $dotColor . '"/></svg>';
-                                        $dotSrc = 'data:image/svg+xml;base64,' . base64_encode($dotSvg);
-                                    @endphp
-                                    <tr>
-                                        <td style="padding: 3.5px 0; vertical-align: middle;">
-                                            <img src="{{ $dotSrc }}" width="9" height="9" alt="" />
-                                        </td>
-                                        <td style="padding: 3.5px 6px; font-size: 13.5px; color: #334155; vertical-align: middle; overflow: hidden;">
-                                            {{ $ch['channel'] ?? 'Unknown' }}
-                                        </td>
-                                        <td style="padding: 3.5px 4px; font-size: 13.5px; font-weight: 800; color: #0f172a; text-align: right; vertical-align: middle;">
-                                            {{ number_format($chCnt) }}
-                                        </td>
-                                        <td style="padding: 3.5px 0 3.5px 4px; font-size: 12.5px; color: #64748b; text-align: right; vertical-align: middle;">
-                                            ({{ $chPct }}%)
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        @endforeach
-        </div>
-        @endif
     </div>
     
         @if($isExplicitCompare)
@@ -798,6 +680,130 @@
 
     @if($isExplicitCompare)
     </tr></table>
+    @endif
+
+    @php
+        $evPalette = ['#3b82f6', '#a855f7', '#f59e0b', '#10b981', '#ec4899', '#6366f1', '#0ea5e9', '#14b8a6'];
+        $makeArcDonut = function(array $channels, int $total, int $size = 88) use ($evPalette) {
+            $cx = $size / 2;
+            $cy = $size / 2;
+            $outerR = $size * 0.44;
+            $innerR = $size * 0.28;
+            $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$size}\" height=\"{$size}\">\n";
+            if ($total > 0) {
+                $startDeg = -90.0;
+                $ci = 0;
+                foreach ($channels as $ch) {
+                    $cnt = (int)($ch['count'] ?? 0);
+                    if ($cnt <= 0) { $ci++; continue; }
+                    $fraction = $cnt / $total;
+                    $sweepDeg = $fraction * 360;
+                    if ($sweepDeg >= 360) $sweepDeg = 359.99;
+                    $endDeg = $startDeg + $sweepDeg;
+                    $startRad = deg2rad($startDeg);
+                    $endRad   = deg2rad($endDeg);
+                    $largeArc = ($sweepDeg > 180) ? 1 : 0;
+                    $color = $evPalette[$ci % count($evPalette)];
+                    $x1o = round($cx + $outerR * cos($startRad), 3);
+                    $y1o = round($cy + $outerR * sin($startRad), 3);
+                    $x2o = round($cx + $outerR * cos($endRad), 3);
+                    $y2o = round($cy + $outerR * sin($endRad), 3);
+                    $x1i = round($cx + $innerR * cos($endRad), 3);
+                    $y1i = round($cy + $innerR * sin($endRad), 3);
+                    $x2i = round($cx + $innerR * cos($startRad), 3);
+                    $y2i = round($cy + $innerR * sin($startRad), 3);
+                    $d = "M {$x1o} {$y1o} A {$outerR} {$outerR} 0 {$largeArc} 1 {$x2o} {$y2o} L {$x1i} {$y1i} A {$innerR} {$innerR} 0 {$largeArc} 0 {$x2i} {$y2i} Z";
+                    $svg .= "  <path d=\"{$d}\" fill=\"{$color}\"/>\n";
+                    $startDeg = $endDeg;
+                    $ci++;
+                }
+            } else {
+                $svg .= "  <circle cx=\"{$cx}\" cy=\"{$cy}\" r=\"{$outerR}\" fill=\"#e2e8f0\"/>\n";
+            }
+            $svg .= "  <circle cx=\"{$cx}\" cy=\"{$cy}\" r=\"{$innerR}\" fill=\"#ffffff\"/>\n";
+            $svg .= "  <text x=\"{$cx}\" y=\"" . round($cy - 3, 1) . "\" font-family=\"DejaVu Sans\" font-size=\"14\" font-weight=\"bold\" fill=\"#1e293b\" text-anchor=\"middle\">{$total}</text>\n";
+            $svg .= "  <text x=\"{$cx}\" y=\"" . round($cy + 11, 1) . "\" font-family=\"DejaVu Sans\" font-size=\"5.5\" fill=\"#94a3b8\" text-anchor=\"middle\">EVENTS</text>\n";
+            $svg .= "</svg>";
+            return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        };
+        $renderEventCard = function($evName, $evChannels) use ($makeArcDonut, $evPalette) {
+            usort($evChannels, fn($a,$b) => ($b['count'] ?? 0) <=> ($a['count'] ?? 0));
+            $evTotal = array_sum(array_column($evChannels, 'count'));
+            $donutImg = $makeArcDonut($evChannels, $evTotal);
+            $html = '<div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; background: #ffffff; page-break-inside: avoid; min-height: 140px; margin-bottom: 5px;">';
+            $html .= '<table style="width: 100%; border-collapse: collapse;"><tr>';
+            $html .= '<td style="width: 86px; vertical-align: middle; text-align: center; padding-right: 12px;"><img src="'.$donutImg.'" width="76" height="76" style="display: block; margin: 0 auto;" /></td>';
+            $html .= '<td style="vertical-align: top;">';
+            $html .= '<div style="font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">'.$evName.'</div>';
+            $html .= '<table style="width: 100%; border-collapse: collapse; table-layout: fixed;">';
+            $html .= '<colgroup><col style="width: 12px;" /><col /><col style="width: 34px;" /><col style="width: 48px;" /></colgroup>';
+            foreach(array_slice($evChannels, 0, 8) as $ci => $ch) {
+                $chCnt = (int)($ch['count'] ?? 0);
+                $chPct = $evTotal > 0 ? round(($chCnt / $evTotal) * 100, 1) : 0;
+                $dotColor = $evPalette[$ci % count($evPalette)];
+                $dotSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><circle cx="4" cy="4" r="4" fill="' . $dotColor . '"/></svg>';
+                $dotSrc = 'data:image/svg+xml;base64,' . base64_encode($dotSvg);
+                $html .= '<tr>';
+                $html .= '<td style="padding: 3px 0; vertical-align: middle;"><img src="'.$dotSrc.'" width="8" height="8" /></td>';
+                $html .= '<td style="padding: 3px 4px; font-size: 12.5px; color: #334155; vertical-align: middle; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">'.($ch['channel'] ?? 'Unknown').'</td>';
+                $html .= '<td style="padding: 3px 2px; font-size: 12.5px; font-weight: 800; color: #0f172a; text-align: right; vertical-align: middle;">'.number_format($chCnt).'</td>';
+                $html .= '<td style="padding: 3px 0 3px 2px; font-size: 11px; color: #64748b; text-align: right; vertical-align: middle;">('.$chPct.'%)</td>';
+                $html .= '</tr>';
+            }
+            $html .= '</table></td></tr></table></div>';
+            return $html;
+        };
+    @endphp
+
+    @if(!empty($allEventsSets[0]) || (!empty($allEventsSets[1] ?? [])))
+        <div>
+            <div class="section-badge" style="margin-top: 14px; margin-bottom: 10px;">Events</div>
+            @if($isExplicitCompare)
+                @php
+                    $events1 = $allEventsSets[0] ?? [];
+                    $events2 = $allEventsSets[1] ?? [];
+                    $allEventNames = array_unique(array_merge(array_keys($events1), array_keys($events2)));
+                @endphp
+                <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                    @foreach($allEventNames as $evName)
+                    <tr>
+                        <td style="width: 50%; padding: 0 15px 12px 0; vertical-align: top; border-right: 1px dashed #cbd5e1;">
+                            {!! isset($events1[$evName]) ? $renderEventCard($evName, $events1[$evName]) : '' !!}
+                        </td>
+                        <td style="width: 50%; padding: 0 0 12px 15px; vertical-align: top;">
+                            {!! isset($events2[$evName]) ? $renderEventCard($evName, $events2[$evName]) : '' !!}
+                        </td>
+                    </tr>
+                    @endforeach
+                </table>
+            @else
+                @php
+                    $eventsNorm = $allEventsSets[0] ?? [];
+                    $evChunked = array_chunk(
+                        array_map(function($k, $v) { return ['name' => $k, 'channels' => $v]; }, array_keys($eventsNorm), $eventsNorm),
+                        2
+                    );
+                @endphp
+                <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                    @foreach($evChunked as $chunk)
+                    <tr>
+                        @foreach($chunk as $evItem)
+                        @php
+                            $padRight = $loop->first ? '8px' : '0px';
+                            $padLeft  = $loop->last ? '8px' : '0px';
+                        @endphp
+                        <td style="width: 50%; vertical-align: top; padding-bottom: 12px; padding-right: {{ $padRight }}; padding-left: {{ $padLeft }};">
+                            {!! $renderEventCard($evItem['name'], $evItem['channels']) !!}
+                        </td>
+                        @endforeach
+                        @if(count($chunk) < 2)
+                            <td style="width: 50%;"></td>
+                        @endif
+                    </tr>
+                    @endforeach
+                </table>
+            @endif
+        </div>
     @endif
 
     {{-- Footer --}}
