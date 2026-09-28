@@ -60,6 +60,38 @@
                     </div>
                 </div>
             </div>
+            @php
+                $detailMappingData = [
+                    'id' => $clientDetails->id,
+                    'name' => $clientDetails->user->name ?? 'Client',
+                    'email' => $clientDetails->user->email ?? '',
+                    'company_name' => $clientDetails->company_name ?? '',
+                    'initials' => $clientDetails->getInitials(),
+                ];
+                $detailClickUpFolderIds = $clientDetails->clickUpFolders->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            @endphp
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                @if(!empty($detailClickUpFolderIds))
+                    <button type="button"
+                            wire:click="disconnectClickUpMapping({{ $clientDetails->id }})"
+                            wire:confirm="Are you sure you want to disconnect ClickUp from {{ $clientDetails->company_name ?: ($clientDetails->user->name ?? 'this client') }}?"
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 font-bold text-xs rounded-xl shadow-sm transition active:scale-95"
+                            title="Disconnect ClickUp from this client">
+                        <span>Disconnect</span>
+                        <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                    </button>
+                @else
+                    <button type="button" 
+                            @click="
+                                $dispatch('open-clickup-modal', { client: {{ Js::from($detailMappingData) }}, folderIds: {{ Js::from($detailClickUpFolderIds) }} });
+                                $dispatch('open-modal', { name: 'clickup-client-mapping-modal' });
+                            " 
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded-xl shadow-sm transition active:scale-95">
+                        <span>Map With</span>
+                        <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                    </button>
+                @endif
+            </div>
         </div>
 
         <!-- Tabs Navigation (Responsive Horizontal Scroll) -->
@@ -2368,13 +2400,47 @@
                                         {{ $client->created_at->diffForHumans() }}
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <a href="{{ route('staff.clients.detail', ['id' => $client->id]) }}" wire:navigate
-                                           class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90" title="View Details">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </a>
+                                        @php
+                                            $clickUpFolderIds = $client->clickUpFolders->pluck('id')->map(fn($id) => (string)$id)->toArray();
+                                            $clientMappingData = [
+                                                'id' => $client->id,
+                                                'name' => $client->user->name ?? 'Client',
+                                                'email' => $client->user->email ?? '',
+                                                'company_name' => $client->company_name ?? '',
+                                                'initials' => $client->getInitials(),
+                                            ];
+                                        @endphp
+                                        <div class="inline-flex items-center justify-end gap-1.5 shrink-0">
+                                            @if(!empty($clickUpFolderIds))
+                                                <button type="button"
+                                                        wire:click="disconnectClickUpMapping({{ $client->id }})"
+                                                        wire:confirm="Are you sure you want to disconnect ClickUp from {{ $client->company_name ?: ($client->user->name ?? 'this client') }}?"
+                                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-500/10 border border-rose-200/80 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 shadow-sm transition-all duration-150 active:scale-95 shrink-0"
+                                                        title="Disconnect ClickUp from {{ $client->user->name ?? 'Client' }}">
+                                                    <span class="hidden 2xl:inline">Disconnect</span>
+                                                    <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                                                </button>
+                                            @else
+                                                <button type="button" 
+                                                        @click="
+                                                            $dispatch('open-clickup-modal', { client: {{ Js::from($clientMappingData) }}, folderIds: {{ Js::from($clickUpFolderIds) }} });
+                                                            $dispatch('open-modal', { name: 'clickup-client-mapping-modal' });
+                                                        "
+                                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition-all duration-150 active:scale-95 shrink-0"
+                                                        title="Map ClickUp Folders to this Client">
+                                                        <span class="hidden 2xl:inline">Map With</span>
+                                                    <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                                                </button>
+                                            @endif
+
+                                            <a href="{{ route('staff.clients.detail', ['id' => $client->id]) }}" wire:navigate
+                                               class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90" title="View Details">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -2388,4 +2454,264 @@
             @endif
         </x-admin.card>
     @endif
+    <!-- ClickUp Folder Mapping Modal -->
+    @php
+        $formattedFolders = $allClickUpFolders->map(function($f) {
+            return [
+                'id' => (string) $f->id,
+                'name' => $f->name,
+                'clickup_space_id' => (string) $f->clickup_space_id,
+                'client_id' => $f->client_id ? (string) $f->client_id : null,
+                'client_name' => $f->client ? ($f->client->company_name ?: ($f->client->user->name ?? 'Client #'.$f->client_id)) : null,
+            ];
+        })->values()->toArray();
+
+        $formattedSpaces = $clickUpSpaces->map(function($s) {
+            return [
+                'id' => (string) $s->id,
+                'name' => $s->name,
+                'color' => $s->color ?: '#135266',
+                'folders_count' => $s->folders_count ?? count($s->folders),
+            ];
+        })->values()->toArray();
+    @endphp
+
+    <x-admin.modal name="clickup-client-mapping-modal" title="Map ClickUp Folders to Client" maxWidth="max-w-3xl">
+        <div x-data="{
+                mappingClient: null,
+                clickUpSpaceId: '',
+                clickUpFolderSearch: '',
+                selectedClickUpFolderIds: [],
+                allFolders: {{ Js::from($formattedFolders) }},
+                clickUpSpaces: {{ Js::from($formattedSpaces) }},
+
+                get filteredFolders() {
+                    if (!this.clickUpSpaceId) return [];
+                    const search = this.clickUpFolderSearch.trim().toLowerCase();
+                    return this.allFolders.filter(f => {
+                        const spaceMatch = String(f.clickup_space_id) === String(this.clickUpSpaceId);
+                        const searchMatch = !search || f.name.toLowerCase().includes(search);
+                        return spaceMatch && searchMatch;
+                    });
+                },
+
+                toggleFolder(folderId) {
+                    const idStr = String(folderId);
+                    const idx = this.selectedClickUpFolderIds.indexOf(idStr);
+                    if (idx > -1) {
+                        this.selectedClickUpFolderIds.splice(idx, 1);
+                    } else {
+                        this.selectedClickUpFolderIds.push(idStr);
+                    }
+                },
+
+                saveMapping() {
+                    if (!this.mappingClient) return;
+                    $wire.saveClickUpMapping(this.mappingClient.id, this.selectedClickUpFolderIds);
+                }
+             }"
+             @open-clickup-modal.window="
+                mappingClient = $event.detail.client;
+                selectedClickUpFolderIds = ($event.detail.folderIds || []).map(String);
+                clickUpFolderSearch = '';
+
+                let autoSpaceId = '';
+                if (selectedClickUpFolderIds.length > 0) {
+                    const assignedFolder = allFolders.find(f => selectedClickUpFolderIds.includes(String(f.id)));
+                    if (assignedFolder && assignedFolder.clickup_space_id) {
+                        autoSpaceId = String(assignedFolder.clickup_space_id);
+                    }
+                }
+                if (!autoSpaceId && clickUpSpaces.length > 0) {
+                    autoSpaceId = String(clickUpSpaces[0].id);
+                }
+                clickUpSpaceId = autoSpaceId;
+             ">
+            
+            <template x-if="mappingClient">
+                <div class="space-y-5">
+                    <!-- Client Header Banner -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-[#135266]/10 text-[#135266] dark:bg-[#135266]/30 dark:text-teal-300 flex items-center justify-center font-bold text-sm"
+                                 x-text="mappingClient.initials || 'CL'">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 dark:text-white text-base" x-text="mappingClient.company_name || mappingClient.name || 'Client'">
+                                </h4>
+                                <p class="text-xs text-slate-400 dark:text-slate-400">
+                                    <span x-text="mappingClient.name"></span> (<span x-text="mappingClient.email"></span>)
+                                </p>
+                            </div>
+                        </div>
+
+                        <button type="button" wire:click="syncClickUpApi" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-200/70 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
+                            <svg wire:loading.class="animate-spin" wire:target="syncClickUpApi" class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span wire:loading.remove wire:target="syncClickUpApi">Sync ClickUp API</span>
+                            <span wire:loading wire:target="syncClickUpApi">Syncing...</span>
+                        </button>
+                    </div>
+
+                    <!-- ClickUp Spaces Selection Grid -->
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                                Select ClickUp Space
+                            </label>
+                            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700/60"
+                                  x-text="(clickUpSpaces.length || 0) + ' Spaces'">
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
+                            <template x-for="space in clickUpSpaces" :key="space.id">
+                                <button type="button" 
+                                        @click="clickUpSpaceId = space.id"
+                                        :class="clickUpSpaceId === space.id ? 'bg-gradient-to-br from-indigo-50/90 to-slate-50 dark:from-slate-800 dark:to-slate-850 border-indigo-500 dark:border-indigo-400 shadow-md ring-2 ring-indigo-500/20' : 'bg-white dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700/70 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm'"
+                                        class="group relative text-left p-3 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-2.5 overflow-hidden">
+                                    
+                                    <div class="flex items-start justify-between gap-1.5">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="w-3 h-3 rounded-full shrink-0 shadow-sm border border-black/10" :style="'background-color: ' + space.color"></span>
+                                            <h5 class="text-xs font-bold truncate transition-colors"
+                                                :class="clickUpSpaceId === space.id ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'"
+                                                x-text="space.name">
+                                            </h5>
+                                        </div>
+                                        <template x-if="clickUpSpaceId === space.id">
+                                            <span class="w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shrink-0 shadow-sm">✓</span>
+                                        </template>
+                                    </div>
+
+                                    <div class="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-400 font-medium pt-1.5 border-t border-slate-100 dark:border-slate-750/50">
+                                        <span class="flex items-center gap-1 font-semibold">
+                                            <svg class="w-3 h-3 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                            </svg>
+                                            <span x-text="space.folders_count + ' folders'"></span>
+                                        </span>
+                                        <template x-if="clickUpSpaceId === space.id">
+                                            <span class="text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-wider text-[9px]">Selected</span>
+                                        </template>
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Folders Live Search Input -->
+                    <template x-if="clickUpSpaceId">
+                        <div class="relative">
+                            <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input x-model="clickUpFolderSearch"
+                                   type="text"
+                                   placeholder="Search ClickUp folder name in this space..."
+                                   class="block w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-[#135266]/40 focus:border-[#135266]" />
+                        </div>
+                    </template>
+
+                    <!-- Folders List Container with Checkboxes -->
+                    <div class="border border-slate-200/80 dark:border-slate-700/80 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+                        <div class="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
+                            <template x-if="!clickUpSpaceId">
+                                <div class="px-6 py-10 text-center">
+                                    <svg class="w-10 h-10 text-[#135266]/40 dark:text-teal-500/40 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                    </svg>
+                                    <p class="text-xs font-bold text-slate-700 dark:text-slate-300">No Space Selected</p>
+                                    <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Please click on a ClickUp Space tab above to view and assign folders.</p>
+                                </div>
+                            </template>
+                            <template x-if="clickUpSpaceId">
+                                <div>
+                                    <template x-for="folder in filteredFolders" :key="folder.id">
+                                        <label class="flex items-center justify-between px-4 py-3 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 cursor-pointer transition"
+                                               :class="selectedClickUpFolderIds.includes(String(folder.id)) ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''">
+                                            <div class="flex items-center gap-3">
+                                                <input type="checkbox"
+                                                       @change="toggleFolder(folder.id)"
+                                                       :checked="selectedClickUpFolderIds.includes(String(folder.id))"
+                                                       class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#135266] focus:ring-[#135266]/40 focus:ring-2 cursor-pointer" />
+                                                
+                                                <div>
+                                                    <div class="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                                        <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                        </svg>
+                                                        <span x-text="folder.name"></span>
+                                                    </div>
+                                                    <div class="text-[11px] text-slate-400 font-mono" x-text="'ID: ' + folder.id"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Status Badge -->
+                                            <div>
+                                                <template x-if="selectedClickUpFolderIds.includes(String(folder.id))">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                        Assigned to this Client
+                                                    </span>
+                                                </template>
+                                                <template x-if="mappingClient && !selectedClickUpFolderIds.includes(String(folder.id)) && folder.client_id && folder.client_id !== String(mappingClient.id)">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400" :title="'Assigned to ' + folder.client_name">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                        <span x-text="'Assigned: ' + folder.client_name"></span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="mappingClient && !selectedClickUpFolderIds.includes(String(folder.id)) && (!folder.client_id || folder.client_id === String(mappingClient.id))">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                                        Unassigned
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </label>
+                                    </template>
+                                    <template x-if="filteredFolders.length === 0">
+                                        <div class="px-6 py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
+                                            No ClickUp folders found in this space matching your search.
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Footer Summary & Actions -->
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                            Selected <span class="font-extrabold text-[#135266] dark:text-teal-400" x-text="selectedClickUpFolderIds.length"></span> folder(s) for this client
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <template x-if="mappingClient && selectedClickUpFolderIds.length > 0">
+                                <button type="button" 
+                                        @click="if (confirm('Are you sure you want to disconnect ClickUp from ' + (mappingClient.company_name || mappingClient.name) + '?')) { $wire.disconnectClickUpMapping(mappingClient.id); }"
+                                        class="px-4 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-800/40 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition duration-150">
+                                    Disconnect ClickUp
+                                </button>
+                            </template>
+
+                            <button type="button" @click="$dispatch('close-modal', { name: 'clickup-client-mapping-modal' })"
+                                    class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition duration-150">
+                                Cancel
+                            </button>
+
+                            <button type="button" @click="saveMapping()"
+                                    class="px-5 py-2 bg-[#135266] hover:bg-[#0f4152] text-white text-xs font-bold rounded-xl shadow transition duration-150">
+                                Save ClickUp Mapping
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </x-admin.modal>
 </div>

@@ -103,6 +103,93 @@ class StaffClients extends Component
     public string $clickUpTaskAssigneeFilter = 'assigned_to_me'; // 'assigned_to_me' or 'all'
     public bool $clickUpTasksLoaded = false;
 
+    // ClickUp Mapping State
+    public ?int $mappingClientId = null;
+    public string $clickUpSpaceId = '';
+    public string $clickUpFolderSearch = '';
+    public array $selectedClickUpFolderIds = [];
+
+    public function openClickUpMappingModal(int $clientId): void
+    {
+        $client = Client::with('user')->findOrFail($clientId);
+        $this->mappingClientId = $client->id;
+        $this->clickUpSpaceId = '';
+        $this->clickUpFolderSearch = '';
+        $this->selectedClickUpFolderIds = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::where('client_id', $client->id)->pluck('id')->map(fn($id) => (string)$id)->toArray();
+
+        $this->dispatch('open-modal', name: 'clickup-client-mapping-modal');
+    }
+
+    public function selectClickUpSpace(string $spaceId): void
+    {
+        $this->clickUpSpaceId = $spaceId;
+    }
+
+    public function toggleFolderSelection(string $folderId): void
+    {
+        $folderId = (string) $folderId;
+        if (in_array($folderId, $this->selectedClickUpFolderIds, true)) {
+            $this->selectedClickUpFolderIds = array_values(array_diff($this->selectedClickUpFolderIds, [$folderId]));
+        } else {
+            $this->selectedClickUpFolderIds[] = $folderId;
+        }
+    }
+
+    public function syncClickUpApi(\App\Services\ClickUpService $clickUpService): void
+    {
+        try {
+            $res = $clickUpService->syncAll();
+            if ($this->mappingClientId) {
+                $this->selectedClickUpFolderIds = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::where('client_id', $this->mappingClientId)->pluck('id')->map(fn($id) => (string)$id)->toArray();
+            }
+            session()->flash('success', "ClickUp API synced successfully! Updated {$res['synced_folders']} folders.");
+        } catch (\Exception $e) {
+            session()->flash('error', "ClickUp API Error: " . $e->getMessage());
+        }
+    }
+
+    public function saveClickUpMapping($clientId = null, $folderIds = null): void
+    {
+        $id = $clientId ?? $this->mappingClientId;
+        if (!$id) {
+            return;
+        }
+
+        $client = Client::findOrFail($id);
+        $rawFolderIds = $folderIds ?? $this->selectedClickUpFolderIds;
+        $selectedIds = array_map('strval', array_values(array_filter($rawFolderIds)));
+
+        \App\Modules\CRM\ClickUp\Models\ClickUpFolder::where('client_id', $client->id)
+            ->whereNotIn('id', $selectedIds)
+            ->update(['client_id' => null]);
+
+        if (!empty($selectedIds)) {
+            \App\Modules\CRM\ClickUp\Models\ClickUpFolder::whereIn('id', $selectedIds)
+                ->update(['client_id' => $client->id]);
+        }
+
+        $this->dispatch('close-modal', name: 'clickup-client-mapping-modal');
+        $clientName = $client->company_name ?: ($client->user->name ?? 'Client');
+        session()->flash('success', "ClickUp folder mappings saved for '{$clientName}' successfully!");
+    }
+
+    public function disconnectClickUpMapping(int $clientId): void
+    {
+        $client = Client::findOrFail($clientId);
+
+        \App\Modules\CRM\ClickUp\Models\ClickUpFolder::where('client_id', $client->id)->update(['client_id' => null]);
+
+        $this->selectedClickUpFolderIds = [];
+        if ($this->selectedClientId === $client->id) {
+            $this->clientClickUpTasks = [];
+            $this->clickUpTasksLoaded = false;
+        }
+
+        $this->dispatch('close-modal', name: 'clickup-client-mapping-modal');
+        $clientName = $client->company_name ?: ($client->user->name ?? 'Client');
+        session()->flash('success', "ClickUp disconnected from '{$clientName}' successfully!");
+    }
+
     public function selectClient(?int $id)
     {
         if ($id) {
@@ -174,7 +261,7 @@ class StaffClients extends Component
         if ($this->selectedClientId) {
             $clients = collect();
             
-            $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
+            $clientDetails = Client::with(['user', 'phones', 'plans', 'assignedStaff.user', 'clickUpFolders'])
                 ->findOrFail($this->selectedClientId);
 
             $isAssignedToStaff = Client::where('id', $this->selectedClientId)
@@ -330,7 +417,7 @@ class StaffClients extends Component
                     ->onEachSide(1);
             }
         } else {
-            $clients = Client::with(['user', 'phones', 'plans', 'assignedStaff.user'])
+            $clients = Client::with(['user', 'phones', 'plans', 'assignedStaff.user', 'clickUpFolders'])
                 ->withCount('websites')
                 ->when($this->activeViewTab === 'my_clients', function ($query) use ($staffId) {
                     $query->whereHas('assignedStaff', function ($q) use ($staffId) {
@@ -395,6 +482,33 @@ class StaffClients extends Component
             $inactiveWebsitesCount = \Illuminate\Support\Facades\Cache::remember($cachePrefix . 'inactive_websites', 60, fn() => (clone $baseWebsitesQuery)->where('status', 'inactive')->count());
         }
 
+        $clickUpSpaces = \App\Modules\CRM\ClickUp\Models\ClickUpSpace::withCount('folders')->orderBy('name')->get();
+        $allClickUpFolders = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')->orderBy('name')->get();
+
+        if ($this->mappingClientId !== null) {
+            if (!empty($this->clickUpSpaceId)) {
+                $clickUpFoldersQuery = \App\Modules\CRM\ClickUp\Models\ClickUpFolder::with('client.user')
+                    ->where('clickup_space_id', $this->clickUpSpaceId);
+
+                if (!empty($this->clickUpFolderSearch)) {
+                    $searchTerm = '%' . trim($this->clickUpFolderSearch) . '%';
+                    $clickUpFoldersQuery->where('name', 'like', $searchTerm);
+                }
+
+                $clickUpFolders = $clickUpFoldersQuery->get()->sortBy(function ($folder) {
+                    $isAssigned = ($folder->client_id === $this->mappingClientId) 
+                        || in_array((string) $folder->id, $this->selectedClickUpFolderIds, true);
+                    return [$isAssigned ? 0 : 1, strtolower($folder->name)];
+                })->values();
+            } else {
+                $clickUpFolders = collect();
+            }
+            $mappingClient = Client::with('user')->find($this->mappingClientId);
+        } else {
+            $clickUpFolders = collect();
+            $mappingClient = null;
+        }
+
         return view('modules.crm.staff.portal.clients', [
             'clients' => $clients,
             'clientDetails' => $clientDetails,
@@ -416,6 +530,10 @@ class StaffClients extends Component
             'totalWebsitesCount' => $totalWebsitesCount,
             'activeWebsitesCount' => $activeWebsitesCount,
             'inactiveWebsitesCount' => $inactiveWebsitesCount,
+            'clickUpSpaces' => $clickUpSpaces,
+            'clickUpFolders' => $clickUpFolders,
+            'allClickUpFolders' => $allClickUpFolders,
+            'mappingClient' => $mappingClient,
         ])->layoutData(['title' => 'My Clients - Staff Portal']);
     }
 

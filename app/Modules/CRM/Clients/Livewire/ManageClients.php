@@ -576,6 +576,26 @@ class ManageClients extends Component
     }
 
     /**
+     * Disconnect/Unmap all ClickUp folders for a client
+     */
+    public function disconnectClickUpMapping(int $clientId): void
+    {
+        $client = Client::findOrFail($clientId);
+
+        ClickUpFolder::where('client_id', $client->id)->update(['client_id' => null]);
+
+        $this->selectedClickUpFolderIds = [];
+        if ($this->selectedClientDetailId === $client->id) {
+            $this->clientClickUpTasks = [];
+            $this->clickUpTasksLoaded = false;
+        }
+
+        $this->dispatch('close-modal', name: 'clickup-client-mapping-modal');
+        $clientName = $client->company_name ?: ($client->user->name ?? 'Client');
+        session()->flash('success', "ClickUp disconnected from '{$clientName}' successfully!");
+    }
+
+    /**
      * Async background loader for ClickUp tickets
      */
     public function loadClickUpTasks(ClickUpService $clickUpService): void

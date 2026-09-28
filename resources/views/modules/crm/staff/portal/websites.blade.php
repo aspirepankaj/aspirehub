@@ -50,7 +50,8 @@
                             @php
                                 $colorHex = str_starts_with($sT->color, '#') ? $sT->color : '#' . $sT->color;
                             @endphp
-                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider"
+                            <span class="inline-block max-w-[240px] truncate align-middle px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider"
+                                  title="{{ $sT->name }}"
                                   style="background-color: {{ $colorHex }}1a; color: {{ $colorHex }}; border: 1px solid {{ $colorHex }}33;">
                                 {{ $sT->name }}
                             </span>
@@ -525,7 +526,8 @@
                                                 @php
                                                     $colorHex = str_starts_with($sT->color, '#') ? $sT->color : '#' . $sT->color;
                                                 @endphp
-                                                <span class="px-2.5 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wider"
+                                                <span class="inline-block max-w-[180px] sm:max-w-[200px] truncate align-middle px-2.5 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wider"
+                                                      title="{{ $sT->name }}"
                                                       style="background-color: {{ $colorHex }}1a; color: {{ $colorHex }}; border: 1px solid {{ $colorHex }}33;">
                                                     {{ $sT->name }}
                                                 </span>

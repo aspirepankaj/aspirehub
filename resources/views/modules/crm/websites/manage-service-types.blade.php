@@ -79,7 +79,8 @@
                             @php
                                 $colorHex = str_starts_with($type->color, '#') ? $type->color : '#' . $type->color;
                             @endphp
-                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg uppercase tracking-wider"
+                            <span class="inline-block max-w-[220px] truncate align-middle px-2.5 py-1 text-xs font-bold rounded-lg uppercase tracking-wider"
+                                  title="{{ $type->name }}"
                                   style="background-color: {{ $colorHex }}1a; color: {{ $colorHex }}; border: 1px solid {{ $colorHex }}33;">
                                 {{ $type->name }}
                             </span>

@@ -97,15 +97,26 @@
                 ];
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
-                <button type="button" 
-                        @click="
-                            $dispatch('open-clickup-modal', { client: {{ Js::from($detailMappingData) }}, folderIds: {{ Js::from($detailClickUpFolderIds) }} });
-                            $dispatch('open-modal', { name: 'clickup-client-mapping-modal' });
-                        " 
-                        class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded-xl shadow-sm transition active:scale-95">
-                    <span>Map With</span>
-                    <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
-                </button>
+                @if(!empty($detailClickUpFolderIds))
+                    <button type="button"
+                            wire:click="disconnectClickUpMapping({{ $clientDetails->id }})"
+                            wire:confirm="Are you sure you want to disconnect ClickUp from {{ $clientDetails->company_name ?: ($clientDetails->user->name ?? 'this client') }}?"
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 font-bold text-xs rounded-xl shadow-sm transition active:scale-95"
+                            title="Disconnect ClickUp from this client">
+                        <span>Disconnect</span>
+                        <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                    </button>
+                @else
+                    <button type="button" 
+                            @click="
+                                $dispatch('open-clickup-modal', { client: {{ Js::from($detailMappingData) }}, folderIds: {{ Js::from($detailClickUpFolderIds) }} });
+                                $dispatch('open-modal', { name: 'clickup-client-mapping-modal' });
+                            " 
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded-xl shadow-sm transition active:scale-95">
+                        <span>Map With</span>
+                        <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                    </button>
+                @endif
                 <button type="button" 
                         @click="
                             const data = {{ Js::from($detailClientEditData) }};
@@ -2837,16 +2848,27 @@
                                         ];
                                     @endphp
                                     <div class="inline-flex items-center justify-center gap-1.5 shrink-0">
-                                        <button type="button" 
-                                                @click="
-                                                    $dispatch('open-clickup-modal', { client: {{ Js::from($clientMappingData) }}, folderIds: {{ Js::from($clickUpFolderIds) }} });
-                                                    $dispatch('open-modal', { name: 'clickup-client-mapping-modal' });
-                                                "
-                                                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition-all duration-150 active:scale-95 shrink-0"
-                                                title="Map ClickUp Folders to this Client">
-                                                <span class="hidden 2xl:inline">Map With</span>
-                                            <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
-                                        </button>
+                                        @if(!empty($clickUpFolderIds))
+                                            <button type="button"
+                                                    wire:click="disconnectClickUpMapping({{ $client->id }})"
+                                                    wire:confirm="Are you sure you want to disconnect ClickUp from {{ $client->company_name ?: ($client->user->name ?? 'this client') }}?"
+                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-500/10 border border-rose-200/80 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 shadow-sm transition-all duration-150 active:scale-95 shrink-0"
+                                                    title="Disconnect ClickUp from {{ $client->user->name ?? 'Client' }}">
+                                                <span class="hidden 2xl:inline">Disconnect</span>
+                                                <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                                            </button>
+                                        @else
+                                            <button type="button" 
+                                                    @click="
+                                                        $dispatch('open-clickup-modal', { client: {{ Js::from($clientMappingData) }}, folderIds: {{ Js::from($clickUpFolderIds) }} });
+                                                        $dispatch('open-modal', { name: 'clickup-client-mapping-modal' });
+                                                    "
+                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition-all duration-150 active:scale-95 shrink-0"
+                                                    title="Map ClickUp Folders to this Client">
+                                                    <span class="hidden 2xl:inline">Map With</span>
+                                                <img src="{{ asset('aspire-hub-clickup-logo.svg') }}" alt="ClickUp Logo" class="h-4 w-auto shrink-0 dark:brightness-200" />
+                                            </button>
+                                        @endif
 
                                         @if($client->user_id)
                                             <a href="{{ route('impersonate.start', $client->user_id) }}"
@@ -3691,6 +3713,14 @@
                         </div>
 
                         <div class="flex items-center gap-3">
+                            <template x-if="mappingClient && selectedClickUpFolderIds.length > 0">
+                                <button type="button" 
+                                        @click="if (confirm('Are you sure you want to disconnect ClickUp from ' + (mappingClient.company_name || mappingClient.name) + '?')) { $wire.disconnectClickUpMapping(mappingClient.id); }"
+                                        class="px-4 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-800/40 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition duration-150">
+                                    Disconnect ClickUp
+                                </button>
+                            </template>
+
                             <button type="button" @click="$dispatch('close-modal', { name: 'clickup-client-mapping-modal' })"
                                     class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition duration-150">
                                 Cancel
