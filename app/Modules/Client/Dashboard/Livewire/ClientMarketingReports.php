@@ -30,6 +30,7 @@ class ClientMarketingReports extends Component
     public array $gtmData = [];
     public array $gbpData = [];
     public array $gadsData = [];
+    public array $facebookData = [];
     
     // Comparison reports
     public array $compareGa4Data = [];
@@ -38,6 +39,7 @@ class ClientMarketingReports extends Component
     public array $compareKeywordData = [];
     public array $compareGbpData = [];
     public array $compareGadsData = [];
+    public array $compareFacebookData = [];
     
     // Dropdown list holders
     public $websites = [];
@@ -139,6 +141,7 @@ class ClientMarketingReports extends Component
         $this->gtmData = [];
         $this->gbpData = [];
         $this->gadsData = [];
+        $this->facebookData = [];
 
         if (!$this->selectedWebsiteId) {
             return;
@@ -169,6 +172,7 @@ class ClientMarketingReports extends Component
             $this->keywordData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->dateFrom, $this->dateTo);
             $this->gbpData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->dateFrom, $this->dateTo);
             $this->gadsData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->dateFrom, $this->dateTo);
+            $this->facebookData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
 
             // Load comparison data
             if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) {
@@ -178,6 +182,7 @@ class ClientMarketingReports extends Component
                 $this->compareKeywordData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->compareDateFrom, $this->compareDateTo);
                 $this->compareGbpData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->compareDateFrom, $this->compareDateTo);
                 $this->compareGadsData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->compareDateFrom, $this->compareDateTo);
+                $this->compareFacebookData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $this->compareDateFrom, $this->compareDateTo);
             } else {
                 $this->compareGa4Data = [];
                 $this->compareGscData = [];
@@ -185,6 +190,7 @@ class ClientMarketingReports extends Component
                 $this->compareKeywordData = [];
                 $this->compareGbpData = [];
                 $this->compareGadsData = [];
+                $this->compareFacebookData = [];
             }
 
             // Set activeReportData if looking at specific tab
@@ -208,6 +214,9 @@ class ClientMarketingReports extends Component
             } elseif ($this->activeReportIntegrationId === 'gads') {
                 $this->activeReportData = $this->gadsData;
                 if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGadsData;
+            } elseif ($this->activeReportIntegrationId === 'facebook') {
+                $this->activeReportData = $this->facebookData;
+                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareFacebookData;
             }
         } catch (\Exception $e) {
             Log::error('Error loading client marketing report JSON: ' . $e->getMessage());
@@ -240,7 +249,7 @@ class ClientMarketingReports extends Component
 
             // Scan all directories to find all available months
             $options = [];
-            $types = ['ga4', 'gsc', 'youtube', 'keyword', 'gtm'];
+            $types = ['ga4', 'gsc', 'youtube', 'keyword', 'gtm', 'facebook'];
 
             foreach ($types as $typeId) {
                 $integrationPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$typeId}");

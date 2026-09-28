@@ -210,6 +210,15 @@ trait LoadsMarketingReports
                 unset($src);
             }
 
+            // Scale events_report
+            if (!empty($allData['events_report'])) {
+                foreach ($allData['events_report'] as $eventName => &$channels) {
+                    foreach ($channels as &$channel) {
+                        $channel['count'] = (int)round(($channel['count'] ?? 0) * $scaleFactor);
+                    }
+                }
+            }
+
             // Scale pages_report
             if (!empty($allData['pages_report'])) {
                 foreach ($allData['pages_report'] as &$pg) {

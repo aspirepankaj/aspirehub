@@ -9,6 +9,8 @@
         $isGbpConnected = isset($integrations['gbp']);
         $isGadsConnected = isset($integrations['gads']);
         $isGtmConnected = isset($integrations['gtm']);
+        $isFacebookConnected = isset($integrations['facebook']);
+        $isLinkedinConnected = isset($integrations['linkedin']);
 
         $hasGa4 = !empty($ga4Data) && !isset($ga4Data['error']);
         $hasGsc = !empty($gscData) && !isset($gscData['error']);
@@ -17,6 +19,8 @@
         $hasGtm = !empty($gtmData) && !isset($gtmData['error']);
         $hasGbp = !empty($gbpData) && !isset($gbpData['error']);
         $hasGads = !empty($gadsData) && !isset($gadsData['error']);
+        $hasFacebook = !empty($facebookData) && !isset($facebookData['error']);
+        $hasLinkedin = !empty($linkedinData) && !isset($linkedinData['error']);
     @endphp
 
     <!-- Header Controls Widget -->
@@ -91,6 +95,18 @@
                     <span class="w-1.5 h-1.5 rounded-full {{ $isGadsConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
                     <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Google Ads</span>
                 </div>
+
+                <!-- Facebook Badge -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $isFacebookConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                    <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Facebook</span>
+                </div>
+
+                <!-- LinkedIn Badge -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $isLinkedinConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600' }}"></span>
+                    <span class="text-xs font-medium text-slate-600 dark:text-slate-400">LinkedIn</span>
+                </div>
             </div>
         </div>
     </div>
@@ -98,7 +114,7 @@
     <!-- Integration Selector Tabs / Date Filter Header -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <!-- Integration Tabs (Scrollable on mobile) -->
-        @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected)
+        @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isLinkedinConnected)
             <div class="w-full lg:w-auto overflow-x-auto pb-1 scrollbar-none max-w-full">
                 <div class="flex items-center p-1 bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur border border-slate-200/30 dark:border-slate-700/30 rounded-xl min-w-max">
                     <button wire:click="selectIntegration('overview')" wire:loading.attr="disabled" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'overview' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
@@ -179,6 +195,26 @@
                             <span>Tag Manager</span>
                         </button>
                     @endif
+                    @if($isFacebookConnected)
+                        <button wire:click="selectIntegration('facebook')" wire:loading.attr="disabled" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'facebook' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-500 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
+                            <svg wire:loading.remove wire:target="selectIntegration('facebook')" class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
+                            <svg wire:loading wire:target="selectIntegration('facebook')" class="w-4 h-4 text-blue-600 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Facebook</span>
+                        </button>
+                    @endif
+                    @if($isLinkedinConnected)
+                        <button wire:click="selectIntegration('linkedin')" wire:loading.attr="disabled" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'linkedin' ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-500 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
+                            <svg wire:loading.remove wire:target="selectIntegration('linkedin')" class="w-4 h-4 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                            <svg wire:loading wire:target="selectIntegration('linkedin')" class="w-4 h-4 text-sky-600 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>LinkedIn</span>
+                        </button>
+                    @endif
                 </div>
             </div>
         @endif
@@ -198,7 +234,7 @@
 
     <!-- Integration Views (Uses Admin/Staff Layout) -->
     <div class="relative min-h-[400px] w-full mt-4">
-        @if(!($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isGtmConnected))
+        @if(!($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isGtmConnected || $isFacebookConnected || $isLinkedinConnected))
             {{-- Data not found / No Integrations --}}
             <div class="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
                 <div class="w-20 h-20 mb-4 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
@@ -239,6 +275,14 @@
                 @if($isGadsConnected)
                     <div wire:key="overview-gads"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Ads</h3>
                     @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gads', 'activeReportData' => $gadsData])</div>
+                @endif
+                @if($isFacebookConnected)
+                    <div wire:key="overview-facebook"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Facebook</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'facebook', 'activeReportData' => $facebookData])</div>
+                @endif
+                @if($isLinkedinConnected)
+                    <div wire:key="overview-linkedin"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">LinkedIn</h3>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'linkedin', 'activeReportData' => $linkedinData])</div>
                 @endif
                 </div>
             @else

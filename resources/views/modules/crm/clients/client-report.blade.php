@@ -303,10 +303,10 @@
                     </div>
                 </div>
             </div>
-            @endforeach
-            </div>
-            </div>
-            </div>
+@endforeach
+</div>
+</div>
+</div>
 
             
             @if(count($reportSets) == 1)
@@ -400,9 +400,418 @@
                     </div>
                 </div>
             </div>
+@endforeach
+</div>
+</div>
+</div>
+        @elseif ($activeReportIntegrationId === 'facebook')
+            @php
+            $reportSets = [];
+            $baseData = $activeReportData ?? [];
+            if (!empty($baseData)) {
+                $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+            }
+            if (!empty($baseData['compare_data'])) {
+                $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+            }
+            @endphp
+            
+            @if(count($reportSets) > 1)
+            <div wire:key="fb-wrapper-1-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
+            @else
+            <div wire:key="fb-wrapper-1-single" class="flex flex-col gap-6 mb-6">
+            @endif
+            @foreach($reportSets as $idx => $rSet)
+            <div wire:key="fb-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
+                @php $reportDataScope = $rSet['data']; @endphp
+                @if(count($reportSets) > 1)
+                    <div class="col-span-full mb-3 mt-4">
+                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
+                            {{ $rSet['title'] }}
+                        </span>
+                    </div>
+                @endif
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Reach</span>
+                        <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                            {{ number_format($reportDataScope['summary']['reach'] ?? 0) }}
+                        </span>
+                    </div>
+                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
+                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                            {{ number_format($reportDataScope['summary']['impressions'] ?? 0) }}
+                        </span>
+                    </div>
+                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
+                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                            {{ number_format($reportDataScope['summary']['clicks'] ?? 0) }}
+                        </span>
+                    </div>
+                    <div class="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Spend</span>
+                        <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
+                            ${{ number_format($reportDataScope['summary']['spend'] ?? 0, 2) }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- FB Graph Area -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Reach & Spend Over Time
+                        </div>
+                    </div>
+                    <div class="w-full">
+                        <div class="h-64" wire:key="fb-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                            init() {
+                                const ctx = document.getElementById('fb-chart-{{ $idx }}').getContext('2d');
+                                let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
+                                let dt = (rawData && rawData.daily_traffic) ? rawData.daily_traffic : [];
+                                
+                                let labels = dt.map(d => {
+                                    let dateStr = d.date;
+                                    return dateStr.length === 8 && !dateStr.includes('-') 
+                                        ? dateStr.substring(4,6)+'/'+dateStr.substring(6,8) 
+                                        : dateStr.split('-').slice(1).join('/');
+                                });
+                                let reach = dt.map(d => d.reach || 0);
+                                let spend = dt.map(d => d.spend || 0);
+
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [
+                                            {
+                                                label: 'Reach',
+                                                data: reach,
+                                                borderColor: '#3b82f6',
+                                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                                borderWidth: 2,
+                                                fill: true,
+                                                tension: 0.4,
+                                                pointRadius: 0,
+                                                pointHoverRadius: 4,
+                                                yAxisID: 'y'
+                                            },
+                                            {
+                                                label: 'Spend ($)',
+                                                data: spend,
+                                                borderColor: '#10b981',
+                                                backgroundColor: 'transparent',
+                                                borderWidth: 2,
+                                                borderDash: [5, 5],
+                                                tension: 0.4,
+                                                pointRadius: 0,
+                                                pointHoverRadius: 4,
+                                                yAxisID: 'y1'
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        responsive: true, maintainAspectRatio: false,
+                                        interaction: { mode: 'index', intersect: false },
+                                        plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, usePointStyle: true } } },
+                                        scales: {
+                                            y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { color: document.documentElement.classList.contains('dark') ? '#1e293b' : '#f1f5f9' }, border: { dash: [4, 4] } },
+                                            y1: { type: 'linear', display: true, position: 'right', beginAtZero: true, grid: { display: false } },
+                                            x: { grid: { display: false } }
+                                        }
+                                    }
+                                });
+                            }
+                        }"><canvas id="fb-chart-{{ $idx }}"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Ad Campaigns
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead>
+                                    <tr class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
+                                        <th class="py-2 font-bold">Campaign Name</th>
+                                        <th class="py-2 text-right font-bold">Spend</th>
+                                        <th class="py-2 text-right font-bold">Clicks</th>
+                                        <th class="py-2 text-right font-bold">Imp.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (array_slice($reportDataScope['top_campaigns'] ?? [], 0, 5) as $campaign)
+                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                            <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $campaign['name'] ?? '' }}">{{ $campaign['name'] ?? '' }}</td>
+                                            <td class="py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">${{ number_format($campaign['spend'] ?? 0, 2) }}</td>
+                                            <td class="py-2.5 text-right font-bold">{{ number_format($campaign['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($campaign['impressions'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Demographics Doughnut -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                            <div class="w-1.5 h-1.5 rounded-full bg-pink-500"></div> Demographics
+                        </div>
+                        <div class="flex flex-col items-center">
+                            @php
+                                $demoItems = [];
+                                foreach (array_slice($reportDataScope['demographics'] ?? [], 0, 5) as $item) {
+                                    $demoItems[] = [
+                                        'label' => $item['age'] ?? 'Unknown',
+                                        'value' => (float) str_replace('%', '', $item['percentage'] ?? '0')
+                                    ];
+                                }
+                            @endphp
+                            <div class="relative w-40 h-40 mb-6">
+                                <canvas id="fb-demo-chart-{{ $idx }}" x-data="{
+                                    init() {
+                                        const ctx = this.$el.getContext('2d');
+                                        let items = {{ json_encode($demoItems) }};
+                                        if (items.length > 0) {
+                                            let labels = items.map(e => e.label);
+                                            let data = items.map(e => e.value);
+                                            let colors = ['#f472b6','#60a5fa','#34d399','#fbbf24','#a78bfa'];
+                                            new Chart(ctx, {
+                                                type: 'doughnut',
+                                                data: {
+                                                    labels: labels,
+                                                    datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
+                                                },
+                                                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
+                                            });
+                                        }
+                                    }
+                                }"></canvas>
+                            </div>
+                            <div class="flex flex-col gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 w-full pr-4">
+                                @php $colors = ['bg-pink-400', 'bg-blue-400', 'bg-emerald-400', 'bg-yellow-400', 'bg-purple-400']; @endphp
+                                @foreach($demoItems as $index => $item)
+                                    <div class="flex items-center justify-between w-full">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-2 h-2 {{ $colors[$index % count($colors)] }} rounded-full"></div>
+                                            <span>Age {{ $item['label'] }}</span>
+                                        </div>
+                                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $item['value'] }}%</span>
+                                    </div>
+@endforeach
+</div>
+</div>
+</div>
+                </div>
+            </div>
             @endforeach
             </div>
+        @elseif ($activeReportIntegrationId === 'linkedin')
+            @php
+            $reportSets = [];
+            $baseData = $activeReportData ?? [];
+            if (!empty($baseData)) {
+                $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+            }
+            if (!empty($baseData['compare_data'])) {
+                $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+            }
+            @endphp
+            
+            @if(count($reportSets) > 1)
+            <div wire:key="li-wrapper-1-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
+            @else
+            <div wire:key="li-wrapper-1-single" class="flex flex-col gap-6 mb-6">
+            @endif
+            @foreach($reportSets as $idx => $rSet)
+            <div wire:key="li-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
+                @php $reportDataScope = $rSet['data']; @endphp
+                @if(count($reportSets) > 1)
+                    <div class="col-span-full mb-3 mt-4">
+                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
+                            {{ $rSet['title'] }}
+                        </span>
+                    </div>
+                @endif
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="p-4 bg-sky-50/20 dark:bg-sky-950/10 border border-sky-100/30 dark:border-sky-900/20 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Followers</span>
+                        <span class="text-lg font-extrabold text-sky-600 dark:text-sky-400">
+                            {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
+                        </span>
+                    </div>
+                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
+                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                            {{ number_format($reportDataScope['summary']['impressions'] ?? 0) }}
+                        </span>
+                    </div>
+                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
+                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
+                            {{ number_format($reportDataScope['summary']['clicks'] ?? 0) }}
+                        </span>
+                    </div>
+                    <div class="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Engagement</span>
+                        <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
+                            {{ number_format($reportDataScope['summary']['engagements'] ?? 0) }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- LI Graph Area -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                            <div class="w-1.5 h-1.5 rounded-full bg-sky-500"></div> Impressions & Engagements
+                        </div>
+                    </div>
+                    <div class="w-full">
+                        <div class="h-64" wire:key="li-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                            init() {
+                                const ctx = document.getElementById('li-chart-{{ $idx }}').getContext('2d');
+                                let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
+                                let dt = (rawData && rawData.daily_traffic) ? rawData.daily_traffic : [];
+                                
+                                let labels = dt.map(d => {
+                                    let dateStr = d.date;
+                                    return dateStr.length === 8 && !dateStr.includes('-') 
+                                        ? dateStr.substring(4,6)+'/'+dateStr.substring(6,8) 
+                                        : dateStr.split('-').slice(1).join('/');
+                                });
+                                let impressions = dt.map(d => d.impressions || 0);
+                                let engagements = dt.map(d => d.engagements || 0);
+
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [
+                                            {
+                                                label: 'Impressions',
+                                                data: impressions,
+                                                borderColor: '#0284c7',
+                                                backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                                                borderWidth: 2,
+                                                fill: true,
+                                                tension: 0.4,
+                                                pointRadius: 0,
+                                                pointHoverRadius: 4,
+                                                yAxisID: 'y'
+                                            },
+                                            {
+                                                label: 'Engagements',
+                                                data: engagements,
+                                                borderColor: '#10b981',
+                                                backgroundColor: 'transparent',
+                                                borderWidth: 2,
+                                                borderDash: [5, 5],
+                                                tension: 0.4,
+                                                pointRadius: 0,
+                                                pointHoverRadius: 4,
+                                                yAxisID: 'y1'
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        responsive: true, maintainAspectRatio: false,
+                                        interaction: { mode: 'index', intersect: false },
+                                        plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, usePointStyle: true } } },
+                                        scales: {
+                                            y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { color: document.documentElement.classList.contains('dark') ? '#1e293b' : '#f1f5f9' }, border: { dash: [4, 4] } },
+                                            y1: { type: 'linear', display: true, position: 'right', beginAtZero: true, grid: { display: false } },
+                                            x: { grid: { display: false } }
+                                        }
+                                    }
+                                });
+                            }
+                        }"><canvas id="li-chart-{{ $idx }}"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Followers By Job Title
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead>
+                                    <tr class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
+                                        <th class="py-2 font-bold">Job Title</th>
+                                        <th class="py-2 text-right font-bold">Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (array_slice($reportDataScope['followers_by_job'] ?? [], 0, 5) as $job)
+                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                            <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $job['name'] ?? '' }}">{{ $job['name'] ?? '' }}</td>
+                                            <td class="py-2.5 text-right font-bold text-sky-600 dark:text-sky-400">{{ number_format($job['count'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                            <div class="w-1.5 h-1.5 rounded-full bg-sky-500"></div> Follower Demographics
+                        </div>
+                        <div class="flex flex-col items-center">
+                            @php
+                                $demoItems = [];
+                                foreach (array_slice($reportDataScope['demographics'] ?? [], 0, 5) as $item) {
+                                    $demoItems[] = [
+                                        'label' => $item['region'] ?? 'Unknown',
+                                        'value' => (float) str_replace('%', '', $item['percentage'] ?? '0')
+                                    ];
+                                }
+                            @endphp
+                            <div class="relative w-40 h-40 mb-6">
+                                <canvas id="li-demo-chart-{{ $idx }}" x-data="{
+                                    init() {
+                                        const ctx = this.$el.getContext('2d');
+                                        let items = {{ json_encode($demoItems) }};
+                                        if (items.length > 0) {
+                                            let labels = items.map(e => e.label);
+                                            let data = items.map(e => e.value);
+                                            let colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#a78bfa'];
+                                            new Chart(ctx, {
+                                                type: 'doughnut',
+                                                data: {
+                                                    labels: labels,
+                                                    datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
+                                                },
+                                                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
+                                            });
+                                        }
+                                    }
+                                }"></canvas>
+                            </div>
+                            <div class="flex flex-col gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 w-full pr-4">
+                                @php $colors = ['bg-sky-400', 'bg-indigo-400', 'bg-emerald-400', 'bg-yellow-400', 'bg-purple-400']; @endphp
+                                @foreach($demoItems as $index => $item)
+                                    <div class="flex items-center justify-between w-full">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-2 h-2 {{ $colors[$index % count($colors)] }} rounded-full"></div>
+                                            <span>{{ $item['label'] }}</span>
+                                        </div>
+                                        <span class="font-bold text-slate-700 dark:text-slate-300">{{ $item['value'] }}%</span>
+                                    </div>
+@endforeach
+</div>
+</div>
+</div>
+                </div>
             </div>
+            @endforeach
             </div>
         @elseif ($activeReportIntegrationId === 'gbp')
             
@@ -662,10 +1071,10 @@ $format = $compareFormat ?? 'percentage';
                                     <span class="text-slate-400 text-[10px] w-8 text-right">{{ $percent }}%</span>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
+@endforeach
+</div>
+</div>
+</div>
         </div>
         @endforeach
         </div>
@@ -741,9 +1150,9 @@ $format = $compareFormat ?? 'percentage';
                 </div>
             </div>
         </div>
-        @endforeach
-        </div>
-    </div>
+@endforeach
+</div>
+</div>
 </div>
 
 
@@ -852,7 +1261,7 @@ $format = $compareFormat ?? 'percentage';
                         <thead>
                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
                                 <th class="py-2 font-bold w-1/2">Source / Medium</th>
-                                <th class="py-2 text-right font-bold w-1/4">Sessions</th>
+                                <th class="py-2 text-right font-bold w-1/4">Count</th>
                                 <th class="py-2 text-right font-bold w-1/4">Bounce Rate</th>
                             </tr>
                         </thead>
@@ -904,7 +1313,7 @@ $format = $compareFormat ?? 'percentage';
             </div>
         
 </div>
-        @endforeach
+@endforeach
 </div>
 </div>
 </div>
@@ -965,9 +1374,9 @@ $format = $compareFormat ?? 'percentage';
                                 <div class="bg-indigo-600 dark:bg-indigo-400 h-1.5 rounded-full" style="width: {{ $device['percentage'] }}"></div>
                             </div>
                         </div>
-                    @endforeach
-                </div>
-            </div>
+@endforeach
+</div>
+</div>
 </div>
         @endforeach
 </div>
@@ -989,63 +1398,135 @@ $format = $compareFormat ?? 'percentage';
                     </span>
                 </div>
             @endif
-<div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2" x-data="{ showAllGeo: false }">
-                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Geographic Audience</h4>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                <th class="py-2 font-bold w-1/2">Country</th>
-                                <th class="py-2 text-right font-bold w-1/4">Active Users</th>
-                                <th class="py-2 text-right font-bold w-1/4">Sessions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (array_slice($reportDataScope['geographic_sources'] ?? [], 0, 6) as $geo) <tr wire:key="geo-{{ md5(json_encode($geo)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
-                                    <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
-                                    <td class="py-2.5 text-right font-bold w-1/4"><div class="text-slate-800 dark:text-slate-200">{{ number_format($geo['active_users'] ?? 0) }}</div>
-
-</td>
-                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4"><div class="text-slate-800 dark:text-slate-200">{{ number_format($geo['sessions'] ?? 0) }}</div>
-
-</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                @if (count($reportDataScope['geographic_sources'] ?? []) > 6)
-                    <div class="transition-all duration-500 ease-in-out overflow-hidden"
-                         :style="showAllGeo ? 'max-height: 1000px; opacity: 100;' : 'max-height: 0px; opacity: 0;'">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
-                                <tbody>
-                                    @foreach (array_slice($reportDataScope['geographic_sources'] ?? [], 6) as $geo) <tr wire:key="geo-{{ md5(json_encode($geo)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-700 dark:text-slate-300">
-                                            <td class="py-2.5 font-bold w-1/2">{{ $geo['country'] }}</td>
-                                            <td class="py-2.5 text-right font-bold w-1/4"><div class="text-slate-800 dark:text-slate-200">{{ number_format($geo['active_users'] ?? 0) }}</div>
-
-</td>
-                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 w-1/4"><div class="text-slate-800 dark:text-slate-200">{{ number_format($geo['sessions'] ?? 0) }}</div>
-
-</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="text-center mt-3 pt-2 border-t border-slate-200/20 dark:border-slate-800/40">
-                        <button type="button" @click="showAllGeo = !showAllGeo" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition focus:outline-none">
-                            <span x-text="showAllGeo ? 'Show Less' : 'View Full'"></span>
-                            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showAllGeo ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                    </div>
-                @endif
-            </div>
-</div>
-        @endforeach
+<!-- Key Events Charts -->
+                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 col-span-2">
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Key Events</h4>
+                                            
+                                            <div class="flex flex-col gap-6">
+                                                @php
+                                                    $eventsData = $reportDataScope['events_report'] ?? [];
+                                                    if (isset($eventsData[0]) && isset($eventsData[0]['event_name'])) {
+                                                        $newFormat = [];
+                                                        foreach ($eventsData as $item) {
+                                                            if (!isset($newFormat[$item['event_name']])) {
+                                                                $newFormat[$item['event_name']] = [];
+                                                            }
+                                                            $newFormat[$item['event_name']][] = [
+                                                                'channel' => $item['channel'] ?? 'Unknown',
+                                                                'count' => $item['count'] ?? 0
+                                                            ];
+                                                        }
+                                                        $eventsData = $newFormat;
+                                                    }
+                                                    $colors = ['#3b82f6', '#a855f7', '#f59e0b', '#10b981', '#ec4899', '#6366f1'];
+                                                @endphp
+                                                
+                                                @forelse($eventsData as $eventName => $channels)
+                                                    @php
+                                                        $totalEvents = array_sum(array_column($channels, 'count'));
+                                                        usort($channels, function($a, $b) { return $b['count'] <=> $a['count']; });
+                                                    @endphp
+                                                    <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6"><div class="relative w-28 h-28 shrink-0">
+                                                            <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
+                                                                @php
+                                                                    $cumulativePercent = 0;
+                                                                    $colorIndex = 0;
+                                                                @endphp
+                                                                @foreach($channels as $channel)
+                                                                    @if($totalEvents > 0)
+                                                                        @php
+                                                                            $percent = ($channel['count'] / $totalEvents) * 100;
+                                                                            $dashArray = $percent . " " . (100 - $percent);
+                                                                            $dashOffset = 100 - $cumulativePercent;
+                                                                            $cumulativePercent += $percent;
+                                                                            $currentColor = $colors[$colorIndex % count($colors)];
+                                                                            $colorIndex++;
+                                                                        @endphp
+                                                                        <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="{{ $currentColor }}" stroke-width="4" stroke-dasharray="{{ $dashArray }}" stroke-dashoffset="{{ $dashOffset }}"></circle>
+                                                                    @endif
+                                                                @endforeach
+                                                            </svg>
+                                                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                                                <span class="text-xl font-extrabold text-slate-800 dark:text-white">{{ number_format($totalEvents) }}</span>
+                                                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center leading-tight">Key<br>Events</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="w-full">
+                                                            <h5 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2 flex items-center justify-between">
+                                                                {{ $eventName }}
+                                                                @php
+                                                                    $compareEvents = $activeReportData['compare_data']['events_report'] ?? [];
+                                                                    // Fix structure if needed
+                                                                    if (isset($compareEvents[0]) && isset($compareEvents[0]['event_name'])) {
+                                                                        $newFormat = [];
+                                                                        foreach ($compareEvents as $item) {
+                                                                            if (!isset($newFormat[$item['event_name']])) $newFormat[$item['event_name']] = [];
+                                                                            $newFormat[$item['event_name']][] = ['count' => $item['count'] ?? 0];
+                                                                        }
+                                                                        $compareEvents = $newFormat;
+                                                                    }
+                                                                    $pastTotal = 0;
+                                                                    if (isset($compareEvents[$eventName])) {
+                                                                        $pastTotal = array_sum(array_column($compareEvents[$eventName], 'count'));
+                                                                    }
+                                                                    
+                                                                    $showBadge = false;
+                                                                    $percentChange = 0;
+                                                                    $isPositive = true;
+                                                                    
+                                                                    if (isset($activeReportData['compare_data'])) {
+                                                                        $showBadge = true;
+                                                                        if ($pastTotal > 0) {
+                                                                            $percentChange = (($totalEvents - $pastTotal) / $pastTotal) * 100;
+                                                                        } else if ($totalEvents > 0) {
+                                                                            $percentChange = 100;
+                                                                        }
+                                                                        $isPositive = $percentChange >= 0;
+                                                                    }
+                                                                @endphp
+                                                                @if($showBadge)
+                                                                <span class="text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5 {{ $isPositive ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30' : 'text-red-500 bg-red-50 dark:bg-red-900/30' }}">
+                                                                    @if($isPositive)
+                                                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                                                    @else
+                                                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" /></svg>
+                                                                    @endif
+                                                                    {{ number_format(abs($percentChange), 1) }}%
+                                                                </span>
+                                                                @endif
+                                                            </h5>
+                                                            <ul class="space-y-2">
+                                                                @php $colorIndex = 0; @endphp
+                                                                @foreach(array_slice($channels, 0, 5) as $channel)
+                                                                    <li class="flex items-center justify-between text-xs">
+                                                                        <div class="flex items-center gap-2">
+                                                                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ $colors[$colorIndex % count($colors)] }}"></span>
+                                                                            <span class="text-slate-600 dark:text-slate-400 truncate max-w-[100px]" title="{{ $channel['channel'] }}">{{ $channel['channel'] }}</span>
+                                                                        </div>
+                                                                        <div class="flex items-center gap-2">
+                                                                            <span class="font-bold text-slate-800 dark:text-slate-200">{{ number_format($channel['count']) }}</span>
+                                                                            <span class="text-[10px] text-slate-400 w-10 text-right">
+                                                                                @if($totalEvents > 0)
+                                                                                    ({{ number_format(($channel['count'] / $totalEvents) * 100, 1) }}%)
+                                                                                @else
+                                                                                    (0%)
+                                                                                @endif
+                                                                            </span>
+                                                                        </div>
+                                                                    </li>
+                                                                    @php $colorIndex++; @endphp
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    
+                                                        </div>
+                                                @empty
+                                                    <div class="col-span-full py-10 text-center text-slate-400 text-xs">No key events recorded in this period.</div>
+                                                @endforelse
+                                            </div>
+                                        </div>
+                                    </div>
+@endforeach
 </div>
 </div>
 </div>
