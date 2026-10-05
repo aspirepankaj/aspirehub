@@ -27,6 +27,11 @@ class StaffClients extends Component
     {
         $this->resetPage();
     }
+
+    public function updatingPage($page): void
+    {
+        $this->dispatch('scroll-to-top');
+    }
     
     // Client Detail modal or view tracking
     public ?int $selectedClientId = null;
@@ -1054,6 +1059,23 @@ class StaffClients extends Component
                         }
                     }
 
+                    // Parse dynamic countries
+                    $countriesData = [];
+                    if (isset($countriesRes) && $countriesRes->successful()) {
+                        foreach ($countriesRes->json('rows') ?? [] as $row) {
+                            $countryName = $row['dimensionValues'][0]['value'] ?? 'Unknown';
+                            $countryCode = $row['dimensionValues'][1]['value'] ?? 'us';
+                            $users = (int) ($row['metricValues'][0]['value'] ?? 0);
+                            $sess = (int) ($row['metricValues'][1]['value'] ?? 0);
+                            $countriesData[] = [
+                                'country' => $countryName,
+                                'code' => $countryCode,
+                                'active_users' => $users,
+                                'sessions' => $sess,
+                            ];
+                        }
+                    }
+
                     // Parse dynamic device demographics
                     $devices = [];
                     if ($devicesRes->successful()) {
@@ -1150,6 +1172,7 @@ class StaffClients extends Component
                         }, $pagesJson['rows'] ?? []),
                         'traffic_sources' => $trafficSources,
                         'device_demographics' => $devices,
+                        'geographic_sources' => $countriesData,
                         'events_report' => $eventsData,
                         'top_keywords' => $keywords,
                         'daily_traffic' => array_map(function ($row) {

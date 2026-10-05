@@ -31,6 +31,11 @@ class ManageServiceTypes extends Component
         $this->resetPage();
     }
 
+    public function updatingPage($page): void
+    {
+        $this->dispatch('scroll-to-top');
+    }
+
     protected function rules(): array
     {
         $uniqueRule = 'required|string|max:100|unique:adspv_service_types,name';

@@ -37,6 +37,26 @@ class Client extends Model
         'last_login_at' => 'datetime',
     ];
 
+    /**
+     * Decode HTML entities from the company_name attribute.
+     */
+    protected function companyName(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value ? html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $value,
+        );
+    }
+
+    /**
+     * Decode HTML entities from the address attribute.
+     */
+    protected function address(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value ? html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $value,
+        );
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -34,6 +34,7 @@ class StaffMaintenance extends Component
     public function updatingStatusFilter(): void { $this->resetPage(); }
     public function updatingMonthFilter(): void { $this->resetPage(); }
     public function updatingSendFilter(): void { $this->resetPage(); }
+    public function updatingPage($page): void { $this->dispatch('scroll-to-top'); }
 
     public function clearFilters(): void
     {

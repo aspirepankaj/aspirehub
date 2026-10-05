@@ -52,6 +52,11 @@ class ManageClients extends Component
     {
         $this->resetPage();
     }
+
+    public function updatingPage($page): void
+    {
+        $this->dispatch('scroll-to-top');
+    }
     
     // Sorting
     public string $sortField = 'id';
@@ -683,10 +688,15 @@ class ManageClients extends Component
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+            $http = \Illuminate\Support\Facades\Http::withToken($accessToken)
                 ->withHeaders(['developer-token' => $developerToken])
-                ->timeout(15)
-                ->get('https://googleads.googleapis.com/v17/customers:listAccessibleCustomers');
+                ->timeout(15);
+                
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+                
+            $response = $http->get('https://googleads.googleapis.com/v17/customers:listAccessibleCustomers');
 
             if ($response->successful()) {
                 $resourceNames = $response->json('resourceNames') ?? [];
@@ -714,12 +724,13 @@ class ManageClients extends Component
 
     public function saveGoogleAdsAccount(): void
     {
-        $this->savePropertyId($this->activeConfigIntegrationId);
+        $this->selectedPropertyId = preg_replace('/[^0-9]/', '', $this->googleAdsAccountId);
+        $this->savePropertyId('gads');
     }
 
     public function updatedGoogleAdsAccountId($value): void
     {
-        $this->selectedPropertyId = $value;
+        $this->selectedPropertyId = preg_replace('/[^0-9]/', '', $value);
     }
 
     public function saveCredentials(): void
@@ -1212,6 +1223,15 @@ class ManageClients extends Component
                             'dimensions' => [['name' => 'deviceCategory']],
                             'limit' => 10
                         ]),
+                        $makeReq('countries')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
+                            'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
+                            'metrics' => [
+                                ['name' => 'activeUsers'],
+                                ['name' => 'sessions']
+                            ],
+                            'dimensions' => [['name' => 'country'], ['name' => 'countryId']],
+                            'limit' => 20
+                        ]),
                         $makeReq('events')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
                             'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
                             'metrics' => [
@@ -1236,6 +1256,7 @@ class ManageClients extends Component
                 $pagesResponse = $responses['pages'] ?? null;
                 $trafficSourcesRes = $responses['trafficSources'] ?? null;
                 $devicesRes = $responses['devices'] ?? null;
+                $countriesRes = $responses['countries'] ?? null;
                 $eventsRes = $responses['events'] ?? null;
                 $keywordsRes = $responses['keywords'] ?? null;
 
@@ -1304,6 +1325,23 @@ class ManageClients extends Component
                                 'source_medium' => $sourceMedium,
                                 'sessions' => $sessionsVal,
                                 'bounce_rate' => $brFormatted,
+                            ];
+                        }
+                    }
+
+                    // Parse dynamic countries
+                    $countriesData = [];
+                    if (isset($countriesRes) && $countriesRes->successful()) {
+                        foreach ($countriesRes->json('rows') ?? [] as $row) {
+                            $countryName = $row['dimensionValues'][0]['value'] ?? 'Unknown';
+                            $countryCode = $row['dimensionValues'][1]['value'] ?? 'us';
+                            $users = (int) ($row['metricValues'][0]['value'] ?? 0);
+                            $sess = (int) ($row['metricValues'][1]['value'] ?? 0);
+                            $countriesData[] = [
+                                'country' => $countryName,
+                                'code' => $countryCode,
+                                'active_users' => $users,
+                                'sessions' => $sess,
                             ];
                         }
                     }
@@ -1404,6 +1442,7 @@ class ManageClients extends Component
                         }, $pagesJson['rows'] ?? []),
                         'traffic_sources' => $trafficSources,
                         'device_demographics' => $devices,
+                        'geographic_sources' => $countriesData,
                         'events_report' => $eventsData,
                         'top_keywords' => $keywords,
                         'daily_traffic' => array_map(function ($row) {

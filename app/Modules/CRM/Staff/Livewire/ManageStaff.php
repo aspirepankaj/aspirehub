@@ -32,6 +32,11 @@ class ManageStaff extends Component
     {
         $this->resetPage();
     }
+
+    public function updatingPage($page): void
+    {
+        $this->dispatch('scroll-to-top');
+    }
     public $profile_image;
     public ?string $existing_profile_image = null;
     public array $phones = []; // array of ['phone' => '', 'label' => 'Work']

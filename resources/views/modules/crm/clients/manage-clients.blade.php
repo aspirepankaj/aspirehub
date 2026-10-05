@@ -257,6 +257,44 @@
                         </div>
                     </div>
 
+                    <!-- Reports & Integrations -->
+                    <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Reports & Integrations</h3>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                Analytics
+                            </span>
+                        </div>
+                        <div class="space-y-4">
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                View marketing performance, traffic analytics, and SEO rankings from connected third-party platforms.
+                            </p>
+                            
+                            <div class="flex items-center gap-2 mb-4">
+                                <div class="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-500 border border-orange-100 dark:border-orange-800/50" title="Google Analytics 4">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 border border-blue-100 dark:border-blue-800/50" title="Google Search Console">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 border border-emerald-100 dark:border-emerald-800/50" title="Google Ads">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"></path><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 border border-slate-200 dark:border-slate-700 text-[10px] font-bold">
+                                    +3
+                                </div>
+                            </div>
+
+                            <a href="{{ route('admin.clients.detail', ['id' => $clientDetails->id, 'tab' => 'integrations']) }}" wire:navigate
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition active:scale-95">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                View Integrations & Reports
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- Assigned Staff Members -->
                     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6">
                         <div class="flex items-center justify-between gap-3 mb-4">
@@ -957,10 +995,19 @@
                     <p class="text-xs text-slate-450 dark:text-slate-550">Please register or select a website from the list above to configure its third-party app integrations.</p>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
-                    @foreach ($clientIntegrations as $integration)
-                        @php
-                            $isNotConfigured = $integration['status'] === 'not_configured';
+                <div x-data="{ showAllIntegrations: false }">
+                    <div class="mb-4 flex justify-end" x-show="!showAllIntegrations">
+                        <button type="button" x-on:click="showAllIntegrations = true" class="flex items-center gap-2 py-2 px-4 rounded-xl font-bold text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Add New Integration
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
+                        @foreach ($clientIntegrations as $integration)
+                            @php
+                                $isNotConfigured = $integration['status'] === 'not_configured';
                             $isConfigured = $integration['status'] === 'credentials_configured';
                             $isConnected = $integration['status'] === 'connected';
                             $isDegraded = $integration['status'] === 'degraded';
@@ -1010,7 +1057,7 @@
                                 ]
                             };
                         @endphp
-                        <div wire:key="integration-card-{{ $integration['id'] }}" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-none {{ $cardTheme['hoverBorder'] }} {{ $cardTheme['hoverShadow'] }} {{ $isNotConfigured ? 'opacity-70 bg-slate-50/20 dark:bg-slate-950/10' : '' }}">
+                        <div x-show="showAllIntegrations || !{{ json_encode($isNotConfigured) }}" x-transition.opacity.duration.300ms wire:key="integration-card-{{ $integration['id'] }}" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-none {{ $cardTheme['hoverBorder'] }} {{ $cardTheme['hoverShadow'] }} {{ $isNotConfigured ? 'opacity-70 bg-slate-50/20 dark:bg-slate-950/10' : '' }}" style="display: {{ $isNotConfigured ? 'none' : 'flex' }};">
                             <div>
                                 <!-- Top Row: Logo, Name/Category, Status Badge -->
                                 <div class="flex items-start justify-between mb-6">
@@ -1210,6 +1257,25 @@
                                         </div>
                                     @endif
                                 @endif
+                                
+                                @if ($integration['id'] === 'gads' && $isConnected)
+                                    @if (!$integration['property_id'])
+                                        <div class="mt-4 p-3 bg-emerald-50/30 dark:bg-emerald-950/10 rounded-xl border border-emerald-100/30 dark:border-emerald-900/20 mb-4">
+                                            <span class="text-[10px] font-bold text-emerald-650 dark:text-emerald-400 block mb-1.5 uppercase tracking-wider">Select Google Ads Account</span>
+                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
+                                                <input type="text" wire:model.defer="googleAdsAccountId" x-on:input="hasVal = $event.target.value.length >= 10" placeholder="e.g. 123-456-7890" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-sm">
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveGoogleAdsAccount" wire:key="save-btn-gads" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
+                                            <span class="text-slate-455 dark:text-slate-550 font-medium">Google Ads Account ID</span>
+                                            <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[120px] truncate" title="{{ $integration['property_id'] }}">{{ $integration['property_id'] }}</span>
+                                        </div>
+                                    @endif
+                                @endif
                                 </div>
 
                             <!-- Footer Actions -->
@@ -1245,7 +1311,7 @@
                                 @else
                                     <!-- Connected stage -->
                                     <div class="w-full flex flex-col gap-2.5 mt-auto">
-                                        @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword', 'gtm', 'gbp']) && !empty($integration['property_id']))
+                                        @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword', 'gtm', 'gbp', 'gads', 'facebook', 'linkedin']) && !empty($integration['property_id']))
                                             <a href="{{ route('admin.clients.report', ['id' => $selectedClientDetailId, 'integration' => $integration['id'], 'website' => $selectedWebsiteId]) }}"
                                                     class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">
                                                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1282,6 +1348,7 @@
                             </div>
                         </div>
                     @endforeach
+                </div>
                 </div>
             @endif
 
@@ -1385,7 +1452,6 @@
                                             @endif
                                             @error('credentialsFile') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
                                         </div>
-                                        
                                         @if($activeConfigIntegrationId === 'gads')
                                             <div class="mb-5">
                                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Google Ads Developer Token</label>
@@ -3021,7 +3087,13 @@
                 </div>
             @else
                 {{-- Custom table with checkbox column --}}
-                <div class="overflow-x-auto custom-scrollbar w-full rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                <div id="clientsListTableTop" class="overflow-x-auto custom-scrollbar w-full rounded-2xl border border-slate-200/50 dark:border-slate-800/50" x-data="{
+                    init() {
+                        Livewire.on('scroll-to-top', () => {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+                    }
+                }">
                     <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                         <thead>
                             <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -3055,7 +3127,7 @@
                                 <th class="px-3 py-3.5 text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                        <tbody wire:loading.class="hidden" wire:target="search, statusFilter, planFilter, perPage, sortBy, nextPage, previousPage, gotoPage" class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                             @foreach($clients as $client)
                                 <tr wire:key="client-{{ $client->id }}" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors {{ in_array($client->id, $selectedClients) ? 'bg-indigo-50/40 dark:bg-indigo-900/10' : '' }}">
                                     {{-- Row Checkbox --}}
@@ -3234,6 +3306,21 @@
                                 </td>
                             </tr>
                         @endforeach
+                    </tbody>
+                    <tbody wire:loading.class.remove="hidden" wire:target="search, statusFilter, planFilter, perPage, sortBy, nextPage, previousPage, gotoPage" class="hidden divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                        @for($i = 0; $i < $perPage; $i++)
+                            <tr class="animate-pulse bg-white/20 dark:bg-slate-900/5">
+                                <td class="px-3 py-4 w-10 text-center"><div class="w-4 h-4 rounded bg-slate-200 dark:bg-slate-700 mx-auto"></div></td>
+                                <td class="px-3 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0"></div><div class="space-y-2 flex-1"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32"></div><div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-24"></div></div></div></td>
+                                <td class="px-3 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-28"></div></td>
+                                <td class="px-3 py-4"><div class="flex gap-1"><div class="h-5 bg-slate-200 dark:bg-slate-700 rounded w-16"></div><div class="h-5 bg-slate-200 dark:bg-slate-700 rounded w-16"></div></div></td>
+                                <td class="px-3 py-4"><div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-12 mx-auto"></div></td>
+                                <td class="px-3 py-4 hidden xl:table-cell"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-28"></div></td>
+                                <td class="px-3 py-4"><div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-lg w-16 mx-auto"></div></td>
+                                <td class="px-3 py-4 hidden lg:table-cell"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-20 mx-auto"></div></td>
+                                <td class="px-3 py-4"><div class="flex items-center justify-center gap-2"><div class="w-20 h-7 rounded-xl bg-slate-200 dark:bg-slate-700"></div><div class="w-8 h-7 rounded-xl bg-slate-200 dark:bg-slate-700"></div></div></td>
+                            </tr>
+                        @endfor
                     </tbody>
                 </table>
             </div>

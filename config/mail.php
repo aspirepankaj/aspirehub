@@ -115,4 +115,9 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    'reports' => [
+        'to' => env('ASPIRE_HUB_TO_EMAIL', ''),
+        'cc' => env('ASPIRE_HUB_CC_EMAIL', ''),
+    ],
+
 ];

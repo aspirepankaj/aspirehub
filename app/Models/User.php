@@ -19,6 +19,16 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Decode HTML entities from the name attribute.
+     */
+    protected function name(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value ? html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $value,
+        );
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

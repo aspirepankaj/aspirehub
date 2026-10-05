@@ -14,6 +14,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CriticalMaintenanceReportAlert;
 
 #[Layout('layouts.staff')]
 class StaffEditMaintenanceReport extends Component
@@ -31,6 +33,8 @@ class StaffEditMaintenanceReport extends Component
     public string $year_select = '';
     public string $maintenance_date = '';
     public string $status = 'draft';
+    public ?string $tag = null;
+    public ?string $critical_reason = null;
 
     public function updatedMonthSelect($value)
     {
@@ -135,6 +139,8 @@ class StaffEditMaintenanceReport extends Component
         }
         $this->maintenance_date = $report->maintenance_date ? $report->maintenance_date->format('Y-m-d') : '';
         $this->status = $report->status;
+        $this->tag = $report->tag;
+        $this->critical_reason = $report->critical_reason;
 
         $this->wp_version_current = $report->wp_version_current ?? '';
         $this->wp_version_latest = $report->wp_version_latest ?? '';
@@ -208,6 +214,8 @@ class StaffEditMaintenanceReport extends Component
             'maintenance_month' => 'required|string',
             'maintenance_date' => 'required|date',
             'status' => 'required|in:draft,completed',
+            'tag' => 'nullable|string|in:warning,critical',
+            'critical_reason' => 'nullable|required_if:tag,critical|string',
 
             'wp_version_current' => 'nullable|string',
             'wp_version_latest' => 'nullable|string',
@@ -275,6 +283,24 @@ class StaffEditMaintenanceReport extends Component
         }
     }
 
+    public function updatedPastedImages()
+    {
+        $this->validate([
+            'pastedImages.*' => 'image|max:10240', // 10MB max
+        ]);
+
+        foreach ($this->pastedImages as $image) {
+            $media = \App\Modules\CRM\Media\Models\Media::uploadFile($image);
+            if ($media) {
+                $this->newAttachments[] = [
+                    'path' => $media->file_path,
+                    'name' => $media->file_name
+                ];
+            }
+        }
+        $this->pastedImages = [];
+    }
+
     public function removeNewAttachment($index)
     {
         unset($this->newAttachments[$index]);
@@ -322,6 +348,14 @@ class StaffEditMaintenanceReport extends Component
             }
 
             $report = MaintenanceReport::findOrFail($this->reportId);
+            
+            $shouldSendEmail = false;
+            if ($this->tag === 'critical') {
+                if ($report->tag !== 'critical' || $report->critical_reason !== $this->critical_reason) {
+                    $shouldSendEmail = true;
+                }
+            }
+            
             $report->update([
                 'client_id' => $this->client_id,
                 'website_id' => $this->website_id,
@@ -329,6 +363,8 @@ class StaffEditMaintenanceReport extends Component
                 'maintenance_month' => $formattedMonth,
                 'maintenance_date' => $this->maintenance_date,
                 'status' => $this->status,
+                'tag' => $this->tag,
+                'critical_reason' => $this->tag === 'critical' ? $this->critical_reason : null,
 
                 'wp_version_current' => $this->wp_version_current,
                 'wp_version_latest' => $this->wp_version_latest,
@@ -395,6 +431,19 @@ class StaffEditMaintenanceReport extends Component
                     ]);
                 }
             }
+
+            if ($shouldSendEmail) {
+                $toEmail = array_filter(array_map('trim', explode(',', config('mail.reports.to', ''))));
+                $ccEmail = array_filter(array_map('trim', explode(',', config('mail.reports.cc', ''))));
+
+                if (!empty($toEmail)) {
+                    $mail = Mail::to($toEmail);
+                    if (!empty($ccEmail)) {
+                        $mail->cc($ccEmail);
+                    }
+                    $mail->send(new CriticalMaintenanceReportAlert($report));
+                }
+            }
         });
 
         session()->flash('success', 'Maintenance Report Updated Successfully');
@@ -409,7 +458,7 @@ class StaffEditMaintenanceReport extends Component
     public function render()
     {
         $staffId = auth()->user()->staff->id ?? 0;
-        $clients = Client::with('user')->whereHas('assignedStaff', function ($q) use ($staffId) {
+        $clients = Client::with(['user', 'websites'])->whereHas('assignedStaff', function ($q) use ($staffId) {
             $q->where('staff_id', $staffId);
         })->orderBy('company_name')->get();
         $websites = [];

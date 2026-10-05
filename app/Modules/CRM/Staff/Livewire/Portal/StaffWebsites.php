@@ -44,6 +44,11 @@ class StaffWebsites extends Component
         $this->resetPage();
     }
 
+    public function updatingPage($page): void
+    {
+        $this->dispatch('scroll-to-top');
+    }
+
     // ─── Bulk Selection ──────────────────────────────────────────────────────────
     public array $selectedWebsites = [];
     public bool $selectAll = false;

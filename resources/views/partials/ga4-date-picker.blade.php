@@ -6,6 +6,7 @@
     compareDateTo: @entangle('compareDateTo').live,
     includeTodayLive: @entangle('includeToday').live,
     compareFormatLive: @entangle('compareFormat').live,
+    datePresetLive: @entangle('datePreset').live,
     
     enableCompare: false,
     
@@ -33,9 +34,13 @@
         this.tempCompareEnd = this.compareDateTo || '';
         this.includeToday = this.includeTodayLive || false;
         this.format = this.compareFormatLive || 'percentage';
+        this.selectedPreset = this.datePresetLive || 'last_30';
         this.enableCompare = !!this.tempCompareStart;
         
-        this.syncPresetFromDates();
+        if (!this.datePresetLive) {
+            this.syncPresetFromDates();
+        }
+        
         if (this.tempStart) {
             this.viewDate = new Date(this.tempStart);
         }
@@ -202,12 +207,13 @@
     applyPreset(preset) {
         const today = new Date();
         
-        let start = new Date();
         let end = new Date();
         
         if (!this.includeToday) {
             end.setDate(today.getDate() - 1);
         }
+        
+        let start = new Date(end);
 
         if (preset === 'last_7') {
             start.setDate(end.getDate() - 6); 
@@ -316,6 +322,7 @@
             this.compareDateTo = this.enableCompare ? this.tempCompareEnd : '';
             this.includeTodayLive = this.includeToday;
             this.compareFormatLive = this.format;
+            this.datePresetLive = this.selectedPreset;
             
             $wire.applyDateFilter(
                 this.tempStart,
@@ -323,7 +330,8 @@
                 this.enableCompare ? this.tempCompareStart : '',
                 this.enableCompare ? this.tempCompareEnd : '',
                 this.includeToday,
-                this.format
+                this.format,
+                this.selectedPreset
             );
         }
         this.closePopover();

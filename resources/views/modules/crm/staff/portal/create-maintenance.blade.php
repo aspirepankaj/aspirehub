@@ -42,7 +42,8 @@
                             'id' => $c->id, 
                             'name' => $c->user->name ?? '', 
                             'email' => strtolower($c->user->email ?? ''),
-                            'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')'
+                            'label' => ($c->user->name ?? '') . ' (' . strtolower($c->user->email ?? '') . ')',
+                            'websites' => strtolower($c->websites->map(fn($w) => $w->site_name . ' ' . $w->url)->implode(' '))
                         ])) }},
                         select(id, label) {
                             this.search = label;
@@ -92,7 +93,7 @@
                          x-transition
                          class="absolute z-[9999] w-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl max-h-60 overflow-y-auto scrollbar-thin">
                         <template x-for="c in clients" :key="c.id">
-                            <div x-show="search === '' || c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase())"
+                            <div x-show="search === '' || c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || c.label.toLowerCase().includes(search.toLowerCase()) || (c.websites && c.websites.includes(search.toLowerCase()))"
                                  x-on:click="select(c.id, c.label)"
                                  class="px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 cursor-pointer transition-colors font-medium dropdown-hover-item flex items-center justify-between gap-2">
                                 <span class="font-semibold" x-text="c.name"></span>
@@ -147,6 +148,27 @@
                         </select>
                     </div>
                     <input type="hidden" wire:model="maintenance_month" />
+                </div>
+                
+                {{-- Tag & Critical Reason --}}
+                <div class="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tag / Priority</label>
+                        <select wire:model.live="tag" class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                            <option value="">Normal</option>
+                            <option value="warning">Warning</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('tag')" class="mt-1" />
+                    </div>
+                    
+                    @if($tag === 'critical')
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-red-500 dark:text-red-400 uppercase tracking-widest">Reason for Critical Status <span class="text-red-500">*</span></label>
+                        <input type="text" wire:model="critical_reason" placeholder="Explain why this is marked as critical..." class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-red-50/50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50" required />
+                        <x-input-error :messages="$errors->get('critical_reason')" class="mt-1" />
+                    </div>
+                    @endif
                 </div>
             </div>
         </x-admin.card>
@@ -479,7 +501,11 @@
                               <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">OR</span>
                               <div class="flex items-center justify-center gap-2 flex-1 max-w-lg border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-900/50 cursor-text focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                                    tabindex="0"
-                                   x-data
+                                   x-data="{ isUploading: false, progress: 0 }"
+                                   x-on:livewire-upload-start="isUploading = true"
+                                   x-on:livewire-upload-finish="isUploading = false"
+                                   x-on:livewire-upload-error="isUploading = false"
+                                   x-on:livewire-upload-progress="progress = $event.detail.progress"
                                    @paste="
                                       let items = $event.clipboardData.items;
                                       for (let i = 0; i < items.length; i++) {
@@ -489,14 +515,14 @@
                                           }
                                       }
                                    ">
-                                  <div wire:loading wire:target="pastedImages" class="text-xs text-indigo-500 font-bold flex items-center gap-2">
+                                  <div x-show="isUploading" style="display: none;" class="text-xs text-indigo-500 font-bold flex items-center gap-2">
                                       <svg class="animate-spin h-3 w-3 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                       </svg>
-                                      Uploading pasted image...
+                                      Uploading... <span x-text="progress + '%'"></span>
                                   </div>
-                                  <div wire:loading.remove wire:target="pastedImages" class="text-xs text-slate-500 dark:text-slate-400">
+                                  <div x-show="!isUploading" class="text-xs text-slate-500 dark:text-slate-400">
                                       <span class="font-bold">Click here</span> and press <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 rounded-md shadow-sm border border-slate-300 dark:border-slate-700">Ctrl+V</kbd> to paste an image
                                   </div>
                               </div>

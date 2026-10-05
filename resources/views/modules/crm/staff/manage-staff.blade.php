@@ -602,7 +602,13 @@
             </div>
         @else
             {{-- Custom table with checkbox column --}}
-            <div class="overflow-x-auto custom-scrollbar w-full rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+            <div id="adminStaffTableTop" class="overflow-x-auto custom-scrollbar w-full rounded-2xl border border-slate-200/50 dark:border-slate-800/50" x-data="{
+                init() {
+                    Livewire.on('scroll-to-top', () => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }">
                 <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                     <thead>
                         <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -623,7 +629,7 @@
                             <th class="px-3 py-3.5 text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                    <tbody wire:loading.class="hidden" wire:target="search, statusFilter, designationFilter, departmentFilter, perPage, nextPage, previousPage, gotoPage" class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                         @foreach($Staff as $staff)
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors {{ in_array($staff->id, $selectedStaff) ? 'bg-indigo-50/40 dark:bg-indigo-900/10' : '' }}">
                                 {{-- Row Checkbox --}}
@@ -758,9 +764,22 @@
                             </tr>
                         @endforeach
                     </tbody>
+                    <tbody wire:loading.class.remove="hidden" wire:target="search, statusFilter, designationFilter, departmentFilter, perPage, nextPage, previousPage, gotoPage" class="hidden divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                        @for($i = 0; $i < $perPage; $i++)
+                            <tr class="animate-pulse bg-white/20 dark:bg-slate-900/5">
+                                <td class="px-3 py-4 w-10 text-center"><div class="w-4 h-4 rounded bg-slate-200 dark:bg-slate-700 mx-auto"></div></td>
+                                <td class="px-3 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0"></div><div class="space-y-2 flex-1"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32"></div><div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-24"></div></div></div></td>
+                                <td class="px-3 py-4 hidden xl:table-cell"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-28"></div></td>
+                                <td class="px-3 py-4"><div class="flex flex-wrap gap-1.5"><div class="h-5 bg-slate-200 dark:bg-slate-700 rounded w-16"></div><div class="h-5 bg-slate-200 dark:bg-slate-700 rounded w-20"></div></div></td>
+                                <td class="px-3 py-4"><div class="flex flex-wrap gap-1.5"><div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-lg w-20"></div></div></td>
+                                <td class="px-3 py-4 hidden xl:table-cell"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-28"></div></td>
+                                <td class="px-3 py-4"><div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-lg w-16 mx-auto"></div></td>
+                                <td class="px-3 py-4 hidden lg:table-cell"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-20 mx-auto"></div></td>
+                                <td class="px-3 py-4"><div class="flex justify-center"><div class="w-16 h-7 rounded-xl bg-slate-200 dark:bg-slate-700"></div></div></td>
+                            </tr>
+                        @endfor
+                    </tbody>
                 </table>
-                </tbody>
-            </table>
             </div>
 
             <div class="mt-4">

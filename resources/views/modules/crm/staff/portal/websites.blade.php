@@ -477,7 +477,13 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Try refining your search or add a new website above.</p>
             </div>
         @else
-            <div class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+            <div id="staffWebsitesTableTop" class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50" x-data="{
+                init() {
+                    Livewire.on('scroll-to-top', () => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }">
                 <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                     <thead>
                         <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -490,7 +496,7 @@
                             <th class="px-4 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                    <tbody wire:loading.class="hidden" wire:target="search, statusFilter, serviceTypeFilter, planFilter, perPage, nextPage, previousPage, gotoPage" class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                         @foreach($websites as $website)
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                                 {{-- Website Name + URL --}}
@@ -570,6 +576,19 @@
                                 </td>
                             </tr>
                         @endforeach
+                    </tbody>
+                    <tbody wire:loading.class.remove="hidden" wire:target="search, statusFilter, serviceTypeFilter, planFilter, perPage, nextPage, previousPage, gotoPage" class="hidden divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                        @for($i = 0; $i < $perPage; $i++)
+                            <tr class="animate-pulse bg-white/20 dark:bg-slate-900/5">
+                                <td class="px-4 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32 mb-2"></div><div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-48"></div></td>
+                                <td class="px-4 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32 mb-2"></div><div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-24"></div></td>
+                                <td class="px-4 py-4"><div class="flex flex-wrap gap-1.5"><div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-lg w-20"></div></div></td>
+                                <td class="px-4 py-4"><div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-lg w-16"></div></td>
+                                <td class="px-4 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-16"></div></td>
+                                <td class="px-4 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-16"></div></td>
+                                <td class="px-4 py-4"><div class="flex items-center justify-end gap-1.5"><div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700"></div></div></td>
+                            </tr>
+                        @endfor
                     </tbody>
                 </table>
             </div>

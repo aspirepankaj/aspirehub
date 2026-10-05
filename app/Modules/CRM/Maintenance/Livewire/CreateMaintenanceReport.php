@@ -14,6 +14,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CriticalMaintenanceReportAlert;
 
 #[Layout('layouts.admin')]
 class CreateMaintenanceReport extends Component
@@ -29,6 +31,8 @@ class CreateMaintenanceReport extends Component
     public string $year_select = '';
     public string $maintenance_date = '';
     public string $status = 'draft';
+    public ?string $tag = null;
+    public ?string $critical_reason = null;
 
     public function updatedMonthSelect($value)
     {
@@ -378,6 +382,8 @@ class CreateMaintenanceReport extends Component
                 'maintenance_month' => $formattedMonth,
                 'maintenance_date' => $this->maintenance_date,
                 'status' => $this->status,
+                'tag' => $this->tag,
+                'critical_reason' => $this->tag === 'critical' ? $this->critical_reason : null,
 
                 'wp_version_current' => $this->wp_version_current,
                 'wp_version_latest' => $this->wp_version_latest,
@@ -444,6 +450,19 @@ class CreateMaintenanceReport extends Component
                     ]);
                 }
             }
+
+            if ($this->tag === 'critical') {
+                $toEmail = array_filter(array_map('trim', explode(',', config('mail.reports.to', ''))));
+                $ccEmail = array_filter(array_map('trim', explode(',', config('mail.reports.cc', ''))));
+
+                if (!empty($toEmail)) {
+                    $mail = Mail::to($toEmail);
+                    if (!empty($ccEmail)) {
+                        $mail->cc($ccEmail);
+                    }
+                    $mail->send(new CriticalMaintenanceReportAlert($report));
+                }
+            }
         });
 
         session()->flash('success', 'Maintenance Report Created Successfully');
@@ -457,7 +476,7 @@ class CreateMaintenanceReport extends Component
 
     public function render()
     {
-        $clients = Client::with('user')->orderBy('company_name')->get();
+        $clients = Client::with(['user', 'websites'])->orderBy('company_name')->get();
         
         // Load websites matching selected client
         $websites = [];

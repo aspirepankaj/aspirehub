@@ -69,7 +69,23 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">Create a dynamic service type category to classify customer websites.</p>
             </div>
         @else
-            <x-admin.table :headers="['Service Type Name', 'Badge Preview', 'Color Code', 'Actions']">
+            <div id="adminServiceTypesTableTop" class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50" x-data="{
+                init() {
+                    Livewire.on('scroll-to-top', () => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }">
+                <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
+                    <thead>
+                        <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 font-semibold text-left">Service Type Name</th>
+                            <th class="px-6 py-4 font-semibold text-left">Badge Preview</th>
+                            <th class="px-6 py-4 font-semibold text-left">Color Code</th>
+                            <th class="px-6 py-4 font-semibold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody wire:loading.class="hidden" wire:target="search, perPage, nextPage, previousPage, gotoPage" class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                 @foreach($types as $type)
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-900 dark:text-white text-sm">
@@ -124,7 +140,19 @@
                         </td>
                     </tr>
                 @endforeach
-            </x-admin.table>
+                    </tbody>
+                    <tbody wire:loading.class.remove="hidden" wire:target="search, perPage, nextPage, previousPage, gotoPage" class="hidden divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                        @for($i = 0; $i < $perPage; $i++)
+                            <tr class="animate-pulse bg-white/20 dark:bg-slate-900/5">
+                                <td class="px-6 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-48"></div></td>
+                                <td class="px-6 py-4"><div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-lg w-32"></div></td>
+                                <td class="px-6 py-4"><div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-700"></div><div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-16"></div></div></td>
+                                <td class="px-6 py-4"><div class="flex items-center justify-center gap-1.5"><div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700"></div><div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700"></div></div></td>
+                            </tr>
+                        @endfor
+                    </tbody>
+                </table>
+            </div>
 
             <div class="mt-6">
                 {{ $types->links() }}

@@ -23,6 +23,8 @@ class MaintenanceReport extends Model
         'maintenance_month',
         'maintenance_date',
         'status',
+        'tag',
+        'critical_reason',
         
         // WordPress Information
         'wp_version_current',

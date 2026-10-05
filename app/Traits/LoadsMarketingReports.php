@@ -32,6 +32,7 @@ trait LoadsMarketingReports
     public bool $isSendingReport = false;
     public string $reportModalSuccessMessage = '';
     public string $reportModalErrorMessage = '';
+    public string $datePreset = 'last_30';
 
 
     public function initDateRange()
@@ -44,7 +45,7 @@ trait LoadsMarketingReports
         }
     }
 
-    public function applyDateFilter($dateFrom, $dateTo, $compareFrom, $compareTo, $includeToday, $format)
+    public function applyDateFilter($dateFrom, $dateTo, $compareFrom, $compareTo, $includeToday, $format, $preset = 'custom')
     {
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;
@@ -52,6 +53,7 @@ trait LoadsMarketingReports
         $this->compareDateTo = $compareTo;
         $this->includeToday = filter_var($includeToday, FILTER_VALIDATE_BOOLEAN);
         $this->compareFormat = $format;
+        $this->datePreset = $preset;
         
         // Call whichever data loading method exists in the component
         if (method_exists($this, 'loadReport')) {
@@ -86,7 +88,7 @@ trait LoadsMarketingReports
         return $months;
     }
 
-    public function loadIntegrationJsonData(string $clientFolder, string $websiteFolder, string $integrationType, string $startDate, string $endDate): array
+    public function loadIntegrationJsonData(string $clientFolder, string $websiteFolder, string $integrationType, string $startDate, string $endDate, bool $fetchDefaultCompare = true): array
     {
         $months = $this->getMonthsForDateRange($startDate, $endDate);
         if (empty($months)) {
@@ -372,6 +374,19 @@ trait LoadsMarketingReports
                     $allData['summary']['avg_view_duration'] = '0s';
                 }
             }
+        }
+
+        if ($fetchDefaultCompare && !empty($startDate) && !empty($endDate)) {
+            try {
+                $start = \Carbon\Carbon::parse($startDate);
+                $end = \Carbon\Carbon::parse($endDate);
+                $diffDays = $start->diffInDays($end) + 1;
+                $cEnd = $start->copy()->subDay();
+                $cStart = $cEnd->copy()->subDays($diffDays - 1);
+                
+                $defaultCompare = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $integrationType, $cStart->format('Y-m-d'), $cEnd->format('Y-m-d'), false);
+                $allData['default_compare_data'] = $defaultCompare;
+            } catch (\Exception $e) {}
         }
 
         return $allData;

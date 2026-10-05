@@ -14,6 +14,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CriticalMaintenanceReportAlert;
 
 #[Layout('layouts.admin')]
 class EditMaintenanceReport extends Component
@@ -31,6 +33,8 @@ class EditMaintenanceReport extends Component
     public string $year_select = '';
     public string $maintenance_date = '';
     public string $status = 'draft';
+    public ?string $tag = null;
+    public ?string $critical_reason = null;
 
     public function updatedMonthSelect($value)
     {
@@ -128,6 +132,8 @@ class EditMaintenanceReport extends Component
         }
         $this->maintenance_date = $report->maintenance_date ? $report->maintenance_date->format('Y-m-d') : '';
         $this->status = $report->status;
+        $this->tag = $report->tag;
+        $this->critical_reason = $report->critical_reason;
 
         $this->wp_version_current = $report->wp_version_current ?? '';
         $this->wp_version_latest = $report->wp_version_latest ?? '';
@@ -334,6 +340,14 @@ class EditMaintenanceReport extends Component
             }
 
             $report = MaintenanceReport::findOrFail($this->reportId);
+            
+            $shouldSendEmail = false;
+            if ($this->tag === 'critical') {
+                if ($report->tag !== 'critical' || $report->critical_reason !== $this->critical_reason) {
+                    $shouldSendEmail = true;
+                }
+            }
+            
             $report->update([
                 'client_id' => $this->client_id,
                 'website_id' => $this->website_id,
@@ -341,6 +355,8 @@ class EditMaintenanceReport extends Component
                 'maintenance_month' => $formattedMonth,
                 'maintenance_date' => $this->maintenance_date,
                 'status' => $this->status,
+                'tag' => $this->tag,
+                'critical_reason' => $this->tag === 'critical' ? $this->critical_reason : null,
 
                 'wp_version_current' => $this->wp_version_current,
                 'wp_version_latest' => $this->wp_version_latest,
@@ -408,6 +424,19 @@ class EditMaintenanceReport extends Component
                     ]);
                 }
             }
+
+            if ($shouldSendEmail) {
+                $toEmail = array_filter(array_map('trim', explode(',', config('mail.reports.to', ''))));
+                $ccEmail = array_filter(array_map('trim', explode(',', config('mail.reports.cc', ''))));
+
+                if (!empty($toEmail)) {
+                    $mail = Mail::to($toEmail);
+                    if (!empty($ccEmail)) {
+                        $mail->cc($ccEmail);
+                    }
+                    $mail->send(new CriticalMaintenanceReportAlert($report));
+                }
+            }
         });
 
         session()->flash('success', 'Maintenance Report Updated Successfully');
@@ -421,7 +450,7 @@ class EditMaintenanceReport extends Component
 
     public function render()
     {
-        $clients = Client::with('user')->orderBy('company_name')->get();
+        $clients = Client::with(['user', 'websites'])->orderBy('company_name')->get();
         $websites = [];
         if ($this->client_id) {
             $websites = Website::where('client_id', $this->client_id)->orderBy('site_name')->get();

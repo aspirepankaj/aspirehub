@@ -22,7 +22,7 @@ class SyncGoogleAdsMetrics extends Command
         $this->info('Starting Google Ads Metrics Sync...');
 
         $integrations = WebsiteIntegration::with(['website', 'website.client.user'])
-            ->where('integration_type', 'google_ads')
+            ->where('integration_type', 'gads')
             ->where('status', 'connected')
             ->get();
 
@@ -33,13 +33,6 @@ class SyncGoogleAdsMetrics extends Command
 
         $startDate = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
         $endDate = \Carbon\Carbon::now()->format('Y-m-d');
-        
-        $developerToken = env('GOOGLE_ADS_DEVELOPER_TOKEN', '');
-        if (empty($developerToken)) {
-            $this->error('GOOGLE_ADS_DEVELOPER_TOKEN is not set in .env');
-            Log::error('Google Ads Sync Error: Developer Token is missing.');
-            return;
-        }
 
         foreach ($integrations as $integration) {
             $this->info("Processing Website ID: {$integration->website_id}");
@@ -48,9 +41,15 @@ class SyncGoogleAdsMetrics extends Command
                 $apiCredentials = $integration->api_credentials ?? [];
                 $authCredentials = $integration->auth_credentials ?? [];
                 
-                $customerId = $authCredentials['property_id'] ?? null;
+                $customerId = $integration->property_id ?? $authCredentials['property_id'] ?? null;
                 if (!$customerId) {
                     $this->info("Skipping integration {$integration->id} - No Customer ID configured.");
+                    continue;
+                }
+
+                $developerToken = $apiCredentials['developer_token'] ?? env('GOOGLE_ADS_DEVELOPER_TOKEN', '');
+                if (empty($developerToken)) {
+                    $this->error("Skipping integration {$integration->id} - Missing Developer Token.");
                     continue;
                 }
 
@@ -111,9 +110,9 @@ class SyncGoogleAdsMetrics extends Command
     private function fetchGoogleAdsMetrics($token, $developerToken, $customerId, $startDate, $endDate)
     {
         $customerId = str_replace('-', '', $customerId);
-        $url = "https://googleads.googleapis.com/v17/customers/{$customerId}/googleAds:search";
+        $url = "https://googleads.googleapis.com/v25/customers/{$customerId}/googleAds:search";
         
-        $query = "SELECT metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}'";
+        $query = "SELECT campaign.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions, segments.date FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}'";
 
         $http = Http::withToken($token);
         if (app()->environment('local')) {
@@ -136,16 +135,49 @@ class SyncGoogleAdsMetrics extends Command
             $impressions = 0;
             $costMicros = 0;
             $conversions = 0;
+            
+            $dailyTraffic = [];
+            $campaigns = [];
 
             if (isset($data['results'])) {
                 foreach ($data['results'] as $row) {
                     $metrics = $row['metrics'] ?? [];
-                    $clicks += (int)($metrics['clicks'] ?? 0);
-                    $impressions += (int)($metrics['impressions'] ?? 0);
-                    $costMicros += (int)($metrics['costMicros'] ?? 0);
-                    $conversions += (float)($metrics['conversions'] ?? 0);
+                    $date = $row['segments']['date'] ?? null;
+                    $campaignName = $row['campaign']['name'] ?? 'Unknown';
+                    
+                    $c = (int)($metrics['clicks'] ?? 0);
+                    $i = (int)($metrics['impressions'] ?? 0);
+                    $cost = (int)($metrics['costMicros'] ?? 0);
+                    $conv = (float)($metrics['conversions'] ?? 0);
+
+                    $clicks += $c;
+                    $impressions += $i;
+                    $costMicros += $cost;
+                    $conversions += $conv;
+                    
+                    if ($date) {
+                        if (!isset($dailyTraffic[$date])) {
+                            $dailyTraffic[$date] = ['date' => $date, 'clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0];
+                        }
+                        $dailyTraffic[$date]['clicks'] += $c;
+                        $dailyTraffic[$date]['impressions'] += $i;
+                        $dailyTraffic[$date]['cost'] += round($cost / 1000000, 2);
+                        $dailyTraffic[$date]['conversions'] += $conv;
+                    }
+                    
+                    if (!isset($campaigns[$campaignName])) {
+                        $campaigns[$campaignName] = ['name' => $campaignName, 'clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0];
+                    }
+                    $campaigns[$campaignName]['clicks'] += $c;
+                    $campaigns[$campaignName]['impressions'] += $i;
+                    $campaigns[$campaignName]['cost'] += round($cost / 1000000, 2);
+                    $campaigns[$campaignName]['conversions'] += $conv;
                 }
             }
+            
+            usort($campaigns, function($a, $b) {
+                return $b['cost'] <=> $a['cost'];
+            });
 
             return [
                 'summary' => [
@@ -154,11 +186,13 @@ class SyncGoogleAdsMetrics extends Command
                     'cost' => round($costMicros / 1000000, 2),
                     'conversions' => $conversions,
                 ],
+                'daily_traffic' => array_values($dailyTraffic),
+                'top_campaigns' => array_slice($campaigns, 0, 5),
                 'raw' => $data
             ];
         }
 
-        Log::error("Google Ads Metrics Fetch Error for Customer {$customerId}", $response->json());
+        Log::error("Google Ads Metrics Fetch Error for Customer {$customerId}", (array) ($response->json() ?? ['body' => $response->body()]));
         return null;
     }
 
@@ -175,7 +209,7 @@ class SyncGoogleAdsMetrics extends Command
             $websiteFolder = 'site-' . $integration->website->id;
         }
 
-        $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/google_ads/{$year}");
+        $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$year}");
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }

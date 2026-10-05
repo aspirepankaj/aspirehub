@@ -33,6 +33,16 @@ class Website extends Model
     ];
 
     /**
+     * Decode HTML entities from the site_name attribute.
+     */
+    protected function siteName(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value ? html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $value,
+        );
+    }
+
+    /**
      * Encrypt password before saving.
      */
     public function setAdminPasswordAttribute(?string $value): void

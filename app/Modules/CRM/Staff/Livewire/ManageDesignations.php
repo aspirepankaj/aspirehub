@@ -42,6 +42,11 @@ class ManageDesignations extends Component
         $this->resetPage();
     }
 
+    public function updatingPage($page): void
+    {
+        $this->dispatch('scroll-to-top');
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
