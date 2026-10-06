@@ -66,6 +66,7 @@ class StaffClients extends Component
 
     public ?string $youtubeChannelId = null;
     public ?string $keywordProjectId = null;
+    public string $googleAdsAccountId = '';
 
     public function mount($id = null): void
     {
@@ -2109,6 +2110,17 @@ class StaffClients extends Component
         $this->selectedPropertyId = '';
     }
 
+    public function saveGoogleAdsAccount(): void
+    {
+        $this->selectedPropertyId = preg_replace('/[^0-9]/', '', $this->googleAdsAccountId);
+        $this->savePropertyId('gads');
+    }
+
+    public function updatedGoogleAdsAccountId($value): void
+    {
+        $this->selectedPropertyId = preg_replace('/[^0-9]/', '', $value);
+    }
+
     public function getGA4Properties(): array
     {
         if (!$this->selectedWebsiteId) {
@@ -2188,6 +2200,37 @@ class StaffClients extends Component
             ]);
 
             session()->flash('success', "Property ID configured successfully!");
+        }
+    }
+
+    public function clearPropertyId(string $integrationId): void
+    {
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', $integrationId)
+            ->first();
+
+        if ($integration) {
+            $creds = $integration->auth_credentials;
+            unset($creds['property_id']);
+            
+            $integration->update([
+                'auth_credentials' => $creds,
+            ]);
+
+            // Log Activity
+            \App\Modules\Core\Activity\Models\ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'clear_property_id',
+                'loggable_type' => \App\Modules\CRM\Clients\Models\Client::class,
+                'loggable_id' => $this->selectedClientId,
+                'description' => "Cleared " . strtoupper($integrationId) . " Property ID.",
+                'meta' => [
+                    'integration_type' => $integrationId,
+                    'website_id' => $this->selectedWebsiteId,
+                ]
+            ]);
+
+            session()->flash('success', "Account ID cleared successfully!");
         }
     }
 
