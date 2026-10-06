@@ -20,6 +20,8 @@
                             Google Tag Manager &mdash; Container Summary
                         @elseif($activeReportIntegrationId === 'gbp')
                             Google Business Profile &mdash; Detailed Report
+                        @elseif($activeReportIntegrationId === 'gads')
+                            Google Ads &mdash; Detailed Report
                         @else
                             Google Analytics 4 &mdash; Detailed Report
                         @endif
@@ -28,7 +30,15 @@
                 <p class="text-[11px] text-slate-400 mt-0.5 ml-7">
                     {{ $clientName ?? '' }} &bull; 
                     @if(!empty($websiteName)) {{ $websiteName }} &bull; @endif
-                    Property ID: <span class="font-semibold text-slate-600 dark:text-slate-350">{{ $activeReportPropertyId ?? '—' }}</span>
+                    Property ID: <span class="font-semibold text-slate-600 dark:text-slate-350">
+                        @if($activeReportIntegrationId === 'gads' && strlen($activeReportPropertyId ?? '') == 20)
+                            Client: {{ substr($activeReportPropertyId, 10, 3) }}-{{ substr($activeReportPropertyId, 13, 3) }}-{{ substr($activeReportPropertyId, 16, 4) }} (via MCC: {{ substr($activeReportPropertyId, 0, 3) }}-{{ substr($activeReportPropertyId, 3, 3) }}-{{ substr($activeReportPropertyId, 6, 4) }})
+                        @elseif($activeReportIntegrationId === 'gads' && strlen($activeReportPropertyId ?? '') == 10)
+                            {{ substr($activeReportPropertyId, 0, 3) }}-{{ substr($activeReportPropertyId, 3, 3) }}-{{ substr($activeReportPropertyId, 6, 4) }}
+                        @else
+                            {{ $activeReportPropertyId ?? '—' }}
+                        @endif
+                    </span>
                 </p>
             </div>
         </div>

@@ -109,7 +109,14 @@ class SyncGoogleAdsMetrics extends Command
 
     private function fetchGoogleAdsMetrics($token, $developerToken, $customerId, $startDate, $endDate)
     {
-        $customerId = str_replace('-', '', $customerId);
+        $customerId = preg_replace('/[^0-9]/', '', $customerId);
+        $loginCustomerId = $customerId;
+        
+        if (strlen($customerId) >= 20) {
+            $loginCustomerId = substr($customerId, 0, 10);
+            $customerId = substr($customerId, 10, 10);
+        }
+
         $url = "https://googleads.googleapis.com/v25/customers/{$customerId}/googleAds:search";
         
         $query = "SELECT campaign.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions, segments.date FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}'";
@@ -122,7 +129,7 @@ class SyncGoogleAdsMetrics extends Command
         $response = $http
             ->withHeaders([
                 'developer-token' => $developerToken,
-                'login-customer-id' => $customerId // Assume direct access for simplicity, if MCC is used, this might need adjusting
+                'login-customer-id' => $loginCustomerId
             ])
             ->post($url, [
                 'query' => $query

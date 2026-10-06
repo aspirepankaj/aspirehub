@@ -1832,16 +1832,28 @@ class ManageClients extends Component
                     throw new \Exception("Google Ads Developer Token is missing.");
                 }
 
-                $customerId = str_replace('-', '', $propertyId);
-                $url = "https://googleads.googleapis.com/v17/customers/{$customerId}/googleAds:search";
+                $customerId = preg_replace('/[^0-9]/', '', $propertyId);
+                $loginCustomerId = $customerId;
+                
+                if (strlen($customerId) >= 20) {
+                    $loginCustomerId = substr($customerId, 0, 10);
+                    $customerId = substr($customerId, 10, 10);
+                }
+
+                $url = "https://googleads.googleapis.com/v25/customers/{$customerId}/googleAds:search";
                 $query = "SELECT metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM campaign WHERE segments.date >= '{$startDateStr}' AND segments.date <= '{$endDateStr}'";
 
-                $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
+                $http = \Illuminate\Support\Facades\Http::withToken($accessToken)
                     ->withHeaders([
                         'developer-token' => $developerToken,
-                        'login-customer-id' => $customerId
-                    ])
-                    ->post($url, ['query' => $query]);
+                        'login-customer-id' => $loginCustomerId
+                    ]);
+                    
+                if (app()->environment('local')) {
+                    $http = $http->withoutVerifying();
+                }
+                
+                $response = $http->post($url, ['query' => $query]);
 
                 if ($response->successful()) {
                     $data = $response->json();
@@ -2153,10 +2165,14 @@ class ManageClients extends Component
                 ]
             ]);
 
-            session()->flash('success', "Integration refreshed and monthly data report updated successfully!");
+            if (isset($reportData['error'])) {
+                session()->flash('error', $reportData['error']);
+            } else {
+                session()->flash('success', "Integration refreshed and monthly data report updated successfully!");
+            }
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error saving refreshed GA4 data: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error saving refreshed data: ' . $e->getMessage());
             session()->flash('error', "Refresh completed but failed to write monthly file.");
         }
     }
@@ -2781,6 +2797,36 @@ class ManageClients extends Component
             ]);
 
             session()->flash('success', "Property ID configured successfully!");
+        }
+    }
+
+    public function clearPropertyId(string $integrationId): void
+    {
+        $integration = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('integration_type', $integrationId)
+            ->first();
+
+        if ($integration) {
+            $creds = $integration->auth_credentials;
+            unset($creds['property_id']);
+            
+            $integration->update([
+                'auth_credentials' => $creds,
+            ]);
+
+            // Log Activity
+            \App\Modules\Core\Activity\Models\ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'clear_property_id',
+                'loggable_type' => \App\Modules\CRM\Clients\Models\Client::class,
+                'loggable_id' => $this->selectedClientDetailId,
+                'description' => "Cleared " . strtoupper($integrationId) . " Property ID.",
+                'meta' => [
+                    'website_id' => $this->selectedWebsiteId,
+                ]
+            ]);
+
+            session()->flash('success', "Account ID removed successfully!");
         }
     }
 
