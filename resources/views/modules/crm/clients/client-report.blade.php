@@ -30,6 +30,9 @@
                 <p class="text-[11px] text-slate-400 mt-0.5 ml-7">
                     {{ $clientName ?? '' }} &bull; 
                     @if(!empty($websiteName)) {{ $websiteName }} &bull; @endif
+                    @if(!empty($activeReportData['account_name']))
+                        Account: <span class="font-semibold text-slate-600 dark:text-slate-350">{{ $activeReportData['account_name'] }}</span> &bull; 
+                    @endif
                     Property ID: <span class="font-semibold text-slate-600 dark:text-slate-350">
                         @if($activeReportIntegrationId === 'gads' && strlen($activeReportPropertyId ?? '') == 20)
                             Client: {{ substr($activeReportPropertyId, 10, 3) }}-{{ substr($activeReportPropertyId, 13, 3) }}-{{ substr($activeReportPropertyId, 16, 4) }} (via MCC: {{ substr($activeReportPropertyId, 0, 3) }}-{{ substr($activeReportPropertyId, 3, 3) }}-{{ substr($activeReportPropertyId, 6, 4) }})
@@ -1153,13 +1156,13 @@
 
         <!-- 2. Charts Row (Line Chart & Donut) -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
-            <!-- Users & New Users Chart -->
-            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="lg:col-span-3 bg-white border border-slate-200 p-5 rounded-xl shadow-sm relative overflow-hidden flex flex-col" x-data="{
+            <!-- Campaign Performance Chart -->
+            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden flex flex-col" x-data="{
                 chartInstance: null,
-                metric: 'users',
-                showDropdown: false,
+                metric: 'clicks',
                 traffic: [],
                 labels: [],
+                totalValue: 0,
                 
                 init() {
                     let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
@@ -1176,22 +1179,35 @@
                         return d;
                     });
 
+                    // Set default metric to clicks if available, otherwise users
+                    let hasClicks = this.traffic.some(t => typeof t.clicks !== 'undefined' && t.clicks > 0);
+                    if (hasClicks) {
+                        this.metric = 'clicks';
+                    } else {
+                        this.metric = 'users';
+                    }
+
                     this.renderChart();
                 },
                 
                 setMetric(m) {
                     this.metric = m;
-                    this.showDropdown = false;
                     this.renderChart();
                 },
 
                 get title() {
-                    if (this.metric === 'users') return 'Users & New Users';
-                    if (this.metric === 'pageviews') return 'Pageviews';
-                    if (this.metric === 'sessions') return 'Sessions';
-                    if (this.metric === 'bounce_rate') return 'Bounce Rate (%)';
-                    if (this.metric === 'avg_session_duration') return 'Avg Session Duration (s)';
+                    if (this.metric === 'users') return 'Total Users';
+                    if (this.metric === 'sessions') return 'Web Sessions';
+                    if (this.metric === 'clicks') return 'Ad Clicks';
+                    if (this.metric === 'impressions') return 'Ad Impressions';
+                    if (this.metric === 'cost') return 'Total Spend';
+                    if (this.metric === 'conversions') return 'Conversions';
                     return '';
+                },
+                
+                get formattedTotal() {
+                    if (this.metric === 'cost') return '$' + this.totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    return this.totalValue.toLocaleString();
                 },
                 
                 renderChart() {
@@ -1204,86 +1220,62 @@
                     }
                     
                     let d1 = [];
-                    let d2 = [];
-                    let l1 = '';
-                    let l2 = '';
                     let maxVal = 0;
+                    let colorMain = '#0ea5e9';
+                    let colorBgStart = 'rgba(14, 165, 233, 0.4)';
+                    let colorBgEnd = 'rgba(14, 165, 233, 0.0)';
                     
                     if (this.metric === 'users') {
                         d1 = this.traffic.map(t => t.users || 0);
-                        d2 = this.traffic.map(t => Math.round((t.users || 0) * 0.71));
-                        l1 = 'Total Users';
-                        l2 = 'New Users';
-                        maxVal = Math.max(...d1, 400);
-                    } else if (this.metric === 'pageviews') {
-                        d1 = this.traffic.map(t => t.pageviews || 0);
-                        l1 = 'Pageviews';
-                        maxVal = Math.max(...d1, 100);
+                        colorMain = '#6366f1'; colorBgStart = 'rgba(99, 102, 241, 0.3)'; colorBgEnd = 'rgba(99, 102, 241, 0)';
                     } else if (this.metric === 'sessions') {
                         d1 = this.traffic.map(t => t.sessions || 0);
-                        l1 = 'Sessions';
-                        maxVal = Math.max(...d1, 100);
-                    } else if (this.metric === 'bounce_rate') {
-                        d1 = this.traffic.map(t => t.bounce_rate || 0);
-                        l1 = 'Bounce Rate (%)';
-                        maxVal = Math.max(...d1, 10);
-                    } else if (this.metric === 'avg_session_duration') {
-                        d1 = this.traffic.map(t => t.avg_session_duration || 0);
-                        l1 = 'Avg Duration (s)';
-                        maxVal = Math.max(...d1, 10);
+                        colorMain = '#8b5cf6'; colorBgStart = 'rgba(139, 92, 246, 0.3)'; colorBgEnd = 'rgba(139, 92, 246, 0)';
+                    } else if (this.metric === 'clicks') {
+                        d1 = this.traffic.map(t => t.clicks || 0);
+                        colorMain = '#0ea5e9'; colorBgStart = 'rgba(14, 165, 233, 0.3)'; colorBgEnd = 'rgba(14, 165, 233, 0)';
+                    } else if (this.metric === 'impressions') {
+                        d1 = this.traffic.map(t => t.impressions || 0);
+                        colorMain = '#f59e0b'; colorBgStart = 'rgba(245, 158, 11, 0.3)'; colorBgEnd = 'rgba(245, 158, 11, 0)';
+                    } else if (this.metric === 'cost') {
+                        d1 = this.traffic.map(t => t.cost || 0);
+                        colorMain = '#10b981'; colorBgStart = 'rgba(16, 185, 129, 0.3)'; colorBgEnd = 'rgba(16, 185, 129, 0)';
+                    } else if (this.metric === 'conversions') {
+                        d1 = this.traffic.map(t => t.conversions || 0);
+                        colorMain = '#f43f5e'; colorBgStart = 'rgba(244, 63, 94, 0.3)'; colorBgEnd = 'rgba(244, 63, 94, 0)';
                     }
                     
-                    // Format maxScale properly based on metric magnitude
+                    this.totalValue = d1.reduce((a, b) => a + Number(b), 0);
+                    maxVal = Math.max(...d1, 5);
+                    
                     let maxScale = 100;
                     if (maxVal <= 10) maxScale = Math.ceil(maxVal);
                     else if (maxVal <= 100) maxScale = Math.ceil(maxVal / 10) * 10;
                     else if (maxVal <= 1000) maxScale = Math.ceil(maxVal / 100) * 100;
-                    else maxScale = Math.ceil(maxVal / 500) * 500;
-                    
-                    if (this.metric === 'users') maxScale = Math.max(maxScale, 400); // preserve the 400 default for users
+                    else if (maxVal <= 10000) maxScale = Math.ceil(maxVal / 1000) * 1000;
+                    else maxScale = Math.ceil(maxVal / 5000) * 5000;
                     
                     let stepScale = maxScale / 4;
                     if (stepScale < 1) stepScale = 1;
                     
-                    let gradBlue = ctx.createLinearGradient(0, 0, 0, 300);
-                    gradBlue.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
-                    gradBlue.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-                    
-                    let gradPurple = ctx.createLinearGradient(0, 0, 0, 300);
-                    gradPurple.addColorStop(0, 'rgba(168, 85, 247, 0.2)');
-                    gradPurple.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+                    let grad = ctx.createLinearGradient(0, 0, 0, 300);
+                    grad.addColorStop(0, colorBgStart);
+                    grad.addColorStop(1, colorBgEnd);
                     
                     let datasets = [{
-                        label: l1,
+                        label: this.title,
                         data: d1,
-                        borderColor: '#3b82f6',
-                        backgroundColor: gradBlue,
-                        borderWidth: 2,
+                        borderColor: colorMain,
+                        backgroundColor: grad,
+                        borderWidth: 3,
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#3b82f6',
-                        pointBorderWidth: 2,
+                        pointRadius: 0,
                         pointHoverRadius: 6,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: colorMain,
+                        pointBorderWidth: 2,
                     }];
-                    
-                    if (d2.length > 0) {
-                        datasets.push({
-                            label: l2,
-                            data: d2,
-                            borderColor: '#a855f7',
-                            backgroundColor: gradPurple,
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#a855f7',
-                            pointBorderWidth: 2,
-                            pointHoverRadius: 6,
-                        });
-                    }
                     
                     this.chartInstance = new Chart(ctx, {
                         type: 'line',
@@ -1293,58 +1285,86 @@
                             interaction: { mode: 'index', intersect: false },
                             plugins: { 
                                 legend: { display: false },
-                                tooltip: { backgroundColor: '#fff', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1, padding: 10, cornerRadius: 6, titleFont: { size: 12, weight: 'bold' } }
+                                tooltip: { 
+                                    backgroundColor: '#ffffff', 
+                                    titleColor: '#1e293b', 
+                                    bodyColor: colorMain, 
+                                    borderColor: '#e2e8f0', 
+                                    borderWidth: 1, 
+                                    padding: 12, 
+                                    cornerRadius: 8, 
+                                    titleFont: { size: 13, weight: 'bold' },
+                                    bodyFont: { size: 14, weight: 'bold' },
+                                    displayColors: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) label += ': ';
+                                            if (context.dataset.label === 'Total Spend') {
+                                                return label + '$' + Number(context.parsed.y).toLocaleString(undefined, {minimumFractionDigits:2});
+                                            }
+                                            return label + Number(context.parsed.y).toLocaleString();
+                                        }
+                                    }
+                                }
                             },
                             scales: {
                                 y: { 
                                     beginAtZero: true, 
                                     max: maxScale,
                                     border: { display: false }, 
-                                    grid: { color: '#f1f5f9', drawBorder: false }, 
-                                    ticks: { stepSize: stepScale, color: '#94a3b8', font: {size: 11}, padding: 10 } 
+                                    grid: { color: 'rgba(241, 245, 249, 0.5)', drawBorder: false }, 
+                                    ticks: { 
+                                        stepSize: stepScale, 
+                                        color: '#94a3b8', 
+                                        font: {size: 11}, 
+                                        padding: 10,
+                                        callback: function(value) {
+                                            if (this.chart.data.datasets[0].label === 'Total Spend') return '$' + value;
+                                            if (value >= 1000) return (value / 1000) + 'k';
+                                            return value;
+                                        }
+                                    } 
                                 },
                                 x: { 
                                     border: { display: false },
-                                    grid: { display: true, color: '#f1f5f9', drawBorder: false }, 
-                                    ticks: { color: '#94a3b8', font: {size: 11}, maxTicksLimit: 8, padding: 10 } 
+                                    grid: { display: false }, 
+                                    ticks: { color: '#94a3b8', font: {size: 11}, maxTicksLimit: 6, padding: 10 } 
                                 }
                             }
                         }
                     });
                 }
             }">
-                <div class="flex items-center justify-between mb-2 relative z-10">
-                    <h4 class="text-[15px] font-bold text-slate-800" x-text="title">Users & New Users</h4>
+                <!-- Header Area -->
+                <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-4 mb-8 relative z-10">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse"></div>
+                            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Campaign Performance</h4>
+                        </div>
+                        <div class="flex items-baseline gap-3 mt-2">
+                            <h2 class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-slate-100 tracking-tight" x-text="formattedTotal"></h2>
+                            <span class="text-sm font-bold text-slate-400" x-text="title"></span>
+                        </div>
+                    </div>
                     
-                    <!-- Dropdown -->
-                    <div class="relative">
-                        <div @click="showDropdown = !showDropdown" @click.away="showDropdown = false" class="px-3 py-1.5 border border-slate-200 rounded text-xs text-slate-600 bg-white shadow-sm flex items-center gap-1 cursor-pointer hover:bg-slate-50 transition">
-                            <span x-text="title === 'Users & New Users' ? 'Users' : title">Users</span>
-                            <svg class="w-3 h-3 transition-transform" :class="showDropdown ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                        
-                        <div x-show="showDropdown" x-transition style="display:none;" class="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg py-1">
-                            <a href="#" @click.prevent="setMetric('users')" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600" :class="metric === 'users' ? 'font-bold text-blue-600 bg-slate-50' : ''">Users & New Users</a>
-                            <a href="#" @click.prevent="setMetric('pageviews')" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600" :class="metric === 'pageviews' ? 'font-bold text-blue-600 bg-slate-50' : ''">Pageviews</a>
-                            <a href="#" @click.prevent="setMetric('sessions')" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600" :class="metric === 'sessions' ? 'font-bold text-blue-600 bg-slate-50' : ''">Sessions</a>
-                            <a href="#" @click.prevent="setMetric('bounce_rate')" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600" :class="metric === 'bounce_rate' ? 'font-bold text-blue-600 bg-slate-50' : ''">Bounce Rate</a>
-                            <a href="#" @click.prevent="setMetric('avg_session_duration')" class="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600" :class="metric === 'avg_session_duration' ? 'font-bold text-blue-600 bg-slate-50' : ''">Avg Session Duration</a>
-                        </div>
+                    <!-- Modern Pill Tabs -->
+                    <div class="flex flex-wrap bg-slate-50/80 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-100 dark:border-slate-700 shadow-inner">
+                        <button @click="setMetric('clicks')" :class="metric === 'clicks' ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Clicks</button>
+                        <button @click="setMetric('impressions')" :class="metric === 'impressions' ? 'bg-white dark:bg-slate-700 shadow-sm text-amber-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Impr.</button>
+                        <button @click="setMetric('cost')" :class="metric === 'cost' ? 'bg-white dark:bg-slate-700 shadow-sm text-emerald-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Spend</button>
+                        <button @click="setMetric('conversions')" :class="metric === 'conversions' ? 'bg-white dark:bg-slate-700 shadow-sm text-rose-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Conv.</button>
+                        <div class="w-px h-5 bg-slate-200 dark:bg-slate-700 my-auto mx-1 sm:mx-2"></div>
+                        <button @click="setMetric('users')" :class="metric === 'users' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Users</button>
+                        <button @click="setMetric('sessions')" :class="metric === 'sessions' ? 'bg-white dark:bg-slate-700 shadow-sm text-violet-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Sessions</button>
                     </div>
                 </div>
-                <div class="flex-1 w-full relative" style="min-height: 200px;">
-                    <canvas x-ref="canvas"></canvas>
-                </div>
-
-                <!-- Dynamic Legend -->
-                <div class="flex flex-wrap items-center justify-center gap-6 mt-4 relative z-10">
-                    <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> 
-                        <span x-text="metric === 'users' ? 'Total Users' : title">Total Users</span>
-                    </div>
-                    <div x-show="metric === 'users'" class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> New Users
-                    </div>
+                
+                <div class="flex-1 w-full relative" style="min-height: 280px;">
+                    <!-- Faint Grid overlay for aesthetics -->
+                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjA0LCAyMTIsIDIyNCwgMC4yKSIvPjwvc3ZnPg==')] pointer-events-none opacity-50 z-0 mask-image:linear-gradient(to_bottom,white,transparent)"></div>
+                    <canvas x-ref="canvas" class="relative z-10"></canvas>
                 </div>
             </div>
 
@@ -1686,135 +1706,434 @@
                         </span>
                     </div>
                 @endif
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
-                        <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-                            {{ number_format($reportDataScope['summary']['clicks'] ?? 0) }}
-                        </span>
-                    </div>
-                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
-                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                            {{ number_format($reportDataScope['summary']['impressions'] ?? 0) }}
-                        </span>
-                    </div>
-                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Cost</span>
-                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                            ${{ number_format($reportDataScope['summary']['cost'] ?? 0, 2) }}
-                        </span>
-                    </div>
-                    <div class="p-4 bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Conversions</span>
-                        <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                            {{ number_format($reportDataScope['summary']['conversions'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
+                <!-- Google Ads UI Replica -->
+                <div class="bg-white border border-slate-200 rounded-lg shadow-sm mb-6 overflow-hidden font-sans" wire:key="gads-replica-{{ $idx }}-{{ $this->dateFrom }}-{{ $this->dateTo }}" x-data="{
+                    chart: null,
+                    metrics: {
+                        'clicks': { label: 'Clicks', value: 0, color: '#1a73e8', selected: true, order: 1 },
+                        'impressions': { label: 'Impressions', value: 0, color: '#d93025', selected: true, order: 2, isAbbr: true },
+                        'avg_cpc': { label: 'Avg. CPC', value: 0, color: '#8e24aa', selected: false, order: 3, prefix: '$' },
+                        'cost': { label: 'Cost', value: 0, color: '#f9ab00', selected: false, order: 4, prefix: '$', round: true },
+                        'conversions': { label: 'Conversions', value: 0, color: '#1e8e3e', selected: false, order: 5 }
+                    },
+                    traffic: [],
+                    labels: [],
+                    
+                    init() {
+                        let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
+                        this.traffic = (rawData && rawData.daily_traffic) ? rawData.daily_traffic : [];
+                        
+                        let totalClicks = 0, totalImpr = 0, totalCost = 0, totalConv = 0;
+                        
+                        this.labels = this.traffic.map((d, index) => {
+                            totalClicks += parseInt(d.clicks || 0);
+                            totalImpr += parseInt(d.impressions || 0);
+                            totalCost += parseFloat(d.cost || 0);
+                            totalConv += parseFloat(d.conversions || 0);
+                            
+                            let dateStr = d.date ? d.date.toString() : '';
+                            if(dateStr.length === 8 && !dateStr.includes('-')) {
+                                const mNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                                return mNames[parseInt(dateStr.substring(4,6))-1] + ' ' + parseInt(dateStr.substring(6,8)) + ', ' + dateStr.substring(0,4);
+                            }
+                            return dateStr;
+                        });
 
-                <!-- Google Ads Graph Area -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Cost & Conversions Over Time
-                        </div>
-                    </div>
-                    <div class="w-full">
-                        <div class="h-64" wire:key="gads-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
-                            init() {
-                                const ctx = document.getElementById('gads-chart-{{ $idx }}').getContext('2d');
-                                let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
-                                let dt = (rawData && rawData.daily_traffic) ? rawData.daily_traffic : [];
-                                
-                                let labels = dt.map(d => {
-                                    let dateStr = d.date;
-                                    return dateStr.length === 8 && !dateStr.includes('-') 
-                                        ? dateStr.substring(4,6)+'/'+dateStr.substring(6,8) 
-                                        : (dateStr.includes('-') ? dateStr.split('-').slice(1).join('/') : dateStr);
-                                });
-                                let cost = dt.map(d => d.cost || 0);
-                                let conversions = dt.map(d => d.conversions || 0);
+                        this.metrics['clicks'].value = totalClicks;
+                        this.metrics['impressions'].value = totalImpr;
+                        this.metrics['cost'].value = totalCost;
+                        this.metrics['conversions'].value = totalConv;
+                        this.metrics['avg_cpc'].value = totalClicks > 0 ? (totalCost / totalClicks) : 0;
 
-                                new Chart(ctx, {
-                                    type: 'line',
-                                    data: {
-                                        labels: labels,
-                                        datasets: [
-                                            {
-                                                label: 'Cost ($)',
-                                                data: cost,
-                                                borderColor: '#10b981',
-                                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                                borderWidth: 2,
-                                                fill: true,
-                                                tension: 0.4,
-                                                pointRadius: 0,
-                                                pointHoverRadius: 4,
-                                                yAxisID: 'y'
-                                            },
-                                            {
-                                                label: 'Conversions',
-                                                data: conversions,
-                                                borderColor: '#4f46e5',
-                                                backgroundColor: 'transparent',
-                                                borderWidth: 2,
-                                                borderDash: [5, 5],
-                                                tension: 0.4,
-                                                pointRadius: 0,
-                                                pointHoverRadius: 4,
-                                                yAxisID: 'y1'
+                        let activeKeys = Object.keys(this.metrics).filter(k => this.metrics[k].selected);
+                        if (activeKeys.length > 2) {
+                            activeKeys.slice(2).forEach(k => this.metrics[k].selected = false);
+                        }
+
+                        this.renderChart();
+                    },
+
+                    toggleMetric(key) {
+                        this.metrics[key].selected = !this.metrics[key].selected;
+                        
+                        let activeKeys = Object.keys(this.metrics).filter(k => this.metrics[k].selected);
+                        if (activeKeys.length === 0) {
+                            this.metrics[key].selected = true; // Prevent unselecting everything
+                            return;
+                        }
+                        this.renderChart();
+                    },
+
+                    formatValue(val, metric) {
+                        let v = Number(val);
+                        if (metric.isAbbr && v >= 1000) {
+                            v = (v / 1000).toFixed(2) + 'K';
+                        } else if (metric.prefix === '$') {
+                            if (metric.round) v = Math.round(v);
+                            let digits = metric.round ? 0 : 2;
+                            v = v.toLocaleString(undefined, {minimumFractionDigits: digits, maximumFractionDigits: digits});
+                        } else {
+                            v = v.toLocaleString();
+                        }
+                        return (metric.prefix || '') + v;
+                    },
+
+                    renderChart() {
+                        const ctx = this.$refs.canvas.getContext('2d');
+                        
+                        // Destroy old chart to completely wipe scales and datasets
+                        if (this.chart) {
+                            this.chart.destroy();
+                        }
+
+                        let activeKeys = Object.keys(this.metrics).filter(k => this.metrics[k].selected);
+                        let datasets = [];
+                        let yAxes = {};
+
+                        activeKeys.forEach((k, index) => {
+                            let m = this.metrics[k];
+                            let data = this.traffic.map(d => {
+                                if (k === 'avg_cpc') {
+                                    let c = Number(d.clicks || 0);
+                                    let cst = Number(d.cost || 0);
+                                    return c > 0 ? (cst / c) : 0;
+                                }
+                                return Number(d[k] || 0);
+                            });
+                            let yId = 'y' + index; // Independent axis for each line
+                            
+                            datasets.push({
+                                label: m.label,
+                                data: data,
+                                borderColor: m.color,
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                tension: 0,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                pointBackgroundColor: m.color,
+                                yAxisID: yId
+                            });
+
+                            let isRight = index % 2 !== 0; // alternate left/right
+                            let showAxis = index < 2; // only show axis labels for the first 2 metrics
+                            
+                            yAxes[yId] = { 
+                                type: 'linear', 
+                                display: showAxis, 
+                                position: isRight ? 'right' : 'left', 
+                                border: { display: false }, 
+                                grid: { color: isRight || !showAxis ? 'transparent' : '#f1f5f9' }, 
+                                ticks: { color: '#80868b', font: {size: 11}, maxTicksLimit: 5 } 
+                            };
+                        });
+
+                        let self = this;
+                        let options = {
+                            responsive: true, maintainAspectRatio: false,
+                            interaction: { mode: 'index', intersect: false },
+                            plugins: { 
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: '#ffffff',
+                                    titleColor: '#1e293b',
+                                    bodyColor: '#475569',
+                                    borderColor: '#e2e8f0',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    cornerRadius: 8,
+                                    titleFont: { size: 13, weight: 'bold' },
+                                    bodyFont: { size: 13, weight: 'bold' },
+                                    boxPadding: 4,
+                                    usePointStyle: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) label += ': ';
+                                            if (context.dataset.label.includes('Cost')) {
+                                                return label + '$' + Math.round(context.parsed.y).toLocaleString();
                                             }
-                                        ]
-                                    },
-                                    options: {
-                                        responsive: true, maintainAspectRatio: false,
-                                        interaction: { mode: 'index', intersect: false },
-                                        plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, usePointStyle: true } } },
-                                        scales: {
-                                            y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { color: document.documentElement.classList.contains('dark') ? '#1e293b' : '#f1f5f9' }, border: { dash: [4, 4] } },
-                                            y1: { type: 'linear', display: true, position: 'right', beginAtZero: true, grid: { display: false } },
-                                            x: { grid: { display: false } }
+                                            if (context.dataset.label.includes('Avg. CPC')) {
+                                                return label + '$' + Number(context.parsed.y).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+                                            }
+                                            return label + Number(context.parsed.y).toLocaleString();
                                         }
                                     }
-                                });
+                                }
+                            },
+                            animation: { duration: 0 }, // Disable animation on recreate for instant Google Ads feel
+                            scales: {
+                                x: { 
+                                    grid: { display: false }, 
+                                    border: { display: true, color: '#dadce0' }, 
+                                    ticks: {
+                                        color: '#80868b',
+                                        font: {size: 11},
+                                        maxRotation: 0,
+                                        autoSkip: false,
+                                        callback: function(val, index) {
+                                            return index === 0 || index === self.labels.length - 1 ? self.labels[index] : '';
+                                        }
+                                    } 
+                                },
+                                ...yAxes
                             }
-                        }"><canvas id="gads-chart-{{ $idx }}"></canvas></div>
+                        };
+
+                        this.chart = new Chart(ctx, {
+                            type: 'line',
+                            data: { labels: this.labels, datasets: datasets },
+                            options: options
+                        });
+                    }
+                }">
+                    <!-- Top Google Ads Style Metric Selector -->
+                    <div class="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200 divide-x divide-slate-200">
+                        <template x-for="(key, index) in Object.keys(metrics)" :key="key">
+                            <div @click="toggleMetric(key)" 
+                                 class="p-4 cursor-pointer select-none transition-colors h-[100px] flex flex-col justify-between"
+                                 :style="metrics[key].selected ? 'background-color: ' + metrics[key].color + '; color: white;' : 'background-color: white; color: #3c4043;'">
+                                 
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[13px] font-medium" x-text="metrics[key].label"></span>
+                                </div>
+                                <div class="text-[26px] font-normal font-sans leading-none" x-text="formatValue(metrics[key].value, metrics[key])"></div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Graph Area -->
+                    <div class="p-6 w-full relative bg-white" style="height: 320px;" wire:ignore>
+                        <canvas x-ref="canvas" class="relative z-10"></canvas>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
-                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Ad Campaigns
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead>
-                                    <tr class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
-                                        <th class="py-2 font-bold">Campaign Name</th>
-                                        <th class="py-2 text-right font-bold">Clicks</th>
-                                        <th class="py-2 text-right font-bold">Imp.</th>
-                                        <th class="py-2 text-right font-bold">Cost</th>
-                                        <th class="py-2 text-right font-bold">Conv.</th>
+
+                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Ad Campaigns
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead>
+                                <tr class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
+                                    <th class="py-2 font-bold">Campaign Name</th>
+                                    <th class="py-2 text-right font-bold">Clicks</th>
+                                    <th class="py-2 text-right font-bold">Imp.</th>
+                                    <th class="py-2 text-right font-bold">Cost</th>
+                                    <th class="py-2 text-right font-bold">Conv.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse (array_slice($reportDataScope['top_campaigns'] ?? [], 0, 5) as $campaign)
+                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                        <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $campaign['name'] ?? '' }}">{{ $campaign['name'] ?? '' }}</td>
+                                        <td class="py-2.5 text-right font-bold">{{ number_format($campaign['clicks'] ?? 0) }}</td>
+                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ ($campaign['impressions'] ?? 0) >= 1000 ? round(($campaign['impressions'] ?? 0) / 1000, 2) . 'k' : number_format($campaign['impressions'] ?? 0) }}</td>
+                                        <td class="py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">${{ ($campaign['cost'] ?? 0) >= 1000 ? round(($campaign['cost'] ?? 0) / 1000, 2) . 'k' : number_format($campaign['cost'] ?? 0, 2) }}</td>
+                                        <td class="py-2.5 text-right text-indigo-600 dark:text-indigo-400 font-bold">{{ number_format($campaign['conversions'] ?? 0) }}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse (array_slice($reportDataScope['top_campaigns'] ?? [], 0, 5) as $campaign)
-                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                            <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $campaign['name'] ?? '' }}">{{ $campaign['name'] ?? '' }}</td>
-                                            <td class="py-2.5 text-right font-bold">{{ number_format($campaign['clicks'] ?? 0) }}</td>
-                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($campaign['impressions'] ?? 0) }}</td>
-                                            <td class="py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">${{ number_format($campaign['cost'] ?? 0, 2) }}</td>
-                                            <td class="py-2.5 text-right text-indigo-600 dark:text-indigo-400 font-bold">{{ number_format($campaign['conversions'] ?? 0) }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="py-4 text-center text-xs text-slate-500">No campaigns data available for this period.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="py-4 text-center text-xs text-slate-500">No campaigns data available for this period.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Keywords Table -->
+                    <div class="flex flex-col">
+                        @php $keywords = $idx === 0 ? ($activeReportData['top_keywords'] ?? []) : ($activeReportData['compare_data']['top_keywords'] ?? []); @endphp
+                        @if(count($keywords) > 0)
+                            <div class="bg-white border border-slate-200 rounded-lg shadow-sm h-full overflow-hidden font-sans">
+                                <div class="px-5 py-4 border-b border-slate-200">
+                                    <h3 class="text-[15px] font-normal text-[#202124]">Summary of how your keywords are performing</h3>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="bg-white text-[13px] text-[#5f6368] border-b border-slate-200">
+                                                <th class="px-5 py-3 font-medium w-1/2"></th>
+                                                <th class="px-5 py-3 font-medium text-right border-b-2 border-[#1a73e8]">Cost <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
+                                                <th class="px-5 py-3 font-medium text-right">Clicks <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
+                                                <th class="px-5 py-3 font-medium text-right">CTR <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-[13px] text-[#202124]">
+                                            @foreach($keywords as $kw)
+                                                <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
+                                                    <td class="px-5 py-3 flex items-center gap-3">
+                                                        <span class="w-2.5 h-2.5 rounded-full bg-[#1e8e3e]"></span>
+                                                        <span class="text-[#1a73e8] cursor-pointer hover:underline">{{ $kw['keyword'] }}</span>
+                                                    </td>
+                                                    <td class="px-5 py-3 text-right bg-[#8ab4f8]/30">${{ number_format($kw['cost'], 2) }}</td>
+                                                    <td class="px-5 py-3 text-right bg-slate-100/70">{{ number_format($kw['clicks']) }}</td>
+                                                    <td class="px-5 py-3 text-right bg-slate-50/50">{{ number_format($kw['ctr'] * 100, 2) }}%</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @else
+                            <div class="h-full"></div>
+                        @endif
+                    </div>
+                    
+                    <!-- Ad performance across devices -->
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-[2rem] shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Devices
+                        </div>
+                        
+                        @php
+                            $ds = $reportDataScope['device_summary'] ?? ['desktop' => ['clicks'=>0,'impressions'=>0,'cost'=>0,'conversions'=>0], 'mobile' => ['clicks'=>0,'impressions'=>0,'cost'=>0,'conversions'=>0], 'tablet' => ['clicks'=>0,'impressions'=>0,'cost'=>0,'conversions'=>0]];
+                            
+                            $tc = max(0.001, ($ds['desktop']['clicks'] ?? 0) + ($ds['mobile']['clicks'] ?? 0) + ($ds['tablet']['clicks'] ?? 0));
+                            $ti = max(0.001, ($ds['desktop']['impressions'] ?? 0) + ($ds['mobile']['impressions'] ?? 0) + ($ds['tablet']['impressions'] ?? 0));
+                            $tcost = max(0.001, ($ds['desktop']['cost'] ?? 0) + ($ds['mobile']['cost'] ?? 0) + ($ds['tablet']['cost'] ?? 0));
+                            
+                            $cc_mob = round((($ds['mobile']['clicks'] ?? 0) / $tc) * 100, 1);
+                            $cc_tab = round((($ds['tablet']['clicks'] ?? 0) / $tc) * 100, 1);
+                            $cc_desk = 100 - $cc_mob - $cc_tab; if($cc_desk < 0) $cc_desk = 0;
+                            
+                            $ic_mob = round((($ds['mobile']['impressions'] ?? 0) / $ti) * 100, 1);
+                            $ic_tab = round((($ds['tablet']['impressions'] ?? 0) / $ti) * 100, 1);
+                            $ic_desk = 100 - $ic_mob - $ic_tab; if($ic_desk < 0) $ic_desk = 0;
+                            
+                            $costc_mob = round((($ds['mobile']['cost'] ?? 0) / $tcost) * 100, 1);
+                            $costc_tab = round((($ds['tablet']['cost'] ?? 0) / $tcost) * 100, 1);
+                            $costc_desk = 100 - $costc_mob - $costc_tab; if($costc_desk < 0) $costc_desk = 0;
+                        @endphp
+                        
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                                <div class="w-2 h-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 animate-pulse"></div> 
+                                Device Intelligence
+                            </div>
+                            <div class="px-2 py-1 bg-slate-50 dark:bg-slate-800 rounded-md text-[10px] font-bold text-slate-400 border border-slate-100 dark:border-slate-700/50">
+                                Smart Breakdown
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- MOBILE CARD -->
+                            <div class="group relative overflow-hidden bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-900/40 p-4 rounded-2xl border border-slate-100/80 dark:border-slate-700/50 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] hover:shadow-[0_8px_20px_-6px_rgba(6,81,237,0.15)] transition-all duration-500">
+                                <!-- Glowing abstract blob -->
+                                <div class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                
+                                <div class="flex items-center justify-between mb-4 relative z-10">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-500">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm tracking-tight">Mobile Traffic</h4>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Primary Device</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">{{ $cc_mob }}%</div>
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 relative z-10">
+                                    <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
+                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['mobile']['cost']??0, 2) }}</div>
+                                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style="width: {{ $costc_mob }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
+                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['mobile']['impressions']??0) }}</div>
+                                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style="width: {{ $ic_mob }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- COMPUTER CARD -->
+                            <div class="group relative overflow-hidden bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-900/40 p-4 rounded-2xl border border-slate-100/80 dark:border-slate-700/50 shadow-[0_2px_10px_-3px_rgba(245,158,11,0.05)] hover:shadow-[0_8px_20px_-6px_rgba(245,158,11,0.15)] transition-all duration-500">
+                                <div class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                
+                                <div class="flex items-center justify-between mb-4 relative z-10">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform duration-500">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm tracking-tight">Desktop</h4>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Workstations</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-400 dark:to-orange-400">{{ $cc_desk }}%</div>
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 relative z-10">
+                                    <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
+                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['desktop']['cost']??0, 2) }}</div>
+                                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full" style="width: {{ $costc_desk }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
+                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['desktop']['impressions']??0) }}</div>
+                                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full" style="width: {{ $ic_desk }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TABLET CARD -->
+                            <div class="group relative overflow-hidden bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-900/40 p-4 rounded-2xl border border-slate-100/80 dark:border-slate-700/50 shadow-[0_2px_10px_-3px_rgba(244,63,94,0.05)] hover:shadow-[0_8px_20px_-6px_rgba(244,63,94,0.15)] transition-all duration-500">
+                                <div class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+                                
+                                <div class="flex items-center justify-between mb-4 relative z-10">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 text-white shadow-md shadow-rose-500/20 group-hover:scale-105 transition-transform duration-500">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm tracking-tight">Tablet</h4>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Portable</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600 dark:from-rose-400 dark:to-pink-400">{{ $cc_tab }}%</div>
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 relative z-10">
+                                    <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
+                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['tablet']['cost']??0, 2) }}</div>
+                                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-rose-400 to-rose-500 rounded-full" style="width: {{ $costc_tab }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
+                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['tablet']['impressions']??0) }}</div>
+                                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-rose-400 to-rose-500 rounded-full" style="width: {{ $ic_tab }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

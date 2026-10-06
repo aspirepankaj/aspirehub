@@ -1841,7 +1841,7 @@ class ManageClients extends Component
                 }
 
                 $url = "https://googleads.googleapis.com/v25/customers/{$customerId}/googleAds:search";
-                $query = "SELECT metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM campaign WHERE segments.date >= '{$startDateStr}' AND segments.date <= '{$endDateStr}'";
+                $query = "SELECT customer.descriptive_name, campaign.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions, segments.date, segments.device FROM campaign WHERE segments.date >= '{$startDateStr}' AND segments.date <= '{$endDateStr}' AND campaign.status = 'ENABLED'";
 
                 $http = \Illuminate\Support\Facades\Http::withToken($accessToken)
                     ->withHeaders([
@@ -1862,24 +1862,126 @@ class ManageClients extends Component
                     $impressions = 0;
                     $costMicros = 0;
                     $conversions = 0;
+                    $dailyTraffic = [];
+                    $dailyCampaigns = [];
+                    $accountName = null;
 
                     if (isset($data['results'])) {
                         foreach ($data['results'] as $row) {
+                            if (!$accountName && isset($row['customer']['descriptiveName'])) {
+                                $accountName = $row['customer']['descriptiveName'];
+                            }
+                            
                             $metrics = $row['metrics'] ?? [];
-                            $clicks += (int)($metrics['clicks'] ?? 0);
-                            $impressions += (int)($metrics['impressions'] ?? 0);
-                            $costMicros += (int)($metrics['costMicros'] ?? 0);
-                            $conversions += (float)($metrics['conversions'] ?? 0);
+                            $date = $row['segments']['date'] ?? null;
+                            
+                            $c = (int)($metrics['clicks'] ?? 0);
+                            $i = (int)($metrics['impressions'] ?? 0);
+                            $cost = (int)($metrics['costMicros'] ?? 0);
+                            $conv = (float)($metrics['conversions'] ?? 0);
+                            
+                            $clicks += $c;
+                            $impressions += $i;
+                            $costMicros += $cost;
+                            $conversions += $conv;
+                            
+                            $device = $row['segments']['device'] ?? 'UNKNOWN';
+                            if ($device === 'MOBILE') $deviceKey = 'mobile';
+                            elseif ($device === 'TABLET') $deviceKey = 'tablet';
+                            elseif ($device === 'DESKTOP') $deviceKey = 'desktop';
+                            else $deviceKey = 'other';
+                            
+                            if ($date) {
+                                if (!isset($dailyTraffic[$date])) {
+                                    $dailyTraffic[$date] = [
+                                        'date' => $date, 'clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0,
+                                        'devices' => [
+                                            'mobile' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                            'tablet' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                            'desktop' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                            'other' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                        ]
+                                    ];
+                                }
+                                $dailyTraffic[$date]['clicks'] += $c;
+                                $dailyTraffic[$date]['impressions'] += $i;
+                                $dailyTraffic[$date]['cost'] += round($cost / 1000000, 2);
+                                $dailyTraffic[$date]['conversions'] += $conv;
+                                
+                                $dailyTraffic[$date]['devices'][$deviceKey]['clicks'] += $c;
+                                $dailyTraffic[$date]['devices'][$deviceKey]['impressions'] += $i;
+                                $dailyTraffic[$date]['devices'][$deviceKey]['cost'] += round($cost / 1000000, 2);
+                                $dailyTraffic[$date]['devices'][$deviceKey]['conversions'] += $conv;
+                            }
+                            
+                            $campaignName = $row['campaign']['name'] ?? 'Unknown Campaign';
+                            if ($date) {
+                                $cKey = $date . '_' . $campaignName;
+                                if (!isset($dailyCampaigns[$cKey])) {
+                                    $dailyCampaigns[$cKey] = [
+                                        'date' => $date,
+                                        'name' => $campaignName,
+                                        'clicks' => 0,
+                                        'impressions' => 0,
+                                        'cost' => 0,
+                                        'conversions' => 0
+                                    ];
+                                }
+                                $dailyCampaigns[$cKey]['clicks'] += $c;
+                                $dailyCampaigns[$cKey]['impressions'] += $i;
+                                $dailyCampaigns[$cKey]['cost'] += round($cost / 1000000, 2);
+                                $dailyCampaigns[$cKey]['conversions'] += $conv;
+                            }
+                        }
+                    }
+                    
+                    $keywordQuery = "SELECT segments.date, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, metrics.clicks, metrics.impressions, metrics.cost_micros FROM keyword_view WHERE segments.date >= '{$startDateStr}' AND segments.date <= '{$endDateStr}' AND ad_group_criterion.status = 'ENABLED' AND metrics.clicks > 0 ORDER BY segments.date DESC";
+                    $keywordResponse = $http->post($url, ['query' => $keywordQuery]);
+                    
+                    $dailyKeywords = [];
+                    if ($keywordResponse->successful()) {
+                        $kwData = $keywordResponse->json();
+                        if (isset($kwData['results'])) {
+                            foreach ($kwData['results'] as $row) {
+                                if (!isset($row['adGroupCriterion']['keyword']['text'])) continue;
+                                $date = $row['segments']['date'] ?? null;
+                                if (!$date) continue;
+
+                                $text = $row['adGroupCriterion']['keyword']['text'];
+                                $matchType = $row['adGroupCriterion']['keyword']['matchType'] ?? 'BROAD';
+                                
+                                if ($matchType === 'PHRASE') {
+                                    $text = '"' . $text . '"';
+                                } elseif ($matchType === 'EXACT') {
+                                    $text = '[' . $text . ']';
+                                }
+
+                                $k_clicks = (int)($row['metrics']['clicks'] ?? 0);
+                                $k_impressions = (int)($row['metrics']['impressions'] ?? 0);
+                                $k_cost = round(((int)($row['metrics']['costMicros'] ?? 0)) / 1000000, 2);
+                                
+                                $dailyKeywords[] = [
+                                    'date' => $date,
+                                    'keyword' => $text,
+                                    'clicks' => $k_clicks,
+                                    'impressions' => $k_impressions,
+                                    'cost' => $k_cost
+                                ];
+                            }
                         }
                     }
 
                     $reportData = [
+                        'account_name' => $accountName,
                         'summary' => [
                             'clicks' => $clicks,
                             'impressions' => $impressions,
                             'cost' => round($costMicros / 1000000, 2),
                             'conversions' => $conversions,
                         ],
+                        'daily_traffic' => array_values($dailyTraffic),
+                        'daily_campaigns' => array_values($dailyCampaigns),
+                        'daily_keywords' => $dailyKeywords,
                         'raw' => $data
                     ];
                 } else {

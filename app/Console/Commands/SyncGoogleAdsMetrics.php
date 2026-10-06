@@ -119,7 +119,7 @@ class SyncGoogleAdsMetrics extends Command
 
         $url = "https://googleads.googleapis.com/v25/customers/{$customerId}/googleAds:search";
         
-        $query = "SELECT campaign.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions, segments.date FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}'";
+        $query = "SELECT customer.descriptive_name, campaign.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions, segments.date, segments.device FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}' AND campaign.status = 'ENABLED'";
 
         $http = Http::withToken($token);
         if (app()->environment('local')) {
@@ -145,9 +145,14 @@ class SyncGoogleAdsMetrics extends Command
             
             $dailyTraffic = [];
             $campaigns = [];
+            $dailyCampaigns = [];
+            $accountName = null;
 
             if (isset($data['results'])) {
                 foreach ($data['results'] as $row) {
+                    if (!$accountName && isset($row['customer']['descriptiveName'])) {
+                        $accountName = $row['customer']['descriptiveName'];
+                    }
                     $metrics = $row['metrics'] ?? [];
                     $date = $row['segments']['date'] ?? null;
                     $campaignName = $row['campaign']['name'] ?? 'Unknown';
@@ -162,31 +167,101 @@ class SyncGoogleAdsMetrics extends Command
                     $costMicros += $cost;
                     $conversions += $conv;
                     
+                    $device = $row['segments']['device'] ?? 'UNKNOWN';
+                    if ($device === 'MOBILE') $deviceKey = 'mobile';
+                    elseif ($device === 'TABLET') $deviceKey = 'tablet';
+                    elseif ($device === 'DESKTOP') $deviceKey = 'desktop';
+                    else $deviceKey = 'other';
+                    
                     if ($date) {
                         if (!isset($dailyTraffic[$date])) {
-                            $dailyTraffic[$date] = ['date' => $date, 'clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0];
+                            $dailyTraffic[$date] = [
+                                'date' => $date, 'clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0,
+                                'devices' => [
+                                    'mobile' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                    'tablet' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                    'desktop' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                    'other' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                                ]
+                            ];
                         }
                         $dailyTraffic[$date]['clicks'] += $c;
                         $dailyTraffic[$date]['impressions'] += $i;
                         $dailyTraffic[$date]['cost'] += round($cost / 1000000, 2);
                         $dailyTraffic[$date]['conversions'] += $conv;
+                        
+                        $dailyTraffic[$date]['devices'][$deviceKey]['clicks'] += $c;
+                        $dailyTraffic[$date]['devices'][$deviceKey]['impressions'] += $i;
+                        $dailyTraffic[$date]['devices'][$deviceKey]['cost'] += round($cost / 1000000, 2);
+                        $dailyTraffic[$date]['devices'][$deviceKey]['conversions'] += $conv;
                     }
                     
-                    if (!isset($campaigns[$campaignName])) {
-                        $campaigns[$campaignName] = ['name' => $campaignName, 'clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0];
+                    if ($date) {
+                        $cKey = $date . '_' . $campaignName;
+                        if (!isset($dailyCampaigns[$cKey])) {
+                            $dailyCampaigns[$cKey] = [
+                                'date' => $date,
+                                'name' => $campaignName,
+                                'clicks' => 0,
+                                'impressions' => 0,
+                                'cost' => 0,
+                                'conversions' => 0
+                            ];
+                        }
+                        $dailyCampaigns[$cKey]['clicks'] += $c;
+                        $dailyCampaigns[$cKey]['impressions'] += $i;
+                        $dailyCampaigns[$cKey]['cost'] += round($cost / 1000000, 2);
+                        $dailyCampaigns[$cKey]['conversions'] += $conv;
                     }
-                    $campaigns[$campaignName]['clicks'] += $c;
-                    $campaigns[$campaignName]['impressions'] += $i;
-                    $campaigns[$campaignName]['cost'] += round($cost / 1000000, 2);
-                    $campaigns[$campaignName]['conversions'] += $conv;
                 }
             }
+
+            $keywordQuery = "SELECT segments.date, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, metrics.clicks, metrics.impressions, metrics.cost_micros FROM keyword_view WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}' AND ad_group_criterion.status = 'ENABLED' AND metrics.clicks > 0 ORDER BY segments.date DESC";
             
-            usort($campaigns, function($a, $b) {
-                return $b['cost'] <=> $a['cost'];
-            });
+            $keywordResponse = $http
+                ->withHeaders([
+                    'developer-token' => $developerToken,
+                    'login-customer-id' => $loginCustomerId
+                ])
+                ->post($url, [
+                    'query' => $keywordQuery
+                ]);
+
+            $dailyKeywords = [];
+            if ($keywordResponse->successful()) {
+                $kwData = $keywordResponse->json();
+                if (isset($kwData['results'])) {
+                    foreach ($kwData['results'] as $row) {
+                        if (!isset($row['adGroupCriterion']['keyword']['text'])) continue;
+                        $date = $row['segments']['date'] ?? null;
+                        if (!$date) continue;
+
+                        $text = $row['adGroupCriterion']['keyword']['text'];
+                        $matchType = $row['adGroupCriterion']['keyword']['matchType'] ?? 'BROAD';
+                        
+                        if ($matchType === 'PHRASE') {
+                            $text = '"' . $text . '"';
+                        } elseif ($matchType === 'EXACT') {
+                            $text = '[' . $text . ']';
+                        }
+
+                        $k_clicks = (int)($row['metrics']['clicks'] ?? 0);
+                        $k_impressions = (int)($row['metrics']['impressions'] ?? 0);
+                        $k_cost = round(((int)($row['metrics']['costMicros'] ?? 0)) / 1000000, 2);
+                        
+                        $dailyKeywords[] = [
+                            'date' => $date,
+                            'keyword' => $text,
+                            'clicks' => $k_clicks,
+                            'impressions' => $k_impressions,
+                            'cost' => $k_cost
+                        ];
+                    }
+                }
+            }
 
             return [
+                'account_name' => $accountName,
                 'summary' => [
                     'clicks' => $clicks,
                     'impressions' => $impressions,
@@ -195,6 +270,8 @@ class SyncGoogleAdsMetrics extends Command
                 ],
                 'daily_traffic' => array_values($dailyTraffic),
                 'top_campaigns' => array_slice($campaigns, 0, 5),
+                'daily_campaigns' => array_values($dailyCampaigns),
+                'daily_keywords' => $dailyKeywords,
                 'raw' => $data
             ];
         }

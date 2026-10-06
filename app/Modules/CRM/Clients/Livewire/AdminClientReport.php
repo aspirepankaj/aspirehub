@@ -70,11 +70,21 @@ class AdminClientReport extends Component
 
             if ($this->website) {
                 $this->websiteName = $this->website->site_name ?? '';
-                $integrations = json_decode($this->website->integrations ?? '[]', true);
-                foreach ($integrations as $intg) {
-                    if (($intg['id'] ?? '') === $this->integration && !empty($intg['property_id'])) {
-                        $this->activeReportPropertyId = $intg['property_id'] ?? '';
-                        break;
+                
+                $integrationRecord = \App\Modules\CRM\Websites\Models\WebsiteIntegration::where('website_id', $this->website->id)
+                    ->where('integration_type', $this->integration)
+                    ->first();
+                    
+                if ($integrationRecord) {
+                    $creds = $integrationRecord->auth_credentials ?? [];
+                    $this->activeReportPropertyId = $creds['property_id'] ?? ($creds['site_url'] ?? ($creds['channel_id'] ?? ($creds['project_id'] ?? ($creds['container_id'] ?? ($creds['location_id'] ?? '')))));
+                } else {
+                    $integrations = json_decode($this->website->integrations ?? '[]', true);
+                    foreach ($integrations as $intg) {
+                        if (($intg['id'] ?? '') === $this->integration && !empty($intg['property_id'])) {
+                            $this->activeReportPropertyId = $intg['property_id'] ?? '';
+                            break;
+                        }
                     }
                 }
             }

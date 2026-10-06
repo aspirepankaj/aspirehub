@@ -139,6 +139,28 @@ trait LoadsMarketingReports
                     }
                 }
             }
+            
+            if (!empty($jsonData['daily_keywords'])) {
+                if (!isset($mergedDailyKeywords)) $mergedDailyKeywords = [];
+                foreach ($jsonData['daily_keywords'] as $item) {
+                    $rawDate = (string)($item['date'] ?? '');
+                    $normDate = strlen($rawDate) === 8 ? substr($rawDate, 0, 4) . '-' . substr($rawDate, 4, 2) . '-' . substr($rawDate, 6, 2) : $rawDate;
+                    if ($normDate >= $startDate && $normDate <= $endDate) {
+                        $mergedDailyKeywords[] = $item;
+                    }
+                }
+            }
+
+            if (!empty($jsonData['daily_campaigns'])) {
+                if (!isset($mergedDailyCampaigns)) $mergedDailyCampaigns = [];
+                foreach ($jsonData['daily_campaigns'] as $item) {
+                    $rawDate = (string)($item['date'] ?? '');
+                    $normDate = strlen($rawDate) === 8 ? substr($rawDate, 0, 4) . '-' . substr($rawDate, 4, 2) . '-' . substr($rawDate, 6, 2) : $rawDate;
+                    if ($normDate >= $startDate && $normDate <= $endDate) {
+                        $mergedDailyCampaigns[] = $item;
+                    }
+                }
+            }
         }
 
         if (empty($allData)) {
@@ -372,6 +394,131 @@ trait LoadsMarketingReports
                     $allData['summary']['avg_view_duration'] = $formattedDuration;
                 } else {
                     $allData['summary']['avg_view_duration'] = '0s';
+                }
+            }
+            // Re-calculate Gads summary
+            elseif ($integrationType === 'gads') {
+                $totalClicks = 0;
+                $totalImpressions = 0;
+                $totalCost = 0;
+                $totalConversions = 0;
+                
+                $deviceSummary = [
+                    'mobile' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                    'desktop' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                    'tablet' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                    'other' => ['clicks' => 0, 'impressions' => 0, 'cost' => 0, 'conversions' => 0],
+                ];
+                
+                foreach ($mergedDaily as $d) {
+                    $totalClicks += (int)($d['clicks'] ?? 0);
+                    $totalImpressions += (int)($d['impressions'] ?? 0);
+                    $totalCost += (float)($d['cost'] ?? 0);
+                    $totalConversions += (float)($d['conversions'] ?? 0);
+                    
+                    if (isset($d['devices']) && is_array($d['devices'])) {
+                        foreach (['mobile', 'desktop', 'tablet', 'other'] as $dev) {
+                            if (isset($d['devices'][$dev])) {
+                                $deviceSummary[$dev]['clicks'] += (int)($d['devices'][$dev]['clicks'] ?? 0);
+                                $deviceSummary[$dev]['impressions'] += (int)($d['devices'][$dev]['impressions'] ?? 0);
+                                $deviceSummary[$dev]['cost'] += (float)($d['devices'][$dev]['cost'] ?? 0);
+                                $deviceSummary[$dev]['conversions'] += (float)($d['devices'][$dev]['conversions'] ?? 0);
+                            }
+                        }
+                    }
+                }
+                
+                $allData['summary']['clicks'] = $totalClicks;
+                $allData['summary']['impressions'] = $totalImpressions;
+                $allData['summary']['cost'] = round($totalCost, 2);
+                $allData['summary']['conversions'] = round($totalConversions, 2);
+                
+                foreach ($deviceSummary as $k => &$v) {
+                    $v['cost'] = round($v['cost'], 2);
+                    $v['conversions'] = round($v['conversions'], 2);
+                }
+                $allData['device_summary'] = $deviceSummary;
+
+                if (!empty($mergedDailyKeywords)) {
+                    $aggregatedKeywords = [];
+                    $uniqueDaily = [];
+                    foreach ($mergedDailyKeywords as $dk) {
+                        $date = $dk['date'] ?? '';
+                        $kw = $dk['keyword'];
+                        $uniqueKey = $date . '_' . $kw;
+                        // Deduplicate exact same keyword on same date across overlapping JSON files
+                        $uniqueDaily[$uniqueKey] = $dk;
+                    }
+
+                    foreach ($uniqueDaily as $dk) {
+                        $kw = $dk['keyword'];
+                        if (!isset($aggregatedKeywords[$kw])) {
+                            $aggregatedKeywords[$kw] = [
+                                'keyword' => $kw,
+                                'clicks' => 0,
+                                'impressions' => 0,
+                                'cost' => 0
+                            ];
+                        }
+                        $aggregatedKeywords[$kw]['clicks'] += (int)($dk['clicks'] ?? 0);
+                        $aggregatedKeywords[$kw]['impressions'] += (int)($dk['impressions'] ?? 0);
+                        $aggregatedKeywords[$kw]['cost'] += (float)($dk['cost'] ?? 0);
+                    }
+
+                    $topKwList = [];
+                    foreach ($aggregatedKeywords as $kwData) {
+                        if ($kwData['clicks'] > 0 || $kwData['impressions'] > 0) {
+                            $c = $kwData['clicks'];
+                            $i = $kwData['impressions'];
+                            // Google Ads CTR is normally stored as a decimal (e.g. 0.0676 for 6.76%), because the blade file multiplies by 100
+                            $kwData['ctr'] = $i > 0 ? ($c / $i) : 0;
+                            $kwData['avg_cpc'] = $c > 0 ? round($kwData['cost'] / $c, 2) : 0;
+                            $kwData['cost'] = round($kwData['cost'], 2);
+                            $topKwList[] = $kwData;
+                        }
+                    }
+
+                    usort($topKwList, function($a, $b) {
+                        return $b['cost'] <=> $a['cost'];
+                    });
+
+                    $allData['top_keywords'] = array_slice($topKwList, 0, 10);
+                }
+
+                if (!empty($mergedDailyCampaigns)) {
+                    $aggregatedCampaigns = [];
+                    $uniqueDailyCamp = [];
+                    foreach ($mergedDailyCampaigns as $dc) {
+                        $date = $dc['date'] ?? '';
+                        $campName = $dc['name'] ?? 'Unknown';
+                        $uniqueKey = $date . '_' . $campName;
+                        // Deduplicate same campaign on same date
+                        $uniqueDailyCamp[$uniqueKey] = $dc;
+                    }
+
+                    foreach ($uniqueDailyCamp as $dc) {
+                        $campName = $dc['name'] ?? 'Unknown';
+                        if (!isset($aggregatedCampaigns[$campName])) {
+                            $aggregatedCampaigns[$campName] = [
+                                'name' => $campName,
+                                'clicks' => 0,
+                                'impressions' => 0,
+                                'cost' => 0,
+                                'conversions' => 0
+                            ];
+                        }
+                        $aggregatedCampaigns[$campName]['clicks'] += (int)($dc['clicks'] ?? 0);
+                        $aggregatedCampaigns[$campName]['impressions'] += (int)($dc['impressions'] ?? 0);
+                        $aggregatedCampaigns[$campName]['cost'] += (float)($dc['cost'] ?? 0);
+                        $aggregatedCampaigns[$campName]['conversions'] += (float)($dc['conversions'] ?? 0);
+                    }
+
+                    $topCampList = array_values($aggregatedCampaigns);
+                    usort($topCampList, function($a, $b) {
+                        return $b['cost'] <=> $a['cost'];
+                    });
+
+                    $allData['top_campaigns'] = array_slice($topCampList, 0, 5);
                 }
             }
         }
