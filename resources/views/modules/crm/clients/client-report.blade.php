@@ -86,6 +86,19 @@
             </div>
         @endif
     </div>
+    @else
+    {{-- Embedded Mode: Show Date Picker & Send Report without the title/back button --}}
+    <div class="flex flex-wrap items-center justify-end gap-3 mb-6">
+        @include('partials.marketing-report-send-modal')
+        
+        <div class="w-full sm:w-auto mt-2 sm:mt-0">
+            @php
+                $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+            @endphp
+            @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+        </div>
+    </div>
     @endif
 
     {{-- Report Content --}}
