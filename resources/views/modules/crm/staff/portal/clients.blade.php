@@ -99,7 +99,7 @@
             <nav class="flex space-x-3 sm:space-x-8 overflow-x-auto whitespace-nowrap scrollbar-none pb-0.5" aria-label="Tabs">
                 @php
                     $navTabs = [
-                        'overview' => 'Overview', 
+                        'marketing' => 'Marketing',
                         'websites' => 'Websites',
                     ];
                     if ($isAssignedToStaff) {
@@ -109,6 +109,7 @@
                     $navTabs['maintenance'] = 'Maintenance';
                     $navTabs['documents'] = 'Resources';
                     $navTabs['activity log'] = 'Activity Log';
+                    $navTabs['overview'] = 'Overview';
                 @endphp
                 @foreach($navTabs as $tabKey => $tabLabel)
                     <a href="{{ route('staff.clients.detail', ['id' => $clientDetails->id, 'tab' => $tabKey]) }}" wire:navigate class="py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-bold text-xs sm:text-sm whitespace-nowrap transition flex items-center gap-2 shrink-0 {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
@@ -159,7 +160,7 @@
                                 </div>
                             </div>
 
-                            <a href="{{ route('staff.clients.detail', ['id' => $clientDetails->id, 'tab' => 'integrations']) }}" wire:navigate
+                            <a href="{{ route('staff.clients.detail', ['id' => $clientDetails->id, 'tab' => 'marketing']) }}" wire:navigate
                                 class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition active:scale-95">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -204,6 +205,11 @@
 
                 </div>
 
+            @elseif ($activeTab === 'marketing')
+                <div class="animate-fadeIn">
+                    @livewire('client-marketing', ['clientId' => $clientDetails->id, 'isEmbedded' => true], key('marketing-reports-'.$clientDetails->id))
+                </div>
+
             @elseif ($activeTab === 'websites')
                 <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm animate-fadeIn">
                     @if ($clientWebsites->isEmpty())
@@ -221,7 +227,11 @@
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                                 @foreach ($clientWebsites as $web)
                                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
-                                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-white">{{ $web->site_name }}</td>
+                                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-white">
+                                            <a href="{{ route('staff.websites.detail', ['id' => $web->id]) }}" wire:navigate class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors">
+                                                {{ $web->site_name }}
+                                            </a>
+                                        </td>
                                         <td class="px-6 py-4">
                                             <a href="{{ $web->url }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">{{ $web->url }}</a>
                                         </td>
@@ -372,14 +382,8 @@
                                     </div>
 
                                     <!-- Middle: Stats columns (Modern card sub-containers) -->
-                                    <div class="grid grid-cols-2 gap-4 mb-6">
+                                    <div class="mb-6">
                                         <div class="bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100/50 dark:border-slate-850/50 p-3.5 rounded-2xl transition hover:bg-slate-100/30 dark:hover:bg-slate-850/20">
-                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">API health</span>
-                                            <span class="text-base font-extrabold text-slate-800 dark:text-slate-200">
-                                                {{ $isConnected ? $integration['api_health'] . '%' : '—' }}
-                                            </span>
-                                        </div>
-                                        <div class="bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100/50 dark:border-slate-855/50 p-3.5 rounded-2xl transition hover:bg-slate-100/30 dark:hover:bg-slate-855/20">
                                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Last sync</span>
                                             <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate block mt-0.5" title="{{ $integration['last_sync'] }}">
                                                 {{ $integration['last_sync'] }}
@@ -529,41 +533,6 @@
                                         </div>
                                     @endif
                                 @endif
-
-                                @if ($integration['id'] === 'gads' && $isConnected)
-                                    @if (!$integration['property_id'])
-                                        <div class="mt-4 p-3 bg-emerald-50/30 dark:bg-emerald-950/10 rounded-xl border border-emerald-100/30 dark:border-emerald-900/20 mb-4">
-                                            <span class="text-[10px] font-bold text-emerald-650 dark:text-emerald-400 block mb-1.5 uppercase tracking-wider">Select Google Ads Account</span>
-                                            <div class="flex gap-2 items-center" x-data="{ hasVal: false }">
-                                                <input type="text" wire:model.defer="googleAdsAccountId" x-on:input="hasVal = $event.target.value.length >= 10" placeholder="e.g. 123-456-7890" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-sm">
-                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveGoogleAdsAccount" wire:key="save-btn-gads" class="py-2 px-4 border border-transparent bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
-                                                    <span>Save</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
-                                            <span class="text-slate-455 dark:text-slate-550 font-medium">Google Ads Account ID</span>
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-bold text-slate-755 dark:text-slate-300 max-w-[200px] truncate" title="{{ $integration['property_id'] }}">
-                                                    @if(strlen($integration['property_id']) == 20)
-                                                        <span class="text-[10px] font-normal text-slate-400">MCC:</span> {{ substr($integration['property_id'], 0, 3) }}-{{ substr($integration['property_id'], 3, 3) }}-{{ substr($integration['property_id'], 6, 4) }} <br>
-                                                        <span class="text-[10px] font-normal text-slate-400">Client:</span> {{ substr($integration['property_id'], 10, 3) }}-{{ substr($integration['property_id'], 13, 3) }}-{{ substr($integration['property_id'], 16, 4) }}
-                                                    @elseif(strlen($integration['property_id']) == 10)
-                                                        <span class="text-[10px] font-normal text-slate-400">Client:</span> {{ substr($integration['property_id'], 0, 3) }}-{{ substr($integration['property_id'], 3, 3) }}-{{ substr($integration['property_id'], 6, 4) }}
-                                                    @else
-                                                        {{ $integration['property_id'] }}
-                                                    @endif
-                                                </span>
-                                                <button type="button" wire:click="clearPropertyId('gads')" class="text-slate-400 hover:text-red-500 transition" title="Clear Account ID">
-                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endif
                                 </div>
 
                                 <!-- Footer Actions -->
@@ -599,15 +568,7 @@
                                     @else
                                         <!-- Connected stage -->
                                         <div class="w-full flex flex-col gap-2.5 mt-auto">
-                                            @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword', 'gtm', 'gbp', 'gads']) && !empty($integration['property_id']))
-                                                <a href="{{ route('staff.clients.report', ['id' => $selectedClientId, 'integration' => $integration['id'], 'website' => $selectedWebsiteId]) }}"
-                                                        class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">
-                                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/>
-                                                    </svg>
-                                                    View Full Report
-                                                </a>
-                                            @endif
+
                                             <div class="flex items-center gap-3">
                                                 <button type="button" 
                                                         wire:click="refreshIntegration('{{ $integration['id'] }}')"
@@ -1056,19 +1017,11 @@
                                             </div>
                                         @endif
 <!-- 1. GA4 Charts Grid (Traffic by Channel & Visitors by Channel) -->
-@if(count($reportSets) == 1)
-<div wire:key="wrapper-19-single" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-@else
-<div wire:key="wrapper-19-multi" class="grid grid-cols-1 gap-6 mb-6">
-@endif
+<div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
 
     <!-- Left: Traffic by Channel / Events Distribution -->
     <div>
-        @if(count($reportSets) > 1)
-        <div wire:key="wrapper-8-multi" class="flex flex-col lg:flex-row gap-6">
-        @else
-        <div wire:key="wrapper-8-single" class="flex flex-col gap-6">
-        @endif
+        <div wire:key="wrapper-8-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
         @foreach($reportSets as $idx => $rSet)
         <div wire:key="ga4-section-2-{{ $idx }}" class="flex-1 w-full overflow-hidden">
             @php $reportDataScope = $rSet['data']; @endphp
@@ -1161,11 +1114,7 @@
 
     <!-- Right: Visitors by Channel Bar Chart -->
     <div>
-        @if(count($reportSets) > 1)
-        <div wire:key="wrapper-9-multi" class="flex flex-col lg:flex-row gap-6">
-        @else
-        <div wire:key="wrapper-9-single" class="flex flex-col gap-6">
-        @endif
+        <div wire:key="wrapper-9-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
         @foreach($reportSets as $idx => $rSet)
         <div wire:key="ga4-section-3-{{ $idx }}" class="flex-1 w-full overflow-hidden">
             @php $reportDataScope = $rSet['data']; @endphp
@@ -1233,11 +1182,7 @@
 </div>
 
 <!-- 2. Tables Grid -->
-@if(count($reportSets) == 1)
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-@else
-<div class="grid grid-cols-1 gap-6 mb-6">
-@endif
+<div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
 <!-- Pageviews by Page Path -->
 <div>
 @foreach($reportSets as $idx => $rSet)
@@ -1386,11 +1331,7 @@
 </div>
 
 <!-- 3. Lower Grid: Demographics, Geography -->
-@if(count($reportSets) == 1)
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-@else
-<div class="grid grid-cols-1 gap-6 mb-6">
-@endif
+<div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
 <!-- Devices -->
 <div>
 @foreach($reportSets as $idx => $rSet)

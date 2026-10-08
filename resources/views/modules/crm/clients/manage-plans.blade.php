@@ -1,15 +1,7 @@
 @section('page_title', 'Plans')
 
 <div>
-    {{-- Breadcrumbs --}}
-    <x-admin.breadcrumbs :items="['Plans' => null]" />
-
-    {{-- Page Header --}}
-    <div class="flex items-center justify-between gap-4 mb-5">
-        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">
-            Manage custom plans (e.g. Starter, Growth, Enterprise) and assign them to clients
-        </p>
-
+    <div class="flex justify-end mb-5">
         <button type="button" @click="$dispatch('open-modal', { name: 'add-plan-modal' })"
                 style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
     class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300">

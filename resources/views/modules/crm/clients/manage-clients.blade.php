@@ -151,16 +151,16 @@
         <div class="mb-6 bg-slate-100/80 dark:bg-slate-900/50 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-200/40 dark:border-slate-800/40">
             <nav class="flex flex-nowrap space-x-1 min-w-max" aria-label="Tabs">
                 @foreach([
-                    'overview' => 'Overview', 
+                    'marketing' => 'Marketing',
                     'clickup_tickets' => 'ClickUp Tickets', 
                     'websites' => 'Websites', 
-                    'marketing' => 'Marketing',
                     'maintenance' => 'Maintenance', 
                     'support' => 'Support',
                     'documents' => 'Documents', 
                     'activity log' => 'Activity', 
                     'integrations' => 'Integrations',
-                    'settings' => 'Settings'
+                    'settings' => 'Settings',
+                    'overview' => 'Overview'
                 ] as $tabKey => $tabLabel)
                     <a href="{{ route('admin.clients.detail', ['id' => $clientDetails->id, 'tab' => $tabKey]) }}" wire:navigate
                        class="py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0 {{ $activeTab === $tabKey ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-850 hover:bg-white/40 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/30' }}">
@@ -285,7 +285,7 @@
                                 </div>
                             </div>
 
-                            <a href="{{ route('admin.clients.detail', ['id' => $clientDetails->id, 'tab' => 'integrations']) }}" wire:navigate
+                            <a href="{{ route('admin.marketing', ['clientId' => $clientDetails->id]) }}" wire:navigate
                                 class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition active:scale-95">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -700,7 +700,7 @@
                                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                                     <td class="px-6 py-4">
                                         <div class="font-bold text-slate-900 dark:text-white">
-                                            <a href="{{ $site->url }}" target="_blank" class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
+                                            <a href="{{ route('admin.websites.detail', ['id' => $site->id]) }}" wire:navigate class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
                                                 {{ $site->site_name }}
                                             </a>
                                         </div>
@@ -868,25 +868,8 @@
             </div>
 
         @elseif ($activeTab === 'marketing')
-            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm animate-fadeIn">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Marketing Performance Hub</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Track and review comprehensive marketing stats and campaign results.</p>
-                    </div>
-                </div>
-                <div class="border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center bg-slate-50/20 dark:bg-slate-950/10">
-                    <svg class="w-12 h-12 text-slate-350 dark:text-slate-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
-                    </svg>
-                    <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1">Marketing Reports Coming Soon</h4>
-                    <p class="text-xs text-slate-450 dark:text-slate-550 max-w-md mx-auto">We are actively working on building comprehensive marketing performance reports. Soon you will be able to track search performance, campaign statistics, and SEO health directly from this dashboard.</p>
-                </div>
+            <div class="animate-fadeIn">
+                @livewire('client-marketing', ['clientId' => $clientDetails->id, 'isEmbedded' => true], key('marketing-reports-'.$clientDetails->id))
             </div>
 
         @elseif ($activeTab === 'support')
@@ -1100,13 +1083,7 @@
                                 </div>
 
                                 <!-- Middle: Stats columns (Modern card sub-containers) -->
-                                <div class="grid grid-cols-2 gap-4 mb-6">
-                                    <div class="bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100/50 dark:border-slate-850/50 p-3.5 rounded-2xl transition hover:bg-slate-100/30 dark:hover:bg-slate-850/20">
-                                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">API health</span>
-                                        <span class="text-base font-extrabold text-slate-800 dark:text-slate-200">
-                                            {{ $isConnected ? $integration['api_health'] . '%' : '—' }}
-                                        </span>
-                                    </div>
+                                <div class="mb-6">
                                     <div class="bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100/50 dark:border-slate-850/50 p-3.5 rounded-2xl transition hover:bg-slate-100/30 dark:hover:bg-slate-850/20">
                                         <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Last sync</span>
                                         <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate block mt-0.5" title="{{ $integration['last_sync'] }}">
@@ -1327,15 +1304,6 @@
                                 @else
                                     <!-- Connected stage -->
                                     <div class="w-full flex flex-col gap-2.5 mt-auto">
-                                        @if (in_array($integration['id'], ['ga4', 'gsc', 'youtube', 'keyword', 'gtm', 'gbp', 'gads', 'facebook', 'linkedin']) && !empty($integration['property_id']))
-                                            <a href="{{ route('admin.clients.report', ['id' => $selectedClientDetailId, 'integration' => $integration['id'], 'website' => $selectedWebsiteId]) }}"
-                                                    class="w-full py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 active:scale-95">
-                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/>
-                                                </svg>
-                                                View Full Report
-                                            </a>
-                                        @endif
                                         <div class="flex items-center gap-3">
                                             <button type="button" 
                                                     wire:click="refreshIntegration('{{ $integration['id'] }}')"
@@ -1921,12 +1889,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mb-6">
-                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Google Business Profile Data Dump</h4>
-                                            <div class="overflow-x-auto">
-                                                <pre class="text-[10px] text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{{ json_encode($activeReportData, JSON_PRETTY_PRINT) }}</pre>
-                                            </div>
-                                        </div>
+
                                     @elseif ($activeReportIntegrationId === 'ga4')
 @php
                                         
@@ -2875,7 +2838,7 @@
             </p>
 
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.clients.plans') }}"
+                <a href="{{ route('admin.settings', ['tab' => 'plans']) }}"
                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-sm font-semibold transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -3155,7 +3118,7 @@
                                     </td>
                                     <td class="px-3 py-3.5">
                                         <div class="flex items-center gap-3">
-                                            <a href="{{ route('admin.clients.detail', ['id' => $client->id]) }}" wire:navigate class="shrink-0 cursor-pointer">
+                                            <div class="shrink-0">
                                                 @if($client->profile_image)
                                                     <img src="{{ asset('storage/' . $client->profile_image) }}" alt="{{ $client->user->name }}" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400'>{{ $client->getInitials() }}</div>`" />
                                                 @else
@@ -3163,19 +3126,19 @@
                                                         {{ $client->getInitials() }}
                                                     </div>
                                                 @endif
-                                            </a>
+                                            </div>
                                             <div class="min-w-0 flex-1">
-                                                <a href="{{ route('admin.clients.detail', ['id' => $client->id]) }}" wire:navigate class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block" title="{{ $client->user->name ?? 'Deleted User' }}">
+                                                <button type="button" wire:click="viewClientDetail({{ $client->id }})" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block text-left transition-colors" title="{{ $client->user->name ?? 'Deleted User' }}">
                                                     {{ $client->user->name ?? 'Deleted User' }}
-                                                </a>
+                                                </button>
                                                 <div class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal" title="{{ $client->user->email ?? 'N/A' }}">{{ $client->user->email ?? 'N/A' }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-3 py-3.5 text-slate-700 dark:text-slate-350 font-semibold">
-                                        <a href="{{ route('admin.clients.detail', ['id' => $client->id]) }}" wire:navigate class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                        <div class="truncate max-w-[150px] sm:max-w-none">
                                             {{ $client->company_name ?: '—' }}
-                                        </a>
+                                        </div>
                                     </td>
                                     <td class="px-3 py-3.5">
                                         @if($client->plans->isNotEmpty())
@@ -3288,6 +3251,14 @@
                                             </a>
                                         @endif
 
+                                        <a href="{{ route('admin.clients.detail', ['id' => $client->id]) }}" wire:navigate
+                                           class="inline-flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 dark:text-indigo-400 transition-all duration-150 active:scale-95 shrink-0"
+                                           title="View Client Details">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
                                         <button type="button" 
                                                 @click="
                                                     const data = {{ Js::from($clientEditData) }};

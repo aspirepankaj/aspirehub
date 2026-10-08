@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->environment('local')) {
+            \Illuminate\Support\Facades\Http::globalOptions(['verify' => false]);
+        }
+        
         \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(function ($user, string $token) {
             if ($user->staff()->exists()) {
                 return url(route('staff.password.reset', [
@@ -60,6 +64,8 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('client-maintenance', \App\Modules\Client\Dashboard\Livewire\ClientMaintenanceReports::class);
         \Livewire\Livewire::component('client-view-maintenance-report', \App\Modules\Client\Dashboard\Livewire\ClientViewMaintenanceReport::class);
         \Livewire\Livewire::component('client-support', \App\Modules\Client\Dashboard\Livewire\ClientSupport::class);
+        
+        \Livewire\Livewire::component('manage-marketing-reports', \App\Modules\CRM\Reports\Livewire\ManageMarketingReports::class);
 
         \Livewire\Livewire::component('staff-dashboard', \App\Modules\CRM\Staff\Livewire\Portal\StaffDashboard::class);
         \Livewire\Livewire::component('staff-clients', \App\Modules\CRM\Staff\Livewire\Portal\StaffClients::class);

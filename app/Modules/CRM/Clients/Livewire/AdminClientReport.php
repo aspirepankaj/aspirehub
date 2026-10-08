@@ -30,13 +30,15 @@ class AdminClientReport extends Component
     public ?Website $website = null;
     public string $clientName = '';
     public string $websiteName = '';
+    public bool $hideHeader = false;
 
-    public function mount(int $id, string $integration): void
+    public function mount(int $id, string $integration, $websiteId = null, $hideHeader = false): void
     {
         $this->clientId = $id;
         $this->integration = $integration;
         $this->activeReportIntegrationId = $integration;
-        $this->websiteId = (int) request('website', 0);
+        $this->websiteId = $websiteId ?? (int) request('website', 0);
+        $this->hideHeader = $hideHeader;
 
         // Dates are handled by #[Url] now, but we can keep defaults if empty
         if (empty($this->dateFrom)) $this->dateFrom = request('from', Carbon::now()->subDays(28)->format('Y-m-d'));

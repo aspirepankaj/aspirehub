@@ -1,27 +1,7 @@
 @section('page_title', 'Designation Management')
 
 <div>
-    <!-- Breadcrumbs -->
-    <x-admin.breadcrumbs :items="['Designations' => null]" />
 
-    {{-- ══════════════════════════════════════════════
-         PAGE HEADER — Title + Add Designation button
-    ══════════════════════════════════════════════ --}}
-    <div class="flex items-center justify-between gap-4 mb-5">
-        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">
-            Configure and manage official staff roles and professional titles
-        </p>
-
-        {{-- Add Designation button --}}
-        <button type="button" @click="$dispatch('open-modal', { name: 'add-designation-modal' })"
-                style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95 whitespace-nowrap">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-            <span>Add Designation</span>
-        </button>
-    </div>
 
     {{-- Session alerts --}}
     @if(session('success'))
@@ -44,6 +24,16 @@
             </div>
 
             <div class="flex items-center gap-3 justify-end">
+                {{-- Add Designation button --}}
+                <button type="button" @click="$dispatch('open-modal', { name: 'add-designation-modal' })"
+                        style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300 active:scale-95 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Add Designation</span>
+                </button>
+                
                 <div class="relative flex items-center min-w-[140px]">
                     <svg class="absolute left-3 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none shrink-0 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />

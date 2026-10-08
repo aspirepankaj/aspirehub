@@ -45,6 +45,7 @@ class ClientMyWebsites extends Component
             })
             ->leftJoin('adspv_staff as s', 's.id', '=', 'mr.developer_id')
             ->where('w.client_id', $client->id)
+            ->where('w.status', 'active')
             ->select(
 
                 // Website

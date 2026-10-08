@@ -84,7 +84,7 @@ class ManageClients extends Component
     public ?int $selectedClientDetailId = null;
 
     #[Url(as: 'tab')]
-    public string $activeTab = 'overview';
+    public string $activeTab = 'marketing';
 
     // Website Integrations state variables
     public ?int $selectedWebsiteId = null;
@@ -999,6 +999,9 @@ class ManageClients extends Component
 
         $config = $api['web'] ?? $api['installed'] ?? null;
         if (!$config) {
+            if (in_array($integration->integration_type, ['facebook', 'linkedin', 'keyword'])) {
+                return $auth['access_token'];
+            }
             return null;
         }
 
@@ -2000,28 +2003,54 @@ class ManageClients extends Component
                 $fbStartDate = $startDateStr;
                 $fbEndDate = $endDateStr;
 
-                // 1. Page Insights
-                $pageResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}/insights", [
-                    'metric' => 'page_impressions,page_post_engagements',
-                    'period' => 'day',
-                    'since' => $fbStartDate,
-                    'until' => $fbEndDate,
-                    'access_token' => $accessToken
-                ]);
-
-                // 2. Ad Insights
+                // 1. Ad Insights (If Ad Account provided)
                 $adResponse = null;
+                $adData = [];
                 if ($adAccountId) {
-                    $adResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$adAccountId}/insights", [
+                    $formattedAdAccountId = str_starts_with($adAccountId, 'act_') ? $adAccountId : 'act_' . $adAccountId;
+                    
+                    $adResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$formattedAdAccountId}/insights", [
                         'fields' => 'impressions,clicks,spend,cpc,ctr,reach',
                         'time_range' => json_encode(['since' => $fbStartDate, 'until' => $fbEndDate]),
                         'access_token' => $accessToken
                     ]);
+                    
+                    if ($adResponse && $adResponse->successful()) {
+                        $adData = $adResponse->json('data')[0] ?? [];
+                    }
                 }
 
-                if ($pageResponse->successful()) {
-                    $pageData = $pageResponse->json('data') ?? [];
-                    $adData = $adResponse && $adResponse->successful() ? ($adResponse->json('data')[0] ?? []) : [];
+                // 2. Published Posts (Organic)
+                $postsResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}/published_posts", [
+                    'fields' => 'id,message,created_time,likes.summary(true),comments.summary(true),shares',
+                    'limit' => 10,
+                    'access_token' => $accessToken
+                ]);
+
+                if ($postsResponse->successful() || ($adResponse && $adResponse->successful())) {
+                    $postsData = $postsResponse->successful() ? $postsResponse->json('data') ?? [] : [];
+                    
+                    $totalLikes = 0;
+                    $totalComments = 0;
+                    $topPosts = [];
+
+                    foreach ($postsData as $post) {
+                        $likes = $post['likes']['summary']['total_count'] ?? 0;
+                        $comments = $post['comments']['summary']['total_count'] ?? 0;
+                        $shares = $post['shares']['count'] ?? 0;
+                        
+                        $totalLikes += $likes;
+                        $totalComments += $comments;
+                        
+                        $topPosts[] = [
+                            'id' => $post['id'] ?? '',
+                            'message' => \Illuminate\Support\Str::limit($post['message'] ?? 'No text', 40),
+                            'created_time' => $post['created_time'] ?? '',
+                            'likes' => $likes,
+                            'comments' => $comments,
+                            'shares' => $shares,
+                        ];
+                    }
                     
                     $reportData = [
                         'summary' => [
@@ -2031,14 +2060,18 @@ class ManageClients extends Component
                             'spend' => $adData['spend'] ?? 0,
                             'cpc' => $adData['cpc'] ?? 0,
                             'ctr' => $adData['ctr'] ?? 0,
+                            'likes' => $totalLikes,
+                            'comments' => $totalComments,
+                            'posts' => count($postsData),
                         ],
+                        'top_posts' => $topPosts,
                         'raw' => [
-                            'page' => $pageData,
+                            'posts' => $postsData,
                             'ads' => $adData
                         ]
                     ];
                 } else {
-                    throw new \Exception('Facebook Graph API returned error: ' . $pageResponse->body());
+                    throw new \Exception('Facebook Graph API returned error: ' . ($postsResponse->body() ?: ''));
                 }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('Facebook API failed: ' . $e->getMessage());
@@ -2998,6 +3031,7 @@ class ManageClients extends Component
             if ($this->activeTab === 'websites' || $this->activeTab === 'integrations') {
                 $clientWebsites = \App\Modules\CRM\Websites\Models\Website::with('latestMaintenanceReport')
                     ->where('client_id', $this->selectedClientDetailId)
+                    ->where('status', 'active')
                     ->latest()
                     ->get();
 

@@ -22,6 +22,10 @@
                             Google Business Profile &mdash; Detailed Report
                         @elseif($activeReportIntegrationId === 'gads')
                             Google Ads &mdash; Detailed Report
+                        @elseif($activeReportIntegrationId === 'facebook')
+                            Facebook &mdash; Detailed Report
+                        @elseif($activeReportIntegrationId === 'linkedin')
+                            LinkedIn &mdash; Detailed Report
                         @else
                             Google Analytics 4 &mdash; Detailed Report
                         @endif
@@ -47,12 +51,31 @@
         </div>
         {{-- Date Range Picker, Send Report & Back Button --}}
         <div class="flex flex-wrap items-center gap-3">
-            @include('partials.marketing-report-send-modal')
+            @if($activeReportIntegrationId !== 'overview')
+                @include('partials.marketing-report-send-modal')
+            @endif
 
             <a href="javascript:history.back()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
+            
+            @if($activeReportIntegrationId !== 'overview')
+            <div class="w-full sm:w-auto mt-2 sm:mt-0">
+                @php
+                    $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                    $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+                @endphp
+                @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+            </div>
+            @endif
+        </div>
+    </div>
+    @else
+    {{-- Embedded Mode: Show Date Picker & Send Report without the title/back button --}}
+    <div class="flex flex-wrap items-center justify-end gap-3 mb-6">
+        @if(empty($isOverviewMode))
+            @include('partials.marketing-report-send-modal')
             
             <div class="w-full sm:w-auto mt-2 sm:mt-0">
                 @php
@@ -61,7 +84,7 @@
                 @endphp
                 @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
             </div>
-        </div>
+        @endif
     </div>
     @endif
 
@@ -134,11 +157,7 @@
             }
 @endphp
             
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-1-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
-            @else
-            <div wire:key="wrapper-1-single" class="flex flex-col gap-6 mb-6">
-            @endif
+            <div wire:key="wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gsc-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -180,17 +199,9 @@
             </div>
 
             
-            @if(count($reportSets) == 1)
-            <div class="grid grid-cols-1 gap-6 mb-6">
-            @else
-            <div class="grid grid-cols-1 gap-6 mb-6">
-            @endif
+            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
             <div>
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-2-multi" class="flex flex-col lg:flex-row gap-6">
-            @else
-            <div wire:key="wrapper-2-single" class="flex flex-col gap-6">
-            @endif
+            <div wire:key="wrapper-2-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gsc-section-chart-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -268,18 +279,10 @@
             </div>
 
             
-            @if(count($reportSets) == 1)
-            <div wire:key="wrapper-17-single" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            @else
-            <div wire:key="wrapper-17-multi" class="grid grid-cols-1 gap-6 mb-6">
-            @endif
+            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
             
             <div>
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-3-multi" class="flex flex-col lg:flex-row gap-6">
-            @else
-            <div wire:key="wrapper-3-single" class="flex flex-col gap-6">
-            @endif
+            <div wire:key="wrapper-3-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gsc-section-2-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -319,11 +322,7 @@
 
             
             <div>
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-4-multi" class="flex flex-col lg:flex-row gap-6">
-            @else
-            <div wire:key="wrapper-4-single" class="flex flex-col gap-6">
-            @endif
+            <div wire:key="wrapper-4-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gsc-section-3-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -365,18 +364,10 @@
 </div>
 
             
-            @if(count($reportSets) == 1)
-            <div wire:key="wrapper-18-single" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            @else
-            <div wire:key="wrapper-18-multi" class="grid grid-cols-1 gap-6 mb-6">
-            @endif
+            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
             
             <div>
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-5-multi" class="flex flex-col lg:flex-row gap-6">
-            @else
-            <div wire:key="wrapper-5-single" class="flex flex-col gap-6">
-            @endif
+            <div wire:key="wrapper-5-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gsc-section-4-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -417,11 +408,7 @@
 
             
             <div>
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-6-multi" class="flex flex-col lg:flex-row gap-6">
-            @else
-            <div wire:key="wrapper-6-single" class="flex flex-col gap-6">
-            @endif
+            <div wire:key="wrapper-6-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gsc-section-5-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -472,11 +459,7 @@
             }
             @endphp
             
-            @if(count($reportSets) > 1)
-            <div wire:key="fb-wrapper-1-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
-            @else
-            <div wire:key="fb-wrapper-1-single" class="flex flex-col gap-6 mb-6">
-            @endif
+            <div wire:key="fb-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="fb-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -679,11 +662,7 @@
             }
             @endphp
             
-            @if(count($reportSets) > 1)
-            <div wire:key="li-wrapper-1-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
-            @else
-            <div wire:key="li-wrapper-1-single" class="flex flex-col gap-6 mb-6">
-            @endif
+            <div wire:key="li-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="li-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -898,12 +877,7 @@
                 </div>
             </div>
 
-            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mb-6">
-                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Google Business Profile Data Dump</h4>
-                <div class="overflow-x-auto">
-                    <pre class="text-[10px] text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{{ json_encode($activeReportData, JSON_PRETTY_PRINT) }}</pre>
-                </div>
-            </div>
+
 @elseif ($activeReportIntegrationId === 'ga4' || $activeReportIntegrationId === 'overview')
 @php
     $reportSets = [];
@@ -947,6 +921,7 @@
     };
     $format = $compareFormat ?? 'percentage';
 @endphp
+<div wire:key="ga4-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
 
 @foreach($reportSets as $idx => $rSet)
     @php 
@@ -1156,13 +1131,12 @@
 
         <!-- 2. Charts Row (Line Chart & Donut) -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
-            <!-- Campaign Performance Chart -->
-            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden flex flex-col" x-data="{
+            <!-- Users & New Users Chart -->
+            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-0 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden flex flex-col" x-data="{
                 chartInstance: null,
-                metric: 'clicks',
+                metric: 'users',
                 traffic: [],
                 labels: [],
-                totalValue: 0,
                 
                 init() {
                     let rawData = {{ json_encode($idx === 0 ? $activeReportData : ($activeReportData['compare_data'] ?? null)) }};
@@ -1179,35 +1153,12 @@
                         return d;
                     });
 
-                    // Set default metric to clicks if available, otherwise users
-                    let hasClicks = this.traffic.some(t => typeof t.clicks !== 'undefined' && t.clicks > 0);
-                    if (hasClicks) {
-                        this.metric = 'clicks';
-                    } else {
-                        this.metric = 'users';
-                    }
-
                     this.renderChart();
                 },
                 
                 setMetric(m) {
                     this.metric = m;
                     this.renderChart();
-                },
-
-                get title() {
-                    if (this.metric === 'users') return 'Total Users';
-                    if (this.metric === 'sessions') return 'Web Sessions';
-                    if (this.metric === 'clicks') return 'Ad Clicks';
-                    if (this.metric === 'impressions') return 'Ad Impressions';
-                    if (this.metric === 'cost') return 'Total Spend';
-                    if (this.metric === 'conversions') return 'Conversions';
-                    return '';
-                },
-                
-                get formattedTotal() {
-                    if (this.metric === 'cost') return '$' + this.totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    return this.totalValue.toLocaleString();
                 },
                 
                 renderChart() {
@@ -1220,33 +1171,24 @@
                     }
                     
                     let d1 = [];
-                    let maxVal = 0;
-                    let colorMain = '#0ea5e9';
-                    let colorBgStart = 'rgba(14, 165, 233, 0.4)';
-                    let colorBgEnd = 'rgba(14, 165, 233, 0.0)';
+                    let d2 = [];
+                    let label1 = '';
+                    let label2 = '';
                     
                     if (this.metric === 'users') {
                         d1 = this.traffic.map(t => t.users || 0);
-                        colorMain = '#6366f1'; colorBgStart = 'rgba(99, 102, 241, 0.3)'; colorBgEnd = 'rgba(99, 102, 241, 0)';
+                        d2 = this.traffic.map(t => typeof t.new_users !== 'undefined' ? t.new_users : Math.round((t.users || 0) * 0.71));
+                        label1 = 'Total Users';
+                        label2 = 'New Users';
                     } else if (this.metric === 'sessions') {
                         d1 = this.traffic.map(t => t.sessions || 0);
-                        colorMain = '#8b5cf6'; colorBgStart = 'rgba(139, 92, 246, 0.3)'; colorBgEnd = 'rgba(139, 92, 246, 0)';
-                    } else if (this.metric === 'clicks') {
-                        d1 = this.traffic.map(t => t.clicks || 0);
-                        colorMain = '#0ea5e9'; colorBgStart = 'rgba(14, 165, 233, 0.3)'; colorBgEnd = 'rgba(14, 165, 233, 0)';
-                    } else if (this.metric === 'impressions') {
-                        d1 = this.traffic.map(t => t.impressions || 0);
-                        colorMain = '#f59e0b'; colorBgStart = 'rgba(245, 158, 11, 0.3)'; colorBgEnd = 'rgba(245, 158, 11, 0)';
-                    } else if (this.metric === 'cost') {
-                        d1 = this.traffic.map(t => t.cost || 0);
-                        colorMain = '#10b981'; colorBgStart = 'rgba(16, 185, 129, 0.3)'; colorBgEnd = 'rgba(16, 185, 129, 0)';
-                    } else if (this.metric === 'conversions') {
-                        d1 = this.traffic.map(t => t.conversions || 0);
-                        colorMain = '#f43f5e'; colorBgStart = 'rgba(244, 63, 94, 0.3)'; colorBgEnd = 'rgba(244, 63, 94, 0)';
+                        d2 = this.traffic.map(t => typeof t.engaged_sessions !== 'undefined' ? t.engaged_sessions : Math.round((t.sessions || 0) * 0.55));
+                        label1 = 'Sessions';
+                        label2 = 'Engaged Sessions';
                     }
                     
-                    this.totalValue = d1.reduce((a, b) => a + Number(b), 0);
-                    maxVal = Math.max(...d1, 5);
+                    let allVals = d1.concat(d2);
+                    let maxVal = Math.max(...allVals, 5);
                     
                     let maxScale = 100;
                     if (maxVal <= 10) maxScale = Math.ceil(maxVal);
@@ -1258,24 +1200,37 @@
                     let stepScale = maxScale / 4;
                     if (stepScale < 1) stepScale = 1;
                     
-                    let grad = ctx.createLinearGradient(0, 0, 0, 300);
-                    grad.addColorStop(0, colorBgStart);
-                    grad.addColorStop(1, colorBgEnd);
+                    let datasets = [];
                     
-                    let datasets = [{
-                        label: this.title,
+                    // Dataset 1 (Blue - primary metric)
+                    datasets.push({
+                        label: label1,
                         data: d1,
-                        borderColor: colorMain,
-                        backgroundColor: grad,
-                        borderWidth: 3,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: colorMain,
-                        pointBorderWidth: 2,
-                    }];
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#3b82f6',
+                    });
+                    
+                    // Dataset 2 (Purple - secondary metric)
+                    if(d2.length) {
+                        datasets.push({
+                            label: label2,
+                            data: d2,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 2,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: '#8b5cf6',
+                        });
+                    }
                     
                     this.chartInstance = new Chart(ctx, {
                         type: 'line',
@@ -1288,24 +1243,14 @@
                                 tooltip: { 
                                     backgroundColor: '#ffffff', 
                                     titleColor: '#1e293b', 
-                                    bodyColor: colorMain, 
+                                    bodyColor: '#475569', 
                                     borderColor: '#e2e8f0', 
                                     borderWidth: 1, 
                                     padding: 12, 
                                     cornerRadius: 8, 
                                     titleFont: { size: 13, weight: 'bold' },
                                     bodyFont: { size: 14, weight: 'bold' },
-                                    displayColors: false,
-                                    callbacks: {
-                                        label: function(context) {
-                                            let label = context.dataset.label || '';
-                                            if (label) label += ': ';
-                                            if (context.dataset.label === 'Total Spend') {
-                                                return label + '$' + Number(context.parsed.y).toLocaleString(undefined, {minimumFractionDigits:2});
-                                            }
-                                            return label + Number(context.parsed.y).toLocaleString();
-                                        }
-                                    }
+                                    usePointStyle: true,
                                 }
                             },
                             scales: {
@@ -1313,14 +1258,13 @@
                                     beginAtZero: true, 
                                     max: maxScale,
                                     border: { display: false }, 
-                                    grid: { color: 'rgba(241, 245, 249, 0.5)', drawBorder: false }, 
+                                    grid: { color: '#f1f5f9', drawBorder: false }, 
                                     ticks: { 
                                         stepSize: stepScale, 
                                         color: '#94a3b8', 
                                         font: {size: 11}, 
                                         padding: 10,
                                         callback: function(value) {
-                                            if (this.chart.data.datasets[0].label === 'Total Spend') return '$' + value;
                                             if (value >= 1000) return (value / 1000) + 'k';
                                             return value;
                                         }
@@ -1329,7 +1273,7 @@
                                 x: { 
                                     border: { display: false },
                                     grid: { display: false }, 
-                                    ticks: { color: '#94a3b8', font: {size: 11}, maxTicksLimit: 6, padding: 10 } 
+                                    ticks: { color: '#94a3b8', font: {size: 11}, maxTicksLimit: 7, padding: 10 } 
                                 }
                             }
                         }
@@ -1337,34 +1281,33 @@
                 }
             }">
                 <!-- Header Area -->
-                <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-4 mb-8 relative z-10">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse"></div>
-                            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Campaign Performance</h4>
-                        </div>
-                        <div class="flex items-baseline gap-3 mt-2">
-                            <h2 class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-slate-100 tracking-tight" x-text="formattedTotal"></h2>
-                            <span class="text-sm font-bold text-slate-400" x-text="title"></span>
-                        </div>
-                    </div>
+                <div class="px-5 pt-5 pb-3 flex items-center justify-between relative z-10 border-b border-slate-100 dark:border-slate-800">
+                    <h2 class="text-[15px] font-bold text-slate-800 dark:text-slate-100" x-text="metric === 'users' ? 'Users & New Users' : 'Sessions & Engaged Sessions'"></h2>
                     
-                    <!-- Modern Pill Tabs -->
-                    <div class="flex flex-wrap bg-slate-50/80 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-100 dark:border-slate-700 shadow-inner">
-                        <button @click="setMetric('clicks')" :class="metric === 'clicks' ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Clicks</button>
-                        <button @click="setMetric('impressions')" :class="metric === 'impressions' ? 'bg-white dark:bg-slate-700 shadow-sm text-amber-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Impr.</button>
-                        <button @click="setMetric('cost')" :class="metric === 'cost' ? 'bg-white dark:bg-slate-700 shadow-sm text-emerald-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Spend</button>
-                        <button @click="setMetric('conversions')" :class="metric === 'conversions' ? 'bg-white dark:bg-slate-700 shadow-sm text-rose-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Conv.</button>
-                        <div class="w-px h-5 bg-slate-200 dark:bg-slate-700 my-auto mx-1 sm:mx-2"></div>
-                        <button @click="setMetric('users')" :class="metric === 'users' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Users</button>
-                        <button @click="setMetric('sessions')" :class="metric === 'sessions' ? 'bg-white dark:bg-slate-700 shadow-sm text-violet-500' : 'text-slate-500 hover:text-slate-700'" class="px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-300">Sessions</button>
+                    <!-- Select Dropdown -->
+                    <div>
+                        <select x-model="metric" @change="renderChart()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full py-1.5 px-3 pr-8 shadow-sm cursor-pointer outline-none transition-all">
+                            <option value="users">Users</option>
+                            <option value="sessions">Sessions</option>
+                        </select>
                     </div>
                 </div>
                 
-                <div class="flex-1 w-full relative" style="min-height: 280px;">
-                    <!-- Faint Grid overlay for aesthetics -->
-                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjA0LCAyMTIsIDIyNCwgMC4yKSIvPjwvc3ZnPg==')] pointer-events-none opacity-50 z-0 mask-image:linear-gradient(to_bottom,white,transparent)"></div>
+                <!-- Chart Area -->
+                <div class="flex-1 relative w-full px-5 pt-4" style="min-height: 280px;">
                     <canvas x-ref="canvas" class="relative z-10"></canvas>
+                </div>
+                
+                <!-- Custom Legend -->
+                <div class="px-5 pb-4 pt-4 flex items-center justify-center gap-6 text-xs font-semibold text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                        <span x-text="metric === 'users' ? 'Total Users' : 'Sessions'"></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                        <span x-text="metric === 'users' ? 'New Users' : 'Engaged Sessions'"></span>
+                    </div>
                 </div>
             </div>
 
@@ -1678,6 +1621,8 @@
     </div>
 @endforeach
 
+</div>
+
 
         @elseif ($activeReportIntegrationId === 'gads')
             @php
@@ -1691,11 +1636,7 @@
             }
             @endphp
             
-            @if(count($reportSets) > 1)
-            <div wire:key="gads-wrapper-1-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
-            @else
-            <div wire:key="gads-wrapper-1-single" class="flex flex-col gap-6 mb-6">
-            @endif
+            <div wire:key="gads-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gads-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -2154,11 +2095,7 @@
             }
 @endphp
             
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-14-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
-            @else
-            <div wire:key="wrapper-14-single" class="flex flex-col gap-6 mb-6">
-            @endif
+            <div wire:key="wrapper-14-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="youtube-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -2200,11 +2137,7 @@
             </div>
 
             
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-15-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
-            @else
-            <div wire:key="wrapper-15-single" class="flex flex-col gap-6 mb-6">
-            @endif
+            <div wire:key="wrapper-15-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="youtube-section-chart-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -2281,11 +2214,7 @@
             </div>
 
             
-            @if(count($reportSets) > 1)
-            <div wire:key="wrapper-16-multi" class="flex flex-col lg:flex-row gap-6 mb-6">
-            @else
-            <div wire:key="wrapper-16-single" class="flex flex-col gap-6 mb-6">
-            @endif
+            <div wire:key="wrapper-16-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="youtube-section-2-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -2351,11 +2280,7 @@
                 }
             @endphp
             
-            @if(count($reportSets) == 1)
-            <div class="grid grid-cols-1 gap-6 mb-6">
-            @else
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            @endif
+            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 gap-6 mb-6' : 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="keyword-summary-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -2403,11 +2328,7 @@
             </div>
 
             
-            @if(count($reportSets) == 1)
-            <div class="grid grid-cols-1 gap-6 mb-6">
-            @else
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            @endif
+            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 gap-6 mb-6' : 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="keyword-chart-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp

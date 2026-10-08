@@ -10,19 +10,19 @@ use Livewire\Attributes\Url;
 
 trait LoadsMarketingReports
 {
-    #[Url]
+    #[\Livewire\Attributes\Url(except: '')]
     public string $dateFrom = '';
-    #[Url]
+    #[\Livewire\Attributes\Url(except: '')]
     public string $dateTo = '';
-    #[Url]
+    #[\Livewire\Attributes\Url(except: '')]
     public string $compareDateFrom = '';
-    #[Url]
+    #[\Livewire\Attributes\Url(except: '')]
     public string $compareDateTo = '';
-    #[Url]
+    #[\Livewire\Attributes\Url(except: false)]
     public bool $compareEnabled = false;
-    #[Url]
+    #[\Livewire\Attributes\Url(except: false)]
     public bool $includeToday = false;
-    #[Url]
+    #[\Livewire\Attributes\Url(except: 'percentage')]
     public string $compareFormat = 'percentage';
 
     public bool $showSendReportModal = false;

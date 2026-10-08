@@ -1,6 +1,8 @@
 <div class="space-y-6">
     {{-- Breadcrumbs --}}
-    <x-admin.breadcrumbs :items="['Marketing Reports' => null]" />
+    @if(!$isEmbedded)
+        <x-admin.breadcrumbs :items="['Marketing Reports' => null]" />
+    @endif
     @php
         $isGa4Connected = isset($integrations['ga4']);
         $isGscConnected = isset($integrations['gsc']);
@@ -220,15 +222,7 @@
         @endif
 
         <div class="flex items-center gap-3">
-            <!-- Date Range Calendar Selectors (-90 Days to +90 Days) -->
-            <!-- GA4 Style Date Range Picker Popover -->
-            @if($activeReportIntegrationId !== 'overview')
-                @php
-                    $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
-                    $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
-                @endphp
-                @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
-            @endif
+            <!-- Date picker removed as it is now handled by the embedded client-report -->
         </div>
     </div>
 
@@ -250,39 +244,39 @@
                 <div class="space-y-12" wire:key="integration-view-overview">
                 @if($isGa4Connected)
                     <div wire:key="overview-ga4"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Analytics 4</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'ga4', 'activeReportData' => $ga4Data])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'ga4', 'activeReportData' => $ga4Data])</div>
                 @endif
                 @if($isGscConnected)
                     <div wire:key="overview-gsc"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Search Console</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gsc', 'activeReportData' => $gscData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'gsc', 'activeReportData' => $gscData])</div>
                 @endif
                 @if($isYoutubeConnected)
                     <div wire:key="overview-youtube"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">YouTube</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'youtube', 'activeReportData' => $youtubeData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'youtube', 'activeReportData' => $youtubeData])</div>
                 @endif
                 @if($isKeywordConnected)
                     <div wire:key="overview-keyword"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Keyword.com</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'keyword', 'activeReportData' => $keywordData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'keyword', 'activeReportData' => $keywordData])</div>
                 @endif
                 @if($isGbpConnected)
                     <div wire:key="overview-gbp"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Business Profile</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gbp', 'activeReportData' => $gbpData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'gbp', 'activeReportData' => $gbpData])</div>
                 @endif
                 @if($isGtmConnected)
                     <div wire:key="overview-gtm"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Tag Manager</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gtm', 'activeReportData' => $gtmData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'gtm', 'activeReportData' => $gtmData])</div>
                 @endif
                 @if($isGadsConnected)
                     <div wire:key="overview-gads"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Google Ads</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'gads', 'activeReportData' => $gadsData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'gads', 'activeReportData' => $gadsData])</div>
                 @endif
                 @if($isFacebookConnected)
                     <div wire:key="overview-facebook"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">Facebook</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'facebook', 'activeReportData' => $facebookData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'facebook', 'activeReportData' => $facebookData])</div>
                 @endif
                 @if($isLinkedinConnected)
                     <div wire:key="overview-linkedin"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">LinkedIn</h3>
-                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'activeReportIntegrationId' => 'linkedin', 'activeReportData' => $linkedinData])</div>
+                    @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'linkedin', 'activeReportData' => $linkedinData])</div>
                 @endif
                 </div>
             @else

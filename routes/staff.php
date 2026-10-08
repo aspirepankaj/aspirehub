@@ -22,6 +22,9 @@ Route::get('/clickup-tickets', StaffClickUpTickets::class)->name('clickup-ticket
 Route::get('/websites', StaffWebsites::class)->name('websites');
 Route::get('/websites/ADSWS-{id}', StaffWebsites::class)->name('websites.detail');
 
+use App\Modules\CRM\Reports\Livewire\ManageMarketingReports;
+Route::get('/marketing-reports', ManageMarketingReports::class)->name('marketing');
+
 Route::get('/maintenance', StaffMaintenance::class)->name('maintenance');
 Route::get('/maintenance/create', StaffCreateMaintenanceReport::class)->name('maintenance.create');
 Route::get('/maintenance/{id}/edit', StaffEditMaintenanceReport::class)->name('maintenance.edit');

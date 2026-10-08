@@ -20,23 +20,23 @@ Route::get('/', function () {
 Route::get('/clients', ManageClients::class)->name('clients');
 Route::get('/clients/ADSCL-{id}', ManageClients::class)->name('clients.detail');
 Route::get('/clients/ADSCL-{id}/report/{integration}', AdminClientReport::class)->name('clients.report');
-Route::get('/clients/plans', \App\Modules\CRM\Clients\Livewire\ManagePlans::class)->name('clients.plans');
+
 
 use App\Modules\CRM\Staff\Livewire\ManageDesignations;
 use App\Modules\Core\Authentication\Livewire\ManageAdmins;
 
 Route::get('/staff', ManageStaff::class)->name('staff');
 Route::get('/staff/ADSTM-{id}', ManageStaff::class)->name('staff.detail');
-Route::get('/staff/designations', ManageDesignations::class)->name('staff.designations');
+
 Route::get('/admins', ManageAdmins::class)->name('admins');
 
-Route::get('/websites/service-types', \App\Modules\CRM\Websites\Livewire\ManageServiceTypes::class)->name('websites.service-types');
+
 Route::get('/websites', ManageWebsites::class)->name('websites');
 Route::get('/websites/ADSWS-{id}', ManageWebsites::class)->name('websites.detail');
 
-Route::get('/marketing-reports', function () {
-    return view('modules.core.placeholder', ['title' => 'Marketing Reports']);
-})->name('marketing');
+use App\Modules\CRM\Reports\Livewire\ManageMarketingReports;
+
+Route::get('/marketing-reports', ManageMarketingReports::class)->name('marketing');
 
 Route::get('/maintenance-reports', ManageMaintenanceReports::class)->name('maintenance');
 Route::get('/maintenance-reports/create', CreateMaintenanceReport::class)->name('maintenance.create');
@@ -75,9 +75,8 @@ Route::get('/automation', function () {
     return view('modules.core.placeholder', ['title' => 'Workflow Automation']);
 })->name('automation');
 
-Route::get('/settings', function () {
-    return view('modules.core.placeholder', ['title' => 'Settings Center']);
-})->name('settings');
+use App\Livewire\ManageSettings;
+Route::get('/settings', ManageSettings::class)->name('settings');
 
 Route::get('/profile', function () {
     return view('modules.core.profile');

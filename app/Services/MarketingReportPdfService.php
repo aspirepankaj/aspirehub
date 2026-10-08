@@ -84,6 +84,7 @@ class MarketingReportPdfService
         $compareGsc = [];
         $compareKeyword = [];
         $compareYoutube = [];
+        $compareGbp = [];
 
         $isExplicitCompare = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
 
@@ -100,16 +101,19 @@ class MarketingReportPdfService
                 $compareGsc = $hasGsc ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $computedCompareFrom, $computedCompareTo) : [];
                 $compareKeyword = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $computedCompareFrom, $computedCompareTo) : [];
                 $compareYoutube = $hasYoutube ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $computedCompareFrom, $computedCompareTo) : [];
+                $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $computedCompareFrom, $computedCompareTo) : [];
                 $this->compareDateFrom = $computedCompareFrom;
                 $this->compareDateTo = $computedCompareTo;
             } catch (\Exception $e) {
                 // ignore
+                $compareGbp = [];
             }
         } else {
             $compareGa4 = $hasGa4 ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $this->compareDateFrom, $this->compareDateTo) : [];
             $compareGsc = $hasGsc ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $this->compareDateFrom, $this->compareDateTo) : [];
             $compareKeyword = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->compareDateFrom, $this->compareDateTo) : [];
             $compareYoutube = $hasYoutube ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $this->compareDateFrom, $this->compareDateTo) : [];
+            $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->compareDateFrom, $this->compareDateTo) : [];
         }
 
         // Year-over-Year (YoY) Prior Period (1 year prior)
@@ -233,6 +237,7 @@ class MarketingReportPdfService
             'compareGsc' => $compareGsc,
             'compareKeyword' => $compareKeyword,
             'compareYoutube' => $compareYoutube,
+            'compareGbp' => $compareGbp,
             'yoyGa4' => $yoyGa4,
             'yoyGsc' => $yoyGsc,
             'donutChartSvg' => $donutChartSvg,

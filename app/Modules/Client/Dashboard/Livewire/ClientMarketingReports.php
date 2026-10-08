@@ -50,16 +50,27 @@ class ClientMarketingReports extends Component
     public string $compareMonth = '';
     public array $availableMonths = [];
 
-    public function mount()
+    public ?int $clientId = null;
+    public bool $isEmbedded = false;
+
+    public function mount($clientId = null, $isEmbedded = false)
     {
+        $this->isEmbedded = $isEmbedded;
+        $this->clientId = $clientId;
         $this->initDateRange();
 
-        $client = Client::where('user_id', Auth::id())->first();
+        if ($this->clientId) {
+            $client = Client::find($this->clientId);
+        } else {
+            $client = Client::where('user_id', Auth::id())->first();
+        }
+
         if (!$client) {
             return;
         }
 
         $this->websites = Website::where('client_id', $client->id)
+            ->where('status', 'active')
             ->orderBy('site_name')
             ->get();
 
@@ -148,7 +159,11 @@ class ClientMarketingReports extends Component
         }
 
         try {
-            $clientDetails = Client::where('user_id', Auth::id())->first();
+            if ($this->clientId) {
+                $clientDetails = Client::find($this->clientId);
+            } else {
+                $clientDetails = Client::where('user_id', Auth::id())->first();
+            }
             $website = Website::findOrFail($this->selectedWebsiteId);
 
             if (!$clientDetails || !$website) {
@@ -230,7 +245,11 @@ class ClientMarketingReports extends Component
         }
 
         try {
-            $clientDetails = Client::where('user_id', Auth::id())->first();
+            if ($this->clientId) {
+                $clientDetails = Client::find($this->clientId);
+            } else {
+                $clientDetails = Client::where('user_id', Auth::id())->first();
+            }
             $website = Website::findOrFail($this->selectedWebsiteId);
 
             if (!$clientDetails || !$website) {
