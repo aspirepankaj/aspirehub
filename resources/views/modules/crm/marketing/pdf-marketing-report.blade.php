@@ -305,7 +305,7 @@
     };
 
     // Dynamically count total report pages based ONLY on connected integrations
-    $totalPages = ($hasGa4 ? 1 : 0) + ($hasGsc ? 1 : 0) + ($hasKeyword ? 1 : 0) + ($hasGbp ? 1 : 0);
+    $totalPages = ($hasGa4 ? 1 : 0) + ($hasGsc ? 1 : 0) + ($hasKeyword ? 1 : 0) + ($hasGbp ? 1 : 0) + ($hasGads ? 1 : 0) + ($hasFacebook ? 1 : 0) + ($hasYoutube ? 1 : 0);
     if ($totalPages === 0) $totalPages = 1;
     $currentPageNum = 1;
 @endphp
@@ -1279,6 +1279,429 @@
                     @if(!empty($gSet['clicksSvg']))
                         <img src="{{ $gSet['clicksSvg'] }}" width="680" height="48" alt="Clicks Trend" style="display: block;" />
                     @endif
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- Footer --}}
+    <div class="page-footer">
+        <span class="page-footer-left">{{ $website->site_name }} &bull; Aspire Digital Solutions</span>
+        <span class="page-footer-right">Monthly SEO &amp; Marketing Report &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}</span>
+    </div>
+
+        @if($isExplicitCompare)
+        </td>
+        @endif
+    @endforeach
+
+    @if($isExplicitCompare)
+    </tr></table>
+    @endif
+</div>
+@endif
+
+@if($hasFacebook)
+@php
+    $fbSets = [];
+    $fbSets[] = [
+        'title' => $formattedDateRange,
+        'data' => $facebookData,
+        'prevData' => $compareFacebook,
+        'reachSvg' => $fbReachMomSvg,
+        'viewsSvg' => $fbViewsMomSvg,
+        'engagedSvg' => $fbEngagedMomSvg
+    ];
+    if ($isExplicitCompare) {
+        $fbSets[] = [
+            'title' => $formattedCompareRange,
+            'data' => $compareFacebook,
+            'prevData' => [],
+            'reachSvg' => '',
+            'viewsSvg' => '',
+            'engagedSvg' => ''
+        ];
+    }
+@endphp
+
+<div class="page">
+    @if($isExplicitCompare)
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;"><tr>
+    @endif
+
+    @foreach($fbSets as $fSet)
+        @if($isExplicitCompare)
+        <td style="width: 50%; padding: 0 15px; vertical-align: top; border-right: {{ $loop->first ? '1px dashed #cbd5e1' : 'none' }};">
+        @endif
+
+        @php
+            $currentData = $fSet['data'];
+        @endphp
+    {{-- Header Banner --}}
+    <div class="header-banner">
+        <table class="header-table">
+            <tr>
+                <td style="width: 60%;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                    @else
+                        <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
+                    @endif
+                    <div>
+                        <span class="header-title-white">FACEBOOK </span><span class="header-title-cyan">INSIGHTS</span>
+                    </div>
+                    <div class="header-divider"></div>
+                    <div class="header-subtitle">Source: Facebook</div>
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: middle;">
+                    <span class="filter-pill">{{ $fSet['title'] }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="content-body">
+        {{-- Reach Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Total Reach</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['reach'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($fSet['reachSvg']))
+                        <img src="{{ $fSet['reachSvg'] }}" width="680" height="48" alt="Reach Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Views Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Total Views</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['views'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($fSet['viewsSvg']))
+                        <img src="{{ $fSet['viewsSvg'] }}" width="680" height="48" alt="Views Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Engaged Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Engaged</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['engaged'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($fSet['engagedSvg']))
+                        <img src="{{ $fSet['engagedSvg'] }}" width="680" height="48" alt="Engaged Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        <div class="section-badge" style="margin-top: 15px;">ADDITIONAL METRICS</div>
+        <table class="kpi-table">
+            <tr>
+                <td style="width: 50%;">
+                    <div class="stat-card-kpi card-indigo">
+                        <div class="stat-card-kpi-title">Followers</div>
+                        <div class="stat-card-kpi-val">{{ number_format($currentData['summary']['followers'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 50%;">
+                    <div class="stat-card-kpi card-amber">
+                        <div class="stat-card-kpi-title">Posts</div>
+                        <div class="stat-card-kpi-val">{{ number_format($currentData['summary']['posts'] ?? 0) }}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- Footer --}}
+    <div class="page-footer">
+        <span class="page-footer-left">{{ $website->site_name }} &bull; Aspire Digital Solutions</span>
+        <span class="page-footer-right">Monthly SEO &amp; Marketing Report &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}</span>
+    </div>
+
+        @if($isExplicitCompare)
+        </td>
+        @endif
+    @endforeach
+
+    @if($isExplicitCompare)
+    </tr></table>
+    @endif
+</div>
+@endif
+
+@if($hasGads)
+@php
+    $gadsSets = [];
+    $gadsSets[] = [
+        'title' => $formattedDateRange,
+        'data' => $gadsData,
+        'prevData' => $compareGads,
+        'impressionsSvg' => $gadsImpressionsMomSvg,
+        'clicksSvg' => $gadsClicksMomSvg,
+        'conversionsSvg' => $gadsConversionsMomSvg
+    ];
+    if ($isExplicitCompare) {
+        $gadsSets[] = [
+            'title' => $formattedCompareRange,
+            'data' => $compareGads,
+            'prevData' => [],
+            'impressionsSvg' => '',
+            'clicksSvg' => '',
+            'conversionsSvg' => ''
+        ];
+    }
+@endphp
+
+<div class="page">
+    @if($isExplicitCompare)
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;"><tr>
+    @endif
+
+    @foreach($gadsSets as $gSet)
+        @if($isExplicitCompare)
+        <td style="width: 50%; padding: 0 15px; vertical-align: top; border-right: {{ $loop->first ? '1px dashed #cbd5e1' : 'none' }};">
+        @endif
+
+        @php
+            $currentData = $gSet['data'];
+        @endphp
+    {{-- Header Banner --}}
+    <div class="header-banner">
+        <table class="header-table">
+            <tr>
+                <td style="width: 60%;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                    @else
+                        <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
+                    @endif
+                    <div>
+                        <span class="header-title-white">GOOGLE </span><span class="header-title-cyan">ADS</span>
+                    </div>
+                    <div class="header-divider"></div>
+                    <div class="header-subtitle">Source: Google Ads</div>
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: middle;">
+                    <span class="filter-pill">{{ $gSet['title'] }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="content-body">
+        {{-- Impressions Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Impressions</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['impressions'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($gSet['impressionsSvg']))
+                        <img src="{{ $gSet['impressionsSvg'] }}" width="680" height="48" alt="Impressions Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Clicks Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Clicks</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['clicks'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($gSet['clicksSvg']))
+                        <img src="{{ $gSet['clicksSvg'] }}" width="680" height="48" alt="Clicks Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Conversions Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Conversions</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['conversions'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($gSet['conversionsSvg']))
+                        <img src="{{ $gSet['conversionsSvg'] }}" width="680" height="48" alt="Conversions Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- Footer --}}
+    <div class="page-footer">
+        <span class="page-footer-left">{{ $website->site_name }} &bull; Aspire Digital Solutions</span>
+        <span class="page-footer-right">Monthly SEO &amp; Marketing Report &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}</span>
+    </div>
+
+        @if($isExplicitCompare)
+        </td>
+        @endif
+    @endforeach
+
+    @if($isExplicitCompare)
+    </tr></table>
+    @endif
+</div>
+@endif
+
+@if($hasYoutube)
+@php
+    $ytSets = [];
+    $ytSets[] = [
+        'title' => $formattedDateRange,
+        'data' => $youtubeData,
+        'prevData' => $compareYoutube,
+        'viewsSvg' => $ytViewsMomSvg,
+        'watchTimeSvg' => $ytWatchTimeMomSvg,
+        'subscribersSvg' => $ytSubscribersMomSvg
+    ];
+    if ($isExplicitCompare) {
+        $ytSets[] = [
+            'title' => $formattedCompareRange,
+            'data' => $compareYoutube,
+            'prevData' => [],
+            'viewsSvg' => '',
+            'watchTimeSvg' => '',
+            'subscribersSvg' => ''
+        ];
+    }
+@endphp
+
+<div class="page">
+    @if($isExplicitCompare)
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;"><tr>
+    @endif
+
+    @foreach($ytSets as $ySet)
+        @if($isExplicitCompare)
+        <td style="width: 50%; padding: 0 15px; vertical-align: top; border-right: {{ $loop->first ? '1px dashed #cbd5e1' : 'none' }};">
+        @endif
+
+        @php
+            $currentData = $ySet['data'];
+        @endphp
+    {{-- Header Banner --}}
+    <div class="header-banner">
+        <table class="header-table">
+            <tr>
+                <td style="width: 60%;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                    @else
+                        <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
+                    @endif
+                    <div>
+                        <span class="header-title-white">YOUTUBE </span><span class="header-title-cyan">ANALYTICS</span>
+                    </div>
+                    <div class="header-divider"></div>
+                    <div class="header-subtitle">Source: YouTube</div>
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: middle;">
+                    <span class="filter-pill">{{ $ySet['title'] }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="content-body">
+        {{-- Views Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Total Views</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['views'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($ySet['viewsSvg']))
+                        <img src="{{ $ySet['viewsSvg'] }}" width="680" height="48" alt="Views Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Watch Time Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Watch Time (hrs)</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['watch_time'] ?? 0, 1) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($ySet['watchTimeSvg']))
+                        <img src="{{ $ySet['watchTimeSvg'] }}" width="680" height="48" alt="Watch Time Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Subscribers Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Subscribers Gained</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['subscribers'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($ySet['subscribersSvg']))
+                        <img src="{{ $ySet['subscribersSvg'] }}" width="680" height="48" alt="Subscribers Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+        
+        <div class="section-badge" style="margin-top: 15px;">ADDITIONAL METRICS</div>
+        <table class="kpi-table">
+            <tr>
+                <td style="width: 50%;">
+                    <div class="stat-card-kpi card-indigo">
+                        <div class="stat-card-kpi-title">Avg View Duration</div>
+                        <div class="stat-card-kpi-val">{{ $currentData['summary']['avg_view_duration'] ?? '0s' }}</div>
+                    </div>
+                </td>
+                <td style="width: 50%;">
+                    <div class="stat-card-kpi card-amber">
+                        <div class="stat-card-kpi-title">Videos Posted</div>
+                        <div class="stat-card-kpi-val">{{ number_format($currentData['summary']['video_count'] ?? 0) }}</div>
+                    </div>
                 </td>
             </tr>
         </table>

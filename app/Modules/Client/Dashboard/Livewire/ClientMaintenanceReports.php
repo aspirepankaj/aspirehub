@@ -57,6 +57,13 @@ class ClientMaintenanceReports extends Component
             $report->issues_found = ($report->health_critical_issues ?? 0) + ($report->health_warnings ?? 0);
             $report->issues_fixed = $report->issues_found; 
             $report->backups_count = $report->backup_completed ? 30 : 0;
+            
+            $report->has_previous = DB::table('adspv_maintenance_reports')
+                ->where('website_id', $report->website_id)
+                ->where('maintenance_date', '<', $report->maintenance_date)
+                ->where('status', 'completed')
+                ->exists();
+                
             return $report;
         });
 

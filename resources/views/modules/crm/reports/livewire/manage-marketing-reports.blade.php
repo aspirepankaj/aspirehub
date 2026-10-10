@@ -1,4 +1,6 @@
 <div>
+    @section('page_title', 'Marketing Reports')
+    <x-admin.breadcrumbs :items="['Marketing Reports' => null]" />
     {{-- Page Header --}}
     <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -78,10 +80,10 @@
                                         open = false; 
                                         search = '';
                                      " 
-                                     class="px-3 py-2.5 rounded-lg text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2 {{ $clientId == $client->id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
-                                    <span class="truncate">{{ $clientName }}</span>
+                                     class="px-3 py-2.5 rounded-lg text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors block w-full text-left {{ $clientId == $client->id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
+                                    <span class="truncate block w-full">{{ $clientName }}</span>
                                     @if($clientEmail)
-                                        <span class="text-[11px] text-slate-400 font-medium shrink-0">({{ $clientEmail }})</span>
+                                        <span class="text-[11px] text-slate-400 font-medium block w-full truncate">({{ $clientEmail }})</span>
                                     @endif
                                 </div>
                             @endforeach
@@ -132,8 +134,8 @@
                                         open = false; 
                                         search = '';
                                      " 
-                                     class="px-3 py-2.5 rounded-lg text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center {{ $websiteId == $site->id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
-                                    <span class="truncate">{{ $siteName }}</span>
+                                     class="px-3 py-2.5 rounded-lg text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors block w-full text-left {{ $websiteId == $site->id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
+                                    <span class="truncate block w-full">{{ $siteName }}</span>
                                 </div>
                             @empty
                                 <div class="px-3 py-2.5 text-sm text-slate-500 text-center">No websites found</div>
@@ -160,13 +162,20 @@
         @else
             {{-- Integrations Tabs --}}
             <div class="mb-6 bg-slate-100/80 dark:bg-slate-900/50 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-200/40 dark:border-slate-800/40">
-                <nav class="flex flex-nowrap space-x-1 min-w-max" aria-label="Tabs">
+                <nav x-data class="flex flex-nowrap space-x-1 min-w-max" aria-label="Tabs">
                     @foreach($integrations as $integration)
                         @php $intgId = $integration->integration_type; @endphp
                         <button type="button" 
-                           x-on:click="let u = new URL(window.location.href); u.searchParams.delete('compareDateFrom'); u.searchParams.delete('compareDateTo'); window.history.replaceState({}, '', u.toString());"
-                           wire:click="switchTab('{{ $intgId }}')"
-                           class="py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0 {{ $activeTab === $intgId ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-850 hover:bg-white/40 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/30' }}">
+                           x-on:click="
+                               $wire.activeTab = '{{ $intgId }}';
+                               let u = new URL(window.location.href); 
+                               u.searchParams.delete('compareDateFrom'); 
+                               u.searchParams.delete('compareDateTo'); 
+                               window.history.replaceState({}, '', u.toString());
+                               $wire.switchTab('{{ $intgId }}');
+                           "
+                           :class="$wire.activeTab === '{{ $intgId }}' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-850 hover:bg-white/40 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/30'"
+                           class="py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0">
                             {{-- Icon mapping --}}
                             @if($intgId === 'ga4')
                                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
@@ -199,17 +208,60 @@
             </div>
 
             {{-- Selected Integration Report --}}
-            <div class="animate-fadeIn">
-                @if($activeTab)
-                    @livewire('admin-client-report', [
-                        'id' => $clientId, 
-                        'integration' => $activeTab, 
-                        'websiteId' => $websiteId, 
-                        'hideHeader' => true,
-                        'compareDateFrom' => '',
-                        'compareDateTo' => ''
-                    ], key('report-'.$clientId.'-'.$websiteId.'-'.$activeTab))
-                @endif
+            <div class="relative min-h-[400px]">
+                {{-- Skeleton Loader --}}
+                <div wire:loading wire:target="switchTab, resetSelection" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
+                    <div class="w-full h-full p-6">
+                        <!-- Skeleton cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5 mb-6 relative" style="z-index: 10;">
+                            @for($i = 0; $i < 5; $i++)
+                                <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm h-32 flex flex-col justify-center">
+                                    <div class="flex items-start gap-4 mb-2">
+                                        <div class="w-12 h-12 rounded-full bg-slate-200/60 dark:bg-slate-800/60 shrink-0"></div>
+                                        <div class="flex-1 space-y-2 py-1">
+                                            <div class="h-3 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/2"></div>
+                                            <div class="h-8 bg-slate-200/80 dark:bg-slate-700/80 rounded w-3/4"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-2/3"></div>
+                                </div>
+                            @endfor
+                        </div>
+                        <!-- Skeleton Charts -->
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5 relative" style="z-index: 10;">
+                            <div class="lg:col-span-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-100 dark:border-slate-800 p-5 rounded-xl shadow-sm h-96 flex flex-col justify-center items-center">
+                                <div class="w-full h-full flex flex-col">
+                                    <div class="h-4 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/4 mb-6"></div>
+                                    <div class="flex-1 bg-slate-50/50 dark:bg-slate-800/30 rounded w-full flex items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-300 dark:text-slate-700 tracking-wider">LOADING DATA</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lg:col-span-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-100 dark:border-slate-800 p-5 rounded-xl shadow-sm h-96 flex flex-col">
+                                <div class="h-4 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/3 mb-6"></div>
+                                <div class="flex justify-center mb-8 flex-1 items-center">
+                                    <div class="w-48 h-48 rounded-full border-[16px] border-slate-100 dark:border-slate-800/50 flex items-center justify-center">
+                                        <div class="w-32 h-32 rounded-full border-[8px] border-slate-50 dark:border-slate-800/20"></div>
+                                    </div>
+                                </div>
+                                <div class="space-y-3 mt-auto"><div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-full"></div><div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-5/6"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div wire:loading.remove wire:target="switchTab, resetSelection" class="animate-fadeIn" wire:key="tab-container-{{ $activeTab }}">
+                    @if($activeTab)
+                        @livewire('admin-client-report', [
+                            'id' => $clientId, 
+                            'integration' => $activeTab, 
+                            'websiteId' => $websiteId, 
+                            'hideHeader' => true,
+                            'compareDateFrom' => '',
+                            'compareDateTo' => ''
+                        ], key('report-'.$clientId.'-'.$websiteId.'-'.$activeTab))
+                    @endif
+                </div>
             </div>
         @endif
     @elseif($clientId)

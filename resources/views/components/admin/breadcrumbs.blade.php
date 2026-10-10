@@ -27,6 +27,12 @@
         }
     }
 
+    // Fallback to dashboard if no parent link is found and we are not already on the dashboard
+    if (!$calcBackUrl && !request()->routeIs('*.dashboard') && !request()->is('dashboard')) {
+        $calcBackUrl = $rootUrl;
+        $calcBackLabel = 'Dashboard';
+    }
+
     // 2. If backLabel is not set, use the current page title (last item in $items)
     if (!$calcBackLabel && !empty($items)) {
         $itemKeys = array_keys($items);

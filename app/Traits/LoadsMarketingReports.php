@@ -10,13 +10,9 @@ use Livewire\Attributes\Url;
 
 trait LoadsMarketingReports
 {
-    #[\Livewire\Attributes\Url(except: '')]
     public string $dateFrom = '';
-    #[\Livewire\Attributes\Url(except: '')]
     public string $dateTo = '';
-    #[\Livewire\Attributes\Url(except: '')]
     public string $compareDateFrom = '';
-    #[\Livewire\Attributes\Url(except: '')]
     public string $compareDateTo = '';
     #[\Livewire\Attributes\Url(except: false)]
     public bool $compareEnabled = false;
@@ -32,16 +28,41 @@ trait LoadsMarketingReports
     public bool $isSendingReport = false;
     public string $reportModalSuccessMessage = '';
     public string $reportModalErrorMessage = '';
+    #[\Livewire\Attributes\Url(except: 'last_30')]
     public string $datePreset = 'last_30';
 
 
     public function initDateRange()
     {
         if (empty($this->dateFrom)) {
-            $this->dateFrom = Carbon::now()->subDays(28)->format('Y-m-d');
+            $this->dateFrom = session('marketing_date_from', Carbon::now()->subDays(29)->format('Y-m-d'));
         }
         if (empty($this->dateTo)) {
-            $this->dateTo = Carbon::now()->subDays(1)->format('Y-m-d');
+            $this->dateTo = session('marketing_date_to', Carbon::now()->format('Y-m-d'));
+        }
+        if ($this->datePreset === 'last_30') {
+            $this->datePreset = session('marketing_date_preset', 'last_30');
+        }
+        
+        // Ensure format and other compare states persist if not set
+        if (empty($this->compareDateFrom)) {
+            $this->compareDateFrom = session('marketing_compare_date_from', '');
+            $this->compareDateTo = session('marketing_compare_date_to', '');
+            $this->compareFormat = session('marketing_compare_format', 'percentage');
+        }
+
+        if ($this->dateFrom && $this->dateTo) {
+            $d1 = Carbon::parse($this->dateFrom);
+            $d2 = Carbon::parse($this->dateTo);
+            $diff = $d1->diffInDays($d2) + 1;
+            
+            if ($diff == 7) $this->datePreset = 'last_7';
+            elseif ($diff == 28) $this->datePreset = 'last_28';
+            elseif ($diff == 30) $this->datePreset = 'last_30';
+            elseif ($diff == 90) $this->datePreset = 'last_90';
+            else $this->datePreset = 'custom';
+            
+            session(['marketing_date_preset' => $this->datePreset]);
         }
     }
 
@@ -54,6 +75,15 @@ trait LoadsMarketingReports
         $this->includeToday = filter_var($includeToday, FILTER_VALIDATE_BOOLEAN);
         $this->compareFormat = $format;
         $this->datePreset = $preset;
+
+        session([
+            'marketing_date_from' => $this->dateFrom,
+            'marketing_date_to' => $this->dateTo,
+            'marketing_compare_date_from' => $this->compareDateFrom,
+            'marketing_compare_date_to' => $this->compareDateTo,
+            'marketing_compare_format' => $this->compareFormat,
+            'marketing_date_preset' => $this->datePreset,
+        ]);
         
         // Call whichever data loading method exists in the component
         if (method_exists($this, 'loadReport')) {
@@ -111,17 +141,21 @@ trait LoadsMarketingReports
                 }
             }
 
-            $jsonData = json_decode(file_get_contents($path), true);
+            // Prevent processing the exact same file twice in the same loop if fallback was used
+            if (isset($allMonthlyJsons[$path])) {
+                continue;
+            }
+            $allMonthlyJsons[$path] = true;
+
+            static $fileCache = [];
+            if (!isset($fileCache[$path])) {
+                $fileCache[$path] = json_decode(file_get_contents($path), true);
+            }
+            $jsonData = $fileCache[$path];
+            
             if (!is_array($jsonData)) {
                 continue;
             }
-
-            // Prevent processing the exact same file twice if fallback was used
-            $fileHash = md5($path);
-            if (isset($allMonthlyJsons[$fileHash])) {
-                continue;
-            }
-            $allMonthlyJsons[$fileHash] = true;
 
             if (empty($allData)) {
                 $allData = $jsonData;
@@ -161,10 +195,31 @@ trait LoadsMarketingReports
                     }
                 }
             }
+
+            if (!empty($jsonData['top_posts'])) {
+                if (!isset($mergedTopPosts)) $mergedTopPosts = [];
+                foreach ($jsonData['top_posts'] as $post) {
+                    $rawDate = (string)($post['created_time'] ?? '');
+                    if ($rawDate) {
+                        $normDate = substr($rawDate, 0, 10);
+                        if ($normDate >= $startDate && $normDate <= $endDate) {
+                            $mergedTopPosts[$post['id']] = $post;
+                        }
+                    }
+                }
+            }
         }
 
         if (empty($allData)) {
             return [];
+        }
+
+        if (isset($mergedTopPosts)) {
+            $allData['top_posts'] = array_values($mergedTopPosts);
+            usort($allData['top_posts'], function($a, $b) {
+                return ($b['views'] ?? 0) <=> ($a['views'] ?? 0);
+            });
+            $allData['top_posts'] = array_slice($allData['top_posts'], 0, 15);
         }
 
         // Fill in missing dates for the selected date range
@@ -394,6 +449,25 @@ trait LoadsMarketingReports
                     $allData['summary']['avg_view_duration'] = $formattedDuration;
                 } else {
                     $allData['summary']['avg_view_duration'] = '0s';
+                }
+            }
+            // Re-calculate Facebook/LinkedIn summary
+            elseif ($integrationType === 'facebook' || $integrationType === 'linkedin') {
+                $totalReach = 0;
+                $totalViews = 0;
+                $totalEngaged = 0;
+                
+                foreach ($mergedDaily as $d) {
+                    $totalReach += (int)($d['reach'] ?? ($d['impressions'] ?? 0));
+                    $totalViews += (int)($d['views'] ?? 0);
+                    $totalEngaged += (int)($d['engaged'] ?? ($d['engagements'] ?? 0));
+                }
+                
+                $allData['summary']['reach'] = $totalReach;
+                $allData['summary']['views'] = $totalViews;
+                $allData['summary']['engaged'] = $totalEngaged;
+                if (isset($allData['top_posts'])) {
+                    $allData['summary']['posts'] = count($allData['top_posts']);
                 }
             }
             // Re-calculate Gads summary

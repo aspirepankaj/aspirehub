@@ -1,7 +1,7 @@
 <div>
     <x-admin.breadcrumbs
         :items="[
-            'Dashboard' => route('client.dashboard'),
+            'Dashboard' => null,
         ]"
     />
     <!-- Header -->

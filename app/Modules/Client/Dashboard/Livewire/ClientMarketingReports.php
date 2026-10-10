@@ -115,17 +115,7 @@ class ClientMarketingReports extends Component
         // triggers re-render automatically
     }
 
-    public function applyDateFilter($dateFrom, $dateTo, $compareFrom, $compareTo, $includeToday, $format)
-    {
-        $this->dateFrom = $dateFrom;
-        $this->dateTo = $dateTo;
-        $this->compareDateFrom = $compareFrom;
-        $this->compareDateTo = $compareTo;
-        $this->includeToday = filter_var($includeToday, FILTER_VALIDATE_BOOLEAN);
-        $this->compareFormat = $format;
-        
-        $this->loadReportData();
-    }
+
 
     protected function loadIntegrationsAndMonths()
     {
@@ -349,13 +339,31 @@ class ClientMarketingReports extends Component
     public function selectIntegration(string $typeId)
     {
         $this->activeReportIntegrationId = $typeId;
+        
+        $this->datePreset = 'last_30';
+        $this->dateFrom = \Carbon\Carbon::now()->subDays(29)->format('Y-m-d');
+        $this->dateTo = \Carbon\Carbon::now()->format('Y-m-d');
+        
         $this->compareDateFrom = '';
         $this->compareDateTo = '';
         
-        if ($typeId === 'overview') {
-            $this->dateFrom = \Carbon\Carbon::now()->subDays(28)->format('Y-m-d');
-            $this->dateTo = \Carbon\Carbon::now()->format('Y-m-d');
-        }
+        session()->forget([
+            'marketing_date_from',
+            'marketing_date_to',
+            'marketing_compare_date_from',
+            'marketing_compare_date_to',
+            'marketing_date_preset'
+        ]);
+
+        $this->js("
+            let u = new URL(window.location.href); 
+            u.searchParams.delete('compareDateFrom'); 
+            u.searchParams.delete('compareDateTo'); 
+            u.searchParams.delete('dateFrom'); 
+            u.searchParams.delete('dateTo'); 
+            u.searchParams.delete('datePreset'); 
+            window.history.replaceState({}, '', u.toString());
+        ");
 
         $this->loadReportData();
     }

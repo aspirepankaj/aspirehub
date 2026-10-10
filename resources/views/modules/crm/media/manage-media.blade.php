@@ -1,5 +1,6 @@
 <div>
     <!-- Page Header -->
+    <x-admin.breadcrumbs :items="['Media' => null]" />
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-1">

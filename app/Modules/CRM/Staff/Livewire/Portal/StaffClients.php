@@ -1574,35 +1574,40 @@ class StaffClients extends Component
                 $fbStartDate = $startDateStr;
                 $fbEndDate = $endDateStr;
 
-                // 1. Ad Insights (If Ad Account provided)
-                $adResponse = null;
-                $adData = [];
-                if ($adAccountId) {
-                    $formattedAdAccountId = str_starts_with($adAccountId, 'act_') ? $adAccountId : 'act_' . $adAccountId;
-                    
-                    $adResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$formattedAdAccountId}/insights", [
-                        'fields' => 'impressions,clicks,spend,cpc,ctr,reach',
-                        'time_range' => json_encode(['since' => $fbStartDate, 'until' => $fbEndDate]),
-                        'access_token' => $accessToken
-                    ]);
-                    
-                    if ($adResponse && $adResponse->successful()) {
-                        $adData = $adResponse->json('data')[0] ?? [];
-                    }
-                }
-
-                // 2. Published Posts (Organic)
-                $postsResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}/published_posts", [
-                    'fields' => 'id,message,created_time,likes.summary(true),comments.summary(true),shares',
-                    'limit' => 10,
+                // Get Page Access Token if a User Token was provided
+                $pageAccessToken = $accessToken;
+                $tokenResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}", [
+                    'fields' => 'access_token,followers_count',
                     'access_token' => $accessToken
                 ]);
+                $pageFollowers = 0;
+                if ($tokenResponse->successful()) {
+                    $pageAccessToken = $tokenResponse->json('access_token') ?? $accessToken;
+                    $pageFollowers = $tokenResponse->json('followers_count') ?? 0;
+                }
 
-                if ($postsResponse->successful() || ($adResponse && $adResponse->successful())) {
-                    $postsData = $postsResponse->successful() ? $postsResponse->json('data') ?? [] : [];
-                    
-                    $totalLikes = 0;
-                    $totalComments = 0;
+                // Fetch Daily Page Insights for accurate graph and summary
+                $summaryReach = 0;
+                $summaryViews = 0;
+                $summaryEngaged = 0;
+                $dailyTraffic = [];
+                
+                // Initialize daily traffic with 0 for all dates in range
+                $start = \Carbon\Carbon::parse($fbStartDate);
+                $end = \Carbon\Carbon::parse($fbEndDate);
+                for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+                    $dailyTraffic[$d->format('Y-m-d')] = ['date' => $d->format('Y-m-d'), 'reach' => 0, 'views' => 0, 'engaged' => 0];
+                }
+                // 2. Published Posts (Organic) for daily metrics and table
+                $postsResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}/published_posts", [
+                    'fields' => 'id,message,created_time,full_picture,permalink_url,likes.summary(true),comments.summary(true),shares,insights.metric(post_total_media_view_unique,post_media_view){name,values}',
+                    'limit' => 100,
+                    'since' => $fbStartDate,
+                    'access_token' => $pageAccessToken
+                ]);
+
+                if ($postsResponse->successful()) {
+                    $postsData = $postsResponse->json('data') ?? [];
                     $topPosts = [];
 
                     foreach ($postsData as $post) {
@@ -1610,40 +1615,75 @@ class StaffClients extends Component
                         $comments = $post['comments']['summary']['total_count'] ?? 0;
                         $shares = $post['shares']['count'] ?? 0;
                         
-                        $totalLikes += $likes;
-                        $totalComments += $comments;
+                        $reach = 0;
+                        $views = 0;
+                        $viewers = $likes + $comments + $shares; // Engagement fallback
+                        
+                        if (isset($post['insights']['data'])) {
+                            foreach ($post['insights']['data'] as $insight) {
+                                if ($insight['name'] === 'post_total_media_view_unique' || $insight['name'] === 'post_impressions_unique') {
+                                    $val = $insight['values'][0]['value'] ?? 0;
+                                    if ($val > $reach) $reach = $val;
+                                }
+                                if ($insight['name'] === 'post_media_view' || $insight['name'] === 'post_impressions') {
+                                    $val = $insight['values'][0]['value'] ?? 0;
+                                    if ($val > $views) $views = $val;
+                                }
+                            }
+                        }
+                        
+                        $dateStr = \Carbon\Carbon::parse($post['created_time'])->format('Y-m-d');
+                        if (isset($dailyTraffic[$dateStr])) {
+                            $dailyTraffic[$dateStr]['reach'] += $reach;
+                            $dailyTraffic[$dateStr]['views'] += $views;
+                            $dailyTraffic[$dateStr]['engaged'] += $viewers;
+                            
+                            $summaryReach += $reach;
+                            $summaryViews += $views;
+                            $summaryEngaged += $viewers;
+                        }
                         
                         $topPosts[] = [
                             'id' => $post['id'] ?? '',
-                            'message' => \Illuminate\Support\Str::limit($post['message'] ?? 'No text', 40),
+                            'message' => \Illuminate\Support\Str::limit($post['message'] ?? 'This post has no text', 60),
                             'created_time' => $post['created_time'] ?? '',
+                            'picture' => $post['full_picture'] ?? null,
+                            'url' => $post['permalink_url'] ?? '#',
                             'likes' => $likes,
                             'comments' => $comments,
                             'shares' => $shares,
+                            'reach' => $reach,
+                            'views' => $views,
+                            'viewers' => $viewers,
                         ];
                     }
                     
+                    usort($topPosts, function($a, $b) {
+                        return $b['views'] <=> $a['views'];
+                    });
+                    $topPosts = array_slice($topPosts, 0, 15);
+                } else {
+                    $errorMsg = $postsResponse->json('error.message') ?? 'Unknown error';
+                    \Illuminate\Support\Facades\Log::error('FB Posts Insights Error: ' . $postsResponse->body());
+                    throw new \Exception('Facebook API failed: ' . $errorMsg);
+                }
+                    
+                    ksort($dailyTraffic);
+                    
                     $reportData = [
                         'summary' => [
-                            'reach' => $adData['reach'] ?? 0,
-                            'impressions' => $adData['impressions'] ?? 0,
-                            'clicks' => $adData['clicks'] ?? 0,
-                            'spend' => $adData['spend'] ?? 0,
-                            'cpc' => $adData['cpc'] ?? 0,
-                            'ctr' => $adData['ctr'] ?? 0,
-                            'likes' => $totalLikes,
-                            'comments' => $totalComments,
+                            'reach' => $summaryReach,
+                            'views' => $summaryViews,
+                            'engaged' => $summaryEngaged,
+                            'followers' => $pageFollowers,
                             'posts' => count($postsData),
                         ],
+                        'daily_traffic' => array_values($dailyTraffic),
                         'top_posts' => $topPosts,
                         'raw' => [
-                            'posts' => $postsData,
-                            'ads' => $adData
+                            'posts' => $postsData
                         ]
                     ];
-                } else {
-                    throw new \Exception('Facebook Graph API returned error: ' . ($postsResponse->body() ?: ''));
-                }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('Facebook API failed: ' . $e->getMessage());
                 $reportData = ['error' => 'Facebook API failed: ' . $e->getMessage()];
@@ -1810,6 +1850,36 @@ class StaffClients extends Component
                         mkdir($mDir, 0755, true);
                     }
                     $mReportData = $reportData;
+                    
+                    if ($integrationId === 'facebook' || $integrationId === 'linkedin') {
+                        $mReach = 0;
+                        $mViews = 0;
+                        $mEngaged = 0;
+                        foreach ($rows as $r) {
+                            $mReach += $r['reach'] ?? ($r['impressions'] ?? 0);
+                            $mViews += $r['views'] ?? 0;
+                            $mEngaged += $r['engaged'] ?? ($r['engagements'] ?? 0);
+                        }
+                        $mReportData['summary']['reach'] = $mReach;
+                        $mReportData['summary']['views'] = $mViews;
+                        $mReportData['summary']['engaged'] = $mEngaged;
+                        
+                        if (isset($mReportData['top_posts'])) {
+                            $mTopPosts = [];
+                            foreach ($mReportData['top_posts'] as $tp) {
+                                $tpDate = $tp['created_time'] ?? '';
+                                if ($tpDate) {
+                                    $tpDateObj = \Carbon\Carbon::parse($tpDate);
+                                    if ($tpDateObj->format('Y') == $y && \Illuminate\Support\Str::lower($tpDateObj->format('F')) == $m) {
+                                        $mTopPosts[] = $tp;
+                                    }
+                                }
+                            }
+                            $mReportData['top_posts'] = $mTopPosts;
+                            $mReportData['summary']['posts'] = count($mTopPosts);
+                        }
+                    }
+
                     $mReportData['daily_traffic'] = $rows;
                     file_put_contents($mPath, json_encode($mReportData, JSON_PRETTY_PRINT));
                 }

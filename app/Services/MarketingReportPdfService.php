@@ -71,6 +71,8 @@ class MarketingReportPdfService
         $hasKeyword = $integrations->has('keyword');
         $hasYoutube = $integrations->has('youtube');
         $hasGbp = $integrations->has('gbp');
+        $hasGads = $integrations->has('gads');
+        $hasFacebook = $integrations->has('facebook');
 
         // Load data
         $ga4Data = $hasGa4 ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $dateFrom, $dateTo) : [];
@@ -78,6 +80,8 @@ class MarketingReportPdfService
         $keywordData = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $dateFrom, $dateTo) : [];
         $youtubeData = $hasYoutube ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $dateFrom, $dateTo) : [];
         $gbpData = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $dateFrom, $dateTo) : [];
+        $gadsData = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $dateFrom, $dateTo) : [];
+        $facebookData = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $dateFrom, $dateTo) : [];
 
         // Comparison Data (MoM / previous period)
         $compareGa4 = [];
@@ -85,6 +89,8 @@ class MarketingReportPdfService
         $compareKeyword = [];
         $compareYoutube = [];
         $compareGbp = [];
+        $compareGads = [];
+        $compareFacebook = [];
 
         $isExplicitCompare = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
 
@@ -102,6 +108,8 @@ class MarketingReportPdfService
                 $compareKeyword = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $computedCompareFrom, $computedCompareTo) : [];
                 $compareYoutube = $hasYoutube ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $computedCompareFrom, $computedCompareTo) : [];
                 $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $computedCompareFrom, $computedCompareTo) : [];
+                $compareGads = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $computedCompareFrom, $computedCompareTo) : [];
+                $compareFacebook = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $computedCompareFrom, $computedCompareTo) : [];
                 $this->compareDateFrom = $computedCompareFrom;
                 $this->compareDateTo = $computedCompareTo;
             } catch (\Exception $e) {
@@ -114,6 +122,8 @@ class MarketingReportPdfService
             $compareKeyword = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->compareDateFrom, $this->compareDateTo) : [];
             $compareYoutube = $hasYoutube ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $this->compareDateFrom, $this->compareDateTo) : [];
             $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->compareDateFrom, $this->compareDateTo) : [];
+            $compareGads = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->compareDateFrom, $this->compareDateTo) : [];
+            $compareFacebook = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $this->compareDateFrom, $this->compareDateTo) : [];
         }
 
         // Year-over-Year (YoY) Prior Period (1 year prior)
@@ -199,6 +209,42 @@ class MarketingReportPdfService
             }
         }
 
+        // Facebook Metric Trend Lines
+        $fbReachMomSvg = '';
+        $fbViewsMomSvg = '';
+        $fbEngagedMomSvg = '';
+        if ($hasFacebook && !empty($facebookData)) {
+            $dailyFb = $facebookData['daily_traffic'] ?? [];
+            $compareDailyFb = $compareFacebook['daily_traffic'] ?? [];
+            $fbReachMomSvg = $this->generateMetricTrendLineSvg($dailyFb, $compareDailyFb, 'reach', 680, 48, '#3b82f6');
+            $fbViewsMomSvg = $this->generateMetricTrendLineSvg($dailyFb, $compareDailyFb, 'views', 680, 48, '#10b981');
+            $fbEngagedMomSvg = $this->generateMetricTrendLineSvg($dailyFb, $compareDailyFb, 'engaged', 680, 48, '#f43f5e');
+        }
+
+        // Gads Metric Trend Lines
+        $gadsImpressionsMomSvg = '';
+        $gadsClicksMomSvg = '';
+        $gadsConversionsMomSvg = '';
+        if ($hasGads && !empty($gadsData)) {
+            $dailyGads = $gadsData['daily_traffic'] ?? [];
+            $compareDailyGads = $compareGads['daily_traffic'] ?? [];
+            $gadsImpressionsMomSvg = $this->generateMetricTrendLineSvg($dailyGads, $compareDailyGads, 'impressions', 680, 48, '#6366f1');
+            $gadsClicksMomSvg = $this->generateMetricTrendLineSvg($dailyGads, $compareDailyGads, 'clicks', 680, 48, '#10b981');
+            $gadsConversionsMomSvg = $this->generateMetricTrendLineSvg($dailyGads, $compareDailyGads, 'conversions', 680, 48, '#3b82f6');
+        }
+
+        // YouTube Metric Trend Lines
+        $ytViewsMomSvg = '';
+        $ytWatchTimeMomSvg = '';
+        $ytSubscribersMomSvg = '';
+        if ($hasYoutube && !empty($youtubeData)) {
+            $dailyYt = $youtubeData['daily_traffic'] ?? [];
+            $compareDailyYt = $compareYoutube['daily_traffic'] ?? [];
+            $ytViewsMomSvg = $this->generateMetricTrendLineSvg($dailyYt, $compareDailyYt, 'views', 680, 48, '#ef4444');
+            $ytWatchTimeMomSvg = $this->generateMetricTrendLineSvg($dailyYt, $compareDailyYt, 'watch_time', 680, 48, '#f59e0b');
+            $ytSubscribersMomSvg = $this->generateMetricTrendLineSvg($dailyYt, $compareDailyYt, 'subscribers', 680, 48, '#10b981');
+        }
+
         $sparklineUpSvg = $this->generateSparklineSvg('up', 65, 26);
         $sparklineDownSvg = $this->generateSparklineSvg('down', 65, 26);
 
@@ -228,18 +274,33 @@ class MarketingReportPdfService
             'hasKeyword' => $hasKeyword,
             'hasYoutube' => $hasYoutube,
             'hasGbp' => $hasGbp,
+            'hasGads' => $hasGads,
+            'hasFacebook' => $hasFacebook,
             'ga4Data' => $ga4Data,
             'gscData' => $gscData,
             'keywordData' => $keywordData,
             'youtubeData' => $youtubeData,
             'gbpData' => $gbpData,
+            'gadsData' => $gadsData,
+            'facebookData' => $facebookData,
             'compareGa4' => $compareGa4,
             'compareGsc' => $compareGsc,
             'compareKeyword' => $compareKeyword,
             'compareYoutube' => $compareYoutube,
             'compareGbp' => $compareGbp,
+            'compareGads' => $compareGads,
+            'compareFacebook' => $compareFacebook,
             'yoyGa4' => $yoyGa4,
             'yoyGsc' => $yoyGsc,
+            'fbReachMomSvg' => $fbReachMomSvg,
+            'fbViewsMomSvg' => $fbViewsMomSvg,
+            'fbEngagedMomSvg' => $fbEngagedMomSvg,
+            'gadsImpressionsMomSvg' => $gadsImpressionsMomSvg,
+            'gadsClicksMomSvg' => $gadsClicksMomSvg,
+            'gadsConversionsMomSvg' => $gadsConversionsMomSvg,
+            'ytViewsMomSvg' => $ytViewsMomSvg,
+            'ytWatchTimeMomSvg' => $ytWatchTimeMomSvg,
+            'ytSubscribersMomSvg' => $ytSubscribersMomSvg,
             'donutChartSvg' => $donutChartSvg,
             'visitorsBarChartSvg' => $visitorsBarChartSvg,
             'channelTimeSeriesSvg' => $channelTimeSeriesSvg,

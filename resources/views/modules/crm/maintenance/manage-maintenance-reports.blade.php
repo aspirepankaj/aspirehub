@@ -10,7 +10,7 @@
             Manage, review, compile, and distribute monthly website maintenance reports to clients
         </p>
 
-        <a href="{{ route('admin.maintenance.create') }}"
+        <a href="{{ request()->is('staffadspnl*') ? route('staff.maintenance.create') : route('admin.maintenance.create') }}"
            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-semibold shadow-sm shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />

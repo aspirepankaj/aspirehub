@@ -163,31 +163,7 @@
 
         <!-- Right Side: Activities & Notifications -->
         <div class="space-y-6">
-            <!-- Recent Notifications -->
-            <x-admin.card title="System Alerts" subtitle="Recent automated platform notices">
-                <x-slot:actions>
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-450 border border-amber-500/20 tracking-wider">
-                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                        Under Development
-                    </span>
-                </x-slot:actions>
-                <div class="space-y-3.5 mt-2">
-                    @foreach($recentNotifications as $notif)
-                        <div class="flex items-start space-x-3 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/30 bg-slate-50/40 dark:bg-slate-900/10">
-                            <span class="flex-shrink-0 w-2.5 h-2.5 rounded-full mt-1.5 
-                                  {{ $notif['type'] === 'warning' ? 'bg-amber-500' : '' }}
-                                  {{ $notif['type'] === 'info' ? 'bg-indigo-500' : '' }}
-                                  {{ $notif['type'] === 'success' ? 'bg-emerald-500' : '' }}
-                                  {{ $notif['type'] === 'danger' ? 'bg-red-500' : '' }}
-                            "></span>
-                            <div class="min-w-0">
-                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-normal">{{ $notif['title'] }}</p>
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block font-medium">{{ $notif['time'] }}</span>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </x-admin.card>
+
 
             <!-- Recent Activity Stream -->
             <x-admin.card title="Recent Activity" subtitle="Real-time log of administrative events">

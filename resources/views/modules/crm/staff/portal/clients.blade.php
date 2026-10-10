@@ -94,9 +94,9 @@
             </div>
         </div>
 
-        <!-- Tabs Navigation (Responsive Horizontal Scroll) -->
-        <div class="border-b border-slate-200/60 dark:border-slate-800/40 mb-6 overflow-hidden">
-            <nav class="flex space-x-3 sm:space-x-8 overflow-x-auto whitespace-nowrap scrollbar-none pb-0.5" aria-label="Tabs">
+        <!-- Tabs Navigation -->
+        <div class="mb-6 bg-slate-100/80 dark:bg-slate-900/50 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-200/40 dark:border-slate-800/40">
+            <nav class="flex flex-nowrap space-x-1 min-w-max" aria-label="Tabs">
                 @php
                     $navTabs = [
                         'marketing' => 'Marketing',
@@ -107,17 +107,38 @@
                         $navTabs['clickup_tickets'] = 'ClickUp Tickets';
                     }
                     $navTabs['maintenance'] = 'Maintenance';
-                    $navTabs['documents'] = 'Resources';
-                    $navTabs['activity log'] = 'Activity Log';
-                    $navTabs['overview'] = 'Overview';
+                    $navTabs['misc'] = 'Misc';
                 @endphp
                 @foreach($navTabs as $tabKey => $tabLabel)
-                    <a href="{{ route('staff.clients.detail', ['id' => $clientDetails->id, 'tab' => $tabKey]) }}" wire:navigate class="py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-bold text-xs sm:text-sm whitespace-nowrap transition flex items-center gap-2 shrink-0 {{ $activeTab === $tabKey ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300' }}">
+                    @php
+                        $isMiscActive = in_array($activeTab, ['overview', 'activity log', 'documents']);
+                        $isActive = ($tabKey === 'misc' && $isMiscActive) || $activeTab === $tabKey;
+                        $linkTab = $tabKey === 'misc' ? 'overview' : $tabKey;
+                    @endphp
+                    <a href="{{ route('staff.clients.detail', ['id' => $clientDetails->id, 'tab' => $linkTab]) }}" wire:navigate class="py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0 {{ $isActive ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-850 hover:bg-white/40 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/30' }}">
                         <span>{{ $tabLabel }}</span>
                     </a>
                 @endforeach
             </nav>
         </div>
+
+        <!-- Secondary Tabs for Misc -->
+        @if(in_array($activeTab, ['overview', 'activity log', 'documents']))
+            <div class="mb-6 bg-slate-50/80 dark:bg-slate-900/30 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-200/30 dark:border-slate-800/30">
+                <nav class="flex flex-nowrap space-x-1 min-w-max" aria-label="Sub Tabs">
+                    @foreach([
+                        'overview' => 'Overview',
+                        'activity log' => 'Activity Log',
+                        'documents' => 'Resources'
+                    ] as $subTabKey => $subTabLabel)
+                        <a href="{{ route('staff.clients.detail', ['id' => $clientDetails->id, 'tab' => $subTabKey]) }}" wire:navigate
+                           class="py-2 px-4 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0 {{ $activeTab === $subTabKey ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-300 dark:hover:bg-slate-800/50' }}">
+                            <span>{{ $subTabLabel }}</span>
+                        </a>
+                    @endforeach
+                </nav>
+            </div>
+        @endif
 
         {{-- Tab Content --}}
         <div>
@@ -2138,7 +2159,11 @@
                                 @foreach ($clientMaintenanceReports as $report)
                                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                                         <td class="px-6 py-4 text-slate-450 dark:text-slate-500">#{{ $report->id }}</td>
-                                        <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ $report->maintenance_month }}</td>
+                                        <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
+                                            <a href="{{ route('staff.maintenance.view', $report->id) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
+                                                {{ $report->maintenance_month }}
+                                            </a>
+                                        </td>
                                         <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-350">{{ $report->health_score }}%</td>
                                         <td class="px-6 py-4">
                                             <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase {{ $report->status === 'completed' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400' }} tracking-wider">

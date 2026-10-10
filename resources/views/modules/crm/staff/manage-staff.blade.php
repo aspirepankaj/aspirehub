@@ -194,7 +194,7 @@
                                 <th class="px-6 py-4">Company</th>
                                 <th class="px-6 py-4">Plans</th>
                                 <th class="px-6 py-4">Status</th>
-                                <th class="px-6 py-4">Email</th>
+                                <th class="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
@@ -209,9 +209,12 @@
                                                     {{ $client->getInitials() }}
                                                 </div>
                                             @endif
-                                            <a href="{{ route('admin.clients.detail', $client->id) }}" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
-                                                {{ $client->user->name ?? 'Deleted User' }}
-                                            </a>
+                                            <div>
+                                                <a href="{{ route('admin.clients.detail', $client->id) }}" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition block">
+                                                    {{ $client->user->name ?? 'Deleted User' }}
+                                                </a>
+                                                <span class="text-xs text-slate-500 font-medium">{{ $client->user->email ?? 'No email' }}</span>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium">{{ $client->company_name ?: '—' }}</td>
@@ -229,7 +232,15 @@
                                             {{ $client->status }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-medium">{{ $client->user->email ?? '—' }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <a href="{{ route('admin.clients.detail', $client->id) }}"
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="View Client">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -252,32 +263,45 @@
                             <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                                 <th class="px-6 py-4">Domain</th>
                                 <th class="px-6 py-4">Client</th>
-                                <th class="px-6 py-4">Hosting</th>
-                                <th class="px-6 py-4">SSL</th>
                                 <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                             @foreach($staffWebsites as $website)
                                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                                     <td class="px-6 py-4">
-                                        <div class="font-bold text-slate-900 dark:text-white">{{ $website->site_name }}</div>
+                                        <div class="font-bold text-slate-900 dark:text-white">
+                                            <a href="{{ route('admin.websites.detail', ['id' => $website->id]) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
+                                                {{ $website->site_name }}
+                                            </a>
+                                        </div>
                                         @if($website->url)
                                             <a href="{{ $website->url }}" target="_blank" class="text-xs text-indigo-500 hover:text-indigo-600 transition">{{ $website->url }}</a>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium text-xs">{{ $website->client->user->name ?? '—' }}</td>
-                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-xs font-medium">{{ $website->hosting_provider ?? '—' }}</td>
-                                    <td class="px-6 py-4">
-                                        @php $ssl = $website->ssl_status ?? ''; @endphp
-                                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md {{ $ssl === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ($ssl === 'expiring' ? 'bg-amber-500/10 text-amber-600' : 'bg-slate-500/10 text-slate-500') }}">
-                                            {{ $ssl ?: '—' }}
-                                        </span>
+                                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium text-xs">
+                                        @if($website->client)
+                                            <a href="{{ route('admin.clients.detail', ['id' => $website->client->id]) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
+                                                {{ $website->client->user->name ?? '—' }}
+                                            </a>
+                                        @else
+                                            —
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4">
                                         <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md {{ ($website->status ?? '') === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-500' }}">
                                             {{ $website->status ?: '—' }}
                                         </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <a href="{{ route('admin.websites.detail', ['id' => $website->id]) }}"
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150" title="View Website">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
