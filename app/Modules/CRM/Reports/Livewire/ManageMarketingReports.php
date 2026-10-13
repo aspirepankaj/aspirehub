@@ -55,41 +55,79 @@ class ManageMarketingReports extends Component
         }
     }
 
+    public function selectClient($id)
+    {
+        $this->clientId = (int)$id;
+        $this->updatedClientId($this->clientId);
+    }
+
+    public function selectWebsite($id)
+    {
+        $this->websiteId = (int)$id;
+        $this->updatedWebsiteId($this->websiteId);
+    }
+
     public function updatedClientId($value)
     {
         $this->websiteId = null;
         $this->activeTab = null;
-        $this->js("
-            let u = new URL(window.location.href); 
-            u.searchParams.delete('compareDateFrom'); 
-            u.searchParams.delete('compareDateTo'); 
-            u.searchParams.delete('cfrom'); 
-            u.searchParams.delete('cto'); 
-            window.history.replaceState({}, '', u.toString());
-        ");
         
         if ($value) {
             $firstWebsite = Website::where('client_id', $value)->where('status', 'active')->whereHas('integrations')->first();
             if ($firstWebsite) {
                 $this->websiteId = $firstWebsite->id;
+                $this->js("
+                    let u = new URL(window.location.href); 
+                    u.searchParams.set('clientId', '{$value}');
+                    u.searchParams.set('websiteId', '{$this->websiteId}');
+                    u.searchParams.delete('compareDateFrom'); 
+                    u.searchParams.delete('compareDateTo'); 
+                    u.searchParams.delete('cfrom'); 
+                    u.searchParams.delete('cto'); 
+                    window.history.replaceState({}, '', u.toString());
+                ");
                 $this->updatedWebsiteId($this->websiteId);
+            } else {
+                $this->js("
+                    let u = new URL(window.location.href); 
+                    u.searchParams.set('clientId', '{$value}');
+                    u.searchParams.delete('websiteId');
+                    u.searchParams.delete('compareDateFrom'); 
+                    u.searchParams.delete('compareDateTo'); 
+                    u.searchParams.delete('cfrom'); 
+                    u.searchParams.delete('cto'); 
+                    window.history.replaceState({}, '', u.toString());
+                ");
             }
+        } else {
+            $this->js("
+                let u = new URL(window.location.href); 
+                u.searchParams.delete('clientId');
+                u.searchParams.delete('websiteId');
+                u.searchParams.delete('compareDateFrom'); 
+                u.searchParams.delete('compareDateTo'); 
+                u.searchParams.delete('cfrom'); 
+                u.searchParams.delete('cto'); 
+                window.history.replaceState({}, '', u.toString());
+            ");
         }
     }
 
     public function updatedWebsiteId($value)
     {
         $this->activeTab = null;
-        $this->js("
-            let u = new URL(window.location.href); 
-            u.searchParams.delete('compareDateFrom'); 
-            u.searchParams.delete('compareDateTo'); 
-            u.searchParams.delete('cfrom'); 
-            u.searchParams.delete('cto'); 
-            window.history.replaceState({}, '', u.toString());
-        ");
         
         if ($value) {
+            $this->js("
+                let u = new URL(window.location.href); 
+                u.searchParams.set('websiteId', '{$value}');
+                u.searchParams.delete('compareDateFrom'); 
+                u.searchParams.delete('compareDateTo'); 
+                u.searchParams.delete('cfrom'); 
+                u.searchParams.delete('cto'); 
+                window.history.replaceState({}, '', u.toString());
+            ");
+            
             $website = Website::find($value);
             if ($website && $website->integrations()->count() > 0) {
                 $names = [
@@ -121,6 +159,8 @@ class ManageMarketingReports extends Component
         $this->activeTab = null;
         $this->js("
             let u = new URL(window.location.href); 
+            u.searchParams.delete('clientId');
+            u.searchParams.delete('websiteId');
             u.searchParams.delete('compareDateFrom'); 
             u.searchParams.delete('compareDateTo'); 
             u.searchParams.delete('cfrom'); 

@@ -20,6 +20,7 @@ class ManageMaintenanceReports extends Component
     public string $clientFilter = '';
     public string $websiteFilter = '';
     public string $statusFilter = '';
+    public string $tagFilter = '';
     public string $developerFilter = '';
     public string $monthFilter = '';
     public string $sendFilter = '';
@@ -34,6 +35,7 @@ class ManageMaintenanceReports extends Component
     }
     public function updatingWebsiteFilter(): void { $this->resetPage(); }
     public function updatingStatusFilter(): void { $this->resetPage(); }
+    public function updatingTagFilter(): void { $this->resetPage(); }
     public function updatingDeveloperFilter(): void { $this->resetPage(); }
     public function updatingMonthFilter(): void { $this->resetPage(); }
     public function updatingSendFilter(): void { $this->resetPage(); }
@@ -42,7 +44,7 @@ class ManageMaintenanceReports extends Component
     public function clearFilters(): void
     {
         $this->reset([
-            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'developerFilter', 'monthFilter', 'sendFilter'
+            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'tagFilter', 'developerFilter', 'monthFilter', 'sendFilter'
         ]);
         $this->resetPage();
     }
@@ -123,6 +125,17 @@ class ManageMaintenanceReports extends Component
             ->when($this->clientFilter, fn($q) => $q->where('client_id', $this->clientFilter))
             ->when($this->websiteFilter, fn($q) => $q->where('website_id', $this->websiteFilter))
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->tagFilter, function ($q) {
+                if ($this->tagFilter === 'normal') {
+                    $q->where(function ($sq) {
+                        $sq->whereNull('tag')
+                           ->orWhere('tag', '')
+                           ->orWhere('tag', 'normal');
+                    });
+                } else {
+                    $q->where('tag', $this->tagFilter);
+                }
+            })
             ->when($this->developerFilter, fn($q) => $q->where('developer_id', $this->developerFilter))
             ->when($this->monthFilter, fn($q) => $q->where('maintenance_month', $this->monthFilter))
             ->when($this->sendFilter === 'sent', fn($q) => $q->whereNotNull('last_sent_at'))
@@ -171,7 +184,7 @@ class ManageMaintenanceReports extends Component
 
         $scoreChange = ($avgLastMonth > 0) ? ($avgThisMonth - $avgLastMonth) : 0;
 
-        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->developerFilter || $this->monthFilter || $this->sendFilter;
+        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->tagFilter || $this->developerFilter || $this->monthFilter || $this->sendFilter;
 
         return view('modules.crm.maintenance.manage-maintenance-reports', [
             'reports' => $reports,

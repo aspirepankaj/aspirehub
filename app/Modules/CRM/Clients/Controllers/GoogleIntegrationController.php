@@ -55,6 +55,7 @@ class GoogleIntegrationController extends Controller
             ],
             'gtm' => ['https://www.googleapis.com/auth/tagmanager.readonly'],
             'gmb' => ['https://www.googleapis.com/auth/business.manage'],
+            'gbp' => ['https://www.googleapis.com/auth/business.manage'],
             'gads' => ['https://www.googleapis.com/auth/adwords'],
         ];
 

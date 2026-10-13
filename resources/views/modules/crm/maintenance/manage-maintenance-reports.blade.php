@@ -295,6 +295,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
             </div>
+
+            {{-- Tag / Priority Filter --}}
+            <div class="relative flex items-center">
+                <select wire:model.live="tagFilter" class="block w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition duration-150">
+                    <option value="">All Tags / Priority</option>
+                    <option value="normal">Normal</option>
+                    <option value="warning">Warning</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
         </div>
 
         @if($hasActiveFilters)
@@ -343,7 +353,7 @@
                             <th class="px-4 py-4 font-semibold text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody wire:loading.class="hidden" wire:target="search, clientFilter, websiteFilter, statusFilter, monthFilter, sendFilter, perPage, nextPage, previousPage, gotoPage" class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                    <tbody wire:loading.class="hidden" wire:target="search, clientFilter, websiteFilter, statusFilter, tagFilter, monthFilter, sendFilter, perPage, nextPage, previousPage, gotoPage" class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
                 @foreach($reports as $report)
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                         <td class="px-4 py-4 font-bold text-slate-900 dark:text-white text-sm">
@@ -376,12 +386,24 @@
                             {{ $report->developer->name }}
                         </td>
                         <td class="px-4 py-4">
-                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-lg uppercase tracking-wider
-                                  {{ $report->status === 'completed'
-                                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400' }}">
-                                {{ $report->status }}
-                            </span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-lg uppercase tracking-wider
+                                      {{ $report->status === 'completed'
+                                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400' }}">
+                                    {{ $report->status }}
+                                </span>
+                                @if($report->tag === 'critical')
+                                    <span class="px-2 py-0.5 text-[9px] font-extrabold rounded-md uppercase tracking-wider bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20" title="{{ $report->critical_reason ?? 'Critical' }}">
+                                        Critical
+                                    </span>
+                                @elseif($report->tag === 'warning')
+                                    <span class="px-2 py-0.5 text-[9px] font-extrabold rounded-md uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                        Warning
+                                    </span>
+                                @endif
+                            </div>
+                        </td>
                         <td class="px-4 py-4 text-center">
                             <div class="inline-flex items-center gap-1 justify-center">
                                 {{-- View button --}}

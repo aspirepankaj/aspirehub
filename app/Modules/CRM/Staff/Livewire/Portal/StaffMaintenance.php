@@ -19,6 +19,7 @@ class StaffMaintenance extends Component
     public string $clientFilter = '';
     public string $websiteFilter = '';
     public string $statusFilter = '';
+    public string $tagFilter = '';
     public string $monthFilter = '';
     public string $sendFilter = '';
     public int $perPage = 20;
@@ -32,6 +33,7 @@ class StaffMaintenance extends Component
     }
     public function updatingWebsiteFilter(): void { $this->resetPage(); }
     public function updatingStatusFilter(): void { $this->resetPage(); }
+    public function updatingTagFilter(): void { $this->resetPage(); }
     public function updatingMonthFilter(): void { $this->resetPage(); }
     public function updatingSendFilter(): void { $this->resetPage(); }
     public function updatingPage($page): void { $this->dispatch('scroll-to-top'); }
@@ -39,7 +41,7 @@ class StaffMaintenance extends Component
     public function clearFilters(): void
     {
         $this->reset([
-            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'monthFilter', 'sendFilter'
+            'search', 'clientFilter', 'websiteFilter', 'statusFilter', 'tagFilter', 'monthFilter', 'sendFilter'
         ]);
         $this->resetPage();
     }
@@ -134,6 +136,17 @@ class StaffMaintenance extends Component
             ->when($this->clientFilter, fn($q) => $q->where('client_id', $this->clientFilter))
             ->when($this->websiteFilter, fn($q) => $q->where('website_id', $this->websiteFilter))
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->tagFilter, function ($q) {
+                if ($this->tagFilter === 'normal') {
+                    $q->where(function ($sq) {
+                        $sq->whereNull('tag')
+                           ->orWhere('tag', '')
+                           ->orWhere('tag', 'normal');
+                    });
+                } else {
+                    $q->where('tag', $this->tagFilter);
+                }
+            })
             ->when($this->monthFilter, fn($q) => $q->where('maintenance_month', $this->monthFilter))
             ->when($this->sendFilter === 'sent', fn($q) => $q->whereNotNull('last_sent_at'))
             ->when($this->sendFilter === 'unsent', fn($q) => $q->whereNull('last_sent_at'))
@@ -169,7 +182,7 @@ class StaffMaintenance extends Component
         $completedReportsCount = MaintenanceReport::whereIn('client_id', $assignedClientIds)->where('status', 'completed')->count();
         $pendingReportsCount = MaintenanceReport::whereIn('client_id', $assignedClientIds)->where('status', 'draft')->count();
 
-        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->monthFilter || $this->sendFilter;
+        $hasActiveFilters = $this->search || $this->clientFilter || $this->websiteFilter || $this->statusFilter || $this->tagFilter || $this->monthFilter || $this->sendFilter;
 
         return view('modules.crm.staff.portal.maintenance', [
             'reports' => $reports,

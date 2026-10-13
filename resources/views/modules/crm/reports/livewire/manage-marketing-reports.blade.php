@@ -34,8 +34,7 @@
                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Select Client</label>
                 <div x-data="{
                         open: false,
-                        search: '',
-                        selectedId: @entangle('clientId').live
+                        search: ''
                     }"
                     class="relative"
                     @click.away="open = false"
@@ -70,16 +69,9 @@
                                     }
                                     $searchString = strtolower(addslashes($searchString));
                                 @endphp
-                                <div x-show="search === '' || '{{ $searchString }}'.includes(search.toLowerCase())"
-                                     @click="
-                                        let u = new URL(window.location.href); 
-                                        u.searchParams.delete('compareDateFrom'); 
-                                        u.searchParams.delete('compareDateTo'); 
-                                        window.history.replaceState({}, '', u.toString());
-                                        selectedId = '{{ $client->id }}'; 
-                                        open = false; 
-                                        search = '';
-                                     " 
+                                <div wire:key="client-opt-{{ $client->id }}"
+                                     x-show="search === '' || '{{ $searchString }}'.includes(search.toLowerCase())"
+                                     @click="$wire.selectClient({{ $client->id }}); open = false; search = '';" 
                                      class="px-3 py-2.5 rounded-lg text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors block w-full text-left {{ $clientId == $client->id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
                                     <span class="truncate block w-full">{{ $clientName }}</span>
                                     @if($clientEmail)
@@ -97,8 +89,7 @@
                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Select Website</label>
                 <div x-data="{
                         open: false,
-                        search: '',
-                        selectedId: @entangle('websiteId').live
+                        search: ''
                     }"
                     class="relative"
                     @click.away="open = false"
@@ -124,16 +115,9 @@
                                 @php
                                     $siteName = $site->site_name . ' (' . (parse_url($site->url, PHP_URL_HOST) ?: $site->url) . ')';
                                 @endphp
-                                <div x-show="search === '' || '{{ strtolower(addslashes($siteName)) }}'.includes(search.toLowerCase())"
-                                     @click="
-                                        let u = new URL(window.location.href); 
-                                        u.searchParams.delete('compareDateFrom'); 
-                                        u.searchParams.delete('compareDateTo'); 
-                                        window.history.replaceState({}, '', u.toString());
-                                        selectedId = '{{ $site->id }}'; 
-                                        open = false; 
-                                        search = '';
-                                     " 
+                                <div wire:key="website-opt-{{ $site->id }}"
+                                     x-show="search === '' || '{{ strtolower(addslashes($siteName)) }}'.includes(search.toLowerCase())"
+                                     @click="$wire.selectWebsite({{ $site->id }}); open = false; search = '';" 
                                      class="px-3 py-2.5 rounded-lg text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors block w-full text-left {{ $websiteId == $site->id ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300' }}">
                                     <span class="truncate block w-full">{{ $siteName }}</span>
                                 </div>
