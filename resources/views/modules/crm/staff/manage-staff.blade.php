@@ -753,12 +753,22 @@
                                         ];
                                     @endphp
                                     <div class="inline-flex items-center justify-center gap-1.5 shrink-0">
-                                        <a href="{{ route('impersonate.start', $staff->user_id) }}"
-                                           class="inline-flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90 shrink-0"
-                                           title="Login as {{ $staff->user->name ?? 'this staff member' }}"
-                                           onclick="return confirm('Are you sure you want to login as {{ $staff->user->name ?? 'this staff member' }}?')">
+                                        @php
+                                            $staffInitials = $staff->getInitials();
+                                        @endphp
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-150 active:scale-90 shrink-0"
+                                                title="Login as {{ $staff->user->name ?? 'this staff member' }}"
+                                                @click="$dispatch('open-switch-account-modal', {
+                                                    name: '{{ addslashes($staff->user->name ?? 'Staff') }}',
+                                                    email: '{{ addslashes($staff->user->email ?? '') }}',
+                                                    company: '{{ addslashes($staff->company_name ?? '') }}',
+                                                    initials: '{{ $staffInitials }}',
+                                                    role: 'staff',
+                                                    url: '{{ route('impersonate.start', $staff->user_id) }}'
+                                                })">
                                             <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-6 h-6 shrink-0 opacity-80 hover:opacity-100 transition-opacity" alt="Switch Account" />
-                                        </a>
+                                        </button>
                                         <button type="button" 
                                                 @click="
                                                     const data = {{ Js::from($staffEditData) }};

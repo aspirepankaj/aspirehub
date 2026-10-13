@@ -101,6 +101,7 @@ border: 1px solid rgba(255, 255, 255, 0.43);
         </div>
 
         <livewire:media-picker />
+        <x-switch-account-modal />
         @livewireScripts
     </body>
 </html>

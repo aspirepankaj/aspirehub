@@ -192,14 +192,24 @@
                             <td class="px-4 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     @if($admin->user_id !== auth()->id())
-                                        <a href="{{ route('impersonate.start', $admin->user_id) }}"
+                                        @php
+                                            $adminInitials = $admin->getInitials();
+                                        @endphp
+                                        <button type="button"
                                            class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition duration-150"
                                            title="Login as this Admin"
-                                           onclick="return confirm('Are you sure you want to login as {{ $admin->user->name }}?')">
+                                           @click="$dispatch('open-switch-account-modal', {
+                                                name: '{{ addslashes($admin->user->name ?? 'Admin') }}',
+                                                email: '{{ addslashes($admin->user->email ?? '') }}',
+                                                company: 'Aspire Admin',
+                                                initials: '{{ $adminInitials }}',
+                                                role: 'admin',
+                                                url: '{{ route('impersonate.start', $admin->user_id) }}'
+                                           })">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                                             </svg>
-                                        </a>
+                                        </button>
                                     @endif
                                     @php
                                         $adminEditData = [
