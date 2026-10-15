@@ -4,6 +4,7 @@ namespace App\Modules\Client\Dashboard\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use App\Modules\CRM\Clients\Models\Client;
 use App\Modules\CRM\Websites\Models\Website;
 use App\Modules\CRM\Websites\Models\WebsiteIntegration;
@@ -19,7 +20,10 @@ class ClientMarketingReports extends Component
     use LoadsMarketingReports;
 
     public ?int $selectedWebsiteId = null;
+
+    #[Url(as: 'tab', except: 'overview')]
     public string $activeReportIntegrationId = 'overview';
+    public ?string $activeReportPropertyId = null;
     
     // Loaded reports (protected so Livewire does NOT serialize 500KB+ JSON state across requests)
     protected array $activeReportData = [];
@@ -77,6 +81,12 @@ class ClientMarketingReports extends Component
 
         if ($this->websites->isNotEmpty()) {
             $this->selectedWebsiteId = $this->websites->first()->id;
+            
+            $tab = request()->query('tab');
+            if ($tab) {
+                $this->activeReportIntegrationId = $tab;
+            }
+
             $this->loadIntegrationsAndMonths();
         }
     }
@@ -88,6 +98,7 @@ class ClientMarketingReports extends Component
 
     public function updatedActiveReportIntegrationId()
     {
+        $this->updateActivePropertyId();
         $this->loadReportData();
     }
 
@@ -116,7 +127,15 @@ class ClientMarketingReports extends Component
         // triggers re-render automatically
     }
 
-
+    protected function updateActivePropertyId(): void
+    {
+        if ($this->activeReportIntegrationId !== 'overview' && isset($this->integrations[$this->activeReportIntegrationId])) {
+            $int = $this->integrations[$this->activeReportIntegrationId];
+            $this->activeReportPropertyId = $int['auth_credentials']['property_id'] ?? ($int['api_credentials']['organization_id'] ?? ($int['account_identifier'] ?? null));
+        } else {
+            $this->activeReportPropertyId = null;
+        }
+    }
 
     protected function loadIntegrationsAndMonths()
     {
@@ -141,7 +160,14 @@ class ClientMarketingReports extends Component
             ->keyBy('integration_type')
             ->toArray();
 
-        $this->activeReportIntegrationId = 'overview';
+        $requestedTab = request()->query('tab') ?: $this->activeReportIntegrationId;
+        if ($requestedTab && ($requestedTab === 'overview' || isset($this->integrations[$requestedTab]) || in_array($requestedTab, ['ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'linkedin', 'gtm']))) {
+            $this->activeReportIntegrationId = $requestedTab;
+        } else {
+            $this->activeReportIntegrationId = 'overview';
+        }
+
+        $this->updateActivePropertyId();
         $this->loadReportData();
     }
 
@@ -368,6 +394,7 @@ class ClientMarketingReports extends Component
     public function selectIntegration(string $typeId)
     {
         $this->activeReportIntegrationId = $typeId;
+        $this->updateActivePropertyId();
         
         $this->datePreset = 'last_30';
         $this->dateFrom = \Carbon\Carbon::now()->subDays(29)->format('Y-m-d');
@@ -386,6 +413,11 @@ class ClientMarketingReports extends Component
 
         $this->js("
             let u = new URL(window.location.href); 
+            if ('{$typeId}' === 'overview') {
+                u.searchParams.delete('tab');
+            } else {
+                u.searchParams.set('tab', '{$typeId}');
+            }
             u.searchParams.delete('compareDateFrom'); 
             u.searchParams.delete('compareDateTo'); 
             u.searchParams.delete('dateFrom'); 
@@ -405,6 +437,8 @@ class ClientMarketingReports extends Component
         }
 
         return view('modules.client.dashboard.client-marketing-reports', [
+            'activeReportIntegrationId' => $this->activeReportIntegrationId,
+            'activeReportPropertyId' => $this->activeReportPropertyId,
             'activeReportData' => $this->activeReportData,
             'ga4Data' => $this->ga4Data,
             'gscData' => $this->gscData,
