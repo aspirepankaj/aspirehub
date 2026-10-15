@@ -61,9 +61,20 @@ class MarketingReportPdfService
             $websiteFolder = 'site-' . $website->id;
         }
 
-        // Check which integrations are active
+        // Check which integrations are active and connected
         $integrations = WebsiteIntegration::where('website_id', $website->id)
+            ->where('status', 'connected')
             ->get()
+            ->filter(function ($item) {
+                $requiresProperty = in_array($item->integration_type, ['ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'linkedin']);
+                if ($requiresProperty) {
+                    $propId = $item->auth_credentials['property_id'] ?? ($item->api_credentials['organization_id'] ?? ($item->account_identifier ?? null));
+                    if (empty($propId)) {
+                        return false;
+                    }
+                }
+                return true;
+            })
             ->keyBy('integration_type');
 
         $hasGa4 = $integrations->has('ga4');
@@ -75,7 +86,11 @@ class MarketingReportPdfService
         $hasFacebook = $integrations->has('facebook');
         $hasLinkedin = $integrations->has('linkedin');
 
-        // Load data
+        // Dynamically load data for ALL connected integrations
+        $knownTypes = ['ga4', 'gsc', 'keyword', 'youtube', 'gbp', 'gads', 'facebook', 'linkedin'];
+        $dynamicIntegrations = [];
+
+        // Load standard known integrations
         $ga4Data = $hasGa4 ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $dateFrom, $dateTo) : [];
         $gscData = $hasGsc ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $dateFrom, $dateTo) : [];
         $keywordData = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $dateFrom, $dateTo) : [];
@@ -97,7 +112,9 @@ class MarketingReportPdfService
 
         $isExplicitCompare = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
 
-        // If comparison dates were not explicitly passed, compute prior period of same length for MoM
+        // Compute compare dates
+        $computedCompareFrom = '';
+        $computedCompareTo = '';
         if (!$isExplicitCompare) {
             try {
                 $start = Carbon::parse($dateFrom);
@@ -105,30 +122,37 @@ class MarketingReportPdfService
                 $diffDays = $start->diffInDays($end) + 1;
                 $computedCompareTo = $start->copy()->subDay()->format('Y-m-d');
                 $computedCompareFrom = $start->copy()->subDays($diffDays)->format('Y-m-d');
-                
-                $compareGa4 = $hasGa4 ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $computedCompareFrom, $computedCompareTo) : [];
-                $compareGsc = $hasGsc ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $computedCompareFrom, $computedCompareTo) : [];
-                $compareKeyword = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $computedCompareFrom, $computedCompareTo) : [];
-                $compareYoutube = $hasYoutube ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $computedCompareFrom, $computedCompareTo) : [];
-                $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $computedCompareFrom, $computedCompareTo) : [];
-                $compareGads = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $computedCompareFrom, $computedCompareTo) : [];
-                $compareFacebook = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $computedCompareFrom, $computedCompareTo) : [];
-                $compareLinkedin = $hasLinkedin ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $computedCompareFrom, $computedCompareTo) : [];
                 $this->compareDateFrom = $computedCompareFrom;
                 $this->compareDateTo = $computedCompareTo;
-            } catch (\Exception $e) {
-                // ignore
-                $compareGbp = [];
+            } catch (\Exception $e) {}
+        }
+
+        $activeCompareFrom = $isExplicitCompare ? $this->compareDateFrom : $computedCompareFrom;
+        $activeCompareTo = $isExplicitCompare ? $this->compareDateTo : $computedCompareTo;
+
+        $compareGa4 = ($hasGa4 && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $activeCompareFrom, $activeCompareTo) : [];
+        $compareGsc = ($hasGsc && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $activeCompareFrom, $activeCompareTo) : [];
+        $compareKeyword = ($hasKeyword && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $activeCompareFrom, $activeCompareTo) : [];
+        $compareYoutube = ($hasYoutube && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $activeCompareFrom, $activeCompareTo) : [];
+        $compareGbp = ($hasGbp && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $activeCompareFrom, $activeCompareTo) : [];
+        $compareGads = ($hasGads && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $activeCompareFrom, $activeCompareTo) : [];
+        $compareFacebook = ($hasFacebook && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $activeCompareFrom, $activeCompareTo) : [];
+        $compareLinkedin = ($hasLinkedin && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $activeCompareFrom, $activeCompareTo) : [];
+
+        // DYNAMIC HANDLER: Automatically load ANY integration not explicitly hardcoded above (e.g. TikTok, Pinterest, Instagram, Twitter, etc.)
+        foreach ($integrations as $intType => $intModel) {
+            if (!in_array($intType, $knownTypes)) {
+                $curData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $intType, $dateFrom, $dateTo);
+                $cmpData = $activeCompareFrom ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $intType, $activeCompareFrom, $activeCompareTo) : [];
+                if (!empty($curData) && !isset($curData['error'])) {
+                    $dynamicIntegrations[$intType] = [
+                        'name' => ucwords(str_replace(['_', '-'], ' ', $intType)),
+                        'type' => $intType,
+                        'data' => $curData,
+                        'compare' => $cmpData,
+                    ];
+                }
             }
-        } else {
-            $compareGa4 = $hasGa4 ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $this->compareDateFrom, $this->compareDateTo) : [];
-            $compareGsc = $hasGsc ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $this->compareDateFrom, $this->compareDateTo) : [];
-            $compareKeyword = $hasKeyword ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->compareDateFrom, $this->compareDateTo) : [];
-            $compareYoutube = $hasYoutube ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $this->compareDateFrom, $this->compareDateTo) : [];
-            $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->compareDateFrom, $this->compareDateTo) : [];
-            $compareGads = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->compareDateFrom, $this->compareDateTo) : [];
-            $compareFacebook = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $this->compareDateFrom, $this->compareDateTo) : [];
-            $compareLinkedin = $hasLinkedin ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $this->compareDateFrom, $this->compareDateTo) : [];
         }
 
         // Year-over-Year (YoY) Prior Period (1 year prior)
@@ -250,6 +274,18 @@ class MarketingReportPdfService
             $ytSubscribersMomSvg = $this->generateMetricTrendLineSvg($dailyYt, $compareDailyYt, 'subscribers', 680, 48, '#10b981');
         }
 
+        // LinkedIn Metric Trend Lines
+        $liImpressionsMomSvg = '';
+        $liClicksMomSvg = '';
+        $liEngagementsMomSvg = '';
+        if ($hasLinkedin && !empty($linkedinData)) {
+            $dailyLi = $linkedinData['daily_traffic'] ?? [];
+            $compareDailyLi = $compareLinkedin['daily_traffic'] ?? [];
+            $liImpressionsMomSvg = $this->generateMetricTrendLineSvg($dailyLi, $compareDailyLi, 'impressions', 680, 48, '#0077b5');
+            $liClicksMomSvg = $this->generateMetricTrendLineSvg($dailyLi, $compareDailyLi, 'clicks', 680, 48, '#10b981');
+            $liEngagementsMomSvg = $this->generateMetricTrendLineSvg($dailyLi, $compareDailyLi, 'engagements', 680, 48, '#0ea5e9');
+        }
+
         $sparklineUpSvg = $this->generateSparklineSvg('up', 65, 26);
         $sparklineDownSvg = $this->generateSparklineSvg('down', 65, 26);
 
@@ -309,6 +345,9 @@ class MarketingReportPdfService
             'ytViewsMomSvg' => $ytViewsMomSvg,
             'ytWatchTimeMomSvg' => $ytWatchTimeMomSvg,
             'ytSubscribersMomSvg' => $ytSubscribersMomSvg,
+            'liImpressionsMomSvg' => $liImpressionsMomSvg,
+            'liClicksMomSvg' => $liClicksMomSvg,
+            'liEngagementsMomSvg' => $liEngagementsMomSvg,
             'donutChartSvg' => $donutChartSvg,
             'visitorsBarChartSvg' => $visitorsBarChartSvg,
             'channelTimeSeriesSvg' => $channelTimeSeriesSvg,
@@ -333,6 +372,7 @@ class MarketingReportPdfService
             'sparklineUpSvg' => $sparklineUpSvg,
             'sparklineDownSvg' => $sparklineDownSvg,
             'logoBase64' => $this->getLogoBase64(),
+            'dynamicIntegrations' => $dynamicIntegrations,
         ];
     }
 

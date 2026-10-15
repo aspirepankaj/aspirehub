@@ -32,27 +32,49 @@ class ManageMarketingReports extends Component
 
         if ($this->websiteId && empty($this->activeTab)) {
             $website = Website::find($this->websiteId);
-            if ($website && $website->integrations()->count() > 0) {
-                $names = [
-                    'gbp' => 'Business Profile',
-                    'facebook' => 'Facebook',
-                    'gads' => 'Google Ads',
-                    'ga4' => 'Google Analytics 4',
-                    'keyword' => 'Keyword.com',
-                    'linkedin' => 'LinkedIn',
-                    'gsc' => 'Search Console',
-                    'gtm' => 'Tag Manager',
-                    'youtube' => 'YouTube'
-                ];
-                $firstIntegration = $website->integrations->sortBy(function($intg) use ($names) {
-                    return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
-                })->first();
-                
+            if ($website) {
+                $validIntegrations = $this->getValidIntegrations($website);
+                $firstIntegration = $validIntegrations->first();
                 if ($firstIntegration) {
                     $this->activeTab = $firstIntegration->integration_type;
                 }
             }
         }
+    }
+
+    private function getValidIntegrations(Website $website)
+    {
+        $names = [
+            'gbp' => 'Business Profile',
+            'facebook' => 'Facebook',
+            'gads' => 'Google Ads',
+            'ga4' => 'Google Analytics 4',
+            'keyword' => 'Keyword.com',
+            'linkedin' => 'LinkedIn',
+            'gsc' => 'Search Console',
+            'gtm' => 'Tag Manager',
+            'youtube' => 'YouTube'
+        ];
+
+        return $website->integrations
+            ->filter(function ($item) {
+                if ($item->status !== 'connected') {
+                    return false;
+                }
+                $requiresProperty = in_array($item->integration_type, ['ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'linkedin']);
+                if ($requiresProperty) {
+                    $propId = $item->auth_credentials['property_id'] 
+                        ?? ($item->api_credentials['organization_id'] 
+                        ?? ($item->account_identifier ?? null));
+                    if (empty($propId)) {
+                        return false;
+                    }
+                }
+                return true;
+            })
+            ->sortBy(function($intg) use ($names) {
+                return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
+            });
     }
 
     public function selectClient($id)
@@ -129,22 +151,9 @@ class ManageMarketingReports extends Component
             ");
             
             $website = Website::find($value);
-            if ($website && $website->integrations()->count() > 0) {
-                $names = [
-                    'gbp' => 'Business Profile',
-                    'facebook' => 'Facebook',
-                    'gads' => 'Google Ads',
-                    'ga4' => 'Google Analytics 4',
-                    'keyword' => 'Keyword.com',
-                    'linkedin' => 'LinkedIn',
-                    'gsc' => 'Search Console',
-                    'gtm' => 'Tag Manager',
-                    'youtube' => 'YouTube'
-                ];
-                $firstIntegration = $website->integrations->sortBy(function($intg) use ($names) {
-                    return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
-                })->first();
-                
+            if ($website) {
+                $validIntegrations = $this->getValidIntegrations($website);
+                $firstIntegration = $validIntegrations->first();
                 if ($firstIntegration) {
                     $this->activeTab = $firstIntegration->integration_type;
                 }
@@ -221,20 +230,10 @@ class ManageMarketingReports extends Component
         if ($this->websiteId) {
             $website = Website::find($this->websiteId);
             if ($website) {
-                $names = [
-                    'gbp' => 'Business Profile',
-                    'facebook' => 'Facebook',
-                    'gads' => 'Google Ads',
-                    'ga4' => 'Google Analytics 4',
-                    'keyword' => 'Keyword.com',
-                    'linkedin' => 'LinkedIn',
-                    'gsc' => 'Search Console',
-                    'gtm' => 'Tag Manager',
-                    'youtube' => 'YouTube'
-                ];
-                $integrations = $website->integrations->sortBy(function($intg) use ($names) {
-                    return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
-                });
+                $integrations = $this->getValidIntegrations($website);
+                if ($this->activeTab && !$integrations->contains('integration_type', $this->activeTab)) {
+                    $this->activeTab = $integrations->first()?->integration_type;
+                }
             }
         }
 

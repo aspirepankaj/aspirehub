@@ -23,7 +23,7 @@
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0 w-full md:w-auto">
                 <div class="relative shrink-0">
                     @if($clientDetails->profile_image)
-                        <img src="{{ asset('storage/' . $clientDetails->profile_image) }}" alt="{{ $clientDetails->user->name }}" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800" />
+                        <img src="{{ Str::startsWith($clientDetails->profile_image, 'http') ? $clientDetails->profile_image : asset('storage/' . $clientDetails->profile_image) }}" alt="{{ $clientDetails->user->name }}" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400'>{{ $clientDetails->getInitials() }}</div>`" />
                     @else
                         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400">
                             {{ $clientDetails->getInitials() }}
@@ -3493,7 +3493,7 @@
 
     <!-- Add Client Modal -->
     <x-admin.modal name="add-client-modal" title="Add New Client" maxWidth="max-w-3xl">
-        <div class="space-y-6 mt-2">
+        <form wire:submit.prevent="saveClient" class="space-y-6 mt-2">
             
             <!-- Section 1: Profile & Basic Details -->
             <div class="space-y-4">
@@ -3751,7 +3751,7 @@
                         class="px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
-                <x-admin.button type="button" wire:click="saveClient" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
+                <x-admin.button type="submit" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
                     <svg wire:loading wire:target="saveClient" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -3759,12 +3759,12 @@
                     <span>Save Client</span>
                 </x-admin.button>
             </div>
-        </div>
+        </form>
     </x-admin.modal>
 
     <!-- Edit Client Modal -->
     <x-admin.modal name="edit-client-modal" title="Edit Client" maxWidth="max-w-3xl">
-        <div class="space-y-6 mt-2">
+        <form wire:submit.prevent="updateClient" class="space-y-6 mt-2">
             
             <!-- Section 1: Profile & Basic Details -->
             <div class="space-y-4">
@@ -3823,7 +3823,7 @@
 
                     <div>
                         <label for="edit_client_email" class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ __('Email Address') }}</label>
-                        <input wire:model="email" id="edit_client_email" type="email" required placeholder="john.doe@example.com"
+                        <input wire:model="email" id="edit_client_email" type="email" required autocomplete="email" placeholder="john.doe@example.com"
                                class="block w-full px-4 py-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 text-sm font-semibold transition duration-150" />
                         <x-input-error :messages="$errors->get('email')" class="mt-1" />
                     </div>
@@ -4032,7 +4032,7 @@
                         class="px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
-                <x-admin.button type="button" wire:click="updateClient" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
+                <x-admin.button type="submit" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
                     <svg wire:loading wire:target="updateClient" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -4040,7 +4040,7 @@
                     <span>Update Client</span>
                 </x-admin.button>
             </div>
-        </div>
+        </form>
     </x-admin.modal>
 
     <!-- ClickUp Folder Mapping Modal -->

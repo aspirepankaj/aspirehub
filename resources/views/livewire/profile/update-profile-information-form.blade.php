@@ -152,16 +152,23 @@ new class extends Component
         <div>
             <x-input-label :value="__('Profile Picture')" />
             <div class="mt-2 flex items-center gap-4">
-                @if ($profile_image)
-                    <img src="{{ Str::startsWith($profile_image, 'http') ? $profile_image : asset('storage/' . $profile_image) }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" onerror="this.outerHTML=`<div class='w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20'>{{ auth()->user()->getInitials() }}</div>`" />
+                @php
+                    $displayImg = null;
+                    $candidateImg = $profile_image ?: $existing_profile_image;
+                    if ($candidateImg) {
+                        if (Str::startsWith($candidateImg, 'http')) {
+                            $displayImg = $candidateImg;
+                        } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($candidateImg) || file_exists(public_path('storage/' . $candidateImg))) {
+                            $displayImg = asset('storage/' . $candidateImg);
+                        }
+                    }
+                @endphp
+                @if ($displayImg)
+                    <img src="{{ $displayImg }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" onerror="this.outerHTML=`<div class='w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20'>{{ auth()->user()->getInitials() }}</div>`" />
                 @else
-                    @if ($existing_profile_image)
-                        <img src="{{ asset('storage/' . $existing_profile_image) }}" class="w-16 h-16 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-md" onerror="this.outerHTML=`<div class='w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20'>{{ auth()->user()->getInitials() }}</div>`" />
-                    @else
-                        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20">
-                            {{ auth()->user()->getInitials() }}
-                        </div>
-                    @endif
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-500/20">
+                        {{ auth()->user()->getInitials() }}
+                    </div>
                 @endif
                 <div class="flex items-center gap-2">
                     <button type="button" @click="Livewire.dispatch('open-media-picker', { field: 'profile_image' })" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 font-semibold text-xs rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800">

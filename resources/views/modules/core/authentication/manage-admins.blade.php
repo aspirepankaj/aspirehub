@@ -307,7 +307,7 @@
             <!-- Email -->
             <div>
                 <label for="admin_email" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Email Address') }}</label>
-                <input wire:model="email" id="admin_email" type="email" required placeholder="john.doe@example.com"
+                <input wire:model="email" id="admin_email" type="email" required autocomplete="email" placeholder="john.doe@example.com"
                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('email')" class="mt-1" />
             </div>
@@ -315,7 +315,7 @@
             <!-- Password -->
             <div>
                 <label for="admin_password" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Password') }}</label>
-                <input wire:model="password" id="admin_password" type="password" required placeholder="Min 8 characters"
+                <input wire:model="password" id="admin_password" type="password" required autocomplete="new-password" placeholder="Min 8 characters"
                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('password')" class="mt-1" />
             </div>
@@ -410,7 +410,7 @@
             <!-- Email -->
             <div>
                 <label for="edit_admin_email" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Email Address') }}</label>
-                <input wire:model="email" id="edit_admin_email" type="email" required placeholder="john.doe@example.com"
+                <input wire:model="email" id="edit_admin_email" type="email" required autocomplete="email" placeholder="john.doe@example.com"
                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('email')" class="mt-1" />
             </div>

@@ -824,6 +824,26 @@ class StaffClients extends Component
                 'account_identifier' => null,
             ]);
 
+            // Delete all stored JSON files for this disconnected integration
+            try {
+                $clientDetails = \App\Modules\CRM\Clients\Models\Client::find($this->selectedClientId);
+                $website = \App\Modules\CRM\Websites\Models\Website::find($this->selectedWebsiteId);
+                if ($clientDetails && $website) {
+                    $userName = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($clientDetails->user->name ?? 'client'));
+                    $emailParts = explode('@', $clientDetails->user->email ?? '');
+                    $emailPrefix = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($emailParts[0] ?? ''));
+                    $clientFolder = "{$userName}-{$emailPrefix}";
+                    $websiteFolder = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::lower($website->site_name ?: 'site-' . $website->id));
+                    
+                    $targetDir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}");
+                    if (\Illuminate\Support\Facades\File::isDirectory($targetDir)) {
+                        \Illuminate\Support\Facades\File::deleteDirectory($targetDir);
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to delete integration JSON files: " . $e->getMessage());
+            }
+
             // Log Activity
             \App\Modules\Core\Activity\Models\ActivityLog::create([
                 'user_id' => auth()->id(),
@@ -1755,7 +1775,7 @@ class StaffClients extends Component
                 // 1. Organization Page Statistics
                 $pageResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
                     ->withHeaders([
-                        'LinkedIn-Version' => '202312',
+                        'LinkedIn-Version' => '202609',
                         'X-Restli-Protocol-Version' => '2.0.0',
                     ])
                     ->get("https://api.linkedin.com/rest/organizationPageStatistics", [
@@ -1768,7 +1788,7 @@ class StaffClients extends Component
 
                 $followersResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
                     ->withHeaders([
-                        'LinkedIn-Version' => '202312',
+                        'LinkedIn-Version' => '202609',
                         'X-Restli-Protocol-Version' => '2.0.0',
                     ])
                     ->get("https://api.linkedin.com/rest/organizationFollowerStatistics", [
@@ -1849,9 +1869,13 @@ class StaffClients extends Component
                 }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('LinkedIn API failed: ' . $e->getMessage());
-                $orgId = $integration->api_credentials['organization_id'] ?? 'unknown';
-                $exactFollowers = (int)($integration->auth_credentials['followers'] ?? 1195);
-                $reportData = $this->getMockLinkedInReportData($orgId, $startDateStr, $endDateStr, $exactFollowers);
+                $orgId = $integration->api_credentials['organization_id'] ?? null;
+                if ($orgId) {
+                    $exactFollowers = (int)($integration->auth_credentials['followers'] ?? 1195);
+                    $reportData = $this->getMockLinkedInReportData($orgId, $startDateStr, $endDateStr, $exactFollowers);
+                } else {
+                    $reportData = ['error' => 'LinkedIn Organization/Page ID not selected yet.'];
+                }
             }
         } else {
             if ($integrationId === 'gsc') {

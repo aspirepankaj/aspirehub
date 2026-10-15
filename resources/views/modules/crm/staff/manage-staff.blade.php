@@ -826,7 +826,7 @@
          ADD STAFF MODAL
     ══════════════════════════════════════════════ --}}
     <x-admin.modal name="add-staff-modal" title="Add New Staff" maxWidth="max-w-3xl">
-        <div class="mt-2 flex flex-col gap-3">
+        <form wire:submit.prevent="saveStaff" class="mt-2 flex flex-col gap-3">
             <!-- Profile Image -->
             <div>
                 <label class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Profile Image') }}</label>
@@ -998,7 +998,7 @@
                         class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
-                <x-admin.button type="button" wire:click="saveStaff" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
+                <x-admin.button type="submit" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
                     <!-- Loading Spinner -->
                     <svg wire:loading wire:target="saveStaff" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1007,7 +1007,7 @@
                     <span>Save Staff</span>
                 </x-admin.button>
             </div>
-        </div>
+        </form>
     </x-admin.modal>
 
     @endif {{-- end @else (list view) --}}
@@ -1016,7 +1016,7 @@
          EDIT STAFF MODAL (Available in both List and Detail view)
     ══════════════════════════════════════════════ --}}
     <x-admin.modal name="edit-staff-modal" title="Edit Staff" maxWidth="max-w-3xl">
-        <div class="mt-2 flex flex-col gap-3">
+        <form wire:submit.prevent="updateStaff" class="mt-2 flex flex-col gap-3">
             <!-- Profile Image -->
             <div x-data="{
                 get imgUrl() {
@@ -1065,7 +1065,7 @@
             <!-- Email -->
             <div>
                 <label for="edit_staff_email" class="block text-[10px] font-extrabold text-slate-600 dark:text-slate-500 uppercase tracking-widest">{{ __('Email Address') }}</label>
-                <input wire:model="email" id="edit_staff_email" type="email" required placeholder="john.doe@example.com"
+                <input wire:model="email" id="edit_staff_email" type="email" required autocomplete="email" placeholder="john.doe@example.com"
                        class="block mt-1.5 w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition duration-150" />
                 <x-input-error :messages="$errors->get('email')" class="mt-1" />
             </div>
@@ -1198,7 +1198,7 @@
                         class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all duration-150">
                     Cancel
                 </button>
-                <x-admin.button type="button" wire:click="updateStaff" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
+                <x-admin.button type="submit" size="sm" variant="primary" wire:loading.attr="disabled" class="space-x-1.5">
                     <!-- Loading Spinner -->
                     <svg wire:loading wire:target="updateStaff" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1207,7 +1207,7 @@
                     <span>Update Staff</span>
                 </x-admin.button>
             </div>
-        </div>
+        </form>
     </x-admin.modal>
 
 </div>

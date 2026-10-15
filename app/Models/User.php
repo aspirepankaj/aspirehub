@@ -102,7 +102,16 @@ class User extends Authenticatable
             return null;
         }
 
-        return \Illuminate\Support\Str::startsWith($img, 'http') ? $img : asset('storage/' . $img);
+        if (\Illuminate\Support\Str::startsWith($img, 'http')) {
+            return $img;
+        }
+
+        // Only return asset URL if file actually exists on public disk
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($img) || file_exists(public_path('storage/' . $img))) {
+            return asset('storage/' . $img);
+        }
+
+        return null;
     }
 }
 

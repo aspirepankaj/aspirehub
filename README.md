@@ -276,6 +276,45 @@ Connects agency spaces, folders, and client-assigned tasks into the CRM.
 3. In the CRM, enter your **API Token** and **Project ID** to start streaming live rankings.
 </details>
 
+<details>
+<summary><b>9. 📘 Facebook Insights & Ads API</b> (Click to expand)</summary>
+
+1. Visit [Meta for Developers](https://developers.facebook.com/) and create a Business App.
+2. In **Meta Business Manager (Business Settings)**:
+   - Navigate to **Users > System Users** and click **Add** (Admin system user role).
+   - Under **Assigned Assets**, assign your **Facebook Page** with manage/view permissions and your **Ad Account** with analyze/read permissions.
+   - Click **Generate New Token**, select your App, set token expiration to **Never / 60 days**, and select permissions:
+     - `pages_show_list`
+     - `pages_read_engagement`
+     - `pages_read_user_content`
+     - `ads_read`
+     - `read_insights`
+3. Get your **Page ID**:
+   - Go to your Facebook Page > **About** / Settings to find your Page Numeric ID.
+4. Get your **Ad Account ID**:
+   - In Meta Ads Manager / Business Settings, copy your Account ID (format: `act_XXXXXXXXX` or number without `act_`).
+5. In Aspire Hub Admin / Staff Portal:
+   - Navigate to **Clients > [Select Client] > Integrations > Facebook**.
+   - Enter **System User Access Token**, **Page ID**, and **Ad Account ID**, then click **Save Configuration**.
+6. Real-time metrics will now populate in Client Marketing Reports and PDF downloads.
+</details>
+
+<details>
+<summary><b>10. 💼 LinkedIn Page Analytics</b> (Click to expand)</summary>
+
+1. Go to [LinkedIn Developer Portal](https://www.linkedin.com/developers/) and create an App connected to your LinkedIn Page.
+2. Under **Products**, add:
+   - **Share on LinkedIn** / **Sign In with LinkedIn using OpenID Connect**
+   - **Community Management API** (or Member Data Portability / Marketing Developer Platform access).
+3. Generate an Access Token with scopes:
+   - `r_organization_social`
+   - `r_basicprofile`
+4. Find your **Organization ID (URN)** from your LinkedIn Page URL (e.g., `https://www.linkedin.com/company/12345678/` -> ID is `12345678`).
+5. In Aspire Hub:
+   - Go to **Clients > [Select Client] > Integrations > LinkedIn**.
+   - Enter **LinkedIn Access Token** and **Organization ID**, then save.
+</details>
+
 ---
 
 ## 📧 Email & SMTP Configuration

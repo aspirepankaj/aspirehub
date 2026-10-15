@@ -24,7 +24,7 @@
             <div class="flex items-center gap-3 sm:gap-4 min-w-0 w-full">
                 <div class="relative shrink-0">
                     @if($clientDetails->profile_image)
-                        <img src="{{ asset('storage/' . $clientDetails->profile_image) }}" alt="{{ $clientDetails->user->name }}" class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800" />
+                        <img src="{{ Str::startsWith($clientDetails->profile_image, 'http') ? $clientDetails->profile_image : asset('storage/' . $clientDetails->profile_image) }}" alt="{{ $clientDetails->user->name }}" class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-800" onerror="this.outerHTML=`<div class='w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400'>{{ $clientDetails->getInitials() }}</div>`" />
                     @else
                         <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-400">
                             {{ $clientDetails->getInitials() }}

@@ -112,6 +112,9 @@
 
             <!-- Change Password Card -->
             <form wire:submit.prevent="updatePassword" class="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800/60 p-6 shadow-sm space-y-6">
+                {{-- Hidden username field for accessibility / browser password managers --}}
+                <input type="text" name="username" value="{{ auth()->user()->email }}" autocomplete="username" class="hidden" style="display:none;" aria-hidden="true" />
+
                 <div>
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">Change password</h3>
                 </div>

@@ -41,8 +41,11 @@
             <span class="hidden sm:inline-block px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg">
                 Administrator
             </span>
-            @if(auth()->user()->admin?->profile_image)
-                <img src="{{ Str::startsWith(auth()->user()->admin->profile_image, 'http') ? auth()->user()->admin->profile_image : asset('storage/' . auth()->user()->admin->profile_image) }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-sm" onerror="this.outerHTML=`<div class='w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300'>{{ auth()->user()->getInitials() }}</div>`" />
+            @php
+                $adminImgUrl = auth()->user()->getProfileImageUrl();
+            @endphp
+            @if($adminImgUrl)
+                <img src="{{ $adminImgUrl }}" alt="{{ auth()->user()->name }}" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-sm" onerror="this.outerHTML=`<div class='w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300'>{{ auth()->user()->getInitials() }}</div>`" />
             @else
                 <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300">
                     {{ auth()->user()->getInitials() }}

@@ -22,7 +22,7 @@ class StaffClientReport extends Component
     public int $websiteId = 0;
     public string $integration = '';
 
-    public array $activeReportData = [];
+    protected array $activeReportData = [];
     public string $activeReportIntegrationId = '';
     public string $activeReportPropertyId = '';
 
@@ -121,6 +121,7 @@ class StaffClientReport extends Component
             'client' => $this->client,
             'website' => $this->website,
             'pageTitle' => $this->clientName . ' — ' . strtoupper($this->integration) . ' Report',
+            'activeReportData' => $this->activeReportData,
         ]);
     }
 }

@@ -779,7 +779,7 @@
          ADD WEBSITE MODAL
     ═══════════════════════════════════════════════════════════ --}}
     <x-admin.modal name="add-website-modal" title="Add New Website" maxWidth="max-w-3xl">
-        <div class="space-y-4 mt-2">
+        <form onsubmit="return false;" class="space-y-4 mt-2">
             
             <!-- Website Image -->
             <div>
@@ -1073,14 +1073,14 @@
                     <span>Save Website</span>
                 </x-admin.button>
             </div>
-        </div>
+        </form>
     </x-admin.modal>
 
     {{-- ═══════════════════════════════════════════════════════════
          EDIT WEBSITE MODAL
     ═══════════════════════════════════════════════════════════ --}}
     <x-admin.modal name="edit-website-modal" title="Edit Website" maxWidth="max-w-3xl">
-        <div class="space-y-4 mt-2">
+        <form onsubmit="return false;" class="space-y-4 mt-2">
 
             <!-- Website Image -->
             <div x-data="{
@@ -1388,6 +1388,6 @@
                     <span>Update Website</span>
                 </x-admin.button>
             </div>
-        </div>
+        </form>
     </x-admin.modal>
 </div>

@@ -71,21 +71,6 @@
             @endif
         </div>
     </div>
-    @else
-    {{-- Embedded Mode: Show Date Picker & Send Report without the title/back button --}}
-    <div class="flex flex-wrap items-center justify-end gap-3 mb-6">
-        @if(empty($isOverviewMode))
-            @include('partials.marketing-report-send-modal')
-            
-            <div class="w-full sm:w-auto mt-2 sm:mt-0">
-                @php
-                    $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
-                    $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
-                @endphp
-                @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
-            </div>
-        @endif
-    </div>
     @endif
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm p-6">
         @if (empty($activeReportData))
@@ -170,13 +155,13 @@
                     <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
                         <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
                         <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                            {{ $this->formatAbbreviated($reportDataScope['summary']['clicks'] ?? 0) }}
+                            {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['clicks'] ?? 0) : number_format($reportDataScope['summary']['clicks'] ?? 0) }}
                         </span>
                     </div>
                     <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
                         <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
                         <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                            {{ $this->formatAbbreviated($reportDataScope['summary']['impressions'] ?? 0) }}
+                            {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['impressions'] ?? 0) : number_format($reportDataScope['summary']['impressions'] ?? 0) }}
                         </span>
                     </div>
                     <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
@@ -272,6 +257,7 @@
                 </div>
             </div>
             @endforeach
+            </div>
             </div>
             </div>
 
@@ -503,8 +489,13 @@
                     </div>
                     <div class="w-full" wire:ignore>
                         <div class="h-64" wire:key="fb-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                            chart: null,
                             init() {
-                                const ctx = document.getElementById('fb-chart-{{ $idx }}').getContext('2d');
+                                if (!this.$refs.canvas) return;
+                                if (this.chart) {
+                                    this.chart.destroy();
+                                }
+                                const ctx = this.$refs.canvas.getContext('2d');
                                 let dt = {{ json_encode($idx === 0 ? ($activeReportData['daily_traffic'] ?? []) : ($activeReportData['compare_data']['daily_traffic'] ?? [])) }};
                                 
                                 let labels = dt.map(d => {
@@ -517,7 +508,7 @@
                                 let views = dt.map(d => d.views || 0);
                                 let engaged = dt.map(d => d.engaged || (d.engagements || 0));
 
-                                new Chart(ctx, {
+                                this.chart = new Chart(ctx, {
                                     type: 'line',
                                     data: {
                                         labels: labels,
@@ -571,7 +562,7 @@
                                     }
                                 });
                             }
-                        }"><canvas id="fb-chart-{{ $idx }}"></canvas></div>
+                        }"><canvas x-ref="canvas" id="fb-chart-{{ $idx }}"></canvas></div>
                     </div>
                 </div>
 
@@ -600,10 +591,30 @@
                                         <td class="py-4 px-5">
                                             <div class="flex items-center gap-4">
                                                 <div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 overflow-hidden relative">
-                                                    @if(!empty($post['picture']))
-                                                        <img src="{{ $post['picture'] }}" class="w-full h-full object-cover">
+                                                    @php
+                                                        $picUrl = $post['picture'] ?? null;
+                                                        $isExpired = false;
+                                                        if (!empty($picUrl) && str_contains($picUrl, 'fbcdn.net')) {
+                                                            $queryStr = parse_url($picUrl, PHP_URL_QUERY);
+                                                            if ($queryStr) {
+                                                                parse_str($queryStr, $params);
+                                                                if (!empty($params['oe']) && hexdec($params['oe']) < time()) {
+                                                                    $isExpired = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @if(!empty($picUrl) && !$isExpired)
+                                                        <img src="{{ $picUrl }}" 
+                                                             referrerpolicy="no-referrer" 
+                                                             loading="lazy"
+                                                             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                                             class="w-full h-full object-cover">
+                                                        <div class="w-full h-full hidden items-center justify-center text-slate-400 bg-slate-100 dark:bg-slate-800">
+                                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16"></path></svg>
+                                                        </div>
                                                     @else
-                                                        <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                                        <div class="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100 dark:bg-slate-800">
                                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16"></path></svg>
                                                         </div>
                                                     @endif
@@ -698,8 +709,13 @@
                     </div>
                     <div class="w-full" wire:ignore>
                         <div class="h-64" wire:key="li-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                            chart: null,
                             init() {
-                                const ctx = document.getElementById('li-chart-{{ $idx }}').getContext('2d');
+                                if (!this.$refs.canvas) return;
+                                if (this.chart) {
+                                    this.chart.destroy();
+                                }
+                                const ctx = this.$refs.canvas.getContext('2d');
                                 let dt = {{ json_encode($idx === 0 ? ($activeReportData['daily_traffic'] ?? []) : ($activeReportData['compare_data']['daily_traffic'] ?? [])) }};
                                 
                                 let labels = dt.map(d => {
@@ -711,7 +727,7 @@
                                 let impressions = dt.map(d => d.impressions || 0);
                                 let engagements = dt.map(d => d.engagements || 0);
 
-                                new Chart(ctx, {
+                                this.chart = new Chart(ctx, {
                                     type: 'line',
                                     data: {
                                         labels: labels,
@@ -754,7 +770,7 @@
                                     }
                                 });
                             }
-                        }"><canvas id="li-chart-{{ $idx }}"></canvas></div>
+                        }"><canvas x-ref="canvas" id="li-chart-{{ $idx }}"></canvas></div>
                     </div>
                 </div>
 
@@ -866,7 +882,7 @@
             </div>
 
 
-@elseif ($activeReportIntegrationId === 'ga4' || $activeReportIntegrationId === 'overview')
+@elseif ($activeReportIntegrationId === 'ga4')
 @php
     $reportSets = [];
     $baseData = $activeReportData ?? [];
@@ -1503,13 +1519,27 @@
                             @endphp
                             @forelse ($geoData as $i => $geo) 
                                 @php
-                                    $flagCode = strtolower($geo['code'] ?? 'us');
+                                    $rawCode = trim(strtolower($geo['code'] ?? ''));
+                                    $isValidIso = preg_match('/^[a-z]{2}$/', $rawCode) && $rawCode !== 'zz';
+                                    $flagCode = $isValidIso ? $rawCode : null;
                                 @endphp
                                 <tr class="border-b border-slate-200 last:border-0" x-show="showAll || <?php echo $i; ?> < 5" x-transition>
                                     <td class="py-2.5 text-slate-400 font-medium">{{ $i + 1 }}</td>
                                     <td class="py-2.5 font-medium flex items-center gap-2">
-                                        <img src="https://flagcdn.com/w20/{{ $flagCode }}.png" alt="flag" class="w-4 h-auto shadow-sm">
-                                        <span class="truncate max-w-[100px]">{{ $geo['country'] ?? 'United States' }}</span>
+                                        @if($flagCode)
+                                            <img src="https://flagcdn.com/w20/{{ $flagCode }}.png" 
+                                                 alt="flag" 
+                                                 class="w-4 h-auto shadow-sm inline-block"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                            <svg class="w-4 h-4 text-slate-400 hidden shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @else
+                                            <svg class="w-4 h-4 text-slate-400 inline-block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @endif
+                                        <span class="truncate max-w-[100px]">{{ $geo['country'] ?? 'Unknown' }}</span>
                                     </td>
                                     <td class="py-2.5 text-right font-medium">{{ number_format($geo['active_users'] ?? 0) }}</td>
                                     <td class="py-2.5 text-right font-medium">{{ number_format($geo['sessions'] ?? 0) }}</td>

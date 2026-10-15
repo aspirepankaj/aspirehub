@@ -1,24 +1,24 @@
 @php
-    $modalClient = $client ?? $this->client ?? null;
-    $modalWebsite = $website ?? $this->website ?? null;
+    $modalClient = $client ?? (isset($this) ? ($this->client ?? null) : null);
+    $modalWebsite = $website ?? (isset($this) ? ($this->website ?? null) : null);
 
-    if ((!$modalClient || !$modalWebsite) && method_exists($this, 'getActiveClientAndWebsite')) {
+    if ((!$modalClient || !$modalWebsite) && isset($this) && method_exists($this, 'getActiveClientAndWebsite')) {
         [$activeC, $activeW] = $this->getActiveClientAndWebsite();
         $modalClient = $modalClient ?? $activeC;
         $modalWebsite = $modalWebsite ?? $activeW;
     }
 
-    if (!$modalClient && !empty($this->clientId)) {
+    if (!$modalClient && isset($this) && !empty($this->clientId)) {
         $modalClient = \App\Modules\CRM\Clients\Models\Client::with('user')->find($this->clientId);
     }
-    if (!$modalWebsite && !empty($this->websiteId)) {
+    if (!$modalWebsite && isset($this) && !empty($this->websiteId)) {
         $modalWebsite = \App\Modules\CRM\Websites\Models\Website::find($this->websiteId);
     }
 
-    $activeFrom = !empty($this->dateFrom) ? $this->dateFrom : ($dateFrom ?? \Carbon\Carbon::now()->subDays(28)->format('Y-m-d'));
-    $activeTo = !empty($this->dateTo) ? $this->dateTo : ($dateTo ?? \Carbon\Carbon::now()->subDays(1)->format('Y-m-d'));
-    $activeCFrom = !empty($this->compareDateFrom) ? $this->compareDateFrom : ($compareDateFrom ?? '');
-    $activeCTo = !empty($this->compareDateTo) ? $this->compareDateTo : ($compareDateTo ?? '');
+    $activeFrom = !empty($dateFrom) ? $dateFrom : (isset($this) && !empty($this->dateFrom) ? $this->dateFrom : \Carbon\Carbon::now()->subDays(28)->format('Y-m-d'));
+    $activeTo = !empty($dateTo) ? $dateTo : (isset($this) && !empty($this->dateTo) ? $this->dateTo : \Carbon\Carbon::now()->subDays(1)->format('Y-m-d'));
+    $activeCFrom = !empty($compareDateFrom) ? $compareDateFrom : (isset($this) && !empty($this->compareDateFrom) ? $this->compareDateFrom : '');
+    $activeCTo = !empty($compareDateTo) ? $compareDateTo : (isset($this) && !empty($this->compareDateTo) ? $this->compareDateTo : '');
 
     $previewRoute = ($modalClient && $modalWebsite) ? route('marketing.report.pdf.preview', [
         'client' => $modalClient->id,
@@ -29,9 +29,9 @@
         'website' => $modalWebsite->id,
     ]) : '';
 
-    $defaultEmail = !empty($this->reportRecipientEmail) ? $this->reportRecipientEmail : ($modalClient->user->email ?? '');
+    $defaultEmail = isset($this) && !empty($this->reportRecipientEmail) ? $this->reportRecipientEmail : ($modalClient->user->email ?? '');
     
-    $monthName = \Carbon\Carbon::parse(!empty($this->dateFrom) ? $this->dateFrom : now())->format('F Y');
+    $monthName = \Carbon\Carbon::parse(!empty($activeFrom) ? $activeFrom : now())->format('F Y');
     $subject = "Monthly SEO & Marketing Report - {$monthName}";
     if (!empty($activeCFrom)) {
         $compareMonthName = \Carbon\Carbon::parse($activeCFrom)->format('F Y');
@@ -40,7 +40,7 @@
     if ($modalWebsite) {
         $subject .= " - {$modalWebsite->site_name}";
     }
-    $defaultSubject = !empty($this->reportEmailSubject) ? $this->reportEmailSubject : $subject;
+    $defaultSubject = isset($this) && !empty($this->reportEmailSubject) ? $this->reportEmailSubject : $subject;
 @endphp
 
 <div data-preview-route="{{ $previewRoute }}"
@@ -100,15 +100,6 @@
         }
         if (!this.subjectInput || this.subjectInput.startsWith('Monthly SEO & Marketing Report -')) {
             this.subjectInput = dynSubject;
-        }
-        
-        if ($wire) {
-            if (!$wire.reportRecipientEmail && this.emailInput) {
-                $wire.set('reportRecipientEmail', this.emailInput, false);
-            }
-            if (!$wire.reportEmailSubject && this.subjectInput) {
-                $wire.set('reportEmailSubject', this.subjectInput, false);
-            }
         }
 
         this.isLoadingPdf = true;
@@ -316,8 +307,7 @@
                             </label>
                             <input type="email" 
                                    x-model="emailInput"
-                                   @input="$wire && $wire.set('reportRecipientEmail', emailInput, false)"
-                                   wire:model.defer="reportRecipientEmail" 
+                                   wire:model="reportRecipientEmail" 
                                    required
                                    placeholder="client@company.com" 
                                    class="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none dark:text-slate-200 font-medium text-slate-800" />
@@ -331,8 +321,7 @@
                             </label>
                             <input type="text" 
                                    x-model="subjectInput"
-                                   @input="$wire && $wire.set('reportEmailSubject', subjectInput, false)"
-                                   wire:model.defer="reportEmailSubject" 
+                                   wire:model="reportEmailSubject" 
                                    required
                                    placeholder="Monthly SEO & Marketing Report..." 
                                    class="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none dark:text-slate-200 font-medium text-slate-800" />
@@ -345,8 +334,7 @@
                                 Personal Note / Highlights <span class="text-slate-400 font-normal">(Optional)</span>
                             </label>
                             <textarea x-model="messageInput"
-                                      @input="$wire && $wire.set('reportEmailMessage', messageInput, false)"
-                                      wire:model.defer="reportEmailMessage" 
+                                      wire:model="reportEmailMessage" 
                                       rows="3" 
                                       placeholder="Add key observations or congratulations on keyword jumps..." 
                                       class="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none dark:text-slate-200 resize-none font-normal"></textarea>

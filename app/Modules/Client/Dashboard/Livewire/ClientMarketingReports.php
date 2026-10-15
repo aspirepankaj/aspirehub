@@ -21,27 +21,26 @@ class ClientMarketingReports extends Component
     public ?int $selectedWebsiteId = null;
     public string $activeReportIntegrationId = 'overview';
     
-    // Loaded reports
-    public array $activeReportData = [];
-    public array $ga4Data = [];
-    public array $gscData = [];
-    public array $youtubeData = [];
-    public array $keywordData = [];
-    public array $gtmData = [];
-    public array $gbpData = [];
-    public array $gadsData = [];
-    public array $facebookData = [];
-    public array $linkedinData = [];
+    // Loaded reports (protected so Livewire does NOT serialize 500KB+ JSON state across requests)
+    protected array $activeReportData = [];
+    protected array $ga4Data = [];
+    protected array $gscData = [];
+    protected array $youtubeData = [];
+    protected array $keywordData = [];
+    protected array $gtmData = [];
+    protected array $gbpData = [];
+    protected array $gadsData = [];
+    protected array $facebookData = [];
+    protected array $linkedinData = [];
     
     // Comparison reports
-    public array $compareGa4Data = [];
-    public array $compareGscData = [];
-    public array $compareYoutubeData = [];
-    public array $compareKeywordData = [];
-    public array $compareGbpData = [];
-    public array $compareGadsData = [];
-    public array $compareFacebookData = [];
-    public array $compareLinkedinData = [];
+    protected array $compareGa4Data = [];
+    protected array $compareGscData = [];
+    protected array $compareYoutubeData = [];
+    protected array $compareKeywordData = [];
+    protected array $compareGbpData = [];
+    protected array $compareGadsData = [];
+    protected array $compareFacebookData = [];
     
     // Dropdown list holders
     public $websites = [];
@@ -126,7 +125,19 @@ class ClientMarketingReports extends Component
         }
 
         $this->integrations = WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+            ->where('status', 'connected')
             ->get()
+            ->filter(function ($item) {
+                // Integrations that require a specific property / page / site must have property_id selected
+                $requiresProperty = in_array($item->integration_type, ['ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'linkedin']);
+                if ($requiresProperty) {
+                    $propId = $item->auth_credentials['property_id'] ?? ($item->api_credentials['organization_id'] ?? ($item->account_identifier ?? null));
+                    if (empty($propId)) {
+                        return false;
+                    }
+                }
+                return true;
+            })
             ->keyBy('integration_type')
             ->toArray();
 
@@ -173,64 +184,73 @@ class ClientMarketingReports extends Component
                 $websiteFolder = 'site-' . $website->id;
             }
 
-            // Load data filtered by date range
-            $this->ga4Data = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $this->dateFrom, $this->dateTo);
-            $this->gscData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $this->dateFrom, $this->dateTo);
-            $this->youtubeData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $this->dateFrom, $this->dateTo);
-            $this->keywordData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->dateFrom, $this->dateTo);
-            $this->gbpData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->dateFrom, $this->dateTo);
-            $this->gadsData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->dateFrom, $this->dateTo);
-            $this->facebookData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
-            $this->linkedinData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $this->dateFrom, $this->dateTo);
-
-            // Load comparison data
-            if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) {
-                $this->compareGa4Data = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $this->compareDateFrom, $this->compareDateTo);
-                $this->compareGscData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gsc', $this->compareDateFrom, $this->compareDateTo);
-                $this->compareYoutubeData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'youtube', $this->compareDateFrom, $this->compareDateTo);
-                $this->compareKeywordData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'keyword', $this->compareDateFrom, $this->compareDateTo);
-                $this->compareGbpData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->compareDateFrom, $this->compareDateTo);
-                $this->compareGadsData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->compareDateFrom, $this->compareDateTo);
-                $this->compareFacebookData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $this->compareDateFrom, $this->compareDateTo);
-                $this->compareLinkedinData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $this->compareDateFrom, $this->compareDateTo);
+            // Optimize loading:
+            // 1. If a specific tab is clicked, ONLY load that tab's data and completely skip all other integrations.
+            // 2. If overview is active, only load connected integrations with $fetchDefaultCompare = false to make it fast.
+            if ($this->activeReportIntegrationId === 'overview') {
+                $connected = array_keys($this->integrations);
+                
+                if (in_array('ga4', $connected)) {
+                    $this->ga4Data = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'ga4', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('gsc', $connected)) {
+                    $this->gscData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gsc', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('youtube', $connected)) {
+                    $this->youtubeData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'youtube', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('keyword', $connected)) {
+                    $this->keywordData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'keyword', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('gbp', $connected)) {
+                    $this->gbpData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gbp', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('gads', $connected)) {
+                    $this->gadsData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gads', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('facebook', $connected)) {
+                    $this->facebookData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('linkedin', $connected)) {
+                    $this->linkedinData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'linkedin', $this->dateFrom, $this->dateTo);
+                }
+                if (in_array('gtm', $connected)) {
+                    $this->gtmData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gtm', $this->dateFrom, $this->dateTo);
+                }
+                $this->activeReportData = [];
             } else {
-                $this->compareGa4Data = [];
-                $this->compareGscData = [];
-                $this->compareYoutubeData = [];
-                $this->compareKeywordData = [];
-                $this->compareGbpData = [];
-                $this->compareGadsData = [];
-                $this->compareFacebookData = [];
-                $this->compareLinkedinData = [];
-            }
+                $tab = $this->activeReportIntegrationId;
+                
+                // Reset all other integrations data to keep Livewire state lightweight and fast
+                $this->ga4Data = [];
+                $this->gscData = [];
+                $this->youtubeData = [];
+                $this->keywordData = [];
+                $this->gbpData = [];
+                $this->gadsData = [];
+                $this->facebookData = [];
+                $this->linkedinData = [];
+                $this->gtmData = [];
 
-            // Set activeReportData if looking at specific tab
-            if ($this->activeReportIntegrationId === 'ga4' || $this->activeReportIntegrationId === 'overview') {
-                $this->activeReportData = $this->ga4Data;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGa4Data;
-            } elseif ($this->activeReportIntegrationId === 'gsc') {
-                $this->activeReportData = $this->gscData;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGscData;
-            } elseif ($this->activeReportIntegrationId === 'youtube') {
-                $this->activeReportData = $this->youtubeData;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareYoutubeData;
-            } elseif ($this->activeReportIntegrationId === 'keyword') {
-                $this->activeReportData = $this->keywordData;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareKeywordData;
-            } elseif ($this->activeReportIntegrationId === 'gtm') {
-                $this->activeReportData = $this->gtmData;
-            } elseif ($this->activeReportIntegrationId === 'gbp') {
-                $this->activeReportData = $this->gbpData;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGbpData;
-            } elseif ($this->activeReportIntegrationId === 'gads') {
-                $this->activeReportData = $this->gadsData;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareGadsData;
-            } elseif ($this->activeReportIntegrationId === 'facebook') {
-                $this->activeReportData = $this->facebookData;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareFacebookData;
-            } elseif ($this->activeReportIntegrationId === 'linkedin') {
-                $this->activeReportData = $this->linkedinData;
-                if (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) $this->activeReportData['compare_data'] = $this->compareLinkedinData;
+                $hasCompareDates = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
+                $activeData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $tab, $this->dateFrom, $this->dateTo, false);
+
+                if ($hasCompareDates) {
+                    $compareData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $tab, $this->compareDateFrom, $this->compareDateTo, false);
+                    $activeData['compare_data'] = $compareData;
+                }
+
+                $this->activeReportData = $activeData;
+
+                if ($tab === 'ga4') $this->ga4Data = $activeData;
+                elseif ($tab === 'gsc') $this->gscData = $activeData;
+                elseif ($tab === 'youtube') $this->youtubeData = $activeData;
+                elseif ($tab === 'keyword') $this->keywordData = $activeData;
+                elseif ($tab === 'gbp') $this->gbpData = $activeData;
+                elseif ($tab === 'gads') $this->gadsData = $activeData;
+                elseif ($tab === 'facebook') $this->facebookData = $activeData;
+                elseif ($tab === 'linkedin') $this->linkedinData = $activeData;
+                elseif ($tab === 'gtm') $this->gtmData = $activeData;
             }
         } catch (\Exception $e) {
             Log::error('Error loading client marketing report JSON: ' . $e->getMessage());
@@ -379,7 +399,23 @@ class ClientMarketingReports extends Component
 
     public function render()
     {
-        return view('modules.client.dashboard.client-marketing-reports')->layoutData(['title' => 'Marketing Reports']);
+        // If data hasn't been loaded in this request lifecycle, load it
+        if (empty($this->activeReportData) && empty($this->ga4Data) && empty($this->facebookData) && empty($this->linkedinData) && empty($this->gscData) && empty($this->youtubeData) && empty($this->keywordData) && empty($this->gbpData) && empty($this->gadsData)) {
+            $this->loadReportData();
+        }
+
+        return view('modules.client.dashboard.client-marketing-reports', [
+            'activeReportData' => $this->activeReportData,
+            'ga4Data' => $this->ga4Data,
+            'gscData' => $this->gscData,
+            'youtubeData' => $this->youtubeData,
+            'keywordData' => $this->keywordData,
+            'gtmData' => $this->gtmData,
+            'gbpData' => $this->gbpData,
+            'gadsData' => $this->gadsData,
+            'facebookData' => $this->facebookData,
+            'linkedinData' => $this->linkedinData,
+        ])->layoutData(['title' => 'Marketing Reports']);
     }
 }
 

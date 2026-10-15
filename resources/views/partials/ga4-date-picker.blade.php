@@ -1,12 +1,12 @@
 <div wire:ignore x-data="{
     open: false,
-    dateFrom: @entangle('dateFrom').live,
-    dateTo: @entangle('dateTo').live,
-    compareDateFrom: @entangle('compareDateFrom').live,
-    compareDateTo: @entangle('compareDateTo').live,
-    includeTodayLive: @entangle('includeToday').live,
-    compareFormatLive: @entangle('compareFormat').live,
-    datePresetLive: @entangle('datePreset').live,
+    dateFrom: @entangle('dateFrom'),
+    dateTo: @entangle('dateTo'),
+    compareDateFrom: @entangle('compareDateFrom'),
+    compareDateTo: @entangle('compareDateTo'),
+    includeTodayLive: @entangle('includeToday'),
+    compareFormatLive: @entangle('compareFormat'),
+    datePresetLive: @entangle('datePreset'),
     
     enableCompare: false,
     
@@ -316,14 +316,6 @@
 
     applySelection() {
         if (this.tempStart && this.tempEnd) {
-            this.dateFrom = this.tempStart;
-            this.dateTo = this.tempEnd;
-            this.compareDateFrom = this.enableCompare ? this.tempCompareStart : '';
-            this.compareDateTo = this.enableCompare ? this.tempCompareEnd : '';
-            this.includeTodayLive = this.includeToday;
-            this.compareFormatLive = this.format;
-            this.datePresetLive = this.selectedPreset;
-            
             $wire.applyDateFilter(
                 this.tempStart,
                 this.tempEnd,

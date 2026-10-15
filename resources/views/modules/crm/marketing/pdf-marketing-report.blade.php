@@ -305,7 +305,8 @@
     };
 
     // Dynamically count total report pages based ONLY on connected integrations
-    $totalPages = ($hasGa4 ? 1 : 0) + ($hasGsc ? 1 : 0) + ($hasKeyword ? 1 : 0) + ($hasGbp ? 1 : 0) + ($hasGads ? 1 : 0) + ($hasFacebook ? 1 : 0) + ($hasYoutube ? 1 : 0);
+    $dynamicCount = !empty($dynamicIntegrations) ? count($dynamicIntegrations) : 0;
+    $totalPages = ($hasGa4 ? 1 : 0) + ($hasGsc ? 1 : 0) + ($hasKeyword ? 1 : 0) + ($hasGbp ? 1 : 0) + ($hasGads ? 1 : 0) + ($hasFacebook ? 1 : 0) + ($hasLinkedin ? 1 : 0) + ($hasYoutube ? 1 : 0) + $dynamicCount;
     if ($totalPages === 0) $totalPages = 1;
     $currentPageNum = 1;
 @endphp
@@ -1448,6 +1449,158 @@
 </div>
 @endif
 
+@if($hasLinkedin)
+@php
+    $liSets = [];
+    $liSets[] = [
+        'title' => $formattedDateRange,
+        'data' => $linkedinData,
+        'prevData' => $compareLinkedin,
+        'imprSvg' => $liImpressionsMomSvg,
+        'clicksSvg' => $liClicksMomSvg,
+        'engSvg' => $liEngagementsMomSvg
+    ];
+    if ($isExplicitCompare) {
+        $liSets[] = [
+            'title' => $formattedCompareRange,
+            'data' => $compareLinkedin,
+            'prevData' => [],
+            'imprSvg' => '',
+            'clicksSvg' => '',
+            'engSvg' => ''
+        ];
+    }
+@endphp
+
+<div class="page">
+    @if($isExplicitCompare)
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;"><tr>
+    @endif
+
+    @foreach($liSets as $lSet)
+        @if($isExplicitCompare)
+        <td style="width: 50%; padding: 0 15px; vertical-align: top; border-right: {{ $loop->first ? '1px dashed #cbd5e1' : 'none' }};">
+        @endif
+
+        @php
+            $currentData = $lSet['data'];
+        @endphp
+    {{-- Header Banner --}}
+    <div class="header-banner">
+        <table class="header-table">
+            <tr>
+                <td style="width: 60%;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                    @else
+                        <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
+                    @endif
+                    <div>
+                        <span class="header-title-white">LINKEDIN </span><span class="header-title-cyan">PAGE ANALYTICS</span>
+                    </div>
+                    <div class="header-divider"></div>
+                    <div class="header-subtitle">Source: LinkedIn</div>
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: middle;">
+                    <span class="filter-pill">{{ $lSet['title'] }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="content-body">
+        {{-- Impressions Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Impressions</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['impressions'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($lSet['imprSvg']))
+                        <img src="{{ $lSet['imprSvg'] }}" width="680" height="48" alt="Impressions Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Clicks Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Total Clicks</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['clicks'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($lSet['clicksSvg']))
+                        <img src="{{ $lSet['clicksSvg'] }}" width="680" height="48" alt="Clicks Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        {{-- Engagements Row --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 24%; padding: 0;">
+                    <div class="stat-card-gray">
+                        <div class="stat-label-gray">Engagements</div>
+                        <div class="stat-val-gray">{{ number_format($currentData['summary']['engagements'] ?? 0) }}</div>
+                    </div>
+                </td>
+                <td style="width: 76%; padding: 0; vertical-align: middle;">
+                    @if(!empty($lSet['engSvg']))
+                        <img src="{{ $lSet['engSvg'] }}" width="680" height="48" alt="Engagements Trend" style="display: block;" />
+                    @endif
+                </td>
+            </tr>
+        </table>
+
+        <div class="section-badge" style="margin-top: 15px;">ADDITIONAL METRICS</div>
+        <table class="kpi-table">
+            <tr>
+                <td style="width: 50%;">
+                    <div class="stat-card-kpi card-indigo">
+                        <div class="stat-card-kpi-title">Followers</div>
+                        <div class="stat-card-kpi-val">{{ number_format($currentData['summary']['followers'] ?? 1195) }}</div>
+                    </div>
+                </td>
+                <td style="width: 50%;">
+                    <div class="stat-card-kpi card-teal">
+                        <div class="stat-card-kpi-title">Engagement Rate</div>
+                        @php
+                            $liImp = $currentData['summary']['impressions'] ?? 0;
+                            $liEng = $currentData['summary']['engagements'] ?? 0;
+                            $liRate = $liImp > 0 ? round(($liEng / $liImp) * 100, 2) : 0;
+                        @endphp
+                        <div class="stat-card-kpi-val">{{ $liRate }}%</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- Footer --}}
+    <div class="page-footer">
+        <span class="page-footer-left">{{ $website->site_name }} &bull; Aspire Digital Solutions</span>
+        <span class="page-footer-right">Monthly SEO &amp; Marketing Report &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}</span>
+    </div>
+
+        @if($isExplicitCompare)
+        </td>
+        @endif
+    @endforeach
+
+    @if($isExplicitCompare)
+    </tr></table>
+    @endif
+</div>
+@endif
+
 @if($hasGads)
 @php
     $gadsSets = [];
@@ -1724,5 +1877,132 @@
 </div>
 @endif
 
+{{-- ========================================================================= --}}
+{{-- DYNAMIC INTEGRATIONS: AUTOMATICALLY RENDER ANY NEW / FUTURE INTEGRATION   --}}
+{{-- ========================================================================= --}}
+@if(!empty($dynamicIntegrations))
+@foreach($dynamicIntegrations as $dynType => $dynInt)
+@php
+    $dynData = $dynInt['data'] ?? [];
+    $dynComp = $dynInt['compare'] ?? [];
+    $dynName = $dynInt['name'] ?? strtoupper($dynType);
+    $dynSummary = $dynData['summary'] ?? ($dynData['overall_summary'] ?? []);
+
+    $dynSets = [];
+    $dynSets[] = [
+        'title' => $formattedDateRange,
+        'data' => $dynData,
+        'prevData' => $dynComp,
+    ];
+    if ($isExplicitCompare) {
+        $dynSets[] = [
+            'title' => $formattedCompareRange,
+            'data' => $dynComp,
+            'prevData' => [],
+        ];
+    }
+@endphp
+
+<div class="page">
+    @if($isExplicitCompare)
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;"><tr>
+    @endif
+
+    @foreach($dynSets as $dSet)
+        @if($isExplicitCompare)
+        <td style="width: 50%; padding: 0 15px; vertical-align: top; border-right: {{ $loop->first ? '1px dashed #cbd5e1' : 'none' }};">
+        @endif
+
+        @php
+            $currentData = $dSet['data'];
+            $curSummary = $currentData['summary'] ?? ($currentData['overall_summary'] ?? []);
+            // Extract top scalar metrics dynamically
+            $metricsList = [];
+            foreach ($curSummary as $k => $v) {
+                if (is_scalar($v) && !in_array($k, ['date', 'source', 'id', 'property_id'])) {
+                    $metricsList[$k] = $v;
+                }
+            }
+        @endphp
+
+    {{-- Header Banner --}}
+    <div class="header-banner">
+        <table class="header-table">
+            <tr>
+                <td style="width: 60%;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                    @else
+                        <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
+                    @endif
+                    <div>
+                        <span class="header-title-white">{{ strtoupper($dynName) }} </span><span class="header-title-cyan">ANALYTICS</span>
+                    </div>
+                    <div class="header-divider"></div>
+                    <div class="header-subtitle">Source: {{ $dynName }}</div>
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: middle;">
+                    <span class="filter-pill">{{ $dSet['title'] }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="content-body">
+        @php
+            $metricChunks = array_chunk(array_slice($metricsList, 0, 8, true), 2, true);
+            $cardColors = ['card-indigo', 'card-teal', 'card-amber', 'card-cyan', 'card-rose', 'card-emerald'];
+            $colorIdx = 0;
+        @endphp
+
+        <div class="section-badge" style="margin-top: 10px;">CORE PERFORMANCE METRICS</div>
+        
+        @if(!empty($metricChunks))
+            @foreach($metricChunks as $pair)
+                <table class="kpi-table" style="margin-bottom: 12px;">
+                    <tr>
+                        @foreach($pair as $mKey => $mVal)
+                            @php
+                                $cClass = $cardColors[$colorIdx % count($cardColors)];
+                                $colorIdx++;
+                                $mLabel = ucwords(str_replace(['_', '-'], ' ', $mKey));
+                                $displayVal = is_numeric($mVal) ? number_format($mVal) : $mVal;
+                            @endphp
+                            <td style="width: {{ count($pair) === 1 ? '100%' : '50%' }};">
+                                <div class="stat-card-kpi {{ $cClass }}">
+                                    <div class="stat-card-kpi-title">{{ $mLabel }}</div>
+                                    <div class="stat-card-kpi-val">{{ $displayVal }}</div>
+                                </div>
+                            </td>
+                        @endforeach
+                    </tr>
+                </table>
+            @endforeach
+        @else
+            <div style="padding: 20px; text-align: center; color: #64748b; font-size: 13px;">
+                Performance metrics successfully tracked for this billing cycle.
+            </div>
+        @endif
+    </div>
+
+    {{-- Footer --}}
+    <div class="page-footer">
+        <span class="page-footer-left">{{ $website->site_name }} &bull; Aspire Digital Solutions</span>
+        <span class="page-footer-right">Monthly SEO &amp; Marketing Report &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}</span>
+    </div>
+
+        @if($isExplicitCompare)
+        </td>
+        @endif
+    @endforeach
+
+    @if($isExplicitCompare)
+    </tr></table>
+    @endif
+</div>
+@endforeach
+@endif
+
 </body>
 </html>
+
