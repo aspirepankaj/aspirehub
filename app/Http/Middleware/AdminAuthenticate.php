@@ -23,9 +23,14 @@ class AdminAuthenticate
             return redirect()->route('admin.login');
         }
 
-        // Allow access if user is currently being impersonated
+        // If user is currently impersonating a non-admin (e.g. client or staff), redirect to their portal instead of letting browser back open admin pages
         if (session()->has('impersonator_id')) {
-            return $next($request);
+            if ($user->client && $user->client->status === 'active') {
+                return redirect()->route('client.dashboard');
+            }
+            if ($user->staff && $user->staff->status === 'active') {
+                return redirect()->route('staff.dashboard');
+            }
         }
 
         // 2. If logged in but not an active admin, redirect to their correct dashboard

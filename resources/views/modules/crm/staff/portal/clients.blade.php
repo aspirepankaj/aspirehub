@@ -359,6 +359,18 @@
                                         'hoverShadow' => 'hover:shadow-blue-600/5',
                                         'svg' => '<svg class="w-5 h-5 text-blue-600 dark:text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>'
                                     ],
+                                    'linkedin' => [
+                                        'iconBg' => 'bg-sky-50 dark:bg-sky-950/20',
+                                        'hoverBorder' => 'hover:border-sky-600/35 dark:hover:border-sky-600/25',
+                                        'hoverShadow' => 'hover:shadow-sky-600/5',
+                                        'svg' => '<svg class="w-5 h-5 text-sky-600 dark:text-sky-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>'
+                                    ],
+                                    'gbp' => [
+                                        'iconBg' => 'bg-blue-50 dark:bg-blue-950/20',
+                                        'hoverBorder' => 'hover:border-blue-500/35 dark:hover:border-blue-500/25',
+                                        'hoverShadow' => 'hover:shadow-blue-500/5',
+                                        'svg' => '<svg class="w-5 h-5 text-blue-500 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                                    ],
                                     default => [
                                         'iconBg' => 'bg-slate-50 dark:bg-slate-800/40',
                                         'hoverBorder' => 'hover:border-indigo-500/35 dark:hover:border-indigo-500/25',

@@ -23,9 +23,11 @@ class StaffAuthenticate
             return redirect()->route('staff.login');
         }
 
-        // Allow access if user is currently being impersonated
+        // If user is currently impersonating a client or non-staff, redirect to their portal instead of letting browser back open staff pages
         if (session()->has('impersonator_id')) {
-            return $next($request);
+            if ($user->client && $user->client->status === 'active') {
+                return redirect()->route('client.dashboard');
+            }
         }
 
         // 2. If logged in but not active staff, redirect to their correct dashboard

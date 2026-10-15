@@ -1064,6 +1064,12 @@
                                     'hoverShadow' => 'hover:shadow-sky-600/5',
                                     'svg' => '<svg class="w-5 h-5 text-sky-600 dark:text-sky-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>'
                                 ],
+                                'gbp' => [
+                                    'iconBg' => 'bg-blue-50 dark:bg-blue-950/20',
+                                    'hoverBorder' => 'hover:border-blue-500/35 dark:hover:border-blue-500/25',
+                                    'hoverShadow' => 'hover:shadow-blue-500/5',
+                                    'svg' => '<svg class="w-5 h-5 text-blue-500 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                                ],
                                 default => [
                                     'iconBg' => 'bg-slate-50 dark:bg-slate-800/40',
                                     'hoverBorder' => 'hover:border-indigo-500/35 dark:hover:border-indigo-500/25',
@@ -1960,79 +1966,136 @@
                                             </div>
 
                                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-                                                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
-                                                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Followers By Job Title
-                                                    </div>
-                                                    <div class="overflow-x-auto">
-                                                        <table class="w-full text-sm text-left">
-                                                            <thead>
-                                                                <tr class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
-                                                                    <th class="py-2 font-bold">Job Title</th>
-                                                                    <th class="py-2 text-right font-bold">Count</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach (array_slice($reportDataScope['followers_by_job'] ?? [], 0, 5) as $job)
-                                                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                        <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $job['name'] ?? '' }}">{{ $job['name'] ?? '' }}</td>
-                                                                        <td class="py-2.5 text-right font-bold text-sky-600 dark:text-sky-400">{{ number_format($job['count'] ?? 0) }}</td>
+                                                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+                                                    <div>
+                                                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                                                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Followers By Job Title
+                                                        </div>
+                                                        <div class="overflow-x-auto">
+                                                            <table class="w-full text-sm text-left">
+                                                                <thead>
+                                                                    <tr class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
+                                                                        <th class="py-2 font-bold">Job Title</th>
+                                                                        <th class="py-2 text-right font-bold">Count</th>
                                                                     </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach (array_slice($reportDataScope['followers_by_job'] ?? [], 0, 5) as $job)
+                                                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                                                            <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $job['name'] ?? '' }}">{{ $job['name'] ?? '' }}</td>
+                                                                            <td class="py-2.5 text-right font-bold text-sky-600 dark:text-sky-400">{{ number_format($job['count'] ?? 0) }}</td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 
-                                                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+                                                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
                                                     <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
                                                         <div class="w-1.5 h-1.5 rounded-full bg-sky-500"></div> Follower Demographics
                                                     </div>
-                                                    <div class="flex flex-col items-center">
-                                                        @php
-                                                            $demoItems = [];
-                                                            foreach (array_slice($reportDataScope['demographics'] ?? [], 0, 5) as $item) {
-                                                                $demoItems[] = [
-                                                                    'label' => $item['region'] ?? 'Unknown',
-                                                                    'value' => (float) str_replace('%', '', $item['percentage'] ?? '0')
-                                                                ];
-                                                            }
-                                                        @endphp
-                                                        <div class="relative w-40 h-40 mb-6">
-                                                            <canvas id="li-demo-chart-{{ $idx }}" x-data="{
+                                                    @php
+                                                        $totalFollowers = (int)($reportDataScope['summary']['followers'] ?? 0);
+                                                        $demoRaw = $reportDataScope['demographics'] ?? [];
+                                                        $donutColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#a855f7', '#06b6d4', '#64748b'];
+                                                        $colorClasses = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-red-500', 'bg-purple-500', 'bg-cyan-500', 'bg-slate-500'];
+
+                                                        $demoItems = [];
+                                                        foreach (array_slice($demoRaw, 0, 7) as $i => $item) {
+                                                            $pct = (float) str_replace('%', '', $item['percentage'] ?? '0');
+                                                            $count = (int) round(($pct / 100) * $totalFollowers);
+                                                            $demoItems[] = [
+                                                                'label' => $item['region'] ?? 'Unknown',
+                                                                'percentage' => $pct,
+                                                                'count' => $count
+                                                            ];
+                                                        }
+                                                    @endphp
+                                                    @if(!empty($demoItems))
+                                                        <div class="flex flex-col sm:flex-row items-center justify-between gap-5 my-auto py-1">
+                                                            <!-- Left: Donut Chart with Center Total -->
+                                                            <div class="relative w-40 h-40 shrink-0" wire:ignore wire:key="li-demo-wrap-adm-{{ $idx }}-{{ md5(json_encode($demoItems)) }}" x-data="{
                                                                 init() {
-                                                                    const ctx = this.$el.getContext('2d');
+                                                                    if (!this.$refs.canvas) return;
+                                                                    const ctx = this.$refs.canvas.getContext('2d');
                                                                     let items = {{ json_encode($demoItems) }};
-                                                                    if (items.length > 0) {
-                                                                        let labels = items.map(e => e.label);
-                                                                        let data = items.map(e => e.value);
-                                                                        let colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#a78bfa'];
-                                                                        new Chart(ctx, {
-                                                                            type: 'doughnut',
-                                                                            data: {
-                                                                                labels: labels,
-                                                                                datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
-                                                                            },
-                                                                            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
-                                                                        });
-                                                                    }
+                                                                    let labels = items.map(e => e.label);
+                                                                    let data = items.map(e => e.count);
+                                                                    let colors = {{ json_encode($donutColors) }};
+                                                                    new Chart(ctx, {
+                                                                        type: 'doughnut',
+                                                                        data: {
+                                                                            labels: labels,
+                                                                            datasets: [{
+                                                                                data: data,
+                                                                                backgroundColor: colors.slice(0, data.length),
+                                                                                borderWidth: 0,
+                                                                                hoverOffset: 4
+                                                                            }]
+                                                                        },
+                                                                        options: {
+                                                                            responsive: true,
+                                                                            maintainAspectRatio: false,
+                                                                            cutout: '70%',
+                                                                            plugins: {
+                                                                                legend: { display: false },
+                                                                                tooltip: {
+                                                                                    backgroundColor: '#fff',
+                                                                                    titleColor: '#0f172a',
+                                                                                    bodyColor: '#334155',
+                                                                                    borderColor: '#e2e8f0',
+                                                                                    borderWidth: 1,
+                                                                                    boxPadding: 4,
+                                                                                    callbacks: {
+                                                                                        label: function(context) {
+                                                                                            let val = context.raw || 0;
+                                                                                            let pct = items[context.dataIndex]?.percentage || 0;
+                                                                                            return ' ' + context.label + ': ' + val.toLocaleString() + ' (' + pct + '%)';
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    });
                                                                 }
-                                                            }"></canvas>
-                                                        </div>
-                                                        <div class="flex flex-col gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 w-full pr-4">
-                                                            @php $colors = ['bg-sky-400', 'bg-indigo-400', 'bg-emerald-400', 'bg-yellow-400', 'bg-purple-400']; @endphp
-                                                            @foreach($demoItems as $index => $item)
-                                                                <div class="flex items-center justify-between w-full">
-                                                                    <div class="flex items-center gap-2">
-                                                                        <div class="w-2 h-2 {{ $colors[$index % count($colors)] }} rounded-full"></div>
-                                                                        <span>{{ $item['label'] }}</span>
-                                                                    </div>
-                                                                    <span class="font-bold text-slate-700 dark:text-slate-300">{{ $item['value'] }}%</span>
+                                                            }">
+                                                                <canvas x-ref="canvas" class="relative z-10"></canvas>
+                                                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                                                                    <span class="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none">{{ number_format($totalFollowers) }}</span>
+                                                                    <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-1">Total Followers</span>
                                                                 </div>
-@endforeach
-</div>
-</div>
-</div>
+                                                            </div>
+
+                                                            <!-- Right: Legend with Label, Count & Percentage -->
+                                                            <div class="flex-1 w-full space-y-2.5">
+                                                                @foreach($demoItems as $index => $item)
+                                                                    <div class="flex items-center justify-between text-xs font-medium">
+                                                                        <div class="flex items-center gap-2 flex-1 pr-2 min-w-0">
+                                                                            <span class="w-2 h-2 rounded-full {{ $colorClasses[$index % count($colorClasses)] }} shrink-0"></span>
+                                                                            <span class="text-slate-600 dark:text-slate-300 truncate font-semibold text-[11px]" title="{{ $item['label'] }}">
+                                                                                {{ $item['label'] }}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class="flex items-center gap-3 shrink-0 text-right text-[11px]">
+                                                                            <span class="font-bold text-slate-800 dark:text-slate-200 min-w-[32px]">
+                                                                                {{ number_format($item['count']) }}
+                                                                            </span>
+                                                                            <span class="text-slate-400 dark:text-slate-500 min-w-[34px]">
+                                                                                {{ $item['percentage'] }}%
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <div class="my-auto py-10 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
+                                                            No demographic data available
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                         @endforeach

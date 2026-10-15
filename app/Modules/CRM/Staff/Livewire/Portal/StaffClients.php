@@ -62,7 +62,6 @@ class StaffClients extends Component
     public string $linkedinOrganizationId = '';
     public string $linkedinScopes = 'openid profile email';
 
-    #[Url(as: 'tab')]
     public string $activeTab = 'marketing';
     public string $activeViewTab = 'my_clients'; // 'my_clients' or 'all_clients'
 
@@ -87,7 +86,11 @@ class StaffClients extends Component
             $this->selectedClientId = (int) $id;
         }
         if (request()->has('tab')) {
-            $this->activeTab = (string) request()->get('tab');
+            $requestedTab = (string) request()->get('tab');
+            $validMainTabs = ['marketing', 'websites', 'integrations', 'clickup_tickets', 'maintenance', 'misc', 'overview', 'activity log', 'documents'];
+            if (in_array($requestedTab, $validMainTabs, true)) {
+                $this->activeTab = $requestedTab;
+            }
         }
     }
 

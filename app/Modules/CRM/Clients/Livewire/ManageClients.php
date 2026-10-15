@@ -84,7 +84,6 @@ class ManageClients extends Component
     // Detail view state
     public ?int $selectedClientDetailId = null;
 
-    #[Url(as: 'tab')]
     public string $activeTab = 'marketing';
 
     // Website Integrations state variables
@@ -136,7 +135,11 @@ class ManageClients extends Component
             $this->selectedClientDetailId = (int) $id;
         }
         if (request()->has('tab')) {
-            $this->activeTab = (string) request()->get('tab');
+            $requestedTab = (string) request()->get('tab');
+            $validMainTabs = ['marketing', 'websites', 'integrations', 'clickup_tickets', 'maintenance', 'misc', 'overview', 'activity log', 'documents'];
+            if (in_array($requestedTab, $validMainTabs, true)) {
+                $this->activeTab = $requestedTab;
+            }
         }
     }
 
