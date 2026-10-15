@@ -8,6 +8,13 @@
     @endif
 
     @if ($selectedClientDetailId && $clientDetails)
+        @if (session('success'))
+            <x-admin.alert type="success" class="mb-5" :message="session('success')" />
+        @endif
+        @if (session('error'))
+            <x-admin.alert type="danger" class="mb-5" :message="session('error')" />
+        @endif
+
         {{-- ==========================================
              CLIENT DETAIL DASHBOARD VIEW
              ========================================== --}}
@@ -1319,6 +1326,79 @@
                                         </div>
                                     @endif
                                 @endif
+                                
+                                @if ($integration['id'] === 'linkedin' && $isConnected)
+                                    @if (!$integration['property_id'])
+                                        @php $linkedInPages = $this->getLinkedInPages(); @endphp
+                                        <div class="mt-4 p-3 bg-sky-50/40 dark:bg-sky-950/20 rounded-xl border border-sky-100/50 dark:border-sky-900/30 mb-4" x-data="{ manual: {{ empty($linkedInPages) ? 'true' : 'false' }}, hasVal: false }">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-[10px] font-bold text-sky-650 dark:text-sky-400 block uppercase tracking-wider">Select LinkedIn Page</span>
+                                                @if(!empty($linkedInPages))
+                                                    <button type="button" @click="manual = !manual; hasVal = false" class="text-[10px] text-sky-600 dark:text-sky-400 hover:underline">
+                                                        <span x-show="!manual">Enter ID manually</span>
+                                                        <span x-show="manual">Choose from list</span>
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                            <div x-show="!manual" class="flex gap-2 items-center">
+                                                <select wire:model="selectedPropertyId" x-on:change="hasVal = $event.target.value !== ''" wire:key="linkedin-page-select-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-sky-500 shadow-sm">
+                                                    <option value="">Select Page / Company...</option>
+                                                    @foreach ($linkedInPages as $page)
+                                                        <option value="{{ $page['id'] }}">{{ $page['name'] }} (ID: {{ $page['id'] }})</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveLinkedInPage" wire:key="save-btn-linkedin" class="py-2 px-4 border border-transparent bg-sky-600 hover:bg-sky-700 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
+                                            </div>
+
+                                            <div x-show="manual" class="flex gap-2 items-center">
+                                                <input type="text" wire:model.defer="selectedPropertyId" x-on:input="hasVal = $event.target.value.trim() !== ''" placeholder="e.g. 12345678" wire:key="linkedin-page-input-{{ $integration['id'] }}" class="flex-1 min-w-0 py-2 text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 focus:outline-none focus:ring-1 focus:ring-sky-500 shadow-sm">
+                                                <button type="button" x-show="hasVal" style="display: none;" wire:click="saveLinkedInPage" wire:key="save-btn-linkedin-manual" class="py-2 px-4 border border-transparent bg-sky-600 hover:bg-sky-700 text-white font-medium text-[11px] rounded-lg transition-all shrink-0 active:scale-95 shadow-sm">
+                                                    <span>Save</span>
+                                                </button>
+                                            </div>
+                                            @if(empty($linkedInPages))
+                                                <p class="text-[10px] text-amber-600 dark:text-amber-400 mt-1.5 leading-tight">No organization pages returned via API. Enter your LinkedIn Organization ID manually above.</p>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="mt-3 p-3 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4" x-data="{ editingFollowers: false, followersVal: '{{ $integration['followers'] ?? 1195 }}' }">
+                                            <div class="flex items-center justify-between text-xs mb-2">
+                                                <div class="min-w-0 flex-1 mr-2">
+                                                    <span class="text-slate-455 dark:text-slate-550 font-medium block text-[10px]">LinkedIn Page</span>
+                                                    <span class="font-bold text-slate-755 dark:text-slate-300 truncate block" title="{{ $integration['property_name'] ?? $integration['property_id'] }}">
+                                                        {{ $integration['property_name'] ?? ('Page ID: ' . $integration['property_id']) }}
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-center gap-2 shrink-0">
+                                                    <button type="button" wire:click="clearPropertyId('linkedin')" class="text-slate-400 hover:text-red-500 transition" title="Clear LinkedIn Page">
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="pt-2 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Followers:</span>
+                                                    <span x-show="!editingFollowers" class="text-xs font-bold text-sky-600 dark:text-sky-400">
+                                                        {{ number_format($integration['followers'] ?? 1195) }}
+                                                    </span>
+                                                    <input x-show="editingFollowers" style="display: none;" type="number" x-model="followersVal" class="w-20 px-2 py-0.5 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+                                                </div>
+                                                <div>
+                                                    <button type="button" x-show="!editingFollowers" @click="editingFollowers = true" class="text-[10px] text-sky-600 dark:text-sky-400 hover:underline">Edit</button>
+                                                    <div x-show="editingFollowers" style="display: none;" class="flex items-center gap-1">
+                                                        <button type="button" @click="$wire.saveLinkedInFollowers(followersVal); editingFollowers = false;" class="text-[10px] px-2 py-0.5 bg-sky-600 text-white rounded hover:bg-sky-700">Save</button>
+                                                        <button type="button" @click="editingFollowers = false" class="text-[10px] px-1.5 py-0.5 text-slate-500 hover:text-slate-700">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
                                 </div>
 
                             <!-- Footer Actions -->
@@ -1335,13 +1415,23 @@
                                     </button>
                                 @elseif ($isConfigured)
                                     <!-- Auth stage -->
-                                    <a href="{{ route('admin.integrations.google.redirect', $integration['db_id']) }}"
-                                       class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 text-center flex items-center justify-center">
-                                        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                        </svg>
-                                        Sign in with Google
-                                    </a>
+                                    @if ($integration['id'] === 'linkedin')
+                                        <a href="{{ route('admin.integrations.linkedin.redirect', $integration['db_id']) }}"
+                                           class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-[#0077b5] hover:bg-[#005f93] text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 text-center flex items-center justify-center">
+                                            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                                                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                                            </svg>
+                                            Continue with LinkedIn
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.integrations.google.redirect', $integration['db_id']) }}"
+                                           class="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 text-center flex items-center justify-center">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                            Sign in with Google
+                                        </a>
+                                    @endif
                                     <button type="button" 
                                             wire:click="removeCredentials('{{ $integration['id'] }}')"
                                             wire:confirm="Are you sure you want to remove the credentials for this integration?"
@@ -1445,19 +1535,41 @@
                                     @elseif($activeConfigIntegrationId === 'linkedin')
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">LinkedIn Access Token</label>
-                                                <input type="text" wire:model="linkedinAccessToken" placeholder="AQW..." class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all">
-                                                @error('linkedinAccessToken') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
+                                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">LinkedIn App Client ID</label>
+                                                <input type="text" wire:model="linkedinClientId" placeholder="e.g. 86dksogosn2mxd" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm focus:ring-2 focus:ring-sky-500/50 outline-none transition-all">
+                                                @error('linkedinClientId') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
                                             </div>
                                             <div>
-                                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Organization ID (URN)</label>
-                                                <input type="text" wire:model="linkedinOrganizationId" placeholder="e.g. 12345678" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all">
-                                                @error('linkedinOrganizationId') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
+                                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">LinkedIn App Primary Client Secret</label>
+                                                <input type="password" wire:model="linkedinClientSecret" placeholder="••••••••••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm focus:ring-2 focus:ring-sky-500/50 outline-none transition-all">
+                                                @error('linkedinClientSecret') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">OAuth Scopes</label>
+                                                    <span class="text-[10px] text-slate-400">Match with your app's "OAuth 2.0 scopes"</span>
+                                                </div>
+                                                <input type="text" wire:model="linkedinScopes" placeholder="openid profile email" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-mono focus:ring-2 focus:ring-sky-500/50 outline-none transition-all">
+                                                <div class="flex flex-wrap gap-1.5 mt-2">
+                                                    <button type="button" wire:click="$set('linkedinScopes', 'openid profile email')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-[10px] font-medium text-slate-600 dark:text-slate-300 transition">
+                                                        Standard (Sign In): openid profile email
+                                                    </button>
+                                                    <button type="button" wire:click="$set('linkedinScopes', 'openid profile email w_member_social')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-[10px] font-medium text-slate-600 dark:text-slate-300 transition">
+                                                        + Member Social: w_member_social
+                                                    </button>
+                                                </div>
+                                                @error('linkedinScopes') <span class="text-red-500 text-xs mt-1 block font-semibold">{{ $message }}</span> @enderror
+                                            </div>
+                                            <div class="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                                                <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">Authorized Redirect URL for your LinkedIn App:</span>
+                                                <code class="text-[11px] text-sky-600 dark:text-sky-400 select-all break-all bg-white dark:bg-slate-900 p-1.5 rounded border border-slate-200 dark:border-slate-700 block font-mono">{{ route('admin.integrations.linkedin.callback') }}</code>
+                                                <p class="text-[10px] text-slate-400 mt-1.5">Add this exact URL to your LinkedIn Developer Portal under <strong>Auth &gt; OAuth 2.0 settings &gt; Authorized redirect URLs</strong>.</p>
                                             </div>
                                         </div>
-                                        <div class="mt-4 text-[11px] text-slate-450 leading-relaxed bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/30 dark:border-indigo-900/20 p-3 rounded-xl text-indigo-650 dark:text-indigo-400 font-medium">
-                                            Note: Generate a LinkedIn Developer Token with Organization stats permissions.
+                                        <div class="mt-4 text-[11px] text-slate-450 leading-relaxed bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-900/30 p-3 rounded-xl text-amber-800 dark:text-amber-400 font-medium">
+                                            <strong>Important Tip:</strong> Agar LinkedIn par <em>"Bummer, something went wrong"</em> error aaye, to scopes me sirf <code>openid profile email</code> rakhein (jo ki "Sign In with LinkedIn" product ke sath standard approved rehta hai).
                                         </div>
+
                                     @else
                                         <div class="mb-5">
                                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Google OAuth Credentials (.json)</label>

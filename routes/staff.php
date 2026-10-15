@@ -43,5 +43,8 @@ Route::get('/support/ticket/{ticket}', StaffSupport::class)->name('support.detai
 Route::get('/notifications', \App\Livewire\UserNotificationsPage::class)->name('notifications');
 
 use App\Modules\CRM\Clients\Controllers\GoogleIntegrationController;
+use App\Modules\CRM\Clients\Controllers\LinkedInIntegrationController;
 
 Route::get('/integrations/google/redirect/{id}', [GoogleIntegrationController::class, 'redirect'])->name('integrations.google.redirect');
+Route::get('/integrations/linkedin/redirect/{id}', [LinkedInIntegrationController::class, 'redirect'])->name('integrations.linkedin.redirect');
+

@@ -82,7 +82,13 @@ Route::get('storage/{path}', function ($path) {
 })->where('path', '.*');
 
 use App\Modules\CRM\Clients\Controllers\GoogleIntegrationController;
+use App\Modules\CRM\Clients\Controllers\LinkedInIntegrationController;
 
 Route::get('/admin/integrations/google/callback', [GoogleIntegrationController::class, 'callback'])
     ->middleware(['web'])
     ->name('admin.integrations.google.callback');
+
+Route::get('/admin/integrations/linkedin/callback', [LinkedInIntegrationController::class, 'callback'])
+    ->middleware(['web'])
+    ->name('admin.integrations.linkedin.callback');
+

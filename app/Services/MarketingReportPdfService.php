@@ -73,6 +73,7 @@ class MarketingReportPdfService
         $hasGbp = $integrations->has('gbp');
         $hasGads = $integrations->has('gads');
         $hasFacebook = $integrations->has('facebook');
+        $hasLinkedin = $integrations->has('linkedin');
 
         // Load data
         $ga4Data = $hasGa4 ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'ga4', $dateFrom, $dateTo) : [];
@@ -82,6 +83,7 @@ class MarketingReportPdfService
         $gbpData = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $dateFrom, $dateTo) : [];
         $gadsData = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $dateFrom, $dateTo) : [];
         $facebookData = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $dateFrom, $dateTo) : [];
+        $linkedinData = $hasLinkedin ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $dateFrom, $dateTo) : [];
 
         // Comparison Data (MoM / previous period)
         $compareGa4 = [];
@@ -91,6 +93,7 @@ class MarketingReportPdfService
         $compareGbp = [];
         $compareGads = [];
         $compareFacebook = [];
+        $compareLinkedin = [];
 
         $isExplicitCompare = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
 
@@ -110,6 +113,7 @@ class MarketingReportPdfService
                 $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $computedCompareFrom, $computedCompareTo) : [];
                 $compareGads = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $computedCompareFrom, $computedCompareTo) : [];
                 $compareFacebook = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $computedCompareFrom, $computedCompareTo) : [];
+                $compareLinkedin = $hasLinkedin ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $computedCompareFrom, $computedCompareTo) : [];
                 $this->compareDateFrom = $computedCompareFrom;
                 $this->compareDateTo = $computedCompareTo;
             } catch (\Exception $e) {
@@ -124,6 +128,7 @@ class MarketingReportPdfService
             $compareGbp = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $this->compareDateFrom, $this->compareDateTo) : [];
             $compareGads = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $this->compareDateFrom, $this->compareDateTo) : [];
             $compareFacebook = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $this->compareDateFrom, $this->compareDateTo) : [];
+            $compareLinkedin = $hasLinkedin ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $this->compareDateFrom, $this->compareDateTo) : [];
         }
 
         // Year-over-Year (YoY) Prior Period (1 year prior)
@@ -276,6 +281,7 @@ class MarketingReportPdfService
             'hasGbp' => $hasGbp,
             'hasGads' => $hasGads,
             'hasFacebook' => $hasFacebook,
+            'hasLinkedin' => $hasLinkedin,
             'ga4Data' => $ga4Data,
             'gscData' => $gscData,
             'keywordData' => $keywordData,
@@ -283,6 +289,7 @@ class MarketingReportPdfService
             'gbpData' => $gbpData,
             'gadsData' => $gadsData,
             'facebookData' => $facebookData,
+            'linkedinData' => $linkedinData,
             'compareGa4' => $compareGa4,
             'compareGsc' => $compareGsc,
             'compareKeyword' => $compareKeyword,
@@ -290,6 +297,7 @@ class MarketingReportPdfService
             'compareGbp' => $compareGbp,
             'compareGads' => $compareGads,
             'compareFacebook' => $compareFacebook,
+            'compareLinkedin' => $compareLinkedin,
             'yoyGa4' => $yoyGa4,
             'yoyGsc' => $yoyGsc,
             'fbReachMomSvg' => $fbReachMomSvg,

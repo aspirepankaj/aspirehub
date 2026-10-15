@@ -22,6 +22,7 @@
         $hasGbp = !empty($gbpData) && !isset($gbpData['error']);
         $hasGads = !empty($gadsData) && !isset($gadsData['error']);
         $hasFacebook = !empty($facebookData) && !isset($facebookData['error']);
+        $linkedinData = $linkedinData ?? [];
         $hasLinkedin = !empty($linkedinData) && !isset($linkedinData['error']);
     @endphp
 
@@ -247,7 +248,7 @@
                     @endif
                     @if($isLinkedinConnected)
                         <div wire:key="overview-linkedin"><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white px-2">LinkedIn</h3>
-                        @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'linkedin', 'activeReportData' => $linkedinData])</div>
+                        @include('modules.crm.clients.client-report', ['hideHeader' => true, 'isOverviewMode' => true, 'activeReportIntegrationId' => 'linkedin', 'activeReportData' => ($linkedinData ?? [])])</div>
                     @endif
                     </div>
                 @else

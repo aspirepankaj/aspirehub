@@ -86,5 +86,8 @@ Route::get('/activity-logs', ManageActivityLogs::class)->name('activity-logs');
 Route::get('/email-logs', \App\Modules\Core\Activity\Livewire\ManageEmailLogs::class)->name('email-logs');
 
 use App\Modules\CRM\Clients\Controllers\GoogleIntegrationController;
+use App\Modules\CRM\Clients\Controllers\LinkedInIntegrationController;
 
 Route::get('/integrations/google/redirect/{id}', [GoogleIntegrationController::class, 'redirect'])->name('integrations.google.redirect');
+Route::get('/integrations/linkedin/redirect/{id}', [LinkedInIntegrationController::class, 'redirect'])->name('integrations.linkedin.redirect');
+
