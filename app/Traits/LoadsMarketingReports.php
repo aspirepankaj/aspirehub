@@ -121,7 +121,16 @@ trait LoadsMarketingReports
 
     public function loadIntegrationJsonData(string $clientFolder, string $websiteFolder, string $integrationType, string $startDate, string $endDate, bool $fetchDefaultCompare = true): array
     {
-        $cacheKey = "mkt_rep_{$clientFolder}_{$websiteFolder}_{$integrationType}_{$startDate}_{$endDate}_" . ($fetchDefaultCompare ? '1' : '0');
+        $months = $this->getMonthsForDateRange($startDate, $endDate);
+        $mtimes = [];
+        foreach ($months as $m) {
+            $path = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationType}/{$m['year']}/{$m['month']}.json");
+            if (file_exists($path)) {
+                $mtimes[] = filemtime($path);
+            }
+        }
+        $version = !empty($mtimes) ? md5(implode('_', $mtimes) . '_' . count($mtimes)) : '0';
+        $cacheKey = "mkt_rep_{$clientFolder}_{$websiteFolder}_{$integrationType}_{$startDate}_{$endDate}_" . ($fetchDefaultCompare ? '1' : '0') . "_{$version}";
         
         return Cache::remember($cacheKey, now()->addHours(6), function () use ($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare) {
             return $this->computeIntegrationJsonData($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare);
@@ -158,8 +167,11 @@ trait LoadsMarketingReports
             $allMonthlyJsons[$path] = true;
 
             static $fileCache = [];
-            if (!isset($fileCache[$path])) {
+            static $fileMtimes = [];
+            $currMtime = file_exists($path) ? filemtime($path) : 0;
+            if (!isset($fileCache[$path]) || ($fileMtimes[$path] ?? 0) !== $currMtime) {
                 $fileCache[$path] = json_decode(file_get_contents($path), true);
+                $fileMtimes[$path] = $currMtime;
             }
             $jsonData = $fileCache[$path];
             
@@ -692,8 +704,11 @@ trait LoadsMarketingReports
             }
 
             static $fastCache = [];
-            if (!isset($fastCache[$path])) {
+            static $fastMtimes = [];
+            $currMtime = file_exists($path) ? filemtime($path) : 0;
+            if (!isset($fastCache[$path]) || ($fastMtimes[$path] ?? 0) !== $currMtime) {
                 $fastCache[$path] = json_decode(file_get_contents($path), true);
+                $fastMtimes[$path] = $currMtime;
             }
             $jsonData = $fastCache[$path];
             if (!is_array($jsonData)) continue;

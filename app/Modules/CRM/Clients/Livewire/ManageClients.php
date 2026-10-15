@@ -2433,6 +2433,48 @@ class ManageClients extends Component
                             $mReportData['top_posts'] = $mTopPosts;
                             $mReportData['summary']['posts'] = count($mTopPosts);
                         }
+                    } elseif ($integrationId === 'gads') {
+                        $mClicks = 0;
+                        $mImpressions = 0;
+                        $mCost = 0;
+                        $mConversions = 0;
+                        foreach ($rows as $r) {
+                            $mClicks += (int)($r['clicks'] ?? 0);
+                            $mImpressions += (int)($r['impressions'] ?? 0);
+                            $mCost += (float)($r['cost'] ?? 0);
+                            $mConversions += (float)($r['conversions'] ?? 0);
+                        }
+                        $mReportData['summary']['clicks'] = $mClicks;
+                        $mReportData['summary']['impressions'] = $mImpressions;
+                        $mReportData['summary']['cost'] = round($mCost, 2);
+                        $mReportData['summary']['conversions'] = round($mConversions, 2);
+                        $mReportData['summary']['ctr'] = $mImpressions > 0 ? round(($mClicks / $mImpressions) * 100, 2) : 0;
+                        $mReportData['summary']['average_cpc'] = $mClicks > 0 ? round($mCost / $mClicks, 2) : 0;
+
+                        if (isset($reportData['daily_campaigns'])) {
+                            $mReportData['daily_campaigns'] = array_values(array_filter($reportData['daily_campaigns'], function($dc) use ($y, $m) {
+                                $d = $dc['date'] ?? '';
+                                if (!$d) return false;
+                                try {
+                                    $cDate = \Carbon\Carbon::parse($d);
+                                    return $cDate->format('Y') == $y && \Illuminate\Support\Str::lower($cDate->format('F')) == $m;
+                                } catch (\Exception $e) {
+                                    return false;
+                                }
+                            }));
+                        }
+                        if (isset($reportData['daily_keywords'])) {
+                            $mReportData['daily_keywords'] = array_values(array_filter($reportData['daily_keywords'], function($dk) use ($y, $m) {
+                                $d = $dk['date'] ?? '';
+                                if (!$d) return false;
+                                try {
+                                    $cDate = \Carbon\Carbon::parse($d);
+                                    return $cDate->format('Y') == $y && \Illuminate\Support\Str::lower($cDate->format('F')) == $m;
+                                } catch (\Exception $e) {
+                                    return false;
+                                }
+                            }));
+                        }
                     }
 
                     $mReportData['daily_traffic'] = $rows;
@@ -2446,6 +2488,8 @@ class ManageClients extends Component
                 }
                 file_put_contents($filePath, json_encode($reportData, JSON_PRETTY_PRINT));
             }
+
+            \Illuminate\Support\Facades\Cache::flush();
 
             $integration->update([
                 'last_sync_at' => now(),
