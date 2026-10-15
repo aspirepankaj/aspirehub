@@ -68,7 +68,7 @@ class SyncGoogleAdsMetrics extends Command
                 $metrics = $this->fetchGoogleAdsMetrics($token, $developerToken, $customerId, $startDate, $endDate);
 
                 if ($metrics) {
-                    $this->saveMetricsToJson($integration, $metrics, $year, $monthStr);
+                    $this->saveMetricsToJson($integration, $metrics);
                     
                     $integration->last_sync_at = now();
                     $integration->save();
@@ -280,7 +280,7 @@ class SyncGoogleAdsMetrics extends Command
         return null;
     }
 
-    private function saveMetricsToJson($integration, $metrics, $year, $monthStr)
+    private function saveMetricsToJson($integration, $metrics)
     {
         $clientDetails = $integration->website->client;
         $userName = Str::slug(Str::lower($clientDetails->user->name ?? 'client'));
@@ -293,12 +293,94 @@ class SyncGoogleAdsMetrics extends Command
             $websiteFolder = 'site-' . $integration->website->id;
         }
 
-        $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$year}");
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        $dailyTraffic = $metrics['daily_traffic'] ?? [];
+        if (empty($dailyTraffic)) {
+            $year = now()->format('Y');
+            $monthStr = Str::lower(now()->format('F'));
+            $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$year}");
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            file_put_contents("{$dir}/{$monthStr}.json", json_encode($metrics, JSON_PRETTY_PRINT));
+            \Illuminate\Support\Facades\Cache::flush();
+            return;
         }
 
-        $filePath = "{$dir}/{$monthStr}.json";
-        file_put_contents($filePath, json_encode($metrics, JSON_PRETTY_PRINT));
+        $grouped = [];
+        foreach ($dailyTraffic as $row) {
+            $d = $row['date'] ?? null;
+            if ($d && strlen($d) >= 8) {
+                $dtStr = (strpos($d, '-') !== false) ? $d : substr($d, 0, 4) . '-' . substr($d, 4, 2) . '-' . substr($d, 6, 2);
+                try {
+                    $cDate = \Carbon\Carbon::parse($dtStr);
+                    $y = $cDate->format('Y');
+                    $m = Str::lower($cDate->format('F'));
+                    $grouped["{$y}|{$m}"][] = $row;
+                } catch (\Exception $e) {
+                    $grouped[now()->format('Y') . '|' . Str::lower(now()->format('F'))][] = $row;
+                }
+            }
+        }
+
+        foreach ($grouped as $key => $rows) {
+            list($y, $m) = explode('|', $key);
+            $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gads/{$y}");
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $filePath = "{$dir}/{$m}.json";
+
+            $mReportData = $metrics;
+            $mClicks = 0;
+            $mImpressions = 0;
+            $mCost = 0;
+            $mConversions = 0;
+            foreach ($rows as $r) {
+                $mClicks += (int)($r['clicks'] ?? 0);
+                $mImpressions += (int)($r['impressions'] ?? 0);
+                $mCost += (float)($r['cost'] ?? 0);
+                $mConversions += (float)($r['conversions'] ?? 0);
+            }
+
+            $mReportData['summary'] = [
+                'clicks' => $mClicks,
+                'impressions' => $mImpressions,
+                'cost' => round($mCost, 2),
+                'conversions' => round($mConversions, 2),
+                'ctr' => $mImpressions > 0 ? round(($mClicks / $mImpressions) * 100, 2) : 0,
+                'average_cpc' => $mClicks > 0 ? round($mCost / $mClicks, 2) : 0,
+            ];
+            $mReportData['daily_traffic'] = $rows;
+
+            if (isset($metrics['daily_campaigns'])) {
+                $mReportData['daily_campaigns'] = array_values(array_filter($metrics['daily_campaigns'], function($dc) use ($y, $m) {
+                    $d = $dc['date'] ?? '';
+                    if (!$d) return false;
+                    try {
+                        $cDate = \Carbon\Carbon::parse($d);
+                        return $cDate->format('Y') == $y && Str::lower($cDate->format('F')) == $m;
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                }));
+            }
+
+            if (isset($metrics['daily_keywords'])) {
+                $mReportData['daily_keywords'] = array_values(array_filter($metrics['daily_keywords'], function($dk) use ($y, $m) {
+                    $d = $dk['date'] ?? '';
+                    if (!$d) return false;
+                    try {
+                        $cDate = \Carbon\Carbon::parse($d);
+                        return $cDate->format('Y') == $y && Str::lower($cDate->format('F')) == $m;
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                }));
+            }
+
+            file_put_contents($filePath, json_encode($mReportData, JSON_PRETTY_PRINT));
+        }
+
+        \Illuminate\Support\Facades\Cache::flush();
     }
 }

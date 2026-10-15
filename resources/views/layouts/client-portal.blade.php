@@ -1,18 +1,42 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
-      x-data="{ dark: localStorage.getItem('client-theme') === 'dark', mobileSidebar: false }" 
-      x-init="$watch('dark', v => {
-          localStorage.setItem('client-theme', v ? 'dark' : 'light');
-          if (v) {
+      x-data="{ 
+          dark: localStorage.getItem('aspire-theme') === 'dark' || localStorage.getItem('client-theme') === 'dark', 
+          mobileSidebar: false,
+          toggleDark() {
+              this.dark = !this.dark;
+              localStorage.setItem('aspire-theme', this.dark ? 'dark' : 'light');
+              localStorage.setItem('client-theme', this.dark ? 'dark' : 'light');
+              if (this.dark) {
+                  document.documentElement.classList.add('dark');
+                  document.body.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+                  document.body.classList.remove('dark');
+              }
+              this.$nextTick(() => { if (window.lucide) lucide.createIcons(); });
+          },
+          filterNav(q) {
+              document.querySelectorAll('.portal-nav-item').forEach(b => {
+                  const label = b.getAttribute('data-label') || '';
+                  b.style.display = label.toLowerCase().includes(q.toLowerCase()) ? 'flex' : 'none';
+              });
+          }
+      }" 
+      x-init="
+          if (dark) {
               document.documentElement.classList.add('dark');
+              document.body.classList.add('dark');
           } else {
               document.documentElement.classList.remove('dark');
+              document.body.classList.remove('dark');
           }
-      })" 
+          $nextTick(() => { if (window.lucide) lucide.createIcons(); });
+      " 
       :class="{ 'dark': dark }">
 <head>
     <script>
-        if (localStorage.getItem('client-theme') === 'dark' || (!('client-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('aspire-theme') === 'dark' || localStorage.getItem('client-theme') === 'dark' || (!('aspire-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -22,171 +46,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ $title ?? 'Client Portal' }} - Aspire Digital Solutions</title>
+    <title>{{ $title ?? 'Dashboard' }} | Aspire Hub Client Portal</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('aspire-triangle.svg') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 
+    <!-- Tailwind / App Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Client Portal Stylesheet (Loaded after Vite to preserve exact typography and styles) -->
+    <link rel="stylesheet" href="{{ asset('css/client-portal.css') }}?v={{ time() }}" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
     @livewireStyles
-
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-        .dark .glass {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.93);
-            border-radius: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(1px);
-            -webkit-backdrop-filter: blur(1px);
-            border: 1px solid rgba(255, 255, 255, 0.43);
-        }
-        .dark .glass-card {
-            background: rgba(15, 23, 42, 0.85) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }
-    </style>
 </head>
-<body class="font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+<body>
 
-<!-- Background decorative blobs -->
-<div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl"></div>
-    <div class="absolute top-1/3 -right-40 w-96 h-96 bg-pink-500/10 dark:bg-pink-500/5 rounded-full blur-3xl"></div>
-    <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-sky-500/10 dark:bg-sky-500/5 rounded-full blur-3xl"></div>
-</div>
-
-<div class="relative min-h-screen flex z-10">
-
-    <!-- Mobile Overlay Backdrop -->
-    <div x-show="mobileSidebar" 
-         x-transition:enter="transition-opacity ease-linear duration-300" 
-         x-transition:enter-start="opacity-0" 
-         x-transition:enter-end="opacity-100" 
-         x-transition:leave="transition-opacity ease-linear duration-300" 
-         x-transition:leave-start="opacity-100" 
-         x-transition:leave-end="opacity-0" 
-         @click="mobileSidebar = false" 
-         class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 lg:hidden" 
-         style="display: none;">
-    </div>
-
+<div class="portal-layout">
     <!-- Sidebar -->
-    <aside :class="mobileSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" 
-           class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800/60 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:z-auto shrink-0">
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <div class="px-6 py-6 flex items-center justify-between">
-                <div class="flex flex-col gap-1">
-                    <img src="{{ asset('aspire-hub-1.svg') }}" class="h-8 w-auto self-start dark:brightness-0 dark:invert" alt="Aspire Digital Solutions" />
-                    <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase pl-1 mt-0.5">Client Portal</div>
-                </div>
-                <button type="button" @click="mobileSidebar = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lg:hidden">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+    <aside class="portal-sidebar" :class="mobileSidebar ? 'is-open' : ''" id="sidebar">
+        <div class="brand">
+            <svg viewBox="0 0 44 44" fill="none"><path d="M23 2 42 36H30L20 18l-3 6h7l5 8H12L6 41H0L19 8l4 7-12 21h23L22 15l-3-5Z" fill="currentColor"/><path d="M10 40h31" stroke="currentColor" stroke-width="2"/></svg>
+            <div>
+                <div class="brand-word">ASPIRE</div>
+                <div class="brand-hub">HUB</div>
             </div>
-
-            <div class="px-4 mb-4">
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
-                    <input type="text" placeholder="Quick search..." class="w-full pl-9 pr-10 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
-                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 border-l border-slate-200 dark:border-slate-700/60 pl-2">⌘K</span>
-                </div>
-            </div>
-
-            <div class="px-6 mb-2 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Portal</div>
-
-            <nav class="px-3 space-y-1">
-                @php
-                    $navItems = [
-                        ['label' => 'Dashboard', 'route' => 'client.dashboard', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
-                        ['label' => 'My Websites', 'route' => 'client.websites', 'icon' => 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['label' => 'Marketing Reports', 'route' => 'client.marketing', 'icon' => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
-                        ['label' => 'Maintenance Reports', 'route' => 'client.maintenance', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z'],
-                        ['label' => 'Support Center', 'route' => 'client.support', 'icon' => 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['label' => 'Resources', 'route' => 'client.documents', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                        ['label' => 'My Profile', 'route' => 'client.profile', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
-                    ];
-                    if (session()->has('impersonator_id')) {
-                        $navItems[] = [
-                            'label' => 'Switch Back to Admin',
-                            'route' => 'impersonate.stop',
-                            'icon' => 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
-                            'is_special' => true
-                        ];
-                    }
-                    $currentRoute = request()->route()?->getName();
-                @endphp
-
-                @foreach($navItems as $item)
-                    @php
-                        $route = $item['route'];
-                        $isActive = $route && (
-                            $currentRoute === $route ||
-                            str_starts_with($currentRoute ?? '', $route . '.') ||
-                            str_starts_with($currentRoute ?? '', $route . '-')
-                        );
-                        $href = $route ? route($route) : '#';
-                        $isSpecial = $item['is_special'] ?? false;
-                    @endphp
-                    <a href="{{ $href }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition
-                              {{ $isActive
-                                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-extrabold shadow-sm shadow-indigo-500/10'
-                                    : ($isSpecial
-                                        ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-sm'
-                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white') }}">
-                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
-                        </svg>
-                        <span>{{ $item['label'] }}</span>
-                    </a>
-                @endforeach
-            </nav>
         </div>
+        <div class="brand-caption">CLIENT PORTAL</div>
 
-        <!-- User footer -->
-        <div class="p-4 border-t border-slate-100 dark:border-slate-800/60">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300 overflow-hidden shrink-0 border border-slate-200/60 dark:border-slate-800">
+        <label class="quick-search">
+            <i data-lucide="search" style="width:15px;height:15px"></i>
+            <input id="quickSearch" placeholder="Quick search..." @input="filterNav($event.target.value)" />
+            <span>⌘K</span>
+        </label>
+
+        <nav class="portal-nav" id="navList">
+            @php
+                $currentRoute = request()->route()?->getName();
+            @endphp
+            <a href="{{ route('client.dashboard') }}" class="portal-nav-item {{ $currentRoute === 'client.dashboard' ? 'active' : '' }}" data-label="Dashboard">
+                <i data-lucide="layout-grid"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ route('client.websites') }}" class="portal-nav-item {{ str_starts_with($currentRoute ?? '', 'client.websites') ? 'active' : '' }}" data-label="My Websites">
+                <i data-lucide="globe"></i>
+                <span>My Websites</span>
+            </a>
+            <a href="{{ route('client.marketing') }}" class="portal-nav-item {{ $currentRoute === 'client.marketing' ? 'active' : '' }}" data-label="Marketing Reports">
+                <i data-lucide="megaphone"></i>
+                <span>Marketing Reports</span>
+            </a>
+            <a href="{{ route('client.maintenance') }}" class="portal-nav-item {{ str_starts_with($currentRoute ?? '', 'client.maintenance') ? 'active' : '' }}" data-label="Maintenance Reports">
+                <i data-lucide="settings"></i>
+                <span>Maintenance Reports</span>
+            </a>
+            <a href="{{ route('client.support') }}" class="portal-nav-item {{ str_starts_with($currentRoute ?? '', 'client.support') ? 'active' : '' }}" data-label="Support Center">
+                <i data-lucide="life-buoy"></i>
+                <span>Support Center</span>
+            </a>
+            <a href="{{ route('client.documents') }}" class="portal-nav-item {{ str_starts_with($currentRoute ?? '', 'client.documents') ? 'active' : '' }}" data-label="Resources">
+                <i data-lucide="file-text"></i>
+                <span>Resources</span>
+            </a>
+            <a href="{{ route('client.profile') }}" class="portal-nav-item {{ str_starts_with($currentRoute ?? '', 'client.profile') ? 'active' : '' }}" data-label="My Profile">
+                <i data-lucide="user-round"></i>
+                <span>My Profile</span>
+            </a>
+        </nav>
+
+        <div class="portal-sidebar-footer">
+            @if(session()->has('impersonator_id'))
+            <div style="margin-bottom: 10px;">
+                <a href="{{ route('impersonate.stop') }}" class="portal-nav-item" style="color: #d97706; background: rgba(245, 158, 11, 0.08); height: 32px; font-size: 11.5px; padding: 0 10px;" data-label="Switch Back to Admin">
+                    <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                    <span>Switch to Admin</span>
+                </a>
+            </div>
+            @endif
+            <div class="portal-profile">
+                <div class="portal-avatar">
                     @if(auth()->user()->client?->profile_image)
-                        <img src="{{ Str::startsWith(auth()->user()->client->profile_image, 'http') ? auth()->user()->client->profile_image : asset('storage/' . auth()->user()->client->profile_image) }}" class="w-full h-full object-cover" onerror="this.outerHTML=`{{ auth()->user()->getInitials() }}`" />
+                        <img src="{{ Str::startsWith(auth()->user()->client->profile_image, 'http') ? auth()->user()->client->profile_image : asset('storage/' . auth()->user()->client->profile_image) }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.outerHTML=`{{ auth()->user()->getInitials() }}`" />
                     @else
                         {{ auth()->user()->getInitials() }}
                     @endif
                 </div>
-                <div class="min-w-0">
-                    <div class="text-xs font-bold truncate">{{ auth()->user()->name ?? 'Guest' }}</div>
-                    <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">{{ $clientCompanyName ?? '' }}</div>
+                <div class="portal-profile-info">
+                    <div class="portal-profile-name">{{ auth()->user()->name }}</div>
+                    <div class="portal-profile-sub">{{ $clientCompanyName ?? 'Aspire Hub' }}</div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button type="button" @click="dark = !dark" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                    <span x-text="dark ? 'Light' : 'Dark'"></span>
+            <div class="portal-actions">
+                <button type="button" class="portal-btn-theme" @click="toggleDark()">
+                    <i :data-lucide="dark ? 'sun' : 'moon'" style="width: 14px; height: 14px;"></i>
+                    <span x-text="dark ? 'Light' : 'Dark'">Dark</span>
                 </button>
-                <form method="POST" action="{{ route('logout') }}" class="flex-1 flex">
+                <form method="POST" action="{{ route('logout') }}" style="flex: 1; display: flex; margin: 0;">
                     @csrf
-                    <button type="submit" class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-500/20 dark:hover:text-red-300 text-[11px] font-bold transition">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <button type="submit" class="portal-btn-logout" style="width: 100%;">
+                        <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
                         <span>Log Out</span>
                     </button>
                 </form>
@@ -194,37 +157,76 @@
         </div>
     </aside>
 
-    <!-- Main Content Container -->
-    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen">
-        <!-- Topbar -->
-        <header class="h-16 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-slate-100 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
-            <div class="flex items-center gap-3">
-                <button type="button" @click="mobileSidebar = !mobileSidebar" class="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 lg:hidden focus:outline-none hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-                <div class="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 truncate">{{ now()->format('l, F j') }}</div>
-            </div>
+    <!-- Main Content Area -->
+    <main class="portal-main">
+        <!-- Top Wave Vector SVG -->
+        <svg class="top-waves-container" viewBox="0 0 1000 250" preserveAspectRatio="none">
+            <path d="M100 250C400 190 390 80 550 0H880C650 145 440 250 100 250Z" fill="#dcf1f7" opacity="0.6"/>
+            <path d="M250 250C600 210 570 45 680 0H1000C780 135 590 245 250 250Z" fill="#edf7fa" opacity="0.85"/>
+        </svg>
 
-            <div class="flex items-center gap-2 sm:gap-3">
-                <livewire:header-notifications />
-                <a href="{{ route('client.support') }}" class="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
-                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="hidden xs:inline">Support</span>
-                </a>
-            </div>
-        </header>
+        <div class="portal-inner">
+            <!-- Topbar -->
+            <header class="portal-topbar">
+                <div class="portal-breadcrumbs">
+                    <button type="button" class="mobile-menu-btn" @click="mobileSidebar = !mobileSidebar">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <i data-lucide="house" style="width:15px;height:15px;opacity:0.7;"></i>
+                    <span>Client</span>
+                    <i data-lucide="chevron-right" style="width:13px;height:13px;opacity:0.5;"></i>
+                    <strong>{{ $title ?? 'Dashboard' }}</strong>
+                </div>
+                <div class="portal-topbar-tools">
+                    <a href="{{ route('client.notifications') }}" class="topbar-tool-btn notification" title="Notifications">
+                        <i data-lucide="bell" style="width:16px;height:16px;"></i>
+                    </a>
+                    <a href="{{ route('client.profile') }}" class="topbar-tool-btn" title="Settings">
+                        <i data-lucide="settings" style="width:16px;height:16px;"></i>
+                    </a>
+                </div>
+            </header>
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <!-- Page Slot -->
             {{ $slot }}
-        </main>
 
-        <!-- Footer -->
-        <x-common-footer />
-    </div>
+            <!-- Footer -->
+            <footer class="portal-footer">
+                <div class="portal-footer-left">
+                    <span>© 2026 <strong>Aspire Digital Solutions.</strong> All rights reserved.</span>
+                    <span class="portal-footer-divider">Next-Gen Enterprise Management System.</span>
+                </div>
+                <div class="portal-footer-right">
+                    <span>Developed with</span>
+                    <i data-lucide="heart" class="heart-icon" style="width:14px;height:14px;"></i>
+                    <span>by</span>
+                    <span class="footer-brand-title">
+                        <img src="{{ asset('aspire-favicon.png') }}" alt="Aspire Digital Solutions" style="width:19px;height:19px;object-fit:contain;flex-shrink:0;" />
+                        Aspire Digital Solutions
+                    </span>
+                </div>
+            </footer>
+        </div>
+    </main>
 </div>
 
 @livewireScripts
+
+<script>
+    function renderLucideIcons() {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+    document.addEventListener('DOMContentLoaded', renderLucideIcons);
+    document.addEventListener('livewire:navigated', renderLucideIcons);
+    document.addEventListener('livewire:load', renderLucideIcons);
+    document.addEventListener('keydown', e => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            document.getElementById('quickSearch')?.focus();
+        }
+    });
+</script>
 </body>
 </html>

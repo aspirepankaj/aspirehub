@@ -1714,9 +1714,15 @@
                             totalConv += parseFloat(d.conversions || 0);
                             
                             let dateStr = d.date ? d.date.toString() : '';
+                            const mNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                             if(dateStr.length === 8 && !dateStr.includes('-')) {
-                                const mNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                                 return mNames[parseInt(dateStr.substring(4,6))-1] + ' ' + parseInt(dateStr.substring(6,8)) + ', ' + dateStr.substring(0,4);
+                            }
+                            if (dateStr.includes('-')) {
+                                const parts = dateStr.split('-');
+                                if (parts.length === 3) {
+                                    return mNames[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
+                                }
                             }
                             return dateStr;
                         });
