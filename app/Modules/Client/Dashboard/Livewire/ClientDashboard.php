@@ -132,13 +132,46 @@ class ClientDashboard extends Component
             ];
         }
 
-        // Get latest report month
+        // Get latest maintenance report month
         $lastReport = DB::table('adspv_maintenance_reports')
-            ->where('client_id', $clientId)
+            ->where(function ($q) use ($clientId, $websiteIds) {
+                $q->where('client_id', $clientId);
+                if ($websiteIds->isNotEmpty()) {
+                    $q->orWhereIn('website_id', $websiteIds);
+                }
+            })
+            ->where('status', 'completed')
             ->orderByDesc('maintenance_date')
+            ->orderByDesc('id')
             ->first();
 
-        $lastReportMonth = $lastReport ? $lastReport->maintenance_month : 'September 2026';
+        if (!$lastReport) {
+            $lastReport = DB::table('adspv_maintenance_reports')
+                ->where(function ($q) use ($clientId, $websiteIds) {
+                    $q->where('client_id', $clientId);
+                    if ($websiteIds->isNotEmpty()) {
+                        $q->orWhereIn('website_id', $websiteIds);
+                    }
+                })
+                ->orderByDesc('maintenance_date')
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        $lastReportMonth = 'No Report';
+        if ($lastReport) {
+            if (!empty($lastReport->maintenance_month)) {
+                try {
+                    $lastReportMonth = \Carbon\Carbon::parse($lastReport->maintenance_month)->format('F Y');
+                } catch (\Throwable $e) {
+                    $lastReportMonth = $lastReport->maintenance_month;
+                }
+            } elseif (!empty($lastReport->maintenance_date)) {
+                $lastReportMonth = \Carbon\Carbon::parse($lastReport->maintenance_date)->format('F Y');
+            } elseif (!empty($lastReport->created_at)) {
+                $lastReportMonth = \Carbon\Carbon::parse($lastReport->created_at)->format('F Y');
+            }
+        }
 
         $stats = [
             'websites'          => $websiteCount,

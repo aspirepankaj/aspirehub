@@ -73,7 +73,7 @@
         </div>
 
         <!-- Latest Report -->
-        <a href="{{ route('client.marketing') }}" class="stat-box">
+        <a href="{{ route('client.maintenance') }}" class="stat-box">
             <div class="stat-circle-icon orange">
                 <i data-lucide="file-text"></i>
             </div>
