@@ -22,7 +22,7 @@ class StaffClientReport extends Component
     public int $websiteId = 0;
     public string $integration = '';
 
-    protected array $activeReportData = [];
+    public array $activeReportData = [];
     public string $activeReportIntegrationId = '';
     public string $activeReportPropertyId = '';
 
@@ -117,6 +117,10 @@ class StaffClientReport extends Component
 
     public function render()
     {
+        if (empty($this->activeReportData)) {
+            $this->loadReport();
+        }
+
         return view('modules.crm.clients.client-report', [
             'client' => $this->client,
             'website' => $this->website,

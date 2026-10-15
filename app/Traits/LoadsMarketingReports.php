@@ -121,11 +121,7 @@ trait LoadsMarketingReports
 
     public function loadIntegrationJsonData(string $clientFolder, string $websiteFolder, string $integrationType, string $startDate, string $endDate, bool $fetchDefaultCompare = true): array
     {
-        $cacheKey = "mkt_rep_{$clientFolder}_{$websiteFolder}_{$integrationType}_{$startDate}_{$endDate}_" . ($fetchDefaultCompare ? '1' : '0');
-        
-        return Cache::remember($cacheKey, now()->addHours(6), function () use ($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare) {
-            return $this->computeIntegrationJsonData($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare);
-        });
+        return $this->computeIntegrationJsonData($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare);
     }
 
     protected function computeIntegrationJsonData(string $clientFolder, string $websiteFolder, string $integrationType, string $startDate, string $endDate, bool $fetchDefaultCompare = true): array
