@@ -33,9 +33,6 @@ class ClientDashboard extends Component
         $activeServices = DB::table('adspv_client_plan')
             ->where('client_id', $clientId)
             ->count();
-        if ($activeServices === 0) {
-            $activeServices = 3;
-        }
 
         $websiteIds = DB::table('adspv_websites')
             ->where('client_id', $clientId)
@@ -49,9 +46,6 @@ class ClientDashboard extends Component
 
         $connectedTypes = $connectedRecords->pluck('integration_type')->unique()->toArray();
         $linkedAnalyticsCount = count($connectedTypes);
-        if ($linkedAnalyticsCount === 0) {
-            $linkedAnalyticsCount = 5;
-        }
 
         // Platform catalog with exact labels, descriptions, and tab parameters
         $catalog = [
@@ -119,17 +113,6 @@ class ClientDashboard extends Component
             if (isset($catalog[$t])) {
                 $connectedPlatforms[] = $catalog[$t];
             }
-        }
-
-        // If no integrations connected yet, fallback to default 5 for demonstration
-        if (empty($connectedPlatforms)) {
-            $connectedPlatforms = [
-                $catalog['ga4'],
-                $catalog['gsc'],
-                $catalog['youtube'],
-                $catalog['keyword'],
-                $catalog['facebook'],
-            ];
         }
 
         // Get latest maintenance report month

@@ -95,76 +95,90 @@
                 <h2 class="section-title">Analytics &amp; Reporting</h2>
                 <p class="section-sub">Access your connected platforms to view performance, insights, and more.</p>
             </div>
-            <a href="{{ route('client.marketing') }}" class="section-link">
-                <span>View All Platforms</span>
-                <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
-            </a>
-        </div>
-
-        <div class="platforms-row">
-            @foreach($connectedPlatforms as $platform)
-                <a href="{{ route('client.marketing') }}?tab={{ $platform['tab'] }}" class="platform-card-box">
-                    <div class="platform-logo-wrap">
-                        @if($platform['key'] === 'ga4')
-                            <svg class="google-logo" viewBox="0 0 54 44" style="width:48px;height:40px;">
-                                <rect x="27" y="2" width="10" height="40" rx="5" fill="#F9AB00"/>
-                                <rect x="14" y="17" width="10" height="25" rx="5" fill="#E37400"/>
-                                <circle cx="6" cy="37" r="5" fill="#E37400"/>
-                            </svg>
-                        @elseif($platform['key'] === 'gsc')
-                            <svg class="console-logo" viewBox="0 0 55 44" style="width:48px;height:40px;">
-                                <path d="M19 11V7q0-4 5-4h8q5 0 5 4v4" fill="none" stroke="#64748b" stroke-width="3"/>
-                                <rect x="4" y="12" width="47" height="30" rx="4" fill="#cbd5e1"/>
-                                <path d="M9 11h39v10H9Z" fill="#3b82f6" opacity=".85"/>
-                                <path d="M9 24h9v17H9m34-17h5v17h-5" fill="#ffffff"/>
-                                <circle cx="14" cy="16" r="1.5" fill="#ffffff"/>
-                                <circle cx="20" cy="16" r="1.5" fill="#ffffff"/>
-                                <path d="m29 24-3 5 2 6 5 2v5h5v-8c4-3 4-7 1-10v6l-5 2-4-3v-5Z" fill="#475569"/>
-                            </svg>
-                        @elseif($platform['key'] === 'youtube')
-                            <svg class="youtube-logo" viewBox="0 0 56 44" style="width:48px;height:40px;">
-                                <path d="M4 7Q28 2 51 7Q56 21 51 37Q28 42 4 37Q-1 23 4 7" fill="#FF0000"/>
-                                <path d="m23 13 16 9-16 9Z" fill="#ffffff"/>
-                            </svg>
-                        @elseif($platform['key'] === 'gads')
-                            <svg class="gads-logo" viewBox="0 0 48 48" style="width:44px;height:40px;">
-                                <path fill="#4285F4" d="M12.6 35.8c-4.4-7.6-1.8-17.3 5.8-21.7 7.6-4.4 17.3-1.8 21.7 5.8l-7.7 4.5c-2-3.4-6.3-4.5-9.7-2.6-3.4 2-4.5 6.3-2.6 9.7l-7.5 4.3z"/>
-                                <path fill="#FBBC04" d="M35.4 12.2l7.7-4.5c4.4 7.6 1.8 17.3-5.8 21.7-7.6 4.4-17.3 1.8-21.7-5.8l7.7-4.5c2 3.4 6.3 4.5 9.7 2.6 3.4-2 4.5-6.3 2.4-9.5z"/>
-                                <circle fill="#34A853" cx="12" cy="36" r="6"/>
-                            </svg>
-                        @elseif($platform['key'] === 'linkedin')
-                            <svg class="linkedin-logo" viewBox="0 0 44 44" style="width:40px;height:40px;">
-                                <rect width="44" height="44" rx="9" fill="#0A66C2"/>
-                                <path fill="#FFFFFF" d="M11 16h6v18h-6V16zm3-10a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm9 10h5.7v2.5h.1c.8-1.5 2.7-3.1 5.6-3.1 6 0 7.1 3.9 7.1 9.1V34h-6v-8.4c0-2-.04-4.6-2.8-4.6-2.8 0-3.2 2.2-3.2 4.5V34h-6V16z"/>
-                            </svg>
-                        @elseif($platform['key'] === 'facebook')
-                            <svg class="meta-logo" viewBox="0 0 58 44" fill="none" style="width:48px;height:40px;">
-                                <path d="M5 31C1 24 8 8 15 8c9 0 17 29 25 29 16 0 11-29 1-29C31 8 22 37 13 37c-4 0-6-2-8-6Z" stroke="#0081FB" stroke-width="5" stroke-linecap="round"/>
-                            </svg>
-                        @elseif($platform['key'] === 'keyword')
-                            <svg class="keywords-logo" viewBox="0 0 53 44" style="width:48px;height:40px;">
-                                <rect x="2" y="8" width="10" height="30" rx="5" fill="#8b5cf6"/>
-                                <path d="m29 2-16 20 16 20h13L26 22 42 2Z" fill="#3b82f6"/>
-                            </svg>
-                        @else
-                            <i data-lucide="globe" style="width:36px;height:36px;color:#0284c7;"></i>
-                        @endif
-                    </div>
-
-                    <h3 class="platform-card-title">{{ $platform['name'] }}</h3>
-                    <p class="platform-card-desc">{{ $platform['description'] }}</p>
-
-                    <div class="platform-arrow-circle">
-                        <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
-                    </div>
-
-                    <svg class="card-wave-svg" viewBox="0 0 210 36" preserveAspectRatio="none">
-                        <path d="M0 8C61 6 92 52 210 1V36H0Z" fill="{{ $platform['wave_color'] ?? '#e0f2fe' }}" opacity="0.6"/>
-                        <path d="M0 35C89 43 138 1 210 3V36H0Z" fill="{{ $platform['wave_color'] ?? '#e0f2fe' }}" opacity="0.8"/>
-                    </svg>
+            @if(count($connectedPlatforms) > 0)
+                <a href="{{ route('client.marketing') }}" class="section-link">
+                    <span>View All Platforms</span>
+                    <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
                 </a>
-            @endforeach
+            @endif
         </div>
+
+        @if(count($connectedPlatforms) > 0)
+            <div class="platforms-row">
+                @foreach($connectedPlatforms as $platform)
+                    <a href="{{ route('client.marketing') }}?tab={{ $platform['tab'] }}" class="platform-card-box">
+                        <div class="platform-logo-wrap">
+                            @if($platform['key'] === 'ga4')
+                                <svg class="google-logo" viewBox="0 0 54 44" style="width:48px;height:40px;">
+                                    <rect x="27" y="2" width="10" height="40" rx="5" fill="#F9AB00"/>
+                                    <rect x="14" y="17" width="10" height="25" rx="5" fill="#E37400"/>
+                                    <circle cx="6" cy="37" r="5" fill="#E37400"/>
+                                </svg>
+                            @elseif($platform['key'] === 'gsc')
+                                <svg class="console-logo" viewBox="0 0 55 44" style="width:48px;height:40px;">
+                                    <path d="M19 11V7q0-4 5-4h8q5 0 5 4v4" fill="none" stroke="#64748b" stroke-width="3"/>
+                                    <rect x="4" y="12" width="47" height="30" rx="4" fill="#cbd5e1"/>
+                                    <path d="M9 11h39v10H9Z" fill="#3b82f6" opacity=".85"/>
+                                    <path d="M9 24h9v17H9m34-17h5v17h-5" fill="#ffffff"/>
+                                    <circle cx="14" cy="16" r="1.5" fill="#ffffff"/>
+                                    <circle cx="20" cy="16" r="1.5" fill="#ffffff"/>
+                                    <path d="m29 24-3 5 2 6 5 2v5h5v-8c4-3 4-7 1-10v6l-5 2-4-3v-5Z" fill="#475569"/>
+                                </svg>
+                            @elseif($platform['key'] === 'youtube')
+                                <svg class="youtube-logo" viewBox="0 0 56 44" style="width:48px;height:40px;">
+                                    <path d="M4 7Q28 2 51 7Q56 21 51 37Q28 42 4 37Q-1 23 4 7" fill="#FF0000"/>
+                                    <path d="m23 13 16 9-16 9Z" fill="#ffffff"/>
+                                </svg>
+                            @elseif($platform['key'] === 'gads')
+                                <svg class="gads-logo" viewBox="0 0 48 48" style="width:44px;height:40px;">
+                                    <path fill="#4285F4" d="M12.6 35.8c-4.4-7.6-1.8-17.3 5.8-21.7 7.6-4.4 17.3-1.8 21.7 5.8l-7.7 4.5c-2-3.4-6.3-4.5-9.7-2.6-3.4 2-4.5 6.3-2.6 9.7l-7.5 4.3z"/>
+                                    <path fill="#FBBC04" d="M35.4 12.2l7.7-4.5c4.4 7.6 1.8 17.3-5.8 21.7-7.6 4.4-17.3 1.8-21.7-5.8l7.7-4.5c2 3.4 6.3 4.5 9.7 2.6 3.4-2 4.5-6.3 2.4-9.5z"/>
+                                    <circle fill="#34A853" cx="12" cy="36" r="6"/>
+                                </svg>
+                            @elseif($platform['key'] === 'linkedin')
+                                <svg class="linkedin-logo" viewBox="0 0 44 44" style="width:40px;height:40px;">
+                                    <rect width="44" height="44" rx="9" fill="#0A66C2"/>
+                                    <path fill="#FFFFFF" d="M11 16h6v18h-6V16zm3-10a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm9 10h5.7v2.5h.1c.8-1.5 2.7-3.1 5.6-3.1 6 0 7.1 3.9 7.1 9.1V34h-6v-8.4c0-2-.04-4.6-2.8-4.6-2.8 0-3.2 2.2-3.2 4.5V34h-6V16z"/>
+                                </svg>
+                            @elseif($platform['key'] === 'facebook')
+                                <svg class="meta-logo" viewBox="0 0 58 44" fill="none" style="width:48px;height:40px;">
+                                    <path d="M5 31C1 24 8 8 15 8c9 0 17 29 25 29 16 0 11-29 1-29C31 8 22 37 13 37c-4 0-6-2-8-6Z" stroke="#0081FB" stroke-width="5" stroke-linecap="round"/>
+                                </svg>
+                            @elseif($platform['key'] === 'keyword')
+                                <svg class="keywords-logo" viewBox="0 0 53 44" style="width:48px;height:40px;">
+                                    <rect x="2" y="8" width="10" height="30" rx="5" fill="#8b5cf6"/>
+                                    <path d="m29 2-16 20 16 20h13L26 22 42 2Z" fill="#3b82f6"/>
+                                </svg>
+                            @else
+                                <i data-lucide="globe" style="width:36px;height:36px;color:#0284c7;"></i>
+                            @endif
+                        </div>
+
+                        <h3 class="platform-card-title">{{ $platform['name'] }}</h3>
+                        <p class="platform-card-desc">{{ $platform['description'] }}</p>
+
+                        <div class="platform-arrow-circle">
+                            <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
+                        </div>
+
+                        <svg class="card-wave-svg" viewBox="0 0 210 36" preserveAspectRatio="none">
+                            <path d="M0 8C61 6 92 52 210 1V36H0Z" fill="{{ $platform['wave_color'] ?? '#e0f2fe' }}" opacity="0.6"/>
+                            <path d="M0 35C89 43 138 1 210 3V36H0Z" fill="{{ $platform['wave_color'] ?? '#e0f2fe' }}" opacity="0.8"/>
+                        </svg>
+                    </a>
+                @endforeach
+            </div>
+        @else
+            <div class="empty-platforms-notice" style="background: #ffffff; border-radius: 18px; padding: 40px 24px; text-align: center; border: 1px dashed #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.02);">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: #f8fafc; color: #64748b; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                    <i data-lucide="chart-no-axes-column-increasing" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">No Connected Analytics Platforms</div>
+                <div style="font-size: 13px; color: #64748b; max-width: 440px; margin: 0 auto; line-height: 1.5;">
+                    No marketing or analytics integrations are currently active for this account. Once your Google, Meta, or search platforms are connected, live performance cards will appear here.
+                </div>
+            </div>
+        @endif
     </section>
 
     <!-- Encouragement Banner -->
