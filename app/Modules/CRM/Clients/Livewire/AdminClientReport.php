@@ -47,6 +47,8 @@ class AdminClientReport extends Component
         if (empty($this->compareDateTo)) $this->compareDateTo = request('cto', '');
         if (empty($this->compareFormat)) $this->compareFormat = request('format', 'percentage');
 
+        $this->initDateRange();
+
         $this->loadReport();
     }
 

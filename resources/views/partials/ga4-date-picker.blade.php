@@ -23,7 +23,7 @@
     
     activeTarget: 'range',
     hoverDate: null,
-    selectedPreset: 'last_30',
+    selectedPreset: 'last_28',
     selectingStep: 0,
     viewDate: new Date(),
 
@@ -34,12 +34,10 @@
         this.tempCompareEnd = this.compareDateTo || '';
         this.includeToday = this.includeTodayLive || false;
         this.format = this.compareFormatLive || 'percentage';
-        this.selectedPreset = this.datePresetLive || 'last_30';
+        this.selectedPreset = this.datePresetLive || 'last_28';
         this.enableCompare = !!this.tempCompareStart;
         
-        if (!this.datePresetLive) {
-            this.syncPresetFromDates();
-        }
+        this.syncPresetFromDates();
         
         if (this.tempStart) {
             this.viewDate = new Date(this.tempStart);
@@ -246,7 +244,7 @@
 
     syncPresetFromDates() {
         if (!this.tempStart || !this.tempEnd) {
-            this.selectedPreset = 'last_30';
+            this.selectedPreset = 'last_28';
             return;
         }
         const dStart = new Date(this.tempStart);
@@ -335,7 +333,7 @@
             class="inline-flex items-center gap-2.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-600 rounded-md shadow-xs transition-colors duration-150 text-xs text-slate-800 dark:text-slate-200 font-medium">
         <span class="bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-xs font-semibold"
               x-text="getPresetLabel()">
-            Last 30 days
+            Last 28 days
         </span>
         <span class="font-semibold text-slate-700 dark:text-slate-200" x-text="formatDateRangeDisplay()"></span>
         <svg class="w-3.5 h-3.5 text-slate-500 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">

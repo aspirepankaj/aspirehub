@@ -70,7 +70,22 @@
             </div>
             @endif
         </div>
-    </div>
+    @elseif(empty($hideToolbar))
+        {{-- Toolbar for integrated view when hideHeader is true --}}
+        <div class="flex items-center justify-end gap-3 mb-4">
+            @if($activeReportIntegrationId !== 'overview')
+                @include('partials.marketing-report-send-modal')
+            @endif
+            @if($activeReportIntegrationId !== 'overview')
+                <div class="w-full sm:w-auto">
+                    @php
+                        $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                        $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+                    @endphp
+                    @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+                </div>
+            @endif
+        </div>
     @endif
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm p-6">
         @if (empty($activeReportData))
@@ -844,10 +859,157 @@
                                         </div>
                                         <span class="font-bold text-slate-700 dark:text-slate-300">{{ $item['value'] }}%</span>
                                     </div>
-@endforeach
-</div>
-</div>
-</div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Post Performance Summary KPI Cards -->
+                <div class="mt-8 mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-sky-500"></span> Post Engagement Overview
+                        </span>
+                    </div>
+                    <div class="{{ count($reportSets) > 1 ? 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4' }}">
+                        <!-- Posts -->
+                        <div class="p-3 sm:p-4 bg-sky-50/20 dark:bg-sky-950/10 border border-sky-100/30 dark:border-sky-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
+                            <div class="flex items-center justify-between mb-1 gap-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">Posts</span>
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                            </div>
+                            <span class="text-base sm:text-xl font-extrabold text-sky-600 dark:text-sky-400 block truncate">
+                                {{ number_format($reportDataScope['summary']['posts'] ?? count($reportDataScope['top_posts'] ?? [])) }}
+                            </span>
+                        </div>
+                        <!-- Post Engagement -->
+                        <div class="p-3 sm:p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
+                            <div class="flex items-center justify-between mb-1 gap-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Post Engagement">Engagement</span>
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            </div>
+                            <span class="text-base sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 block truncate">
+                                {{ number_format($reportDataScope['summary']['post_engagements'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'engaged'))) }}
+                            </span>
+                        </div>
+                        <!-- Average Post Engagement Rate -->
+                        <div class="p-3 sm:p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
+                            <div class="flex items-center justify-between mb-1 gap-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Avg Engagement Rate">Avg Rate</span>
+                                <span class="text-[9px] sm:text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1 py-0.5 rounded shrink-0">%</span>
+                            </div>
+                            <span class="text-base sm:text-xl font-extrabold text-indigo-600 dark:text-indigo-400 block truncate">
+                                {{ number_format((float)($reportDataScope['summary']['avg_post_engagement_rate'] ?? 0), 2) }}%
+                            </span>
+                        </div>
+                        <!-- Post Reactions & Likes -->
+                        <div class="p-3 sm:p-4 bg-rose-50/20 dark:bg-rose-950/10 border border-rose-100/30 dark:border-rose-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
+                            <div class="flex items-center justify-between mb-1 gap-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Reactions & Likes">Reactions</span>
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            </div>
+                            <span class="text-base sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 block truncate">
+                                {{ number_format($reportDataScope['summary']['post_reactions'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'reactions'))) }}
+                            </span>
+                        </div>
+                        <!-- Post Comments & Replies -->
+                        <div class="p-3 sm:p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
+                            <div class="flex items-center justify-between mb-1 gap-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Comments & Replies">Comments</span>
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            </div>
+                            <span class="text-base sm:text-xl font-extrabold text-amber-600 dark:text-amber-400 block truncate">
+                                {{ number_format($reportDataScope['summary']['post_comments'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'comments'))) }}
+                            </span>
+                        </div>
+                        <!-- Post Shares -->
+                        <div class="p-3 sm:p-4 bg-purple-50/20 dark:bg-purple-950/10 border border-purple-100/30 dark:border-purple-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
+                            <div class="flex items-center justify-between mb-1 gap-1">
+                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">Shares</span>
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                            </div>
+                            <span class="text-base sm:text-xl font-extrabold text-purple-600 dark:text-purple-400 block truncate">
+                                {{ number_format($reportDataScope['summary']['post_shares'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'shares'))) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Posts Table -->
+                <div class="mt-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">Posts table</h4>
+                        </div>
+                        <span class="text-[11px] font-semibold text-slate-400">{{ count($reportDataScope['top_posts'] ?? []) }} Posts</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">
+                                <tr>
+                                    <th class="py-3 px-3 sm:px-4">DATE <span class="text-[9px]">▼</span></th>
+                                    <th class="py-3 px-3 sm:px-4">MESSAGE</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">IMPRESSIONS</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">REACH</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">ENGAGEMENT</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">% ENGAGEMENT</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">REACTIONS</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">COMMENTS</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">SHARES</th>
+                                    <th class="py-3 px-3 sm:px-4 text-right">VIDEO VIEWS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50 text-slate-700 dark:text-slate-300">
+                                @forelse($reportDataScope['top_posts'] ?? [] as $post)
+                                    <tr wire:key="li-post-{{ $idx }}-{{ $loop->index }}" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td class="py-3 px-3 sm:px-4 align-top">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-7 h-7 rounded-full bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-[10px] shrink-0 border border-sky-200/50 dark:border-sky-800/40">
+                                                    AS
+                                                </div>
+                                                <div>
+                                                    <span class="font-bold text-slate-800 dark:text-slate-200 block text-[11px] whitespace-nowrap">Aspire Digital Solutions</span>
+                                                    <span class="text-[10px] text-sky-600 dark:text-sky-400 font-medium whitespace-nowrap">
+                                                        {{ !empty($post['created_time']) ? \Carbon\Carbon::parse($post['created_time'])->format('M d, H:i') : '' }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-3 sm:px-4 align-top">
+                                            <div class="flex items-start gap-2.5 min-w-[200px] {{ count($reportSets) > 1 ? 'max-w-[240px]' : 'max-w-[380px]' }} whitespace-normal">
+                                                @if(!empty($post['picture']))
+                                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 overflow-hidden relative border border-slate-200 dark:border-slate-700 mt-0.5">
+                                                        <img src="{{ $post['picture'] }}" 
+                                                             referrerpolicy="no-referrer" 
+                                                             loading="lazy" 
+                                                             class="w-full h-full object-cover"
+                                                             onerror="this.style.display='none'">
+                                                    </div>
+                                                @endif
+                                                <a href="{{ $post['url'] ?? '#' }}" target="_blank" class="text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-sky-600 line-clamp-2 block leading-snug" title="{{ $post['message'] ?? '' }}">
+                                                    {{ $post['message'] ?? 'No message' }}
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-semibold align-top">{{ number_format($post['impressions'] ?? ($post['views'] ?? 0)) }}</td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-semibold text-slate-600 dark:text-slate-400 align-top">{{ number_format($post['reach'] ?? ($post['viewers'] ?? 0)) }}</td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-semibold text-emerald-600 dark:text-emerald-400 align-top">{{ number_format($post['engaged'] ?? 0) }}</td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-bold text-slate-700 dark:text-slate-200 align-top">{{ $post['engagement_rate'] ?? '0.00%' }}</td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-semibold text-sky-600 dark:text-sky-400 align-top">{{ number_format($post['reactions'] ?? ($post['likes'] ?? 0)) }}</td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-semibold align-top">{{ number_format($post['comments'] ?? 0) }}</td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-semibold align-top">{{ number_format($post['shares'] ?? 0) }}</td>
+                                        <td class="py-3 px-3 sm:px-4 text-right font-semibold text-purple-600 dark:text-purple-400 align-top">{{ number_format($post['video_views'] ?? 0) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr wire:key="li-post-empty-{{ $idx }}">
+                                        <td colspan="10" class="py-8 text-center text-slate-500">No posts found for this period.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             @endforeach

@@ -1970,6 +1970,28 @@ class StaffClients extends Component
                             }
                             $mReportData['top_posts'] = $mTopPosts;
                             $mReportData['summary']['posts'] = count($mTopPosts);
+
+                            if ($integrationId === 'linkedin') {
+                                $mShares = 0;
+                                $mComments = 0;
+                                $mReactions = 0;
+                                $mPostEngagements = 0;
+                                $mPostImpressions = 0;
+                                foreach ($mTopPosts as $tp) {
+                                    $mShares += (int)($tp['shares'] ?? 0);
+                                    $mComments += (int)($tp['comments'] ?? 0);
+                                    $mReactions += (int)($tp['reactions'] ?? ($tp['likes'] ?? 0));
+                                    $mPostEngagements += (int)($tp['engaged'] ?? 0);
+                                    $mPostImpressions += (int)($tp['impressions'] ?? ($tp['views'] ?? 0));
+                                }
+                                $mReportData['summary']['post_shares'] = $mShares;
+                                $mReportData['summary']['post_comments'] = $mComments;
+                                $mReportData['summary']['post_reactions'] = $mReactions;
+                                $mReportData['summary']['post_engagements'] = $mPostEngagements;
+                                $mReportData['summary']['avg_post_engagement_rate'] = $mPostImpressions > 0 
+                                    ? round(($mPostEngagements / $mPostImpressions) * 100, 2) 
+                                    : 0;
+                            }
                         }
                     } elseif ($integrationId === 'gads') {
                         $mClicks = 0;
@@ -2107,6 +2129,134 @@ class StaffClients extends Component
                 ['region' => 'Asia Pacific', 'percentage' => '16%'],
                 ['region' => 'Australia', 'percentage' => '8%'],
                 ['region' => 'Other', 'percentage' => '4%'],
+            ],
+            'top_posts' => [
+                [
+                    'id' => 'urn:li:share:7251849102837190',
+                    'message' => "Celebrating excellence in Fairfield County's medical community. 🏆 Our Aspire Digital Solutions team joined local physicians at the Fairfield County Medical Association...",
+                    'created_time' => '2026-10-13T14:03:00Z',
+                    'impressions' => 173,
+                    'reach' => 95,
+                    'engaged' => 83,
+                    'engagement_rate' => '47.98%',
+                    'reactions' => 9,
+                    'likes' => 9,
+                    'comments' => 0,
+                    'shares' => 0,
+                    'video_views' => 0,
+                    'views' => 173,
+                    'viewers' => 95,
+                    'picture' => 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&auto=format&fit=crop&q=60',
+                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                ],
+                [
+                    'id' => 'urn:li:share:7247492019482711',
+                    'message' => "SEO is a long game, but the right strategy can build momentum that keeps working for your business long after you hit publish. From the first signs of progress to the point...",
+                    'created_time' => '2026-10-01T14:00:00Z',
+                    'impressions' => 216,
+                    'reach' => 107,
+                    'engaged' => 10,
+                    'engagement_rate' => '4.63%',
+                    'reactions' => 5,
+                    'likes' => 5,
+                    'comments' => 0,
+                    'shares' => 0,
+                    'video_views' => 0,
+                    'views' => 216,
+                    'viewers' => 107,
+                    'picture' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&auto=format&fit=crop&q=60',
+                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                ],
+                [
+                    'id' => 'urn:li:share:7242401827491029',
+                    'message' => "It was such a great evening celebrating inspiring women, leadership, innovation, and impact. Thank you to Westfair Business for this gracious award and for recognizing...",
+                    'created_time' => '2026-09-17T16:33:00Z',
+                    'impressions' => 592,
+                    'reach' => 312,
+                    'engaged' => 346,
+                    'engagement_rate' => '58.45%',
+                    'reactions' => 26,
+                    'likes' => 26,
+                    'comments' => 7,
+                    'shares' => 1,
+                    'video_views' => 0,
+                    'views' => 592,
+                    'viewers' => 312,
+                    'picture' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=60',
+                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                ],
+                [
+                    'id' => 'urn:li:share:7238719201847102',
+                    'message' => "(Labor Day) Celebrating hard work, dedication, and the amazing team making things happen every day!",
+                    'created_time' => '2026-09-07T11:00:00Z',
+                    'impressions' => 178,
+                    'reach' => 101,
+                    'engaged' => 13,
+                    'engagement_rate' => '7.30%',
+                    'reactions' => 6,
+                    'likes' => 6,
+                    'comments' => 0,
+                    'shares' => 0,
+                    'video_views' => 0,
+                    'views' => 178,
+                    'viewers' => 101,
+                    'picture' => 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?w=300&auto=format&fit=crop&q=60',
+                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                ],
+                [
+                    'id' => 'urn:li:share:7228830192847103',
+                    'message' => "Lauren, the summer intern here, wrapping up an amazing summer at Aspire Digital Solutions! Over the past few months, I've had the opportunity to work directly with...",
+                    'created_time' => '2026-08-10T12:58:00Z',
+                    'impressions' => 461,
+                    'reach' => 255,
+                    'engaged' => 42,
+                    'engagement_rate' => '9.11%',
+                    'reactions' => 17,
+                    'likes' => 17,
+                    'comments' => 0,
+                    'shares' => 1,
+                    'video_views' => 0,
+                    'views' => 461,
+                    'viewers' => 255,
+                    'picture' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&auto=format&fit=crop&q=60',
+                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                ],
+                [
+                    'id' => 'urn:li:share:7221948102938471',
+                    'message' => "Our CEO, Christine Mullen, was honored to speak at a recent event about the growing impact of AI on marketing and the future of the workforce. Hosted by The Ancell Advantage at...",
+                    'created_time' => '2026-07-22T19:09:00Z',
+                    'impressions' => 270,
+                    'reach' => 126,
+                    'engaged' => 28,
+                    'engagement_rate' => '10.37%',
+                    'reactions' => 14,
+                    'likes' => 14,
+                    'comments' => 0,
+                    'shares' => 1,
+                    'video_views' => 193,
+                    'views' => 270,
+                    'viewers' => 126,
+                    'picture' => 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=300&auto=format&fit=crop&q=60',
+                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                ],
+                [
+                    'id' => 'urn:li:share:7221294810293842',
+                    'message' => "The Aspire Digital Rundown got run down 😅 It took a well deserved break, and now it's back with valuable insights! This issue is all about agentic search, aka the moment when people stop Googling and start letting AI do...",
+                    'created_time' => '2026-07-20T01:58:00Z',
+                    'impressions' => 199,
+                    'reach' => 102,
+                    'engaged' => 13,
+                    'engagement_rate' => '6.53%',
+                    'reactions' => 6,
+                    'likes' => 6,
+                    'comments' => 1,
+                    'shares' => 0,
+                    'video_views' => 0,
+                    'views' => 199,
+                    'viewers' => 102,
+                    'picture' => 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=300&auto=format&fit=crop&q=60',
+                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                ],
             ],
             'raw' => [
                 'source' => 'LinkedIn API (Simulated / Fallback)',

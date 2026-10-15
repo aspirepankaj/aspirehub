@@ -29,20 +29,20 @@ trait LoadsMarketingReports
     public bool $isSendingReport = false;
     public string $reportModalSuccessMessage = '';
     public string $reportModalErrorMessage = '';
-    #[\Livewire\Attributes\Url(except: 'last_30')]
-    public string $datePreset = 'last_30';
+    #[\Livewire\Attributes\Url(except: 'last_28')]
+    public string $datePreset = 'last_28';
 
 
     public function initDateRange()
     {
         if (empty($this->dateFrom)) {
-            $this->dateFrom = session('marketing_date_from', Carbon::now()->subDays(29)->format('Y-m-d'));
+            $this->dateFrom = session('marketing_date_from', Carbon::now()->subDays(28)->format('Y-m-d'));
         }
         if (empty($this->dateTo)) {
-            $this->dateTo = session('marketing_date_to', Carbon::now()->format('Y-m-d'));
+            $this->dateTo = session('marketing_date_to', Carbon::now()->subDays(1)->format('Y-m-d'));
         }
-        if ($this->datePreset === 'last_30') {
-            $this->datePreset = session('marketing_date_preset', 'last_30');
+        if ($this->datePreset === 'last_28') {
+            $this->datePreset = session('marketing_date_preset', 'last_28');
         }
         
         // Ensure format and other compare states persist if not set
@@ -517,6 +517,34 @@ trait LoadsMarketingReports
                 if (empty($allData['summary']['followers']) || $allData['summary']['followers'] === 1945) {
                     $allData['summary']['followers'] = 1195;
                 }
+
+                // Aggregate LinkedIn Post Engagement Metrics
+                $postsList = $allData['top_posts'] ?? [];
+                $postCount = count($postsList);
+                $postShares = 0;
+                $postComments = 0;
+                $postReactions = 0;
+                $postEngagements = 0;
+                $postImpressions = 0;
+
+                foreach ($postsList as $p) {
+                    $postShares += (int)($p['shares'] ?? 0);
+                    $postComments += (int)($p['comments'] ?? 0);
+                    $postReactions += (int)($p['reactions'] ?? ($p['likes'] ?? 0));
+                    $postEngagements += (int)($p['engaged'] ?? 0);
+                    $postImpressions += (int)($p['impressions'] ?? ($p['views'] ?? 0));
+                }
+
+                $avgPostEngagementRate = $postImpressions > 0 
+                    ? round(($postEngagements / $postImpressions) * 100, 2) 
+                    : 0;
+
+                $allData['summary']['posts'] = $postCount;
+                $allData['summary']['post_shares'] = $postShares;
+                $allData['summary']['post_comments'] = $postComments;
+                $allData['summary']['post_reactions'] = $postReactions;
+                $allData['summary']['post_engagements'] = $postEngagements;
+                $allData['summary']['avg_post_engagement_rate'] = $avgPostEngagementRate;
             }
             // Re-calculate Gads summary
             elseif ($integrationType === 'gads') {

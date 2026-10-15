@@ -182,9 +182,9 @@ class ManageMarketingReports extends Component
     {
         $this->activeTab = $tab;
         
-        $this->datePreset = 'last_30';
-        $this->dateFrom = \Carbon\Carbon::now()->subDays(29)->format('Y-m-d');
-        $this->dateTo = \Carbon\Carbon::now()->format('Y-m-d');
+        $this->datePreset = 'last_28';
+        $this->dateFrom = \Carbon\Carbon::now()->subDays(28)->format('Y-m-d');
+        $this->dateTo = \Carbon\Carbon::now()->subDays(1)->format('Y-m-d');
         
         $this->compareDateFrom = '';
         $this->compareDateTo = '';

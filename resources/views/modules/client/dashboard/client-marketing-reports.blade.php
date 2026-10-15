@@ -65,10 +65,10 @@
 
     <!-- Integration Selector Tabs / Date Filter Header -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <!-- Integration Tabs (Scrollable on mobile) -->
+        <!-- Integration Tabs (Scrollable cleanly without heavy native scrollbar) -->
         @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isLinkedinConnected)
-            <div class="w-full lg:w-auto overflow-x-auto pb-1 scrollbar-none max-w-full">
-                <div class="flex items-center p-1 bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur border border-slate-200/30 dark:border-slate-700/30 rounded-xl min-w-max">
+            <div class="flex-1 min-w-0 overflow-x-auto no-scrollbar scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
+                <div class="flex items-center p-1.5 bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur border border-slate-200/40 dark:border-slate-700/40 rounded-2xl min-w-max space-x-1">
                     <button type="button" wire:click="selectIntegration('overview')" 
                         class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'overview' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
                         <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
@@ -142,8 +142,10 @@
         @endif
 
         @if($activeReportIntegrationId !== 'overview')
-            <div class="flex items-center gap-3">
-                @include('partials.marketing-report-send-modal')
+            <div class="flex items-center gap-3 shrink-0">
+                @if(!request()->is('client*') && ($isEmbedded || auth()->user()?->staff || auth()->user()?->admin))
+                    @include('partials.marketing-report-send-modal')
+                @endif
                 @php
                     $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
                     $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
@@ -1008,7 +1010,7 @@
                     </div>
                 @else
                     <div wire:key="integration-view-single-{{ $activeReportIntegrationId }}">
-                        @include('modules.crm.clients.client-report', ['hideHeader' => true])
+                        @include('modules.crm.clients.client-report', ['hideHeader' => true, 'hideToolbar' => true])
                     </div>
                 @endif
             @endif
