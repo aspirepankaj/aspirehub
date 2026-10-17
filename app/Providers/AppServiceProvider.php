@@ -55,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::component('manage-support-tickets', \App\Modules\Support\Livewire\ManageSupportTickets::class);
 
         \Livewire\Livewire::component('admin-client-report', \App\Modules\CRM\Clients\Livewire\AdminClientReport::class);
+        \Livewire\Livewire::component('admin-client-marketing-tab', \App\Modules\CRM\Clients\Livewire\AdminClientMarketingTab::class);
 
         \Livewire\Livewire::component('client-dashboard', \App\Modules\Client\Dashboard\Livewire\ClientDashboard::class);
         \Livewire\Livewire::component('client-websites', \App\Modules\Client\Dashboard\Livewire\ClientMyWebsites::class);

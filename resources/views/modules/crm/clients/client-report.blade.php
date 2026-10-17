@@ -61,7 +61,7 @@
             </a>
             
             @if($activeReportIntegrationId !== 'overview')
-            <div class="w-full sm:w-auto mt-2 sm:mt-0">
+            <div class="w-full sm:w-auto mt-2 sm:mt-0" wire:key="dp-top-box-{{ $activeReportIntegrationId }}-{{ $this->websiteId }}">
                 @php
                     $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
                     $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
@@ -77,7 +77,7 @@
                 @include('partials.marketing-report-send-modal')
             @endif
             @if($activeReportIntegrationId !== 'overview')
-                <div class="w-full sm:w-auto">
+                <div class="w-full sm:w-auto" wire:key="dp-box-{{ $activeReportIntegrationId }}-{{ $this->websiteId }}">
                     @php
                         $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
                         $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
@@ -167,29 +167,49 @@
                     </div>
                 @endif
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
-                        <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                            {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['clicks'] ?? 0) : number_format($reportDataScope['summary']['clicks'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['clicks'] ?? 0) : number_format($reportDataScope['summary']['clicks'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
-                        <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                            {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['impressions'] ?? 0) : number_format($reportDataScope['summary']['impressions'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['impressions'] ?? 0) : number_format($reportDataScope['summary']['impressions'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CTR</span>
-                        <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
-                            {{ $reportDataScope['summary']['ctr'] ?? 0 }}%
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CTR</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ $reportDataScope['summary']['ctr'] ?? 0 }}%
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. Position</span>
-                        <span class="text-lg font-extrabold text-amber-600 dark:text-amber-400">
-                            {{ $reportDataScope['summary']['position'] ?? 0 }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. Position</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ $reportDataScope['summary']['position'] ?? 0 }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -469,29 +489,49 @@
                     </div>
                 @endif
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Followers</span>
-                        <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                            {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Followers</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-red-50/30 dark:bg-red-950/10 border border-red-100/30 dark:border-red-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Reach</span>
-                        <span class="text-lg font-extrabold text-red-600 dark:text-red-400">
-                            {{ number_format($reportDataScope['summary']['reach'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Reach</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['reach'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                        <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-                            {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-blue-50/30 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Engaged</span>
-                        <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                            {{ number_format($reportDataScope['summary']['engaged'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Engaged</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['engaged'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -689,29 +729,49 @@
                     </div>
                 @endif
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="p-4 bg-sky-50/20 dark:bg-sky-950/10 border border-sky-100/30 dark:border-sky-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Followers</span>
-                        <span class="text-lg font-extrabold text-sky-600 dark:text-sky-400">
-                            {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Followers</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
-                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                            {{ number_format($reportDataScope['summary']['impressions'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['impressions'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
-                        <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                            {{ number_format($reportDataScope['summary']['clicks'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['clicks'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Engagement</span>
-                        <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-                            {{ number_format($reportDataScope['summary']['engagements'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Engagement</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['engagements'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -1074,29 +1134,49 @@
         @elseif ($activeReportIntegrationId === 'gbp')
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                    <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                        {{ number_format($activeReportData['summary']['views'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($activeReportData['summary']['views'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Searches</span>
-                    <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                        {{ number_format($activeReportData['summary']['searches'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Searches</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($activeReportData['summary']['searches'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Interactions</span>
-                    <span class="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                        {{ number_format($activeReportData['summary']['interactions'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Interactions</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($activeReportData['summary']['interactions'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Calls</span>
-                    <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-                        {{ number_format($activeReportData['summary']['calls'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Calls</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($activeReportData['summary']['calls'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -1912,11 +1992,11 @@
                 <div class="bg-white border border-slate-200 rounded-lg shadow-sm mb-6 overflow-hidden font-sans" wire:key="gads-replica-{{ $idx }}-{{ $this->dateFrom }}-{{ $this->dateTo }}" x-data="{
                     chart: null,
                     metrics: {
-                        'clicks': { label: 'Clicks', value: 0, color: '#1a73e8', selected: true, order: 1 },
-                        'impressions': { label: 'Impressions', value: 0, color: '#d93025', selected: true, order: 2, isAbbr: true },
-                        'avg_cpc': { label: 'Avg. CPC', value: 0, color: '#8e24aa', selected: false, order: 3, prefix: '$' },
-                        'cost': { label: 'Cost', value: 0, color: '#f9ab00', selected: false, order: 4, prefix: '$', round: true },
-                        'conversions': { label: 'Conversions', value: 0, color: '#1e8e3e', selected: false, order: 5 }
+                        'clicks': { label: 'Clicks', value: 0, color: '#1a73e8', selected: true, order: 1, type: 'clicks' },
+                        'impressions': { label: 'Impressions', value: 0, color: '#d93025', selected: true, order: 2, isAbbr: true, type: 'impressions' },
+                        'avg_cpc': { label: 'Avg. CPC', value: 0, color: '#8e24aa', selected: false, order: 3, prefix: '$', type: 'cpc' },
+                        'cost': { label: 'Cost', value: 0, color: '#f9ab00', selected: false, order: 4, prefix: '$', round: true, type: 'cost' },
+                        'conversions': { label: 'Conversions', value: 0, color: '#1e8e3e', selected: false, order: 5, type: 'conversions' }
                     },
                     traffic: [],
                     labels: [],
@@ -2098,13 +2178,32 @@
                     <div class="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200 divide-x divide-slate-200">
                         <template x-for="(key, index) in Object.keys(metrics)" :key="key">
                             <div @click="toggleMetric(key)" 
-                                 class="p-4 cursor-pointer select-none transition-colors h-[100px] flex flex-col justify-between"
+                                 class="p-4 cursor-pointer select-none transition-colors h-[100px] flex items-center gap-3"
                                  :style="metrics[key].selected ? 'background-color: ' + metrics[key].color + '; color: white;' : 'background-color: white; color: #3c4043;'">
                                  
-                                <div class="flex items-center gap-1">
-                                    <span class="text-[13px] font-medium" x-text="metrics[key].label"></span>
+                                <span class="gads-card-icon">
+                                    <template x-if="key === 'clicks'">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
+                                    </template>
+                                    <template x-if="key === 'impressions'">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </template>
+                                    <template x-if="key === 'avg_cpc'">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+                                    </template>
+                                    <template x-if="key === 'cost'">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                                    </template>
+                                    <template x-if="key === 'conversions'">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                    </template>
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-[13px] font-medium" x-text="metrics[key].label"></span>
+                                    </div>
+                                    <div class="text-[26px] font-normal font-sans leading-none" x-text="formatValue(metrics[key].value, metrics[key])"></div>
                                 </div>
-                                <div class="text-[26px] font-normal font-sans leading-none" x-text="formatValue(metrics[key].value, metrics[key])"></div>
                             </div>
                         </template>
                     </div>
@@ -2373,29 +2472,49 @@
                     </div>
                 @endif
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="p-4 bg-red-50/20 dark:bg-red-950/10 border border-red-100/30 dark:border-red-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                        <span class="text-lg font-extrabold text-red-600 dark:text-red-400">
-                            {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/30 dark:border-orange-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Watch Time (hrs)</span>
-                        <span class="text-lg font-extrabold text-orange-600 dark:text-orange-400">
-                            {{ number_format($reportDataScope['summary']['watch_time'] ?? 0, 1) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Watch Time (hrs)</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['watch_time'] ?? 0, 1) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Subscribers</span>
-                        <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
-                            {{ number_format($reportDataScope['summary']['subscribers'] ?? 0) }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Subscribers</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['subscribers'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Duration</span>
-                        <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                            {{ $reportDataScope['summary']['avg_view_duration'] ?? '0s' }}
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 8v5l4-4"/></svg>
                         </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Duration</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ $reportDataScope['summary']['avg_view_duration'] ?? '0s' }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2557,35 +2676,60 @@
                     </div>
                 @endif
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                <div class="p-4 bg-purple-50/20 dark:bg-purple-950/10 border border-purple-100/30 dark:border-purple-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Keywords</span>
-                    <span class="text-lg font-extrabold text-purple-600 dark:text-purple-400">
-                        {{ number_format($reportDataScope['summary']['total_keywords'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Keywords</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($reportDataScope['summary']['total_keywords'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10</span>
-                    <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
-                        {{ number_format($reportDataScope['summary']['top_10'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($reportDataScope['summary']['top_10'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15</span>
-                    <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-                        {{ number_format($reportDataScope['summary']['top_15'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($reportDataScope['summary']['top_15'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="p-4 bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/30 dark:border-orange-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10 Pages</span>
-                    <span class="text-lg font-extrabold text-orange-600 dark:text-orange-400">
-                        {{ number_format($reportDataScope['summary']['top_10_pages'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10 Pages</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($reportDataScope['summary']['top_10_pages'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="p-4 bg-pink-50/20 dark:bg-pink-950/10 border border-pink-100/30 dark:border-pink-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15 Pages</span>
-                    <span class="text-lg font-extrabold text-pink-600 dark:text-pink-400">
-                        {{ number_format($reportDataScope['summary']['top_15_pages'] ?? 0) }}
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                     </span>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15 Pages</span>
+                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ number_format($reportDataScope['summary']['top_15_pages'] ?? 0) }}
+                        </span>
+                    </div>
                 </div>
             </div>
             </div>

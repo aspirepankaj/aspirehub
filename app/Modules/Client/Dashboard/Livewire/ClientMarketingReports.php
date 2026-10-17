@@ -21,7 +21,6 @@ class ClientMarketingReports extends Component
 
     public ?int $selectedWebsiteId = null;
 
-    #[Url(as: 'tab', except: 'overview')]
     public string $activeReportIntegrationId = 'overview';
     public ?string $activeReportPropertyId = null;
     
@@ -83,8 +82,11 @@ class ClientMarketingReports extends Component
             $this->selectedWebsiteId = $this->websites->first()->id;
             
             $tab = request()->query('tab');
-            if ($tab) {
+            // When embedded in admin/staff detail page, '?tab=marketing' is the parent page tab, not the integration report tab!
+            if ($tab && $tab !== 'marketing') {
                 $this->activeReportIntegrationId = $tab;
+            } else {
+                $this->activeReportIntegrationId = 'overview';
             }
 
             $this->loadIntegrationsAndMonths();
@@ -160,7 +162,11 @@ class ClientMarketingReports extends Component
             ->keyBy('integration_type')
             ->toArray();
 
-        $requestedTab = request()->query('tab') ?: $this->activeReportIntegrationId;
+        $requestedTab = request()->query('tab');
+        if ($requestedTab === 'marketing') {
+            $requestedTab = null;
+        }
+        $requestedTab = $requestedTab ?: $this->activeReportIntegrationId;
         if ($requestedTab && ($requestedTab === 'overview' || isset($this->integrations[$requestedTab]) || in_array($requestedTab, ['ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'linkedin', 'gtm']))) {
             $this->activeReportIntegrationId = $requestedTab;
         } else {
@@ -411,20 +417,22 @@ class ClientMarketingReports extends Component
             'marketing_date_preset'
         ]);
 
-        $this->js("
-            let u = new URL(window.location.href); 
-            if ('{$typeId}' === 'overview') {
-                u.searchParams.delete('tab');
-            } else {
-                u.searchParams.set('tab', '{$typeId}');
-            }
-            u.searchParams.delete('compareDateFrom'); 
-            u.searchParams.delete('compareDateTo'); 
-            u.searchParams.delete('dateFrom'); 
-            u.searchParams.delete('dateTo'); 
-            u.searchParams.delete('datePreset'); 
-            window.history.replaceState({}, '', u.toString());
-        ");
+        if (!$this->isEmbedded) {
+            $this->js("
+                let u = new URL(window.location.href); 
+                if ('{$typeId}' === 'overview') {
+                    u.searchParams.delete('tab');
+                } else {
+                    u.searchParams.set('tab', '{$typeId}');
+                }
+                u.searchParams.delete('compareDateFrom'); 
+                u.searchParams.delete('compareDateTo'); 
+                u.searchParams.delete('dateFrom'); 
+                u.searchParams.delete('dateTo'); 
+                u.searchParams.delete('datePreset'); 
+                window.history.replaceState({}, '', u.toString());
+            ");
+        }
 
         $this->loadReportData();
     }
@@ -436,7 +444,18 @@ class ClientMarketingReports extends Component
             $this->loadReportData();
         }
 
-        return view('modules.client.dashboard.client-marketing-reports', [
+        // Use separate view for Admin & Staff portal so client design is never mixed/messed up
+        $user = Auth::user();
+        $isAdminOrStaff = $this->isEmbedded || ($user && ($user->admin || $user->staff));
+        $viewName = $isAdminOrStaff
+            ? 'modules.client.dashboard.admin-marketing-reports'
+            : 'modules.client.dashboard.client-marketing-reports';
+
+        return view($viewName, [
+            'isEmbedded' => $this->isEmbedded,
+            'clientId' => $this->clientId,
+            'websites' => $this->websites,
+            'integrations' => $this->integrations,
             'activeReportIntegrationId' => $this->activeReportIntegrationId,
             'activeReportPropertyId' => $this->activeReportPropertyId,
             'activeReportData' => $this->activeReportData,

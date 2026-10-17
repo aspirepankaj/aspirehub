@@ -32,7 +32,7 @@ class AdminClientReport extends Component
     public string $websiteName = '';
     public bool $hideHeader = false;
 
-    public function mount(int $id, string $integration, $websiteId = null, $hideHeader = false): void
+    public function mount(int $id, string $integration, $websiteId = null, $hideHeader = false, ?string $compareDateFrom = null, ?string $compareDateTo = null): void
     {
         $this->clientId = $id;
         $this->integration = $integration;
@@ -43,11 +43,30 @@ class AdminClientReport extends Component
         // Dates are handled by #[Url] now, but we can keep defaults if empty
         if (empty($this->dateFrom)) $this->dateFrom = request('from', Carbon::now()->subDays(28)->format('Y-m-d'));
         if (empty($this->dateTo)) $this->dateTo = request('to', Carbon::now()->subDays(1)->format('Y-m-d'));
-        if (empty($this->compareDateFrom)) $this->compareDateFrom = request('cfrom', '');
-        if (empty($this->compareDateTo)) $this->compareDateTo = request('cto', '');
+        
+        if ($compareDateFrom !== null) {
+            $this->compareDateFrom = $compareDateFrom;
+        } elseif (empty($this->compareDateFrom)) {
+            $this->compareDateFrom = request('cfrom', '');
+        }
+
+        if ($compareDateTo !== null) {
+            $this->compareDateTo = $compareDateTo;
+        } elseif (empty($this->compareDateTo)) {
+            $this->compareDateTo = request('cto', '');
+        }
+
         if (empty($this->compareFormat)) $this->compareFormat = request('format', 'percentage');
 
         $this->initDateRange();
+
+        // If explicitly passed empty compare dates, ensure they remain empty
+        if ($compareDateFrom === '') {
+            $this->compareDateFrom = '';
+        }
+        if ($compareDateTo === '') {
+            $this->compareDateTo = '';
+        }
 
         $this->loadReport();
     }
