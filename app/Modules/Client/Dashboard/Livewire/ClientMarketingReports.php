@@ -20,6 +20,7 @@ class ClientMarketingReports extends Component
     use LoadsMarketingReports;
 
     public ?int $selectedWebsiteId = null;
+    public ?int $websiteId = null;
 
     public string $activeReportIntegrationId = 'overview';
     public ?string $activeReportPropertyId = null;
@@ -80,6 +81,7 @@ class ClientMarketingReports extends Component
 
         if ($this->websites->isNotEmpty()) {
             $this->selectedWebsiteId = $this->websites->first()->id;
+            $this->websiteId = $this->selectedWebsiteId;
             
             $tab = request()->query('tab');
             // When embedded in admin/staff detail page, '?tab=marketing' is the parent page tab, not the integration report tab!
@@ -95,6 +97,7 @@ class ClientMarketingReports extends Component
 
     public function updatedSelectedWebsiteId()
     {
+        $this->websiteId = $this->selectedWebsiteId;
         $this->loadIntegrationsAndMonths();
     }
 
@@ -265,7 +268,7 @@ class ClientMarketingReports extends Component
                 $this->gtmData = [];
 
                 $hasCompareDates = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
-                $activeData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $tab, $this->dateFrom, $this->dateTo, false);
+                $activeData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $tab, $this->dateFrom, $this->dateTo, true);
 
                 if ($hasCompareDates) {
                     $compareData = $this->loadIntegrationJsonData($clientFolder, $websiteFolder, $tab, $this->compareDateFrom, $this->compareDateTo, false);
@@ -459,6 +462,11 @@ class ClientMarketingReports extends Component
             'activeReportIntegrationId' => $this->activeReportIntegrationId,
             'activeReportPropertyId' => $this->activeReportPropertyId,
             'activeReportData' => $this->activeReportData,
+            'dateFrom' => $this->dateFrom,
+            'dateTo' => $this->dateTo,
+            'compareDateFrom' => $this->compareDateFrom,
+            'compareDateTo' => $this->compareDateTo,
+            'compareFormat' => $this->compareFormat,
             'ga4Data' => $this->ga4Data,
             'gscData' => $this->gscData,
             'youtubeData' => $this->youtubeData,

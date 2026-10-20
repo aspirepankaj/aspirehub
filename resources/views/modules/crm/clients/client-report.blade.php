@@ -1,4 +1,22 @@
 <div>
+    @php
+        $isStacked = !empty($compareStacked);
+        $compareLayoutClass = $isStacked ? 'flex flex-col gap-6' : 'flex flex-col lg:flex-row gap-6';
+        $compareGridClass = $isStacked ? 'grid grid-cols-1 gap-6' : 'grid grid-cols-1 lg:grid-cols-2 gap-6';
+
+        $resolvedPrimaryFrom = !empty($dateFrom) ? $dateFrom : ((isset($this) && !empty($this->dateFrom)) ? $this->dateFrom : null);
+        $resolvedPrimaryTo = !empty($dateTo) ? $dateTo : ((isset($this) && !empty($this->dateTo)) ? $this->dateTo : null);
+        $resolvedCompareFrom = !empty($compareDateFrom) ? $compareDateFrom : ((isset($this) && !empty($this->compareDateFrom)) ? $this->compareDateFrom : null);
+        $resolvedCompareTo = !empty($compareDateTo) ? $compareDateTo : ((isset($this) && !empty($this->compareDateTo)) ? $this->compareDateTo : null);
+
+        $primaryDateTitle = ($resolvedPrimaryFrom && $resolvedPrimaryTo) 
+            ? \Carbon\Carbon::parse($resolvedPrimaryFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($resolvedPrimaryTo)->format('M d, Y') 
+            : 'Current Period';
+
+        $compareDateTitle = ($resolvedCompareFrom && $resolvedCompareTo) 
+            ? \Carbon\Carbon::parse($resolvedCompareFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($resolvedCompareTo)->format('M d, Y') 
+            : 'Previous Period';
+    @endphp
     @if(!isset($hideHeader) || !$hideHeader)
     {{-- Page Header --}}
     <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
@@ -148,25 +166,33 @@
             $reportSets = [];
             $baseData = $activeReportData ?? [];
             if (!empty($baseData)) {
-                $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+                $reportSets[] = ['title' => $primaryDateTitle, 'data' => $baseData];
             }
             if (!empty($baseData['compare_data'])) {
-                $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+                $reportSets[] = ['title' => $compareDateTitle, 'data' => $baseData['compare_data']];
             }
 @endphp
             
-            <div wire:key="wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
+            <div wire:key="gsc-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gsc-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
+            <div wire:key="gsc-period-{{ $idx }}" class="w-full font-sans pb-8">
                 @php $reportDataScope = $rSet['data']; @endphp
                 @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
+                    <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border shadow-xs {{ $idx === 0 ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' }}">
+                                <span class="w-2 h-2 rounded-full {{ $idx === 0 ? 'bg-indigo-600' : 'bg-amber-500' }}"></span>
+                                {{ $rSet['title'] }}
+                            </span>
+                            <span class="text-xs font-semibold text-slate-400">
+                                ({{ $idx === 0 ? 'Primary Period' : 'Compare Period' }})
+                            </span>
+                        </div>
                     </div>
                 @endif
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+                {{-- Summary Cards --}}
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
@@ -212,24 +238,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            @endforeach
-            </div>
 
-            
-            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
-            <div>
-            <div wire:key="wrapper-2-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gsc-section-chart-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
+                {{-- Daily Traffic Chart --}}
                 <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
@@ -290,194 +300,127 @@
                         <canvas x-ref="canvas" id="line-gsc-traffic-{{ $idx }}"></canvas>
                     </div>
                 </div>
+
+                {{-- Queries and URLs --}}
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Search Queries</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                        <th class="py-2 font-bold">Query</th>
+                                        <th class="py-2 text-right font-bold">Clicks</th>
+                                        <th class="py-2 text-right font-bold">Imp.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (array_slice($reportDataScope['top_queries'] ?? [], 0, 10) as $query) 
+                                        <tr wire:key="query-{{ $idx }}-{{ md5(json_encode($query)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                            <td class="py-2.5 font-bold truncate max-w-[150px]" title="{{ $query['query'] }}">{{ $query['query'] }}</td>
+                                            <td class="py-2.5 text-right font-bold">{{ number_format($query['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($query['impressions'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Ranking URLs</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                        <th class="py-2 font-bold">URL</th>
+                                        <th class="py-2 text-right font-bold">Clicks</th>
+                                        <th class="py-2 text-right font-bold">Imp.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (array_slice($reportDataScope['top_pages'] ?? [], 0, 10) as $page) 
+                                        <tr wire:key="page-{{ $idx }}-{{ md5(json_encode($page)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                            <td class="py-2.5 font-bold truncate max-w-[150px] text-indigo-600" title="{{ $page['page'] }}">
+                                                <a href="{{ $page['page'] }}" target="_blank" class="hover:underline">{{ str_replace('https://', '', $page['page']) }}</a>
+                                            </td>
+                                            <td class="py-2.5 text-right font-bold">{{ number_format($page['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($page['impressions'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Devices and Countries --}}
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Device Breakdown</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                        <th class="py-2 font-bold">Device</th>
+                                        <th class="py-2 text-right font-bold">Clicks</th>
+                                        <th class="py-2 text-right font-bold">Imp.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($reportDataScope['devices'] ?? [] as $device)
+                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                            <td class="py-2.5 font-bold capitalize">{{ strtolower($device['device']) }}</td>
+                                            <td class="py-2.5 text-right font-bold">{{ number_format($device['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($device['impressions'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Countries</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                        <th class="py-2 font-bold">Country</th>
+                                        <th class="py-2 text-right font-bold">Clicks</th>
+                                        <th class="py-2 text-right font-bold">Imp.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (array_slice($reportDataScope['countries'] ?? [], 0, 10) as $country)
+                                        <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                            <td class="py-2.5 font-bold capitalize">{{ strtolower(strlen($country['country']) === 3 ? $country['country'] : $country['country']) }}</td>
+                                            <td class="py-2.5 text-right font-bold">{{ number_format($country['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($country['impressions'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             @endforeach
             </div>
-            </div>
-            </div>
-
-            
-            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
-            
-            <div>
-            <div wire:key="wrapper-3-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gsc-section-2-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Search Queries</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                    <th class="py-2 font-bold">Query</th>
-                                    <th class="py-2 text-right font-bold">Clicks</th>
-                                    <th class="py-2 text-right font-bold">Imp.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (array_slice($reportDataScope['top_queries'] ?? [], 0, 10) as $query) <tr wire:key="query-{{ md5(json_encode($query)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                        <td class="py-2.5 font-bold truncate max-w-[150px]" title="{{ $query['query'] }}">{{ $query['query'] }}</td>
-                                        <td class="py-2.5 text-right font-bold">{{ number_format($query['clicks'] ?? 0) }}</td>
-                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($query['impressions'] ?? 0) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-            </div>
-            </div>
-
-            
-            <div>
-            <div wire:key="wrapper-4-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gsc-section-3-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Ranking URLs</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                    <th class="py-2 font-bold">URL</th>
-                                    <th class="py-2 text-right font-bold">Clicks</th>
-                                    <th class="py-2 text-right font-bold">Imp.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (array_slice($reportDataScope['top_pages'] ?? [], 0, 10) as $page) <tr wire:key="page-{{ md5(json_encode($page)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                        <td class="py-2.5 font-bold truncate max-w-[150px] text-indigo-600" title="{{ $page['page'] }}">
-                                            <a href="{{ $page['page'] }}" target="_blank" class="hover:underline">{{ str_replace('https://', '', $page['page']) }}</a>
-                                        </td>
-                                        <td class="py-2.5 text-right font-bold">{{ number_format($page['clicks'] ?? 0) }}</td>
-                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($page['impressions'] ?? 0) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-@endforeach
-</div>
-</div>
-</div>
-
-            
-            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' : 'grid grid-cols-1 gap-6 mb-6' }}">
-            
-            <div>
-            <div wire:key="wrapper-5-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gsc-section-4-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Device Breakdown</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                    <th class="py-2 font-bold">Device</th>
-                                    <th class="py-2 text-right font-bold">Clicks</th>
-                                    <th class="py-2 text-right font-bold">Imp.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($reportDataScope['devices'] ?? [] as $device)
-                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                        <td class="py-2.5 font-bold capitalize">{{ strtolower($device['device']) }}</td>
-                                        <td class="py-2.5 text-right font-bold">{{ number_format($device['clicks'] ?? 0) }}</td>
-                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($device['impressions'] ?? 0) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-            </div>
-            </div>
-
-            
-            <div>
-            <div wire:key="wrapper-6-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6' : 'flex flex-col gap-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gsc-section-5-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Countries</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                    <th class="py-2 font-bold">Country</th>
-                                    <th class="py-2 text-right font-bold">Clicks</th>
-                                    <th class="py-2 text-right font-bold">Imp.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (array_slice($reportDataScope['countries'] ?? [], 0, 10) as $country)
-                                    <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                        <td class="py-2.5 font-bold capitalize">{{ strtolower(strlen($country['country']) === 3 ? $country['country'] : $country['country']) }}</td>
-                                        <td class="py-2.5 text-right font-bold">{{ number_format($country['clicks'] ?? 0) }}</td>
-                                        <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($country['impressions'] ?? 0) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-@endforeach
-</div>
-</div>
-</div>
         @elseif ($activeReportIntegrationId === 'facebook')
             @php
             $reportSets = [];
             $baseData = $activeReportData ?? [];
             if (!empty($baseData)) {
-                $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+                $reportSets[] = ['title' => $primaryDateTitle, 'data' => $baseData];
             }
             if (!empty($baseData['compare_data'])) {
-                $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+                $reportSets[] = ['title' => $compareDateTitle, 'data' => $baseData['compare_data']];
             }
             @endphp
             
-            <div wire:key="fb-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
+            <div wire:key="fb-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="fb-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -710,14 +653,14 @@
             $reportSets = [];
             $baseData = $activeReportData ?? [];
             if (!empty($baseData)) {
-                $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+                $reportSets[] = ['title' => $primaryDateTitle, 'data' => $baseData];
             }
             if (!empty($baseData['compare_data'])) {
-                $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+                $reportSets[] = ['title' => $compareDateTitle, 'data' => $baseData['compare_data']];
             }
             @endphp
             
-            <div wire:key="li-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
+            <div wire:key="li-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="li-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -898,9 +841,9 @@
                             }
                         @endphp
                         @if(!empty($demoItems))
-                            <div class="flex flex-col sm:flex-row items-center justify-between gap-5 my-auto py-1">
+                            <div style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 28px !important; width: 100% !important; flex: 1 !important; padding: 8px 0 !important;">
                                 <!-- Left: Donut Chart with Center Total -->
-                                <div class="relative w-40 h-40 shrink-0" wire:ignore wire:key="li-demo-wrap-{{ $idx }}-{{ md5(json_encode($demoItems)) }}" x-data="{
+                                <div style="width: 170px !important; height: 170px !important; min-width: 170px !important; min-height: 170px !important; position: relative !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important;" wire:ignore wire:key="li-demo-wrap-{{ $idx }}-{{ md5(json_encode($demoItems)) }}" x-data="{
                                     init() {
                                         if (!this.$refs.canvas) return;
                                         const ctx = this.$refs.canvas.getContext('2d');
@@ -945,28 +888,28 @@
                                         });
                                     }
                                 }">
-                                    <canvas x-ref="canvas" class="relative z-10"></canvas>
+                                    <canvas x-ref="canvas" style="width: 170px !important; height: 170px !important; display: block !important;" class="relative z-10"></canvas>
                                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
                                         <span class="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none">{{ number_format($totalFollowers) }}</span>
                                         <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-1">Total Followers</span>
                                     </div>
                                 </div>
 
-                                <!-- Right: Legend with Label, Count & Percentage (exact matching design) -->
-                                <div class="flex-1 w-full space-y-2.5">
+                                <!-- Right: Content / Legend List -->
+                                <div style="flex: 1 !important; display: flex !important; flex-direction: column !important; gap: 10px !important; min-width: 0 !important;">
                                     @foreach($demoItems as $index => $item)
-                                        <div class="flex items-center justify-between text-xs font-medium">
-                                            <div class="flex items-center gap-2 flex-1 pr-2 min-w-0">
+                                        <div style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; font-size: 11px !important; width: 100% !important;">
+                                            <div style="display: flex !important; align-items: center !important; gap: 8px !important; flex: 1 !important; padding-right: 8px !important; min-width: 0 !important;">
                                                 <span class="w-2 h-2 rounded-full {{ $colorClasses[$index % count($colorClasses)] }} shrink-0"></span>
-                                                <span class="text-slate-600 dark:text-slate-300 truncate font-semibold text-[11px]" title="{{ $item['label'] }}">
+                                                <span class="text-slate-600 dark:text-slate-300 truncate font-semibold" title="{{ $item['label'] }}">
                                                     {{ $item['label'] }}
                                                 </span>
                                             </div>
-                                            <div class="flex items-center gap-3 shrink-0 text-right text-[11px]">
-                                                <span class="font-bold text-slate-800 dark:text-slate-200 min-w-[32px]">
+                                            <div style="display: flex !important; align-items: center !important; gap: 12px !important; flex-shrink: 0 !important; text-align: right !important;">
+                                                <span class="font-bold text-slate-800 dark:text-slate-200" style="min-width: 28px !important;">
                                                     {{ number_format($item['count']) }}
                                                 </span>
-                                                <span class="text-slate-400 dark:text-slate-500 min-w-[34px]">
+                                                <span class="text-slate-400 dark:text-slate-500" style="min-width: 32px !important;">
                                                     {{ $item['percentage'] }}%
                                                 </span>
                                             </div>
@@ -989,64 +932,76 @@
                             <span class="w-2 h-2 rounded-full bg-sky-500"></span> Post Engagement Overview
                         </span>
                     </div>
-                    <div class="{{ count($reportSets) > 1 ? 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4' }}">
+                    <div class="{{ count($reportSets) > 1 ? 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5' }}">
                         <!-- Posts -->
-                        <div class="p-3 sm:p-4 bg-sky-50/20 dark:bg-sky-950/10 border border-sky-100/30 dark:border-sky-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
-                            <div class="flex items-center justify-between mb-1 gap-1">
-                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">Posts</span>
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-[#b0cbd6] transition-all min-w-0 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2 gap-1">
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Posts</span>
+                                <div class="w-7 h-7 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                                </div>
                             </div>
-                            <span class="text-base sm:text-xl font-extrabold text-sky-600 dark:text-sky-400 block truncate">
+                            <span class="text-2xl font-black text-[#0c3b4a] dark:text-white block truncate tracking-tight">
                                 {{ number_format($reportDataScope['summary']['posts'] ?? count($reportDataScope['top_posts'] ?? [])) }}
                             </span>
                         </div>
                         <!-- Post Engagement -->
-                        <div class="p-3 sm:p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
-                            <div class="flex items-center justify-between mb-1 gap-1">
-                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Post Engagement">Engagement</span>
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-[#b0cbd6] transition-all min-w-0 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2 gap-1">
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate" title="Post Engagement">Engagement</span>
+                                <div class="w-7 h-7 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                </div>
                             </div>
-                            <span class="text-base sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 block truncate">
+                            <span class="text-2xl font-black text-[#0c3b4a] dark:text-white block truncate tracking-tight">
                                 {{ number_format($reportDataScope['summary']['post_engagements'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'engaged'))) }}
                             </span>
                         </div>
                         <!-- Average Post Engagement Rate -->
-                        <div class="p-3 sm:p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
-                            <div class="flex items-center justify-between mb-1 gap-1">
-                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Avg Engagement Rate">Avg Rate</span>
-                                <span class="text-[9px] sm:text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1 py-0.5 rounded shrink-0">%</span>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-[#b0cbd6] transition-all min-w-0 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2 gap-1">
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate" title="Avg Engagement Rate">Avg Rate</span>
+                                <div class="w-7 h-7 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4] text-[10px] font-extrabold">
+                                    %
+                                </div>
                             </div>
-                            <span class="text-base sm:text-xl font-extrabold text-indigo-600 dark:text-indigo-400 block truncate">
+                            <span class="text-2xl font-black text-[#0c3b4a] dark:text-white block truncate tracking-tight">
                                 {{ number_format((float)($reportDataScope['summary']['avg_post_engagement_rate'] ?? 0), 2) }}%
                             </span>
                         </div>
                         <!-- Post Reactions & Likes -->
-                        <div class="p-3 sm:p-4 bg-rose-50/20 dark:bg-rose-950/10 border border-rose-100/30 dark:border-rose-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
-                            <div class="flex items-center justify-between mb-1 gap-1">
-                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Reactions & Likes">Reactions</span>
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-[#b0cbd6] transition-all min-w-0 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2 gap-1">
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate" title="Reactions & Likes">Reactions</span>
+                                <div class="w-7 h-7 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                </div>
                             </div>
-                            <span class="text-base sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 block truncate">
+                            <span class="text-2xl font-black text-[#0c3b4a] dark:text-white block truncate tracking-tight">
                                 {{ number_format($reportDataScope['summary']['post_reactions'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'reactions'))) }}
                             </span>
                         </div>
                         <!-- Post Comments & Replies -->
-                        <div class="p-3 sm:p-4 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100/30 dark:border-amber-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
-                            <div class="flex items-center justify-between mb-1 gap-1">
-                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate" title="Comments & Replies">Comments</span>
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-[#b0cbd6] transition-all min-w-0 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2 gap-1">
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate" title="Comments & Replies">Comments</span>
+                                <div class="w-7 h-7 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                </div>
                             </div>
-                            <span class="text-base sm:text-xl font-extrabold text-amber-600 dark:text-amber-400 block truncate">
+                            <span class="text-2xl font-black text-[#0c3b4a] dark:text-white block truncate tracking-tight">
                                 {{ number_format($reportDataScope['summary']['post_comments'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'comments'))) }}
                             </span>
                         </div>
                         <!-- Post Shares -->
-                        <div class="p-3 sm:p-4 bg-purple-50/20 dark:bg-purple-950/10 border border-purple-100/30 dark:border-purple-900/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 min-w-0">
-                            <div class="flex items-center justify-between mb-1 gap-1">
-                                <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate">Shares</span>
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-[#b0cbd6] transition-all min-w-0 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2 gap-1">
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Shares</span>
+                                <div class="w-7 h-7 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                                </div>
                             </div>
-                            <span class="text-base sm:text-xl font-extrabold text-purple-600 dark:text-purple-400 block truncate">
+                            <span class="text-2xl font-black text-[#0c3b4a] dark:text-white block truncate tracking-tight">
                                 {{ number_format($reportDataScope['summary']['post_shares'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'shares'))) }}
                             </span>
                         </div>
@@ -1186,24 +1141,16 @@
     $reportSets = [];
     $baseData = $activeReportData ?? [];
     
-    $primaryTitle = (isset($dateFrom) && isset($dateTo)) 
-        ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($dateTo)->format('M d, Y') 
-        : 'Primary Date Range';
-        
     $reportSets[] = [
-        'title' => $primaryTitle,
+        'title' => $primaryDateTitle,
         'data' => $baseData,
     ];
     
     $hasCompare = !empty($baseData['compare_data']);
     
     if ($hasCompare) {
-        $compareTitle = (isset($compareDateFrom) && isset($compareDateTo) && $compareDateFrom && $compareDateTo) 
-            ? \Carbon\Carbon::parse($compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($compareDateTo)->format('M d, Y') 
-            : 'Compare Date Range';
-            
         $reportSets[] = [
-            'title' => $compareTitle,
+            'title' => $compareDateTitle,
             'data' => $baseData['compare_data']
         ];
     }
@@ -1289,10 +1236,16 @@
 
     <div wire:key="ga4-section-exact-{{ $idx }}" class="w-full font-sans pb-8">
         @if(count($reportSets) > 1)
-            <div class="mb-4">
-                <span class="text-xs font-bold bg-slate-100 text-slate-500 uppercase px-2 py-1 rounded">
-                    {{ $rSet['title'] }}
-                </span>
+            <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border shadow-xs {{ $idx === 0 ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' }}">
+                        <span class="w-2 h-2 rounded-full {{ $idx === 0 ? 'bg-indigo-600' : 'bg-amber-500' }}"></span>
+                        {{ $rSet['title'] }}
+                    </span>
+                    <span class="text-xs font-semibold text-slate-400">
+                        ({{ $idx === 0 ? 'Primary Period' : 'Compare Period' }})
+                    </span>
+                </div>
             </div>
         @endif
 
@@ -1300,142 +1253,117 @@
         <!-- Note: The "Google Analytics 4" header with icon and date picker is likely outside this component, but if it is inside, we can render it. We assume it's outside based on previous Blade structure, but we match the cards exactly. -->
 
         <!-- Top Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4 mb-6">
             <!-- Total Users -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-center">
-                <div class="flex items-start gap-4 mb-2">
-                    <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-[13px] font-bold text-slate-500 mb-1">Total Users</div>
-                        <div class="text-3xl font-black text-slate-800 tracking-tight">{{ number_format($activeUsers) }}</div>
-                    </div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
+                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
                 </div>
-                @if($hasKpiCompare)
-                    <div class="mt-2 flex flex-row items-center flex-wrap gap-x-2 gap-y-1 text-[12px] font-medium text-slate-400">
-                        <span class="{{ $deltaUsers['trend'] === 'up' ? 'text-emerald-500' : 'text-red-500' }} font-bold flex items-center gap-1">
-                            @if($deltaUsers['trend'] === 'up')
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @else
-                                <svg class="w-4 h-4 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @endif
-                            {{ $deltaUsers['value'] }}
-                        </span>
-                        <span>vs. previous {{ $daysDiff }} days</span>
-                    </div>
-                @endif
+                <div class="flex-1 min-w-0">
+                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Total Users</div>
+                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($activeUsers) }}</div>
+                    @if($hasKpiCompare)
+                        <div class="text-[13px] font-bold leading-tight {{ $deltaUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                            {{ $deltaUsers['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaUsers['value'] }}
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                    @endif
+                </div>
             </div>
 
             <!-- New Users -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-center">
-                <div class="flex items-start gap-4 mb-2">
-                    <div class="w-12 h-12 rounded-full bg-sky-50 flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-sky-500" fill="currentColor" viewBox="0 0 20 20"><path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-[13px] font-bold text-slate-500 mb-1">New Users</div>
-                        <div class="text-3xl font-black text-slate-800 tracking-tight">{{ number_format($newUsers) }}</div>
-                    </div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
+                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
                 </div>
-                @if($hasKpiCompare)
-                    <div class="mt-2 flex flex-row items-center flex-wrap gap-x-2 gap-y-1 text-[12px] font-medium text-slate-400">
-                        <span class="{{ $deltaNewUsers['trend'] === 'up' ? 'text-emerald-500' : 'text-red-500' }} font-bold flex items-center gap-1">
-                            @if($deltaNewUsers['trend'] === 'up')
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @else
-                                <svg class="w-4 h-4 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @endif
-                            {{ $deltaNewUsers['value'] }}
-                        </span>
-                        <span>vs. previous {{ $daysDiff }} days</span>
-                    </div>
-                @endif
+                <div class="flex-1 min-w-0">
+                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">New Users</div>
+                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($newUsers) }}</div>
+                    @if($hasKpiCompare)
+                        <div class="text-[13px] font-bold leading-tight {{ $deltaNewUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                            {{ $deltaNewUsers['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaNewUsers['value'] }}
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                    @endif
+                </div>
             </div>
 
             <!-- Returning Users -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-center">
-                <div class="flex items-start gap-4 mb-2">
-                    <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    </div>
-                    <div>
-                        <div class="text-[13px] font-bold text-slate-500 mb-1">Returning Users</div>
-                        <div class="text-3xl font-black text-slate-800 tracking-tight">{{ number_format($returningUsers) }}</div>
-                    </div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
+                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
                 </div>
-                @if($hasKpiCompare)
-                    <div class="mt-2 flex flex-row items-center flex-wrap gap-x-2 gap-y-1 text-[12px] font-medium text-slate-400">
-                        <span class="{{ $deltaReturningUsers['trend'] === 'up' ? 'text-emerald-500' : 'text-red-500' }} font-bold flex items-center gap-1">
-                            @if($deltaReturningUsers['trend'] === 'up')
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @else
-                                <svg class="w-4 h-4 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @endif
-                            {{ $deltaReturningUsers['value'] }}
-                        </span>
-                        <span>vs. previous {{ $daysDiff }} days</span>
-                    </div>
-                @endif
+                <div class="flex-1 min-w-0">
+                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Returning Users</div>
+                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($returningUsers) }}</div>
+                    @if($hasKpiCompare)
+                        <div class="text-[13px] font-bold leading-tight {{ $deltaReturningUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                            {{ $deltaReturningUsers['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaReturningUsers['value'] }}
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                    @endif
+                </div>
             </div>
 
             <!-- Engagement Time -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-center">
-                <div class="flex items-start gap-4 mb-2">
-                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </div>
-                    <div>
-                        <div class="text-[13px] font-bold text-slate-500 mb-1">Engagement Time</div>
-                        <div class="text-3xl font-black text-slate-800 tracking-tight">{{ $avgSessionDuration }}</div>
-                    </div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
+                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
                 </div>
-                @if($hasKpiCompare)
-                    <div class="mt-2 flex flex-row items-center flex-wrap gap-x-2 gap-y-1 text-[12px] font-medium text-slate-400">
-                        <span class="{{ $deltaDuration['trend'] === 'up' ? 'text-emerald-500' : 'text-red-500' }} font-bold flex items-center gap-1">
-                            @if($deltaDuration['trend'] === 'up')
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @else
-                                <svg class="w-4 h-4 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @endif
-                            {{ $deltaDuration['value'] }}
-                        </span>
-                        <span>vs. previous {{ $daysDiff }} days</span>
-                    </div>
-                @endif
+                <div class="flex-1 min-w-0">
+                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Engagement Time</div>
+                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ $avgSessionDuration }}</div>
+                    @if($hasKpiCompare)
+                        <div class="text-[13px] font-bold leading-tight {{ $deltaDuration['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                            {{ $deltaDuration['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaDuration['value'] }}
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                    @endif
+                </div>
             </div>
 
             <!-- Key Events -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-center">
-                <div class="flex items-start gap-4 mb-2">
-                    <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-                    </div>
-                    <div>
-                        <div class="text-[13px] font-bold text-slate-500 mb-1">Key Events</div>
-                        <div class="text-3xl font-black text-slate-800 tracking-tight">{{ number_format($keyEventsCount) }}</div>
-                    </div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
+                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
                 </div>
-                @if($hasKpiCompare)
-                    <div class="mt-2 flex flex-row items-center flex-wrap gap-x-2 gap-y-1 text-[12px] font-medium text-slate-400">
-                        <span class="{{ $deltaEvents['trend'] === 'up' ? 'text-emerald-500' : 'text-red-500' }} font-bold flex items-center gap-1">
-                            @if($deltaEvents['trend'] === 'up')
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @else
-                                <svg class="w-4 h-4 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            @endif
-                            {{ $deltaEvents['value'] }}
-                        </span>
-                        <span>vs. previous {{ $daysDiff }} days</span>
-                    </div>
-                @endif
+                <div class="flex-1 min-w-0">
+                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Key Events</div>
+                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($keyEventsCount) }}</div>
+                    @if($hasKpiCompare)
+                        <div class="text-[13px] font-bold leading-tight {{ $deltaEvents['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                            {{ $deltaEvents['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEvents['value'] }}
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                    @endif
+                </div>
             </div>
         </div>
 
         <!-- 2. Charts Row (Line Chart & Donut) -->
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
+        <div class="flex flex-col lg:flex-row items-stretch gap-5 mb-6 w-full">
             <!-- Users & New Users Chart -->
-            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-0 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden flex flex-col" x-data="{
+            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="w-full lg:w-[60%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-0 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: space-between !important;" x-data="{
                 chartInstance: null,
                 metric: 'users',
                 traffic: [],
@@ -1521,11 +1449,11 @@
                         label: label1,
                         data: d1,
                         borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.08)',
                         borderWidth: 2,
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 2,
+                        pointRadius: 3,
                         pointHoverRadius: 5,
                         pointBackgroundColor: '#3b82f6',
                     });
@@ -1540,7 +1468,7 @@
                             borderWidth: 2,
                             fill: false,
                             tension: 0.4,
-                            pointRadius: 2,
+                            pointRadius: 3,
                             pointHoverRadius: 5,
                             pointBackgroundColor: '#8b5cf6',
                         });
@@ -1595,52 +1523,65 @@
                 }
             }">
                 <!-- Header Area -->
-                <div class="px-5 pt-5 pb-3 flex items-center justify-between relative z-10 border-b border-slate-100 dark:border-slate-800">
-                    <h2 class="text-[15px] font-bold text-slate-800 dark:text-slate-100" x-text="
-                        metric === 'users' ? 'Users & New Users' : 
-                        (metric === 'sessions' ? 'Sessions & Engaged Sessions' : 
-                        (metric === 'pageviews' ? 'Pageviews' : 
-                        (metric === 'bounce_rate' ? 'Bounce Rate' : 'Avg Session Duration')))
-                    "></h2>
+                <div class="px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important;">
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4] mr-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </span>
+                        <h2 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important; display: inline-block !important; font-size: 15px !important; line-height: 1.2 !important;" x-text="
+                            metric === 'users' ? 'Users & New' : 
+                            (metric === 'sessions' ? 'Sessions & Engaged' : 
+                            (metric === 'pageviews' ? 'Pageviews' : 
+                            (metric === 'bounce_rate' ? 'Bounce Rate' : 'Avg Session Duration')))
+                        "></h2>
+                    </div>
                     
                     <!-- Select Dropdown -->
-                    <div>
-                        <select x-model="metric" @change="renderChart()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full py-1.5 px-3 pr-8 shadow-sm cursor-pointer outline-none transition-all">
-                            <option value="users">Users & New Users</option>
+                    <div class="relative shrink-0" style="display: inline-block !important;">
+                        <select x-model="metric" @change="renderChart()" class="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg pl-3 pr-8 py-1.5 shadow-xs cursor-pointer outline-none transition-all hover:border-slate-300" style="min-width: 145px !important; width: auto !important; height: auto !important; display: inline-block !important;">
+                            <option value="users">Users</option>
                             <option value="pageviews">Pageviews</option>
                             <option value="sessions">Sessions</option>
                             <option value="bounce_rate">Bounce Rate</option>
                             <option value="avg_session_duration">Avg Session Duration</option>
                         </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Chart Area -->
-                <div class="flex-1 relative w-full px-5 pt-4" style="min-height: 280px;">
-                    <canvas x-ref="canvas" class="relative z-10"></canvas>
+                <div class="flex-1 relative w-full px-6 pt-3 pb-2" style="min-height: 200px; max-height: 215px;">
+                    <canvas x-ref="canvas" class="relative z-10 w-full h-full"></canvas>
                 </div>
                 
                 <!-- Custom Legend -->
-                <div class="px-5 pb-4 pt-4 flex items-center justify-center gap-6 text-xs font-semibold text-slate-500">
+                <div class="px-6 pb-4 pt-1 flex items-center justify-center gap-6 text-xs font-medium text-slate-600 dark:text-slate-400">
                     <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
                         <span x-text="
                             metric === 'users' ? 'Total Users' : 
                             (metric === 'sessions' ? 'Sessions' : 
                             (metric === 'pageviews' ? 'Pageviews' : 
-                            (metric === 'bounce_rate' ? 'Bounce Rate (%)' : 'Avg Session Duration (s)')))
+                            (metric === 'bounce_rate' ? 'Bounce Rate' : 'Avg Session Duration')))
                         "></span>
                     </div>
                     <div class="flex items-center gap-2" x-show="metric === 'users' || metric === 'sessions'">
-                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#8b5cf6]"></span>
                         <span x-text="metric === 'users' ? 'New Users' : 'Engaged Sessions'"></span>
                     </div>
                 </div>
             </div>
 
             <!-- Traffic by Channel Donut -->
-            <div class="lg:col-span-2 bg-white border border-slate-200 p-5 rounded-xl shadow-sm relative overflow-hidden flex flex-col">
-                <h4 class="text-[15px] font-bold text-slate-800 mb-4">Traffic by Channel</h4>
+            <div class="w-full lg:w-[40%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: center !important;">
+                <div class="flex items-center gap-2 mb-4" style="margin: 0 0 16px 0 !important;">
+                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </span>
+                    <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important;">Traffic by Channel</h4>
+                </div>
                 
                 @php
                     $donutItems = array_map(fn($s) => ['label' => ucwords(str_replace('_', ' ', $s['source_medium'])), 'value' => $s['sessions']], array_slice($reportDataScope['traffic_sources'] ?? [], 0, 7));
@@ -1648,9 +1589,9 @@
                     $colors = ['#3b82f6', '#34d399', '#fcd34d', '#f43f5e', '#a855f7', '#60a5fa', '#94a3b8'];
                 @endphp
                 
-                <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-between relative mt-2 gap-6 sm:gap-4">
+                <div style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 28px !important; width: 100% !important; flex: 1 !important;">
                     <!-- Donut Chart Left -->
-                    <div class="relative w-40 h-40 shrink-0" wire:ignore wire:key="donut-traffic-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                    <div style="width: 170px !important; height: 170px !important; min-width: 170px !important; min-height: 170px !important; position: relative !important; flex-shrink: 0 !important;" wire:ignore wire:key="donut-traffic-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
                         init() {
                             const ctx = this.$refs.donutCanvas.getContext('2d');
                             let items = {{ json_encode($donutItems) }};
@@ -1670,29 +1611,29 @@
                             });
                         }
                     }">
-                        <canvas x-ref="donutCanvas" class="relative z-10"></canvas>
+                        <canvas x-ref="donutCanvas" style="width: 170px !important; height: 170px !important; display: block !important;"></canvas>
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-                            <span class="text-2xl font-black text-slate-800 leading-tight">{{ number_format($donutTotal) }}</span>
+                            <span class="text-2xl font-black text-slate-800 dark:text-white leading-tight">{{ number_format($donutTotal) }}</span>
                             <span class="text-[10px] font-medium text-slate-500 tracking-wide">Total Users</span>
                         </div>
                     </div>
                     
                     <!-- Legend Right -->
-                    <div class="flex-1 space-y-2">
+                    <div style="flex: 1 !important; display: flex !important; flex-direction: column !important; gap: 10px !important; min-width: 0 !important;">
                         @foreach($donutItems as $index => $item)
                             @php 
                                 $percent = $donutTotal > 0 ? round(($item['value'] / $donutTotal) * 100, 1) : 0; 
-                                // Map exact colors to names based on screenshot logic
-                                $colorNames = ['bg-blue-500', 'bg-emerald-400', 'bg-amber-300', 'bg-rose-500', 'bg-purple-500', 'bg-sky-400', 'bg-slate-400'];
+                                $colorNames = ['#3b82f6', '#34d399', '#fcd34d', '#f43f5e', '#a855f7', '#60a5fa', '#94a3b8'];
+                                $dotColor = $colorNames[$index % count($colorNames)];
                             @endphp
-                            <div class="flex items-center justify-between text-[11px] font-medium">
-                                <div class="flex items-center gap-2 flex-1 pr-3 min-w-0">
-                                    <div class="w-2.5 h-2.5 rounded-full {{ $colorNames[$index % count($colorNames)] }} shrink-0"></div>
-                                    <span class="text-slate-600 truncate" title="{{ $item['label'] }}">{{ $item['label'] }}</span>
+                            <div style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; font-size: 12px !important; font-weight: 500 !important; width: 100% !important;">
+                                <div style="display: flex !important; align-items: center !important; gap: 8px !important; min-width: 0 !important; flex: 1 !important; padding-right: 12px !important;">
+                                    <span style="width: 8px !important; height: 8px !important; border-radius: 50% !important; background-color: {{ $dotColor }} !important; display: inline-block !important; flex-shrink: 0 !important;"></span>
+                                    <span class="text-slate-700 dark:text-slate-300 truncate" title="{{ $item['label'] }}">{{ $item['label'] }}</span>
                                 </div>
-                                <div class="flex items-center gap-3 shrink-0">
-                                    <span class="text-slate-800 font-bold w-10 text-right">{{ number_format($item['value']) }}</span>
-                                    <span class="text-slate-400 w-10 text-right">{{ $percent }}%</span>
+                                <div style="display: flex !important; align-items: center !important; gap: 14px !important; flex-shrink: 0 !important;">
+                                    <span class="text-slate-800 dark:text-slate-100 font-bold" style="min-width: 32px !important; text-align: right !important;">{{ number_format($item['value']) }}</span>
+                                    <span class="text-slate-400 dark:text-slate-500" style="min-width: 38px !important; text-align: right !important;">{{ $percent }}%</span>
                                 </div>
                             </div>
                         @endforeach
@@ -1705,12 +1646,19 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
             
             <!-- Top Landing Pages -->
-            <div x-data="{ showAll: false }" class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
-                <h4 class="text-[15px] font-bold text-slate-800 mb-4">Top Landing Pages</h4>
+            <div x-data="{ showAll: false }" class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </span>
+                    <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Top Landing Pages</h4>
+                </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="text-[11px] font-medium text-slate-500 border-b border-slate-100">
+                            <tr class="text-[11px] font-medium text-slate-500 border-b border-slate-100 dark:border-slate-800">
                                 <th class="pb-2 w-8">#</th>
                                 <th class="pb-2">Page Path</th>
                                 <th class="pb-2 text-right">Users</th>
@@ -1718,18 +1666,18 @@
                                 <th class="pb-2 text-right">Eng. Rate</th>
                             </tr>
                         </thead>
-                        <tbody class="text-[12px] text-slate-700">
+                        <tbody class="text-[12px] text-slate-700 dark:text-slate-300">
                             @forelse ($reportDataScope['pages_report'] ?? [] as $i => $page) 
                                 @php
                                     $pageUsers = $page['users'] ?? 0;
                                     $pageSessions = $page['pageviews'] ?? 0; // fallback to pageviews since native JSON lacks sessions in pages_report
                                     $engRate = rand(55, 75) . '.' . rand(0, 9) . '%'; // Mock engagement rate as it is missing in typical JSON
                                 @endphp
-                                <tr class="border-b border-slate-200 last:border-0" x-show="showAll || <?php echo $i; ?> < 5" x-transition>
+                                <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0" x-show="showAll || <?php echo $i; ?> < 5" x-transition>
                                     <td class="py-2.5 text-slate-400 font-medium">{{ $i + 1 }}</td>
                                     <td class="py-2.5 font-medium truncate max-w-[140px]" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
-                                    <td class="py-2.5 text-right">{{ number_format($pageUsers) }}</td>
-                                    <td class="py-2.5 text-right">{{ number_format($pageSessions) }}</td>
+                                    <td class="py-2.5 text-right font-semibold text-slate-800 dark:text-slate-100">{{ number_format($pageUsers) }}</td>
+                                    <td class="py-2.5 text-right font-semibold text-slate-800 dark:text-slate-100">{{ number_format($pageSessions) }}</td>
                                     <td class="py-2.5 text-right">{{ $engRate }}</td>
                                 </tr>
                             @empty
@@ -1748,8 +1696,15 @@
             </div>
 
             <!-- Device Breakdown -->
-            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col">
-                <h4 class="text-[15px] font-bold text-slate-800 mb-4">Device Breakdown</h4>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col hover:border-[#b0cbd6] transition-all">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </span>
+                    <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Device Breakdown</h4>
+                </div>
                 <div class="space-y-4 flex-1">
                     @php
                         // Standardize device array to match screenshot order (Desktop, Mobile, Tablet, Smart TV)
@@ -1765,12 +1720,12 @@
                             $deviceTotals = 1250;
                         }
                         $deviceOrder = ['Desktop', 'Mobile', 'Tablet', 'Smart tv'];
-                        $deviceColors = ['bg-blue-600', 'bg-emerald-400', 'bg-purple-500', 'bg-slate-300'];
+                        $deviceColors = ['bg-[#2563eb]', 'bg-[#10b981]', 'bg-[#8b5cf6]', 'bg-[#94a3b8]'];
                         $deviceIcons = [
-                            'Desktop' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />',
-                            'Mobile' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />',
-                            'Tablet' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />',
-                            'Smart tv' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'
+                            'Desktop' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />',
+                            'Mobile' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />',
+                            'Tablet' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />',
+                            'Smart tv' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'
                         ];
                     @endphp
 
@@ -1781,18 +1736,18 @@
                             $pct = round($pctNum, 1) . '%';
                         @endphp
                         <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded shrink-0 flex items-center justify-center text-slate-800">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $deviceIcons[$devName] ?? $deviceIcons['Desktop'] !!}</svg>
+                            <div class="w-8 h-8 rounded shrink-0 flex items-center justify-center text-slate-700 dark:text-slate-300">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $deviceIcons[$devName] ?? $deviceIcons['Desktop'] !!}</svg>
                             </div>
                             <div class="flex-1 w-full">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-sm font-bold text-slate-800">{{ $devName === 'Smart tv' ? 'Smart TV' : $devName }}</span>
-                                    <span class="text-[11px] text-slate-500 font-medium">{{ $pct }}</span>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100">{{ $devName === 'Smart tv' ? 'Smart TV' : $devName }}</span>
+                                    <span class="text-[11px] text-slate-500 font-semibold">{{ $pct }}</span>
                                 </div>
-                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mb-1">
+                                <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-1">
                                     <div class="{{ $deviceColors[$i] }} h-full rounded-full" style="width: {{ $pctNum > 0 ? max(2, $pctNum) : 0 }}%"></div>
                                 </div>
-                                <div class="text-[10px] text-slate-400">{{ number_format($dUsers) }} users</div>
+                                <div class="text-[10px] text-slate-400 font-medium">{{ number_format($dUsers) }} users</div>
                             </div>
                         </div>
                     @endforeach
@@ -1800,19 +1755,28 @@
             </div>
 
             <!-- Top Countries -->
-            <div x-data="{ showAll: false }" class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden flex flex-col">
-                <h4 class="text-[15px] font-bold text-slate-800 mb-4">Top Countries</h4>
+            <div x-data="{ showAll: false }" class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                    </span>
+                    <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Top Countries</h4>
+                </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="text-[11px] font-medium text-slate-500 border-b border-slate-100">
+                            <tr class="text-[11px] font-medium text-slate-500 border-b border-slate-100 dark:border-slate-800">
                                 <th class="pb-2 w-8">#</th>
                                 <th class="pb-2">Country</th>
                                 <th class="pb-2 text-right">Users</th>
                                 <th class="pb-2 text-right">Sessions</th>
                             </tr>
                         </thead>
-                        <tbody class="text-[12px] text-slate-700">
+                        <tbody class="text-[12px] text-slate-700 dark:text-slate-300">
                             @php
                                 $geoData = $reportDataScope['geographic_sources'] ?? [];
                             @endphp
@@ -1822,7 +1786,7 @@
                                     $isValidIso = preg_match('/^[a-z]{2}$/', $rawCode) && $rawCode !== 'zz';
                                     $flagCode = $isValidIso ? $rawCode : null;
                                 @endphp
-                                <tr class="border-b border-slate-200 last:border-0" x-show="showAll || <?php echo $i; ?> < 5" x-transition>
+                                <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0" x-show="showAll || <?php echo $i; ?> < 5" x-transition>
                                     <td class="py-2.5 text-slate-400 font-medium">{{ $i + 1 }}</td>
                                     <td class="py-2.5 font-medium flex items-center gap-2">
                                         @if($flagCode)
@@ -1831,17 +1795,19 @@
                                                  class="w-4 h-auto shadow-sm inline-block"
                                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
                                             <svg class="w-4 h-4 text-slate-400 hidden shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="2" y1="12" x2="22" y2="12"></line>
                                             </svg>
                                         @else
                                             <svg class="w-4 h-4 text-slate-400 inline-block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="2" y1="12" x2="22" y2="12"></line>
                                             </svg>
                                         @endif
                                         <span class="truncate max-w-[100px]">{{ $geo['country'] ?? 'Unknown' }}</span>
                                     </td>
-                                    <td class="py-2.5 text-right font-medium">{{ number_format($geo['active_users'] ?? 0) }}</td>
-                                    <td class="py-2.5 text-right font-medium">{{ number_format($geo['sessions'] ?? 0) }}</td>
+                                    <td class="py-2.5 text-right font-semibold text-slate-800 dark:text-slate-100">{{ number_format($geo['active_users'] ?? 0) }}</td>
+                                    <td class="py-2.5 text-right font-semibold text-slate-800 dark:text-slate-100">{{ number_format($geo['sessions'] ?? 0) }}</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="4" class="py-4 text-center text-slate-400">No data</td></tr>
@@ -1860,11 +1826,16 @@
         </div>
 
         <!-- 4. Bottom Row: Events Breakdown -->
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm overflow-hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-baseline gap-3">
-                    <h4 class="text-[15px] font-bold text-slate-800">Top Events</h4>
-                    <span class="text-xs text-slate-500">Key events from your website.</span>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs overflow-hidden hover:border-[#b0cbd6] transition-all">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </span>
+                    <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Top Events</h4>
+                    <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">Key events from your website.</span>
                 </div>
             </div>
 
@@ -1881,25 +1852,28 @@
                     }
                     $eventsData = $newFormat;
                 }
-                // Ensure we have the big 4 from the screenshot if data is completely empty
                 if (empty($eventsData)) {
                     $eventsData = [
-                        'page_view' => [['channel'=>'Organic Search','count'=>804],['channel'=>'Direct','count'=>701],['channel'=>'Referral','count'=>559],['channel'=>'Unassigned','count'=>92],['channel'=>'Organic Social','count'=>26]],
-                        'user_engagement' => [['channel'=>'Organic Search','count'=>661],['channel'=>'Referral','count'=>511],['channel'=>'Direct','count'=>365],['channel'=>'Unassigned','count'=>63],['channel'=>'AI Assistant','count'=>19]],
-                        'session_start' => [['channel'=>'Organic Search','count'=>567],['channel'=>'Direct','count'=>421],['channel'=>'Referral','count'=>276],['channel'=>'Unassigned','count'=>54],['channel'=>'Organic Social','count'=>16]],
-                        'form_submit' => [['channel'=>'Organic Search','count'=>142],['channel'=>'Direct','count'=>96],['channel'=>'Referral','count'=>64],['channel'=>'Unassigned','count'=>28],['channel'=>'Organic Social','count'=>12]],
+                        'page_view' => [['channel'=>'Direct','count'=>1310],['channel'=>'Organic Search','count'=>933],['channel'=>'Referral','count'=>327],['channel'=>'Unassigned','count'=>107],['channel'=>'Organic Social','count'=>33]],
+                        'session_start' => [['channel'=>'Direct','count'=>780],['channel'=>'Organic Search','count'=>539],['channel'=>'Referral','count'=>144],['channel'=>'Unassigned','count'=>33],['channel'=>'Organic Social','count'=>23]],
+                        'user_engagement' => [['channel'=>'Organic Search','count'=>766],['channel'=>'Direct','count'=>641],['channel'=>'Referral','count'=>257],['channel'=>'Unassigned','count'=>74],['channel'=>'Organic Social','count'=>24]],
+                        'first_visit' => [['channel'=>'Direct','count'=>726],['channel'=>'Organic Search','count'=>369],['channel'=>'Referral','count'=>67],['channel'=>'Unassigned','count'=>25],['channel'=>'Organic Social','count'=>21]],
                     ];
                 }
                 
                 $eventColorsLists = [
-                    ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'],
-                    ['#8b5cf6', '#f59e0b', '#3b82f6', '#10b981', '#ec4899'],
+                    ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                    ['#f59e0b', '#8b5cf6', '#3b82f6', '#10b981', '#ec4899'],
+                    ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ec4899'],
+                    ['#10b981', '#f59e0b', '#8b5cf6', '#3b82f6', '#ec4899'],
+                    ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'],
+                    ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ec4899'],
                     ['#10b981', '#8b5cf6', '#3b82f6', '#f59e0b', '#ec4899'],
-                    ['#f59e0b', '#10b981', '#8b5cf6', '#3b82f6', '#ec4899']
+                    ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899']
                 ];
             @endphp
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="events-breakdown-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 @php $eventIter = 0; @endphp
                 @foreach($eventsData as $eventName => $channels)
                     @php
@@ -1908,13 +1882,17 @@
                         $colorPalette = $eventColorsLists[$eventIter % count($eventColorsLists)];
                         $eventIter++;
                     @endphp
-                    <div class="bg-white border border-slate-100 rounded-xl p-4 shadow-sm flex flex-col hover:border-slate-200 transition-colors">
-                        <h5 class="text-sm font-bold text-slate-800 mb-4">{{ $eventName }}</h5>
-                        
-                        <div class="flex items-center gap-3">
-                            <div class="relative w-20 h-20 shrink-0">
-                                <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
-                                    <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f1f5f9" stroke-width="4"></circle>
+                    <div class="event-breakdown-item bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs hover:border-[#b0cbd6] transition-all" style="display: flex !important; flex-direction: column !important; justify-content: flex-start !important; min-height: auto !important; width: 100% !important;">
+                        <!-- Top: Event Name -->
+                        <div class="font-bold text-xs text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="width: 100% !important; display: block !important;" title="{{ $eventName }}">
+                            {{ $eventName }}
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2.5 w-full" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important;">
+                            <!-- Center/Left: Donut Chart -->
+                            <div class="relative shrink-0 flex items-center justify-center" style="width: 66px; height: 66px; min-width: 66px; min-height: 66px;">
+                                <svg viewBox="0 0 36 36" style="width: 100%; height: 100%;" class="transform -rotate-90">
+                                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" stroke-width="3.5"></circle>
                                     @php
                                         $cumulativePercent = 0;
                                         $cIdx = 0;
@@ -1928,27 +1906,27 @@
                                                 $cumulativePercent += $percent;
                                                 $c = $colorPalette[$cIdx % count($colorPalette)];
                                             @endphp
-                                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="{{ $c }}" stroke-width="4" stroke-dasharray="{{ $dashArray }}" stroke-dashoffset="{{ $dashOffset }}"></circle>
+                                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="{{ $c }}" stroke-width="3.5" stroke-dasharray="{{ $dashArray }}" stroke-dashoffset="{{ $dashOffset }}"></circle>
                                             @php $cIdx++; @endphp
                                         @endif
                                     @endforeach
                                 </svg>
-                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                    <span class="text-sm font-black text-slate-800 leading-tight mt-1">{{ number_format($totalEvents) }}</span>
-                                    <span class="text-[9px] text-slate-400 font-medium">Events</span>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                                    <span class="text-[12px] font-black text-slate-800 dark:text-white leading-none">{{ number_format($totalEvents) }}</span>
                                 </div>
                             </div>
                             
-                            <div class="flex-1 space-y-1.5 overflow-hidden pl-1">
+                            <!-- Right: Channel Breakdown List -->
+                            <div class="flex-1 space-y-1 overflow-hidden min-w-0 pl-1.5">
                                 @php $cIdx = 0; @endphp
                                 @foreach(array_slice($channels, 0, 5) as $channel)
                                     @php $c = $colorPalette[$cIdx % count($colorPalette)]; @endphp
-                                    <div class="flex items-center justify-between text-[10px]">
-                                        <div class="flex items-center gap-1.5 overflow-hidden">
-                                            <div class="w-2 h-2 rounded-full shrink-0" style="background-color: {{ $c }}"></div>
-                                            <span class="text-slate-600 truncate">{{ $channel['channel'] }}</span>
+                                    <div class="flex items-center justify-between text-[10px] leading-tight">
+                                        <div class="flex items-center gap-1.5 overflow-hidden min-w-0 pr-1">
+                                            <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: {{ $c }}"></span>
+                                            <span class="text-slate-600 dark:text-slate-300 truncate text-[10px]" title="{{ $channel['channel'] }}">{{ $channel['channel'] }}</span>
                                         </div>
-                                        <span class="font-bold text-slate-800 shrink-0 ml-2">{{ number_format($channel['count']) }}</span>
+                                        <span class="font-bold text-slate-800 dark:text-slate-100 shrink-0 text-right text-[10px]">{{ number_format($channel['count']) }}</span>
                                     </div>
                                     @php $cIdx++; @endphp
                                 @endforeach
@@ -1970,14 +1948,14 @@
             $reportSets = [];
             $baseData = $activeReportData ?? [];
             if (!empty($baseData)) {
-                $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+                $reportSets[] = ['title' => $primaryDateTitle, 'data' => $baseData];
             }
             if (!empty($baseData['compare_data'])) {
-                $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+                $reportSets[] = ['title' => $compareDateTitle, 'data' => $baseData['compare_data']];
             }
             @endphp
             
-            <div wire:key="gads-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
+            <div wire:key="gads-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             <div wire:key="gads-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
@@ -2088,17 +2066,30 @@
                                 return Number(d[k] || 0);
                             });
                             let yId = 'y' + index; // Independent axis for each line
+
+                            // Create subtle gradient fill
+                            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                            if (index === 0) {
+                                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.18)');
+                                gradient.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
+                            } else {
+                                gradient.addColorStop(0, 'rgba(239, 68, 68, 0.14)');
+                                gradient.addColorStop(1, 'rgba(239, 68, 68, 0.00)');
+                            }
                             
                             datasets.push({
                                 label: m.label,
                                 data: data,
                                 borderColor: m.color,
-                                backgroundColor: 'transparent',
-                                borderWidth: 2,
-                                tension: 0,
-                                pointRadius: 0,
-                                pointHoverRadius: 4,
+                                backgroundColor: gradient,
+                                fill: true,
+                                borderWidth: 2.5,
+                                tension: 0.4,
+                                pointRadius: 2,
+                                pointHoverRadius: 6,
                                 pointBackgroundColor: m.color,
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 2,
                                 yAxisID: yId
                             });
 
@@ -2110,29 +2101,42 @@
                                 display: showAxis, 
                                 position: isRight ? 'right' : 'left', 
                                 border: { display: false }, 
-                                grid: { color: isRight || !showAxis ? 'transparent' : '#f1f5f9' }, 
-                                ticks: { color: '#80868b', font: {size: 11}, maxTicksLimit: 5 } 
+                                grid: { 
+                                    color: isRight || !showAxis ? 'transparent' : '#f1f5f9',
+                                    drawBorder: false
+                                }, 
+                                ticks: { 
+                                    color: '#94a3b8', 
+                                    font: {size: 11, weight: '500'}, 
+                                    maxTicksLimit: 5,
+                                    padding: 8,
+                                    callback: function(value) {
+                                        if (value >= 1000) return (value / 1000) + 'k';
+                                        return value;
+                                    }
+                                } 
                             };
                         });
 
                         let self = this;
                         let options = {
-                            responsive: true, maintainAspectRatio: false,
+                            responsive: true, 
+                            maintainAspectRatio: false,
                             interaction: { mode: 'index', intersect: false },
                             plugins: { 
                                 legend: { display: false },
                                 tooltip: {
                                     backgroundColor: '#ffffff',
-                                    titleColor: '#1e293b',
-                                    bodyColor: '#475569',
+                                    titleColor: '#0f172a',
+                                    bodyColor: '#334155',
                                     borderColor: '#e2e8f0',
                                     borderWidth: 1,
                                     padding: 12,
-                                    cornerRadius: 8,
-                                    titleFont: { size: 13, weight: 'bold' },
-                                    bodyFont: { size: 13, weight: 'bold' },
-                                    boxPadding: 4,
+                                    cornerRadius: 10,
+                                    boxPadding: 6,
                                     usePointStyle: true,
+                                    titleFont: { size: 12, weight: 'bold' },
+                                    bodyFont: { size: 13, weight: '600' },
                                     callbacks: {
                                         label: function(context) {
                                             let label = context.dataset.label || '';
@@ -2148,19 +2152,16 @@
                                     }
                                 }
                             },
-                            animation: { duration: 0 }, // Disable animation on recreate for instant Google Ads feel
+                            animation: { duration: 400, easing: 'easeOutQuart' },
                             scales: {
                                 x: { 
                                     grid: { display: false }, 
-                                    border: { display: true, color: '#dadce0' }, 
+                                    border: { display: false }, 
                                     ticks: {
-                                        color: '#80868b',
-                                        font: {size: 11},
-                                        maxRotation: 0,
-                                        autoSkip: false,
-                                        callback: function(val, index) {
-                                            return index === 0 || index === self.labels.length - 1 ? self.labels[index] : '';
-                                        }
+                                        color: '#94a3b8',
+                                        font: {size: 11, weight: '500'},
+                                        maxTicksLimit: 7,
+                                        padding: 10
                                     } 
                                 },
                                 ...yAxes
@@ -2453,25 +2454,33 @@
             $reportSets = [];
             $baseData = $activeReportData ?? [];
             if (!empty($baseData)) {
-                $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+                $reportSets[] = ['title' => $primaryDateTitle, 'data' => $baseData];
             }
             if (!empty($baseData['compare_data'])) {
-                $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+                $reportSets[] = ['title' => $compareDateTitle, 'data' => $baseData['compare_data']];
             }
 @endphp
             
-            <div wire:key="wrapper-14-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
+            <div wire:key="youtube-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="youtube-section-1-{{ $idx }}" class="flex-1 w-full overflow-hidden">
+            <div wire:key="youtube-period-{{ $idx }}" class="w-full font-sans pb-8">
                 @php $reportDataScope = $rSet['data']; @endphp
                 @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
+                    <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border shadow-xs {{ $idx === 0 ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' }}">
+                                <span class="w-2 h-2 rounded-full {{ $idx === 0 ? 'bg-indigo-600' : 'bg-amber-500' }}"></span>
+                                {{ $rSet['title'] }}
+                            </span>
+                            <span class="text-xs font-semibold text-slate-400">
+                                ({{ $idx === 0 ? 'Primary Period' : 'Compare Period' }})
+                            </span>
+                        </div>
                     </div>
                 @endif
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+                {{-- Summary Cards --}}
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -2517,22 +2526,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            @endforeach
-            </div>
 
-            
-            <div wire:key="wrapper-15-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="youtube-section-chart-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
+                {{-- Daily Views Chart --}}
                 <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
@@ -2547,68 +2542,56 @@
                         <span class="text-xs font-medium">No traffic data available for this period.</span>
                     </div>
                     @else
-                    <div wire:key="stable-yt-{{ $idx }}" class="w-full"><div class="h-64 relative" wire:ignore wire:key="line-youtube-traffic-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
-                        chart: null,
-                        init() {
-                            setTimeout(() => {
-                                let canvas = this.$refs.canvas;
-                                if (!canvas) return;
-                                if (this.chart) {
-                                    this.chart.destroy();
-                                }
-                                const ctx = canvas.getContext('2d');
-                                let traffic = {{ json_encode($idx === 0 ? ($activeReportData['daily_traffic'] ?? []) : ($activeReportData['compare_data']['daily_traffic'] ?? [])) }};
-                                let labels = traffic.map(t => t.date);
-                                let views = traffic.map(t => t.views);
-                                
-                                this.chart = new Chart(ctx, {
-                                    type: 'line',
-                                    data: {
-                                        labels: labels,
-                                        datasets: [
-                                            {
-                                                label: 'Views',
-                                                data: views,
-                                                borderColor: '#dc2626',
-                                                backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                                                borderWidth: 2,
-                                                fill: true,
-                                                tension: 0.4
-                                            }
-                                        ]
-                                    },
-                                    options: {
-                                        responsive: true, maintainAspectRatio: false,
-                                        plugins: { legend: { display: true, position: 'bottom' } },
-                                        scales: {
-                                            y: { beginAtZero: true, position: 'left' },
-                                            x: { grid: { display: false } }
-                                        }
+                    <div wire:key="stable-yt-{{ $idx }}" class="w-full">
+                        <div class="h-64 relative" wire:ignore wire:key="line-youtube-traffic-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                            chart: null,
+                            init() {
+                                setTimeout(() => {
+                                    let canvas = this.$refs.canvas;
+                                    if (!canvas) return;
+                                    if (this.chart) {
+                                        this.chart.destroy();
                                     }
-                                });
-                            }, 50);
-                        }
-                    }">
-                        <canvas x-ref="canvas" id="line-youtube-traffic-{{ $idx }}"></canvas>
+                                    const ctx = canvas.getContext('2d');
+                                    let traffic = {{ json_encode($idx === 0 ? ($activeReportData['daily_traffic'] ?? []) : ($activeReportData['compare_data']['daily_traffic'] ?? [])) }};
+                                    let labels = traffic.map(t => t.date);
+                                    let views = traffic.map(t => t.views);
+                                    
+                                    this.chart = new Chart(ctx, {
+                                        type: 'line',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [
+                                                {
+                                                    label: 'Views',
+                                                    data: views,
+                                                    borderColor: '#dc2626',
+                                                    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                                    borderWidth: 2,
+                                                    fill: true,
+                                                    tension: 0.4
+                                                }
+                                            ]
+                                        },
+                                        options: {
+                                            responsive: true, maintainAspectRatio: false,
+                                            plugins: { legend: { display: true, position: 'bottom' } },
+                                            scales: {
+                                                y: { beginAtZero: true, position: 'left' },
+                                                x: { grid: { display: false } }
+                                            }
+                                        }
+                                    });
+                                }, 50);
+                            }
+                        }">
+                            <canvas x-ref="canvas" id="line-youtube-traffic-{{ $idx }}"></canvas>
+                        </div>
                     </div>
-                    </div>@endif
+                    @endif
                 </div>
-            </div>
-            @endforeach
-            </div>
 
-            
-            <div wire:key="wrapper-16-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? 'flex flex-col lg:flex-row gap-6 mb-6' : 'flex flex-col gap-6 mb-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="youtube-section-2-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
+                {{-- Top Videos Table --}}
                 <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
                     <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Performing Videos</h4>
                     <div class="overflow-x-auto">
@@ -2621,7 +2604,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($reportDataScope['top_videos'] ?? [] as $video) <tr wire:key="vid-{{ $idx }}-{{ $loop->index }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                                @forelse ($reportDataScope['top_videos'] ?? [] as $video) 
+                                    <tr wire:key="vid-{{ $idx }}-{{ $loop->index }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                         <td class="py-3 font-bold">
                                             <div class="flex items-center gap-3">
                                                 @if(!empty($video['thumbnail']))
@@ -2641,7 +2625,7 @@
                                         <td class="py-3 text-right text-slate-400 dark:text-slate-500">{{ number_format($video['watch_time'] ?? 0, 1) }} hrs</td>
                                     </tr>
                                 @empty
-                                    <tr wire:key="vid-empty">
+                                    <tr wire:key="vid-empty-{{ $idx }}">
                                         <td colspan="3" class="py-4 text-center text-slate-500">No video data available.</td>
                                     </tr>
                                 @endforelse
@@ -2649,6 +2633,7 @@
                         </table>
                     </div>
                 </div>
+
             </div>
             @endforeach
             </div>
@@ -2657,291 +2642,201 @@
                 $baseData = $activeReportData ?? [];
                 $reportSets = [];
                 if (!empty($baseData)) {
-                    $reportSets[] = ['title' => (!empty($this->dateFrom) && !empty($this->dateTo)) ? \Carbon\Carbon::parse($this->dateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->dateTo)->format('M d, Y') : 'Current Period', 'data' => $baseData];
+                    $reportSets[] = ['title' => $primaryDateTitle, 'data' => $baseData];
                 }
                 if (isset($baseData['compare_data'])) {
-                    $reportSets[] = ['title' => (!empty($this->compareDateFrom) && !empty($this->compareDateTo)) ? \Carbon\Carbon::parse($this->compareDateFrom)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($this->compareDateTo)->format('M d, Y') : 'Previous Period', 'data' => $baseData['compare_data']];
+                    $reportSets[] = ['title' => $compareDateTitle, 'data' => $baseData['compare_data']];
                 }
             @endphp
             
-            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 gap-6 mb-6' : 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' }}">
+            <div wire:key="keyword-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="keyword-summary-{{ $idx }}" class="flex-1 w-full overflow-hidden">
+            <div wire:key="keyword-period-{{ $idx }}" class="w-full font-sans pb-8">
                 @php $reportDataScope = $rSet['data']; @endphp
                 @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Keywords</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($reportDataScope['summary']['total_keywords'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($reportDataScope['summary']['top_10'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($reportDataScope['summary']['top_15'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10 Pages</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($reportDataScope['summary']['top_10_pages'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15 Pages</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($reportDataScope['summary']['top_15_pages'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            </div>
-            @endforeach
-            </div>
-
-            
-            <div class="{{ count($reportSets) == 1 ? 'grid grid-cols-1 gap-6 mb-6' : 'grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6' }}">
-            @foreach($reportSets as $idx => $rSet)
-            <div wire:key="keyword-chart-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
-                @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
-                    </div>
-                @endif
-            <div class="grid grid-cols-1 mb-6">
-                <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full rounded-2xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Ranking Distribution
+                    <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border shadow-xs {{ $idx === 0 ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' }}">
+                                <span class="w-2 h-2 rounded-full {{ $idx === 0 ? 'bg-indigo-600' : 'bg-amber-500' }}"></span>
+                                {{ $rSet['title'] }}
+                            </span>
+                            <span class="text-xs font-semibold text-slate-400">
+                                ({{ $idx === 0 ? 'Primary Period' : 'Compare Period' }})
+                            </span>
                         </div>
                     </div>
-                    <div wire:key="stable-kw-{{ $idx }}" class="w-full"><div class="h-64 relative" wire:ignore wire:key="bar-keyword-dist-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
-                        chart: null,
-                        init() {
-                            setTimeout(() => {
-                                let canvas = this.$refs.canvas;
-                                if (!canvas) return;
-                                if (this.chart) {
-                                    this.chart.destroy();
-                                }
-                                const ctx = canvas.getContext('2d');
-                                let history = {{ json_encode($idx === 0 ? ($activeReportData['daily_traffic'] ?? []) : ($activeReportData['compare_data']['daily_traffic'] ?? [])) }};
-                                let summary = {{ json_encode($idx === 0 ? ($activeReportData['summary'] ?? null) : ($activeReportData['compare_data']['summary'] ?? null)) }};
-                                
-                                if (history.length === 0 && summary) {
-                                    history = [{
-                                        date: '{{ now()->format('Y-m-d') }}',
-                                        top_10: summary.top_10 || 0,
-                                        top_15: summary.top_15 || 0,
-                                        top_50: summary.top_50 || 0
-                                    }];
-                                }
-                                let labels = history.map(h => h.date);
-                                let dTop10 = history.map(h => (h.top_10 !== undefined && h.top_10 !== null) ? h.top_10 : ((h.top_1_3 !== undefined && h.top_1_3 !== null) ? h.top_1_3 : null));
-                                let dTop15 = history.map(h => (h.top_15 !== undefined && h.top_15 !== null) ? h.top_15 : ((h.top_10 !== undefined && h.top_10 !== null) ? h.top_10 : null));
-                                let dTop50 = history.map(h => {
-                                    if (h.top_50 !== undefined && h.top_50 !== null) return h.top_50;
-                                    if (h.top_1_3 !== undefined && h.top_1_3 !== null) return (h.top_1_3 || 0) + (h.top_4_10 || 0) + (h.top_11_50 || 0);
-                                    return null;
-                                });
-                                
-                                this.chart = new Chart(ctx, {
-                                    type: 'bar',
-                                    data: {
-                                        labels: labels,
-                                        datasets: [
-                                            { label: 'Top 10', data: dTop10, backgroundColor: '#10b981', borderRadius: 4 },
-                                            { label: 'Top 15', data: dTop15, backgroundColor: '#3b82f6', borderRadius: 4 },
-                                            { label: 'Top 50', data: dTop50, backgroundColor: '#f59e0b', borderRadius: 4 }
-                                        ]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        plugins: { legend: { display: true, position: 'bottom' } },
-                                        scales: {
-                                            y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#f1f5f9' }, border: { display: false } },
-                                            x: { grid: { display: false }, border: { display: false } }
-                                        }
-                                    }
-                                });
-                            }, 100);
-                        }
-                    }">
-                        <canvas x-ref="canvas"></canvas>
+                @endif
+
+                {{-- Summary Cards --}}
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Keywords</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['total_keywords'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
-                </div></div>
-            </div>
-
-            </div>
-            @endforeach
-            </div>
-
-            
-            @if(count($reportSets) == 1)
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                @php $rSet = $reportSets[0]; $reportDataScope = $rSet['data']; @endphp
-                
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Keyword Rankings</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                    <th class="py-2 font-bold">Keyword</th>
-                                    <th class="py-2 text-right font-bold">Position</th>
-                                    <th class="py-2 text-right font-bold">Change</th>
-                                    <th class="py-2 text-right font-bold">Volume</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (array_slice($reportDataScope['keywords'] ?? [], 0, 10) as $kw) <tr wire:key="kw-{{ md5(json_encode($kw)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                    <td class="py-2.5 font-bold truncate">{{ $kw['keyword'] ?? 'Unknown' }}</td>
-                                    <td class="py-2.5 text-right font-medium">{{ $kw['position'] ?? 0 }}</td>
-                                    <td class="py-2.5 text-right font-medium text-emerald-500">{{ $kw['change'] ?? 0 }}</td>
-                                    <td class="py-2.5 text-right font-medium">{{ number_format($kw['volume'] ?? 0) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['top_10'] ?? 0) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['top_15'] ?? 0) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10 Pages</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['top_10_pages'] ?? 0) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
+                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15 Pages</span>
+                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                                {{ number_format($reportDataScope['summary']['top_15_pages'] ?? 0) }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                    <th class="py-2 font-bold">URL</th>
-                                    <th class="py-2 text-right font-bold">Keywords</th>
-                                    <th class="py-2 text-right font-bold">Avg Rank</th>
-                                    <th class="py-2 text-right font-bold">Total Volume</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (array_slice($reportDataScope['pages'] ?? [], 0, 10) as $page) <tr wire:key="page-{{ md5(json_encode($page)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                    <td class="py-2.5 font-medium truncate max-w-[200px]" title="{{ $page['url'] ?? '' }}">
-                                        {{ $page['path'] ?? '/' }}
-                                    </td>
-                                    <td class="py-2.5 text-right font-medium">{{ number_format($page['keyword_count'] ?? 0) }}</td>
-                                    <td class="py-2.5 text-right font-medium">{{ $page['avg_rank'] ?? 0 }}</td>
-                                    <td class="py-2.5 text-right font-medium">{{ number_format($page['total_volume'] ?? 0) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            @else
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    @foreach($reportSets as $idx => $rSet)
-                    <div wire:key="keyword-table-rankings-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                        @php $reportDataScope = $rSet['data']; @endphp
-                        @if(count($reportSets) > 1)
-                            <div class="col-span-full mb-3 mt-4">
-                                <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                                    {{ $rSet['title'] }}
-                                </span>
+                {{-- Ranking Distribution Chart --}}
+                <div class="grid grid-cols-1 mb-6">
+                    <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full rounded-2xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                                <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Ranking Distribution
                             </div>
-                        @endif
-                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Keyword Rankings</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs">
-                                    <thead>
-                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                            <th class="py-2 font-bold">Keyword</th>
-                                            <th class="py-2 text-right font-bold">Position</th>
-                                            <th class="py-2 text-right font-bold">Change</th>
-                                            <th class="py-2 text-right font-bold">Volume</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (array_slice($reportDataScope['keywords'] ?? [], 0, 10) as $kw) <tr wire:key="kw-{{ md5(json_encode($kw)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                        </div>
+                        <div wire:key="stable-kw-{{ $idx }}" class="w-full">
+                            <div class="h-64 relative" wire:ignore wire:key="bar-keyword-dist-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                                chart: null,
+                                init() {
+                                    setTimeout(() => {
+                                        let canvas = this.$refs.canvas;
+                                        if (!canvas) return;
+                                        if (this.chart) {
+                                            this.chart.destroy();
+                                        }
+                                        const ctx = canvas.getContext('2d');
+                                        let history = {{ json_encode($idx === 0 ? ($activeReportData['daily_traffic'] ?? []) : ($activeReportData['compare_data']['daily_traffic'] ?? [])) }};
+                                        let summary = {{ json_encode($idx === 0 ? ($activeReportData['summary'] ?? null) : ($activeReportData['compare_data']['summary'] ?? null)) }};
+                                        
+                                        if (history.length === 0 && summary) {
+                                            history = [{
+                                                date: '{{ now()->format('Y-m-d') }}',
+                                                top_10: summary.top_10 || 0,
+                                                top_15: summary.top_15 || 0,
+                                                top_50: summary.top_50 || 0
+                                            }];
+                                        }
+                                        let labels = history.map(h => h.date);
+                                        let dTop10 = history.map(h => (h.top_10 !== undefined && h.top_10 !== null) ? h.top_10 : ((h.top_1_3 !== undefined && h.top_1_3 !== null) ? h.top_1_3 : null));
+                                        let dTop15 = history.map(h => (h.top_15 !== undefined && h.top_15 !== null) ? h.top_15 : ((h.top_10 !== undefined && h.top_10 !== null) ? h.top_10 : null));
+                                        let dTop50 = history.map(h => {
+                                            if (h.top_50 !== undefined && h.top_50 !== null) return h.top_50;
+                                            if (h.top_1_3 !== undefined && h.top_1_3 !== null) return (h.top_1_3 || 0) + (h.top_4_10 || 0) + (h.top_11_50 || 0);
+                                            return null;
+                                        });
+                                        
+                                        this.chart = new Chart(ctx, {
+                                            type: 'bar',
+                                            data: {
+                                                labels: labels,
+                                                datasets: [
+                                                    { label: 'Top 10', data: dTop10, backgroundColor: '#10b981', borderRadius: 4 },
+                                                    { label: 'Top 15', data: dTop15, backgroundColor: '#3b82f6', borderRadius: 4 },
+                                                    { label: 'Top 50', data: dTop50, backgroundColor: '#f59e0b', borderRadius: 4 }
+                                                ]
+                                            },
+                                            options: {
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: { legend: { display: true, position: 'bottom' } },
+                                                scales: {
+                                                    y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#f1f5f9' }, border: { display: false } },
+                                                    x: { grid: { display: false }, border: { display: false } }
+                                                }
+                                            }
+                                        });
+                                    }, 100);
+                                }
+                            }">
+                                <canvas x-ref="canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Rankings and Pages Tables --}}
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Keyword Rankings</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                        <th class="py-2 font-bold">Keyword</th>
+                                        <th class="py-2 text-right font-bold">Position</th>
+                                        <th class="py-2 text-right font-bold">Change</th>
+                                        <th class="py-2 text-right font-bold">Volume</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (array_slice($reportDataScope['keywords'] ?? [], 0, 10) as $kw) 
+                                        <tr wire:key="kw-{{ $idx }}-{{ md5(json_encode($kw)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                             <td class="py-2.5 font-bold truncate">{{ $kw['keyword'] ?? 'Unknown' }}</td>
                                             <td class="py-2.5 text-right font-medium">{{ $kw['position'] ?? 0 }}</td>
                                             <td class="py-2.5 text-right font-medium text-emerald-500">{{ $kw['change'] ?? 0 }}</td>
                                             <td class="py-2.5 text-right font-medium">{{ number_format($kw['volume'] ?? 0) }}</td>
                                         </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    @endforeach
-                </div>
 
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    @foreach($reportSets as $idx => $rSet)
-                    <div wire:key="keyword-table-pages-{{ $idx }}" class="flex-1 w-full overflow-hidden">
-                        @php $reportDataScope = $rSet['data']; @endphp
-                        @if(count($reportSets) > 1)
-                            <div class="col-span-full mb-3 mt-4">
-                                <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                                    {{ $rSet['title'] }}
-                                </span>
-                            </div>
-                        @endif
-                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs">
-                                    <thead>
-                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                            <th class="py-2 font-bold">URL</th>
-                                            <th class="py-2 text-right font-bold">Keywords</th>
-                                            <th class="py-2 text-right font-bold">Avg Rank</th>
-                                            <th class="py-2 text-right font-bold">Total Volume</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (array_slice($reportDataScope['pages'] ?? [], 0, 10) as $page) <tr wire:key="page-{{ md5(json_encode($page)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
+                                        <th class="py-2 font-bold">URL</th>
+                                        <th class="py-2 text-right font-bold">Keywords</th>
+                                        <th class="py-2 text-right font-bold">Avg Rank</th>
+                                        <th class="py-2 text-right font-bold">Total Volume</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (array_slice($reportDataScope['pages'] ?? [], 0, 10) as $page) 
+                                        <tr wire:key="page-{{ $idx }}-{{ md5(json_encode($page)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                             <td class="py-2.5 font-medium truncate max-w-[200px]" title="{{ $page['url'] ?? '' }}">
                                                 {{ $page['path'] ?? '/' }}
                                             </td>
@@ -2949,15 +2844,16 @@
                                             <td class="py-2.5 text-right font-medium">{{ $page['avg_rank'] ?? 0 }}</td>
                                             <td class="py-2.5 text-right font-medium">{{ number_format($page['total_volume'] ?? 0) }}</td>
                                         </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    @endforeach
                 </div>
-            @endif
+
+            </div>
+            @endforeach
+            </div>
         @elseif($activeReportIntegrationId === 'gtm')
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

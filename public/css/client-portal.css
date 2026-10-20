@@ -1779,6 +1779,8 @@ body:has(.is-marketing-report),
 
 /* Remove unwanted outer container card wrap in client-report if rendered */
 .client-integration-theme > div > .bg-white.border.rounded-3xl,
+.client-integration-theme > div > div > .rounded-3xl,
+.client-integration-theme .rounded-3xl.shadow-sm,
 .client-integration-theme .bg-white.dark\:bg-slate-900.border.border-slate-200.rounded-3xl {
   background: transparent !important;
   border: 0 !important;
@@ -1816,9 +1818,11 @@ body:has(.is-marketing-report),
 .client-integration-theme div:has(> table),
 .client-integration-theme div:has(> canvas),
 .client-integration-theme div:has(> div > canvas),
-.client-integration-theme div:has(> .overflow-x-auto) {
-  display: block !important;
+.client-integration-theme div:has(> .overflow-x-auto),
+.client-integration-theme .events-breakdown-grid > div {
+  display: flex !important;
   flex-direction: column !important;
+  align-items: stretch !important;
   min-height: auto !important;
 }
 
@@ -1950,76 +1954,94 @@ body:has(.is-marketing-report),
 
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div {
   border: 1px solid var(--border) !important;
-  border-radius: 10px !important;
+  border-radius: 16px !important;
   background: var(--card) !important;
   color: var(--foreground) !important;
-  padding: 14px 14px 12px !important;
+  padding: 18px 20px !important;
   height: auto !important;
-  min-height: 85px !important;
+  min-height: 95px !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 16px !important;
   cursor: pointer;
-  box-shadow: none !important;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease;
 }
 
 .client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: var(--secondary);
+  background: #e2f1f5 !important;
+  border: 1px solid #cce5ec !important;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--foreground);
+  color: #0b495b !important;
+  transition: all 0.2s ease;
+}
+
+.dark .client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon {
+  background: rgba(19, 78, 74, 0.35) !important;
+  border-color: rgba(19, 78, 74, 0.5) !important;
+  color: #5eead4 !important;
 }
 
 .client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon svg {
-  width: 22px;
-  height: 22px;
-  stroke: var(--foreground);
+  width: 24px;
+  height: 24px;
+  stroke: #0b495b !important;
   stroke-width: 1.8;
   fill: none;
 }
 
+.dark .client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon svg {
+  stroke: #5eead4 !important;
+}
+
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div:hover {
-  background: var(--accent) !important;
-  border-color: var(--ring) !important;
+  border-color: #b0cbd6 !important;
+  box-shadow: 0 4px 12px rgba(11, 73, 91, 0.08) !important;
 }
 
 /* Active selected card in Google Ads */
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div[style*="color: white;"] {
   background-color: var(--card) !important;
   color: var(--foreground) !important;
-  border-color: var(--ring) !important;
-  box-shadow: 0 0 0 1px var(--ring) !important;
+  border-color: #0b495b !important;
+  border-width: 1px !important;
+  box-shadow: 0 2px 8px rgba(11, 73, 91, 0.08) !important;
 }
 
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div span.text-\[13px\] {
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
   color: var(--muted-foreground) !important;
   white-space: nowrap;
 }
 
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div div[class*="text-[26px]"] {
-  font-size: 30px !important;
+  font-size: 28px !important;
   font-weight: 900 !important;
-  line-height: 1.05 !important;
-  color: var(--foreground) !important;
+  line-height: 1.1 !important;
+  color: #0c3b4a !important;
   letter-spacing: -0.02em;
-  margin-top: 4px;
+  margin-top: 2px;
+}
+
+.dark .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div div[class*="text-[26px]"] {
+  color: #ffffff !important;
 }
 
 /* Graph Panel in Google Ads (Wrap into GA4 panel box) */
 .client-integration-theme [wire\:key*="gads-replica"] div.p-6.bg-white {
   background: var(--card) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 10px !important;
-  padding: 16px 20px !important;
+  border-radius: 16px !important;
+  padding: 24px 24px 20px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
 }
 .client-integration-theme [wire\:key*="gads-replica"] canvas {
   background: transparent !important;
@@ -2178,13 +2200,37 @@ body:has(.is-marketing-report),
 }
 .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-blue-500 to-indigo-600"],
 .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-amber-400 to-orange-500"],
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-rose-400 to-pink-500"],
 .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-violet-500 to-purple-600"] {
-  background: var(--secondary) !important;
-  color: var(--foreground) !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: #e2f1f5 !important;
+  border: 1px solid #cce5ec !important;
+  color: #0b495b !important;
   box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
+
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-blue-500 to-indigo-600"],
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-amber-400 to-orange-500"],
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-rose-400 to-pink-500"],
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-violet-500 to-purple-600"] {
+  background: rgba(19, 78, 74, 0.35) !important;
+  border-color: rgba(19, 78, 74, 0.5) !important;
+  color: #5eead4 !important;
+}
+
 .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br"] svg {
-  stroke: var(--foreground) !important;
+  stroke: #0b495b !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br"] svg {
+  stroke: #5eead4 !important;
 }
 
 

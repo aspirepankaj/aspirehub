@@ -46,6 +46,22 @@
         this.$watch('tempStart', value => this.calculateCompareDates());
         this.$watch('tempEnd', value => this.calculateCompareDates());
         this.$watch('comparePreset', value => this.calculateCompareDates());
+        this.$watch('enableCompare', value => {
+            if (value && (!this.tempCompareStart || !this.tempCompareEnd)) {
+                this.comparePreset = 'custom';
+                if (this.tempStart && this.tempEnd) {
+                    const dStart = new Date(this.tempStart);
+                    const dEnd = new Date(this.tempEnd);
+                    const diffDays = Math.round((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+                    const cEnd = new Date(dStart);
+                    cEnd.setDate(cEnd.getDate() - 1);
+                    const cStart = new Date(cEnd);
+                    cStart.setDate(cStart.getDate() - (diffDays - 1));
+                    this.tempCompareStart = this.formatDateObj(cStart);
+                    this.tempCompareEnd = this.formatDateObj(cEnd);
+                }
+            }
+        });
         this.$watch('includeToday', value => {
             if(value && this.tempEnd) {
                 const today = new Date();
@@ -330,13 +346,18 @@
     
     <!-- Trigger Button (GA4 Style) -->
     <button @click="togglePopover()" type="button" 
-            class="inline-flex items-center gap-2.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-600 rounded-md shadow-xs transition-colors duration-150 text-xs text-slate-800 dark:text-slate-200 font-medium">
-        <span class="bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-xs font-semibold"
-              x-text="getPresetLabel()">
-            Last 28 days
+            class="inline-flex items-center gap-2.5 px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs transition-all duration-150 text-xs text-slate-800 dark:text-slate-200 font-medium">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-[#0b495b] dark:text-[#5eead4] border border-slate-200/60 dark:border-slate-700 text-xs font-bold">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span x-text="getPresetLabel()">Last 28 days</span>
         </span>
-        <span class="font-semibold text-slate-700 dark:text-slate-200" x-text="formatDateRangeDisplay()"></span>
-        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <span class="font-semibold text-slate-700 dark:text-slate-200 text-xs" x-text="formatDateRangeDisplay()"></span>
+        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
     </button>
@@ -445,7 +466,11 @@
                         <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm tracking-tight">Compare To</h4>
                     </div>
 
-                    <div x-show="enableCompare" class="mt-2">
+                    <div x-show="enableCompare" class="mt-2 space-y-2">
+                        <select x-model="comparePreset" @change="calculateCompareDates()"
+                                class="w-full text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-200 outline-none">
+                            <option value="custom">Custom</option>
+                        </select>
                         <div class="flex items-center gap-2">
                             <input type="text" readonly :value="tempCompareStart" @click="activeTarget = 'compare'; selectingStep = 0"
                                    class="w-1/2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-100 text-sm outline-none cursor-pointer" :class="{'ring-2 ring-amber-500': activeTarget === 'compare'}" />
