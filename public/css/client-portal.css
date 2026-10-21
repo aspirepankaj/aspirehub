@@ -108,8 +108,8 @@ body:has(.is-marketing-report),
 }
 
 .brand svg {
-  width: 42px;
-  height: 42px;
+  width: 150px;
+  height: auto;
   flex-shrink: 0;
 }
 
@@ -255,8 +255,8 @@ body:has(.is-marketing-report),
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #d0e7ec;
+  color:var(--portal-primary);
   font-weight: 700;
   font-size: 12px;
   display: flex;
@@ -277,7 +277,7 @@ body:has(.is-marketing-report),
 .portal-profile-name {
   font-size: 13px;
   font-weight: 700;
-  color: var(--portal-text);
+  color: var(--portal-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -299,12 +299,12 @@ body:has(.is-marketing-report),
 .portal-btn-theme {
   flex: 1;
   height: 32px;
-  background: #f8fafc;
+  background: var(--portal-primary);
   border: 1px solid var(--portal-border);
   border-radius: 8px;
   font-size: 11.5px;
   font-weight: 600;
-  color: var(--portal-text);
+  color: var(--white-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -353,7 +353,7 @@ body:has(.is-marketing-report),
 .background-mark {
   position: absolute;
   right: -50px;
-  top: -150px;
+  top: -180px;
   width: 800px;
   height: 800px;
   color: var(--mark, oklch(.987 .008 230));
@@ -1811,7 +1811,7 @@ body:has(.is-marketing-report),
   position: relative !important;
   display: flex !important;
   flex-direction: row !important;
-  align-items: center !important;
+  align-items: start !important;
   gap: 13px !important;
   min-height: 85px !important;
 }
@@ -1836,19 +1836,19 @@ body:has(.is-marketing-report),
   width: 46px !important;
   height: 46px !important;
   border-radius: 50% !important;
-  background-color: var(--secondary) !important;
+  background-color: #d0e7ec !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
-  color: var(--foreground) !important;
+  color: #135266 !important;
 }
 
 .client-integration-theme .grid > div[class*="rounded-2xl"] > span:first-child[class*="rounded-full"] svg,
 .client-integration-theme .grid > div[class*="rounded-xl"] > span:first-child[class*="rounded-full"] svg {
   width: 22px !important;
   height: 22px !important;
-  stroke: var(--foreground) !important;
+  stroke: #135266 !important;
   stroke-width: 1.8 !important;
   fill: none !important;
 }
@@ -1895,7 +1895,7 @@ body:has(.is-marketing-report),
 .client-integration-theme h5 {
   color: var(--foreground) !important;
   font-weight: 800 !important;
-  font-size: 14px !important;
+  font-size: 18px !important;
 }
 
 /* Tables across integrations */

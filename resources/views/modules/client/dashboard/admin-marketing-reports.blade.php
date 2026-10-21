@@ -177,7 +177,7 @@
             box-shadow: 0 4px 12px rgba(11, 43, 56, 0.06) !important;
         }
         .client-integration-theme .text-slate-800 {
-            color: #0c3b4a !important;
+            color: #135266 !important;
         }
         .dark .client-integration-theme .text-slate-800 {
             color: #ffffff !important;

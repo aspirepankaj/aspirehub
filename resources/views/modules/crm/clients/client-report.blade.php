@@ -192,7 +192,7 @@
                 @endif
 
                 {{-- Summary Cards --}}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
@@ -431,7 +431,7 @@
                         </span>
                     </div>
                 @endif
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -1253,10 +1253,10 @@
         <!-- Note: The "Google Analytics 4" header with icon and date picker is likely outside this component, but if it is inside, we can render it. We assume it's outside based on previous Blade structure, but we match the cards exactly. -->
 
         <!-- Top Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-2 mb-6">
             <!-- Total Users -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
-                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-start gap-4 transition-all hover:border-[#b0cbd6]">
+                <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="9" cy="7" r="4"></circle>
@@ -1266,9 +1266,9 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Total Users</div>
-                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($activeUsers) }}</div>
+                    <div class="text-3xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($activeUsers) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] font-bold leading-tight {{ $deltaUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[16px] font-bold leading-tight {{ $deltaUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaUsers['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaUsers['value'] }}
                         </div>
                         <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
@@ -1278,7 +1278,7 @@
 
             <!-- New Users -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
-                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="8.5" cy="7" r="4"></circle>
@@ -1288,9 +1288,9 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">New Users</div>
-                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($newUsers) }}</div>
+                    <div class="text-3xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($newUsers) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] font-bold leading-tight {{ $deltaNewUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[16px] font-bold leading-tight {{ $deltaNewUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaNewUsers['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaNewUsers['value'] }}
                         </div>
                         <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
@@ -1300,7 +1300,7 @@
 
             <!-- Returning Users -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
-                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="9" cy="7" r="4"></circle>
@@ -1310,9 +1310,9 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Returning Users</div>
-                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($returningUsers) }}</div>
+                    <div class="text-3xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($returningUsers) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] font-bold leading-tight {{ $deltaReturningUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[16px] font-bold leading-tight {{ $deltaReturningUsers['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaReturningUsers['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaReturningUsers['value'] }}
                         </div>
                         <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
@@ -1322,7 +1322,7 @@
 
             <!-- Engagement Time -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
-                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
@@ -1330,9 +1330,9 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Engagement Time</div>
-                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ $avgSessionDuration }}</div>
+                    <div class="text-3xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ $avgSessionDuration }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] font-bold leading-tight {{ $deltaDuration['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[16px] font-bold leading-tight {{ $deltaDuration['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaDuration['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaDuration['value'] }}
                         </div>
                         <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
@@ -1342,16 +1342,16 @@
 
             <!-- Key Events -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
-                <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#0b495b] dark:text-[#5eead4]">
+                <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
                     <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Key Events</div>
-                    <div class="text-3xl font-extrabold text-[#0c3b4a] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($keyEventsCount) }}</div>
+                    <div class="text-3xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($keyEventsCount) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] font-bold leading-tight {{ $deltaEvents['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[16px] font-bold leading-tight {{ $deltaEvents['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaEvents['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEvents['value'] }}
                         </div>
                         <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
@@ -1525,10 +1525,10 @@
                 <!-- Header Area -->
                 <div class="px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important;">
                     <div class="flex items-center">
-                        <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4] mr-2">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4] mr-2">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         </span>
-                        <h2 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important; display: inline-block !important; font-size: 15px !important; line-height: 1.2 !important;" x-text="
+                        <h2 class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important; display: inline-block !important; font-size: 18px !important; line-height: 1.2 !important;" x-text="
                             metric === 'users' ? 'Users & New' : 
                             (metric === 'sessions' ? 'Sessions & Engaged' : 
                             (metric === 'pageviews' ? 'Pageviews' : 
@@ -1578,7 +1578,7 @@
             <div class="w-full lg:w-[40%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: center !important;">
                 <div class="flex items-center gap-2 mb-4" style="margin: 0 0 16px 0 !important;">
                     <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
                     </span>
                     <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important;">Traffic by Channel</h4>
                 </div>
@@ -1648,8 +1648,8 @@
             <!-- Top Landing Pages -->
             <div x-data="{ showAll: false }" class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
                 <div class="flex items-center gap-2 mb-4">
-                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </span>
@@ -1698,8 +1698,8 @@
             <!-- Device Breakdown -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col hover:border-[#b0cbd6] transition-all">
                 <div class="flex items-center gap-2 mb-4">
-                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
                     </span>
@@ -1757,8 +1757,8 @@
             <!-- Top Countries -->
             <div x-data="{ showAll: false }" class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
                 <div class="flex items-center gap-2 mb-4">
-                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="2" y1="12" x2="22" y2="12"></line>
                             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
@@ -1829,8 +1829,8 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs overflow-hidden hover:border-[#b0cbd6] transition-all">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                         </svg>
                     </span>

@@ -400,7 +400,7 @@
                     <div class="panel-heading">
                         <h2>
                             <span data-icon="file">
-                                <svg viewBox="0 0 24 24" class="w-4 h-4"><path d="M5 2h9l5 5v15H5zM14 2v6h5M8 12h8M8 15h8M8 18h6"/></svg>
+                                <svg viewBox="0 0 24 24" class="w-6 h-6"><path d="M5 2h9l5 5v15H5zM14 2v6h5M8 12h8M8 15h8M8 18h6"/></svg>
                             </span>
                             <span x-text="datasets[metric]?.title || 'Users & New Users'">Users &amp; New Users</span>
                         </h2>
@@ -428,7 +428,7 @@
                     <div class="panel-heading">
                         <h2>
                             <span data-icon="settings">
-                                <svg viewBox="0 0 24 24" class="w-4 h-4"><path d="m10 2-1 3-3 1-3-1-2 4 2 2v3l-2 2 2 4 3-1 3 1 1 3h4l1-3 3-1 3 1 2-4-2-2v-3l2-2-2-4-3 1-3-1-1-3z"/><circle cx="12" cy="12" r="4"/></svg>
+                                <svg viewBox="0 0 24 24" class="w-6 h-6"><path d="m10 2-1 3-3 1-3-1-2 4 2 2v3l-2 2 2 4 3-1 3 1 1 3h4l1-3 3-1 3 1 2-4-2-2v-3l2-2-2-4-3 1-3-1-1-3z"/><circle cx="12" cy="12" r="4"/></svg>
                             </span>
                             Traffic by Channel
                         </h2>

@@ -177,7 +177,7 @@
             box-shadow: 0 4px 12px rgba(11, 43, 56, 0.06) !important;
         }
         .client-integration-theme .text-slate-800 {
-            color: #0c3b4a !important;
+            color: #135266 !important;
         }
         .dark .client-integration-theme .text-slate-800 {
             color: #ffffff !important;
@@ -367,8 +367,8 @@
 
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <h1 class="flex items-center gap-3 text-2xl font-extrabold text-slate-800 dark:text-slate-100">
-                        <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                    <h1 class="flex items-center gap-3 text-2xl font-extrabold text-[#135266] dark:text-slate-100">
+                        <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
                             <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8">
                                 <rect x="3" y="15" width="4.5" height="10" rx="1" />
                                 <rect x="11.5" y="9" width="4.5" height="16" rx="1" />
