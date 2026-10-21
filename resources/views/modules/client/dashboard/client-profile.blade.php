@@ -1,9 +1,4 @@
 <div>
-    <x-admin.breadcrumbs
-        :items="[
-            'My Profile' => null,
-        ]"
-    />
 
     <div class="mb-8">
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400">

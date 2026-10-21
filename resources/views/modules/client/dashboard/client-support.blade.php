@@ -1,6 +1,4 @@
 <div x-data="{ showCreateModal: @entangle('showCreateModal') }" @keydown.escape.window="$wire.closeTicket()" class="space-y-6">
-    {{-- Breadcrumbs --}}
-    <x-admin.breadcrumbs :items="['Support Center' => null]" />
 
     <!-- Top Bar Header -->
     <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">

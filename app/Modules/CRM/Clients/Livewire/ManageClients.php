@@ -136,7 +136,7 @@ class ManageClients extends Component
         }
         if (request()->has('tab')) {
             $requestedTab = (string) request()->get('tab');
-            $validMainTabs = ['marketing', 'websites', 'integrations', 'clickup_tickets', 'maintenance', 'misc', 'overview', 'activity log', 'documents'];
+            $validMainTabs = ['marketing', 'websites', 'integrations', 'clickup_tickets', 'maintenance', 'misc', 'overview', 'activity log', 'documents', 'support', 'settings'];
             if (in_array($requestedTab, $validMainTabs, true)) {
                 $this->activeTab = $requestedTab;
             }

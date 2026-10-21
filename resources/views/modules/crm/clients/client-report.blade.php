@@ -119,7 +119,7 @@
             </div>
         @else
             <!-- SKELETON UI -->
-            <div wire:loading wire:target="applyDateFilter" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
+            <div wire:loading wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('linkedin'), applyDateFilter" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
 
 
                 <!-- Skeleton cards -->
@@ -160,7 +160,7 @@
             </div>
 
             <!-- REAL CONTENT -->
-            <div wire:loading.remove wire:target="applyDateFilter">
+            <div wire:loading.remove wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('linkedin'), applyDateFilter">
                 @if ($activeReportIntegrationId === 'gsc')
 @php
             $reportSets = [];

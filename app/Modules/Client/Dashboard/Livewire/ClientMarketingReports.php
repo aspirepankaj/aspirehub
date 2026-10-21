@@ -402,6 +402,10 @@ class ClientMarketingReports extends Component
 
     public function selectIntegration(string $typeId)
     {
+        if ($this->activeReportIntegrationId === $typeId) {
+            return;
+        }
+
         $this->activeReportIntegrationId = $typeId;
         $this->updateActivePropertyId();
         

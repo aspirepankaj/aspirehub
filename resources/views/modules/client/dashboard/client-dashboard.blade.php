@@ -14,10 +14,6 @@
         <!--<div class="growth-note">Your<br/>growth<br/>matters.<br/>—</div>-->
 
         <div class="welcome-buttons">
-            <a href="{{ route('client.dashboard') }}" class="btn-back">
-                <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
-                <span>Back to Dashboard</span>
-            </a>
             <a href="{{ route('client.support') }}" class="btn-support-ticket">
                 <i data-lucide="message-square-more" style="width:16px;height:16px;"></i>
                 <span>Open Support Ticket</span>
