@@ -26,7 +26,8 @@ class ManageMarketingReports extends Component
     public $compareDateFrom = '';
     public $compareDateTo = '';
 
-    // AI Marketing Report State
+    // AI Marketing Report State (hidden by default as requested, can be toggled without removing any code)
+    public bool $showAiMarketingReport = false;
     public string $aiPrompt = '';
     public bool $isGeneratingAiReport = false;
     public ?array $aiReport = null;
@@ -522,6 +523,7 @@ class ManageMarketingReports extends Component
             'activeTab'            => $this->activeTab,
             'dateFrom'             => $this->dateFrom,
             'dateTo'               => $this->dateTo,
+            'showAiMarketingReport'=> $this->showAiMarketingReport,
             'aiReport'             => $this->aiReport,
             'aiGeneratedHtml'      => $this->aiGeneratedHtml,
             'showAiHtmlReport'     => $this->showAiHtmlReport,

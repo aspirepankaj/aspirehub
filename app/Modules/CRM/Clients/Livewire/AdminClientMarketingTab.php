@@ -48,7 +48,13 @@ class AdminClientMarketingTab extends Component
         if ($websites->isNotEmpty()) {
             $this->selectedWebsiteId = $websites->first()->id;
         }
-        $this->activeTab = 'overview';
+
+        $tab = request()->query('tab');
+        if ($tab && $tab !== 'marketing' && in_array($tab, ['overview', 'ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'linkedin', 'gtm'])) {
+            $this->activeTab = $tab;
+        } else {
+            $this->activeTab = 'overview';
+        }
     }
 
     public function updatedSelectedWebsiteId(): void

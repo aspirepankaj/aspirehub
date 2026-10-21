@@ -124,6 +124,8 @@
         </div>
     </div>
 
+    {{-- AI Marketing Reports (Hidden by default, enable via $showAiMarketingReport = true in component) --}}
+    @if($showAiMarketingReport)
     {{-- AI Marketing Prompt Bar --}}
     {{-- AI Marketing Filter Bar --}}
     <div class="mb-6 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/70 dark:border-slate-800/70 rounded-2xl p-5 shadow-xs relative transition-all">
@@ -526,4 +528,131 @@
             </div>
         @endif
     @endif
+    @else
+        {{-- Standard Marketing Integration Tabs & Reports --}}
+        @if($websiteId)
+            @if($integrations->isEmpty())
+                <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-12 text-center shadow-sm">
+                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">No Integrations Connected</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">This website doesn't have any connected marketing integrations yet.</p>
+                </div>
+            @else
+                {{-- Integrations Tabs --}}
+                <div class="mb-6 bg-slate-100/80 dark:bg-slate-900/50 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-200/40 dark:border-slate-800/40">
+                    <nav x-data class="flex flex-nowrap space-x-1 min-w-max" aria-label="Tabs">
+                        @foreach($integrations as $integration)
+                            @php $intgId = $integration->integration_type; @endphp
+                            <button type="button" 
+                               x-on:click="
+                                   $wire.activeTab = '{{ $intgId }}';
+                                   let u = new URL(window.location.href); 
+                                   u.searchParams.delete('compareDateFrom'); 
+                                   u.searchParams.delete('compareDateTo'); 
+                                   window.history.replaceState({}, '', u.toString());
+                                   $wire.switchTab('{{ $intgId }}');
+                               "
+                               :class="$wire.activeTab === '{{ $intgId }}' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-850 hover:bg-white/40 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/30'"
+                               class="py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0">
+                                {{-- Icon mapping --}}
+                                @if($intgId === 'ga4')
+                                    <svg class="w-4 h-4 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                                    <span>Google Analytics 4</span>
+                                @elseif($intgId === 'gsc')
+                                    <svg class="w-4 h-4 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                                    <span>Search Console</span>
+                                @elseif($intgId === 'gads')
+                                    <svg class="w-4 h-4 text-teal-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <span>Google Ads</span>
+                                @elseif($intgId === 'facebook')
+                                    <svg class="w-4 h-4 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
+                                    <span>Facebook</span>
+                                @elseif($intgId === 'linkedin')
+                                    <svg class="w-4 h-4 text-sky-600 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                                <span>LinkedIn</span>
+                                @elseif($intgId === 'youtube')
+                                    <svg class="w-4 h-4 text-red-500 fill-current shrink-0" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                    <span>YouTube</span>
+                                @elseif($intgId === 'keyword')
+                                    <svg class="w-4 h-4 text-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                                    <span>Keyword.com</span>
+                                @elseif($intgId === 'gbp')
+                                    <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <span>Business Profile</span>
+                                @elseif($intgId === 'gtm')
+                                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                    <span>Tag Manager</span>
+                                @else
+                                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                    <span>{{ ucfirst($intgId) }}</span>
+                                @endif
+                            </button>
+                        @endforeach
+                    </nav>
+                </div>
+
+                {{-- Selected Integration Report --}}
+                <div class="relative min-h-[400px]">
+                    {{-- Skeleton Loader --}}
+                    <div wire:loading wire:target="switchTab, resetSelection" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
+                        <div class="w-full h-full p-6">
+                            <!-- Skeleton cards -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5 mb-6 relative" style="z-index: 10;">
+                                @for($i = 0; $i < 5; $i++)
+                                    <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm h-32 flex flex-col justify-center">
+                                        <div class="flex items-start gap-4 mb-2">
+                                            <div class="w-12 h-12 rounded-full bg-slate-200/60 dark:bg-slate-800/60 shrink-0"></div>
+                                            <div class="flex-1 space-y-2 py-1">
+                                                <div class="h-3 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/2"></div>
+                                                <div class="h-8 bg-slate-200/80 dark:bg-slate-700/80 rounded w-3/4"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-2/3"></div>
+                                    </div>
+                                @endfor
+                            </div>
+                        </div>
+                    </div>
+
+                    <div wire:loading.remove wire:target="switchTab, resetSelection" class="animate-fadeIn" wire:key="tab-container-{{ $activeTab }}">
+                        @if($activeTab)
+                            @livewire('admin-client-report', [
+                                'id' => $clientId, 
+                                'integration' => $activeTab, 
+                                'websiteId' => $websiteId, 
+                                'hideHeader' => true,
+                                'compareDateFrom' => '',
+                                'compareDateTo' => ''
+                            ], key('report-'.$clientId.'-'.$websiteId.'-'.$activeTab))
+                        @endif
+                    </div>
+                </div>
+            @endif
+        @elseif($clientId)
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-12 text-center shadow-sm">
+                <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Select a Website</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Choose a website from the dropdown above to view its marketing reports.</p>
+            </div>
+        @else
+            <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-12 text-center shadow-sm">
+                <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Select Client & Website</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">Choose a client and website from the dropdown above to view its marketing reports.</p>
+            </div>
+        @endif
+    @endif
 </div>
+

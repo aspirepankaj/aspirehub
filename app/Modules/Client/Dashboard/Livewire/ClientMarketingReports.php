@@ -46,9 +46,9 @@ class ClientMarketingReports extends Component
     protected array $compareGadsData = [];
     protected array $compareFacebookData = [];
     
-    // Dropdown list holders
-    public $websites = [];
-    public $integrations = [];
+    // Dropdown list holders (protected to avoid bloating Livewire snapshot state)
+    protected $websites = [];
+    protected $integrations = [];
     
     // Legacy / active month properties
     public string $selectedMonth = '';
@@ -58,11 +58,37 @@ class ClientMarketingReports extends Component
     public ?int $clientId = null;
     public bool $isEmbedded = false;
 
+    public function boot(): void
+    {
+        $this->ensureWebsitesLoaded();
+    }
+
+    protected function ensureWebsitesLoaded(): void
+    {
+        if (empty($this->websites)) {
+            if ($this->clientId) {
+                $client = Client::find($this->clientId);
+            } else {
+                $client = Client::where('user_id', Auth::id())->first();
+            }
+
+            if ($client) {
+                $this->websites = Website::where('client_id', $client->id)
+                    ->where('status', 'active')
+                    ->orderBy('site_name')
+                    ->get();
+            } else {
+                $this->websites = collect();
+            }
+        }
+    }
+
     public function mount($clientId = null, $isEmbedded = false)
     {
         $this->isEmbedded = $isEmbedded;
         $this->clientId = $clientId;
         $this->initDateRange();
+        $this->ensureWebsitesLoaded();
 
         if ($this->clientId) {
             $client = Client::find($this->clientId);
@@ -442,6 +468,11 @@ class ClientMarketingReports extends Component
 
     public function render()
     {
+        $this->ensureWebsitesLoaded();
+        if (empty($this->integrations) && $this->selectedWebsiteId) {
+            $this->loadIntegrationsAndMonths();
+        }
+
         // If data hasn't been loaded in this request lifecycle, load it
         if (empty($this->activeReportData) && empty($this->ga4Data) && empty($this->facebookData) && empty($this->linkedinData) && empty($this->gscData) && empty($this->youtubeData) && empty($this->keywordData) && empty($this->gbpData) && empty($this->gadsData)) {
             $this->loadReportData();
