@@ -75,6 +75,22 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                @if($staffDetails->user_id && $staffDetails->user_id !== auth()->id())
+                    <button type="button" 
+                            class="px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded-xl shadow-sm transition active:scale-95 inline-flex items-center justify-center gap-2"
+                            title="Switch to this staff account"
+                            @click="$dispatch('open-switch-account-modal', {
+                                name: '{{ addslashes($staffDetails->user->name ?? 'Staff') }}',
+                                email: '{{ addslashes($staffDetails->user->email ?? '') }}',
+                                company: '{{ addslashes($staffDetails->company_name ?? '') }}',
+                                initials: '{{ $staffDetails->getInitials() }}',
+                                role: 'staff',
+                                url: '{{ route('impersonate.start', $staffDetails->user_id) }}'
+                            })">
+                        <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-4 h-4 shrink-0" alt="Switch Account" />
+                        <span>Switch Account</span>
+                    </button>
+                @endif
                 <button type="button" wire:click="editStaff({{ $staffDetails->id }})" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl active:scale-95 transition">
                     Edit
                 </button>
