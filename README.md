@@ -48,6 +48,7 @@
 | **Language** | PHP `^8.3` / `^8.4` (Strict Typing, Attributes) |
 | **Frontend Reactive Engine** | Livewire 3 (Volt), Alpine.js |
 | **Styling & Design System** | Tailwind CSS with Dark/Light Adaptive Mode & Vanilla Design Tokens |
+| **AI Engine / LLM** | OpenAI API (`openai-php/laravel` `^0.21.0`) for Executive Reports |
 | **Build & Bundler** | Vite 8+ |
 | **Databases Supported** | MySQL 8.0+ (Local / Prod) • MariaDB 10.4+ |
 | **Caching & Queues** | Database Cache Driver / Redis High-Performance Broker |
@@ -460,6 +461,55 @@ In Aspire Hub, when setting the **Property ID** for a client's Google Ads integr
    - **Admin / Staff Marketing Reports**
    - **Client Portal Dashboard** (`/client/marketing-reports?tab=linkedin`)
    - **Monthly PDF Marketing Reports**
+</details>
+
+<details>
+<summary><b>11. 🤖 OpenAI Integration & Live Server Deployment Guide</b> (Click to expand)</summary>
+
+Aspire Hub integrates OpenAI to generate executive marketing intelligence reports directly from multi-channel JSON telemetry files.
+
+### A. Installed Package & Configuration
+The official OpenAI Laravel package is already configured in the codebase:
+- **Composer Dependency**: `openai-php/laravel` (`^0.21.0`)
+- **Published Config**: `config/openai.php`
+- **Service Layer**: `app/Services/AiMarketingReportService.php`
+
+---
+
+### B. Live Server Deployment Commands
+Jab aap live server par git pull lete hain, toh terminal par ye commands run karein:
+
+1. **Install Package Dependencies**:
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   ```
+   *(Ya agar manually install karna ho bina composer.lock ke)*:
+   ```bash
+   composer require openai-php/laravel
+   ```
+
+2. **Configure Production Environment (`.env`)**:
+   Live server ki `.env` file mein apni OpenAI API Key add karein:
+   ```env
+   OPENAI_API_KEY=sk-proj-your-production-openai-api-key
+   # Optional:
+   OPENAI_ORGANIZATION=
+   OPENAI_PROJECT=
+   ```
+
+3. **Clear & Optimize Laravel Cache**:
+   ```bash
+   php artisan config:clear
+   php artisan cache:clear
+   php artisan config:cache
+   ```
+
+---
+
+### C. Core AI Features Supported
+- **Natural Language Prompt Parsing**: Flexible dates (`Sep. 06-2026 to Oct. 05-2026`, `YYYY-MM-DD`, `DD/MM/YYYY`, Hinglish `se ... tak`, etc.).
+- **Executive Visual Reports**: Multi-platform HTML reports with custom KPI cards, trend comparisons, and executive recommendations for GA4, Google Ads, YouTube, Keyword.com, LinkedIn, and Facebook.
+- **Toggle Visibility**: Control report display via `$showAiMarketingReport` in `ManageMarketingReports.php` without removing underlying AI telemetry logic.
 </details>
 
 ---
