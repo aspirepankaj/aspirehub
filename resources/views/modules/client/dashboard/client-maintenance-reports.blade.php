@@ -1,9 +1,4 @@
 <div>
-    <x-admin.breadcrumbs
-        :items="[
-            'Maintenance Reports' => null,
-        ]"
-    />
 
     <div class="mb-6 sm:mb-8">
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400">

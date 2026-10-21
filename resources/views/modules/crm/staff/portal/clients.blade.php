@@ -582,7 +582,7 @@
                                                     <span>Save</span>
                                                 </button>
                                             </div>
-                                            <p x-show="manual" class="text-[10px] text-slate-400 mt-1.5 leading-tight">Tip: Google Business Profile &gt; 3 dots &gt; Business Profile settings &gt; Advanced settings &gt; Business Profile ID copy karein.</p>
+                                            <p x-show="manual" class="text-[10px] text-slate-400 mt-1.5 leading-tight">Tip: Go to Google Business Profile &gt; 3 dots &gt; Business Profile settings &gt; Advanced settings &gt; Copy the Business Profile ID.</p>
                                         </div>
                                     @else
                                         <div class="mt-3 flex items-center justify-between text-xs p-2.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-850/50 mb-4">
@@ -890,7 +890,7 @@
                                                 </div>
                                             </div>
                                             <div class="mt-4 text-[11px] text-slate-450 leading-relaxed bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-900/30 p-3 rounded-xl text-amber-800 dark:text-amber-400 font-medium">
-                                                <strong>Important Tip:</strong> If you encounter the <em>"Bummer, something went wrong"</em> error on LinkedIn, keep only <code>openid profile email</code> in the scopes, as these are the standard approved scopes for the <strong>"Sign In with LinkedIn"</strong> product.
+                                                <strong>Important Tip:</strong> If LinkedIn returns a <em>"Bummer, something went wrong"</em> error, keep only <code>openid profile email</code> in the scopes (these are standard approved scopes with the "Sign In with LinkedIn" product).
                                             </div>
 
                                         @else

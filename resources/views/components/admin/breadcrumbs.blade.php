@@ -27,8 +27,8 @@
         }
     }
 
-    // Fallback to dashboard if no parent link is found and we are not already on the dashboard
-    if (!$calcBackUrl && !request()->routeIs('*.dashboard') && !request()->is('dashboard')) {
+    // Fallback to dashboard if no parent link is found and we are not already on the dashboard (skip for client portal as requested)
+    if (!$calcBackUrl && !$isClient && !request()->routeIs('*.dashboard') && !request()->is('dashboard')) {
         $calcBackUrl = $rootUrl;
         $calcBackLabel = 'Dashboard';
     }

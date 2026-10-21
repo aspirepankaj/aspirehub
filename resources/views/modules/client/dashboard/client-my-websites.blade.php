@@ -1,9 +1,4 @@
 <div>
-    <x-admin.breadcrumbs
-        :items="[
-            'My Websites' => null,
-        ]"
-    />
     <div class="mb-6 sm:mb-8">
 
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
@@ -186,9 +181,18 @@
                             </div>
 
                             <div class="mt-1 sm:mt-2 text-xs sm:text-sm font-medium text-slate-900 dark:text-white truncate">
-
-                                {{ $website->maintenance_month ?: '-' }}
-
+                                @if(!empty($website->report_id))
+                                    <a href="{{ route('client.maintenance.view', $website->report_id) }}" 
+                                       class="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold group transition-colors duration-150"
+                                       title="View Maintenance Report">
+                                        <span>{{ $website->maintenance_month ?: 'View Report' }}</span>
+                                        <svg class="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
+                                @else
+                                    <span class="text-slate-500 dark:text-slate-400">{{ $website->maintenance_month ?: '-' }}</span>
+                                @endif
                             </div>
 
                         </div>
