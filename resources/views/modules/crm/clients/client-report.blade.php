@@ -438,7 +438,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Followers</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-lg font-extrabold !text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
                             </span>
                         </div>
@@ -1256,13 +1256,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-2 mb-6">
             <!-- Total Users -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-start gap-4 transition-all hover:border-[#b0cbd6]">
-                <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
-                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">   
+                <!-- <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="9" cy="7" r="4"></circle>
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
+                    </svg> -->
+                    <svg class="w-8 h-8" stroke-width="1.5" fill="#135266" id="fi_2956777" viewBox="0 0 32 32"  xmlns="http://www.w3.org/2000/svg" data-name="Layer 3"><path d="m15.867 14.881a4.941 4.941 0 1 0 -4.941-4.94 4.946 4.946 0 0 0 4.941 4.94zm0-7.881a2.941 2.941 0 1 1 -2.941 2.941 2.945 2.945 0 0 1 2.941-2.941z"></path><path d="m6.533 17.785a3.8 3.8 0 1 0 -3.8-3.8 3.8 3.8 0 0 0 3.8 3.8zm0-5.6a1.8 1.8 0 1 1 -1.8 1.8 1.8 1.8 0 0 1 1.8-1.8z"></path><path d="m25.2 17.785a3.8 3.8 0 1 0 -3.8-3.8 3.8 3.8 0 0 0 3.8 3.8zm0-5.6a1.8 1.8 0 1 1 -1.8 1.8 1.8 1.8 0 0 1 1.8-1.8z"></path><path d="m25.333 19.791a5.269 5.269 0 0 0 -2.506.653 8.237 8.237 0 0 0 -6.827-3.837 8.237 8.237 0 0 0 -6.827 3.837 5.269 5.269 0 0 0 -2.506-.653 5.963 5.963 0 0 0 -5.667 6.209 1 1 0 0 0 2 0 3.971 3.971 0 0 1 3.667-4.209 3.272 3.272 0 0 1 1.577.419 10.085 10.085 0 0 0 -.711 3.732 1 1 0 0 0 2 0c0-4.045 2.9-7.335 6.467-7.335s6.467 3.29 6.467 7.335a1 1 0 0 0 2 0 10.085 10.085 0 0 0 -.711-3.732 3.272 3.272 0 0 1 1.577-.419 3.971 3.971 0 0 1 3.667 4.209 1 1 0 0 0 2 0 5.963 5.963 0 0 0 -5.667-6.209z"></path></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Total Users</div>
@@ -1343,9 +1344,64 @@
             <!-- Key Events -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4 transition-all hover:border-[#b0cbd6]">
                 <div class="w-14 h-14 rounded-full bg-[#d0e7ec] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
-                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <!-- <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                    </svg>
+                    </svg> -->
+                    <svg class="w-8 h-8" stroke-width="1.6" fill="#135266"  stroke-linecap="round" stroke-linejoin="round" version="1.1" id="fi_82377" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 447 447" style="enable-background:new 0 0 447 447;" xml:space="preserve">
+                        <g>
+                            <path d="M223.5,80c22.056,0,40-17.944,40-40s-17.944-40-40-40c-22.056,0-40,17.944-40,40S201.444,80,223.5,80z M223.5,20
+                                c11.028,0,20,8.972,20,20s-8.972,20-20,20c-11.028,0-20-8.972-20-20S212.472,20,223.5,20z"></path>
+                            <path d="M163.5,170c5.523,0,10-4.478,10-10c0-27.57,22.43-50,50-50s50,22.43,50,50c0,5.522,4.478,10,10,10s10-4.478,10-10
+                                c0-38.598-31.402-70-70-70c-38.598,0-70,31.402-70,70C153.5,165.522,157.977,170,163.5,170z"></path>
+                            <path d="M308.971,378.429L322.758,200H353.5c5.522,0,10-4.478,10-10s-4.478-10-10-10h-120v-39.76c0-5.522-4.478-10-10-10
+                                c-5.523,0-10,4.478-10,10V180h-120c-5.523,0-10,4.478-10,10s4.477,10,10,10h30.743l13.787,178.429
+                                c0.405,5.244,4.786,9.23,9.959,9.23c0.258,0,0.52-0.011,0.781-0.03c5.506-0.426,9.625-5.234,9.2-10.741L144.302,200h158.395
+                                l-13.668,176.888c-0.425,5.507,3.694,10.315,9.2,10.741c0.263,0.02,0.522,0.03,0.781,0.03
+                                C304.184,387.659,308.565,383.673,308.971,378.429z"></path>
+                            <path d="M263.5,317c0-22.056-17.944-40-40-40c-22.056,0-40,17.944-40,40s17.944,40,40,40C245.556,357,263.5,339.056,263.5,317z
+                                M203.5,317c0-11.028,8.972-20,20-20c11.028,0,20,8.972,20,20s-8.972,20-20,20C212.472,337,203.5,328.028,203.5,317z"></path>
+                            <path d="M223.5,367c-38.598,0-70,31.402-70,70c0,5.522,4.477,10,10,10s10-4.478,10-10c0-27.57,22.43-50,50-50s50,22.43,50,50
+                                c0,5.522,4.478,10,10,10s10-4.478,10-10C293.5,398.402,262.098,367,223.5,367z"></path>
+                            <path d="M334.5,317c0,22.056,17.944,40,40,40s40-17.944,40-40s-17.944-40-40-40S334.5,294.944,334.5,317z M374.5,297
+                                c11.028,0,20,8.972,20,20s-8.972,20-20,20s-20-8.972-20-20S363.472,297,374.5,297z"></path>
+                            <path d="M374.5,367c-38.598,0-70,31.402-70,70c0,5.522,4.478,10,10,10s10-4.478,10-10c0-27.57,22.43-50,50-50s50,22.43,50,50
+                                c0,5.522,4.478,10,10,10s10-4.478,10-10C444.5,398.402,413.098,367,374.5,367z"></path>
+                            <path d="M72.5,357c22.056,0,40-17.944,40-40s-17.944-40-40-40s-40,17.944-40,40S50.444,357,72.5,357z M72.5,297
+                                c11.028,0,20,8.972,20,20s-8.972,20-20,20s-20-8.972-20-20S61.472,297,72.5,297z"></path>
+                            <path d="M72.5,367c-38.598,0-70,31.402-70,70c0,5.522,4.477,10,10,10s10-4.478,10-10c0-27.57,22.43-50,50-50s50,22.43,50,50
+                                c0,5.522,4.477,10,10,10s10-4.478,10-10C142.5,398.402,111.098,367,72.5,367z"></path>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        </svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Key Events</div>
@@ -1526,7 +1582,7 @@
                 <div class="px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important;">
                     <div class="flex items-center">
                         <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4] mr-2">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <svg class="w-6 h-6" fill="#135266" id="fi_2991112" enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg"><g><path d="m446.605 124.392-119.997-119.997c-2.801-2.802-6.624-4.395-10.608-4.395h-210c-24.813 0-45 20.187-45 45v422c0 24.813 20.187 45 45 45h300c24.813 0 45-20.187 45-45v-332c0-4.09-1.717-7.931-4.395-10.608zm-115.605-73.179 68.787 68.787h-53.787c-8.271 0-15-6.729-15-15zm75 430.787h-300c-8.271 0-15-6.729-15-15v-422c0-8.271 6.729-15 15-15h195v75c0 24.813 20.187 45 45 45h75v317c0 8.271-6.729 15-15 15z"></path><path d="m346 212h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 272h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 332h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m286 392h-120c-8.284 0-15 6.716-15 15s6.716 15 15 15h120c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path></g></svg>
                         </span>
                         <h2 class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important; display: inline-block !important; font-size: 18px !important; line-height: 1.2 !important;" x-text="
                             metric === 'users' ? 'Users & New' : 
@@ -1577,7 +1633,7 @@
             <!-- Traffic by Channel Donut -->
             <div class="w-full lg:w-[40%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: center !important;">
                 <div class="flex items-center gap-2 mb-4" style="margin: 0 0 16px 0 !important;">
-                    <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
                     </span>
                     <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important;">Traffic by Channel</h4>
@@ -1648,11 +1704,8 @@
             <!-- Top Landing Pages -->
             <div x-data="{ showAll: false }" class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
                 <div class="flex items-center gap-2 mb-4">
-                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </span>
+                    <span class="inline-flex items-center gap-2 justify-center text-[#135266] dark:text-[#5eead4]">
+                       <svg class="w-6 h-6" fill="#135266" id="fi_2991112" enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg"><g><path d="m446.605 124.392-119.997-119.997c-2.801-2.802-6.624-4.395-10.608-4.395h-210c-24.813 0-45 20.187-45 45v422c0 24.813 20.187 45 45 45h300c24.813 0 45-20.187 45-45v-332c0-4.09-1.717-7.931-4.395-10.608zm-115.605-73.179 68.787 68.787h-53.787c-8.271 0-15-6.729-15-15zm75 430.787h-300c-8.271 0-15-6.729-15-15v-422c0-8.271 6.729-15 15-15h195v75c0 24.813 20.187 45 45 45h75v317c0 8.271-6.729 15-15 15z"></path><path d="m346 212h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 272h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 332h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m286 392h-120c-8.284 0-15 6.716-15 15s6.716 15 15 15h120c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path></g></svg>
                     <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Top Landing Pages</h4>
                 </div>
                 <div class="overflow-x-auto flex-1">
@@ -1829,13 +1882,62 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs overflow-hidden hover:border-[#b0cbd6] transition-all">
             <div class="flex items-center justify-between mb-5">
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">                      
+                        <svg class="w-6 h-6" fill="#135266" version="1.1" id="fi_917647" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                        <g>
+                            <g>
+                                <path d="M71.002,256.001c0-77.879,47.891-143.606,114.279-171.048h0.01l21.3-38.26C112.578,68.687,41.002,153.352,41.002,256.001
+                                    c0,96.593,63.887,179.038,152.718,205.828l2.26-30.78C122.13,405.763,71.002,335.923,71.002,256.001z"></path>
+                            </g>
+                        </g>
+                        <g>
+                            <g>
+                                <path d="M318.279,50.173l-2.26,30.78c73.85,25.286,124.979,95.125,124.979,175.048c0,77.803-47.835,143.583-114.279,171.048h-0.01
+                                    l-21.3,38.26c94.014-21.994,165.588-106.659,165.588-209.308C470.997,159.41,407.111,76.962,318.279,50.173z"></path>
+                            </g>
+                        </g>
+                        <g>
+                            <g>
+                                <path d="M398.93,220.509c-2.694-4.584-7.614-7.399-12.932-7.399H276.241l14.459-197.009c0.515-7.019-3.918-13.452-10.66-15.469
+                                    c-6.742-2.021-13.98,0.923-17.404,7.072L112.897,276.592c-2.587,4.646-2.521,10.313,0.173,14.898
+                                    c2.694,4.584,7.615,7.399,12.932,7.399h109.758L221.3,495.899c-0.515,7.019,3.918,13.451,10.661,15.468
+                                    c6.797,2.036,14.01-0.976,17.404-7.072l149.738-268.887C401.69,230.762,401.624,225.094,398.93,220.509z"></path>
+                            </g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
+                        <g>
+                        </g>
                         </svg>
                     </span>
                     <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Top Events</h4>
-                    <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">Key events from your website.</span>
+                    <!-- <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">Key events from your website.</span> -->
                 </div>
             </div>
 
@@ -1890,7 +1992,7 @@
 
                         <div class="flex items-center justify-between gap-2.5 w-full" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important;">
                             <!-- Center/Left: Donut Chart -->
-                            <div class="relative shrink-0 flex items-center justify-center" style="width: 66px; height: 66px; min-width: 66px; min-height: 66px;">
+                            <div class="relative shrink-0 flex items-center justify-center" style="width: 120px; height: 120px; min-width: 120px; min-height: 120px;">
                                 <svg viewBox="0 0 36 36" style="width: 100%; height: 100%;" class="transform -rotate-90">
                                     <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" stroke-width="3.5"></circle>
                                     @php
@@ -1912,7 +2014,7 @@
                                     @endforeach
                                 </svg>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                                    <span class="text-[12px] font-black text-slate-800 dark:text-white leading-none">{{ number_format($totalEvents) }}</span>
+                                    <span class="text-[14px] font-black text-slate-800 dark:text-white leading-none">{{ number_format($totalEvents) }}</span>
                                 </div>
                             </div>
                             

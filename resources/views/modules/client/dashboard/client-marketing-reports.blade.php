@@ -374,11 +374,58 @@
         <div class="mb-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <h1 class="flex items-center gap-3 text-2xl font-extrabold text-slate-800 dark:text-slate-100">
+                    <h1 class="flex items-center gap-3 text-2xl font-extrabold text-[#135266] dark:text-slate-100">
                         {{-- Platform Specific Dynamic Icon with Consistent Brand Theme Color --}}
-                        <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
+                        <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
                             @if($activeReportIntegrationId === 'ga4')
-                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                             <svg class="w-7 h-7" fill="#135266" stroke="#135266" stroke-width="1.6" version="1.1" id="fi_900772" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 480 480" style="enable-background:new 0 0 480 480;" xml:space="preserve">
+                                <g>
+                                    <g>
+                                        <g>
+                                            <rect y="464" width="480" height="16"></rect>
+                                            <path d="M32,448h80c4.418,0,8-3.582,8-8V296c0-4.418-3.582-8-8-8H32c-4.418,0-8,3.582-8,8v144C24,444.418,27.582,448,32,448z
+                                                M40,304h64v128H40V304z"></path>
+                                            <path d="M256,448h80c4.418,0,8-3.582,8-8V200c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v240C248,444.418,251.582,448,256,448
+                                                z M264,208h64v224h-64V208z"></path>
+                                            <path d="M144,448h80c4.418,0,8-3.582,8-8V104c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v336C136,444.418,139.582,448,144,448
+                                                z M152,112h64v320h-64V112z"></path>
+                                            <path d="M368,448h80c4.418,0,8-3.582,8-8V8c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v432C360,444.418,363.582,448,368,448z
+                                                M376,16h64v416h-64V16z"></path>
+                                        </g>
+                                    </g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                <g>
+                                </g>
+                                </svg>    
+                            <!-- <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg> -->
                             @elseif($activeReportIntegrationId === 'gsc')
                                 <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                             @elseif($activeReportIntegrationId === 'gads')
@@ -461,9 +508,9 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <svg class="w-3 h-3 text-slate-400 pointer-events-none absolute right-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <!-- <svg class="w-3 h-3 text-slate-400 pointer-events-none absolute right-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
+                                </svg> -->
                             </div>
                         @else
                             <span class="text-xs text-slate-400 font-medium">No websites</span>
