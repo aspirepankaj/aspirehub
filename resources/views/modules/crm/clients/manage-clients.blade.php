@@ -1587,8 +1587,8 @@
                                                 <p class="text-[10px] text-slate-400 mt-1.5">Add this exact URL to your LinkedIn Developer Portal under <strong>Auth &gt; OAuth 2.0 settings &gt; Authorized redirect URLs</strong>.</p>
                                             </div>
                                         </div>
-                                        <div class="mt-4 text-[11px] text-slate-450 leading-relaxed bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-900/30 p-3 rounded-xl text-amber-800 dark:text-amber-400 font-medium">
-                                            <strong>Important Tip:</strong> Agar LinkedIn par <em>"Bummer, something went wrong"</em> error aaye, to scopes me sirf <code>openid profile email</code> rakhein (jo ki "Sign In with LinkedIn" product ke sath standard approved rehta hai).
+                                        <div class="mt-4 text-[11px] text-slate-450 leading-relaxed bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-900/30 p-3 rounded-xl text-amber-800 dark:text-amber-400 font-medium"> 
+                                            <strong>Important Tip:</strong> If you encounter the <em>"Bummer, something went wrong"</em> error on LinkedIn, keep only <code>openid profile email</code> in the scopes, as these are the standard approved scopes for the <strong>"Sign In with LinkedIn"</strong> product.
                                         </div>
 
                                     @else

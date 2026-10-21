@@ -81,7 +81,7 @@
             @if($activeReportIntegrationId !== 'overview')
             <div class="w-full sm:w-auto mt-2 sm:mt-0" wire:key="dp-top-box-{{ $activeReportIntegrationId }}-{{ $this->websiteId }}">
                 @php
-                    $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                    $minDateBound = \Carbon\Carbon::now()->subDays(365)->format('Y-m-d');
                     $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
                 @endphp
                 @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
@@ -97,7 +97,7 @@
             @if($activeReportIntegrationId !== 'overview')
                 <div class="w-full sm:w-auto" wire:key="dp-box-{{ $activeReportIntegrationId }}-{{ $this->websiteId }}">
                     @php
-                        $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                        $minDateBound = \Carbon\Carbon::now()->subDays(365)->format('Y-m-d');
                         $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
                     @endphp
                     @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
