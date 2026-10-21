@@ -65,6 +65,22 @@ body {
   background-color: var(--portal-bg);
 }
 
+/* When on Marketing Report: apply the exact soft-tint background ONLY to this view */
+body:has(.is-marketing-report),
+.portal-layout:has(.is-marketing-report) {
+  background-color: oklch(.947 .027 239) !important;
+}
+.dark body:has(.is-marketing-report),
+.dark .portal-layout:has(.is-marketing-report) {
+  background-color: oklch(.23 .029 230) !important;
+}
+.portal-main.is-marketing-report {
+  background-color: oklch(.947 .027 239) !important;
+}
+.dark .portal-main.is-marketing-report {
+  background-color: oklch(.23 .029 230) !important;
+}
+
 /* ── Sidebar ── */
 .portal-sidebar {
   width: 226px;
@@ -322,7 +338,6 @@ body {
   color: #f87171;
 }
 
-/* ── Main Content Area ── */
 .portal-main {
   margin-left: 226px;
   flex: 1;
@@ -331,6 +346,27 @@ body {
   position: relative;
   overflow-x: hidden;
   min-height: 100vh;
+  isolation: isolate;
+}
+
+.background-mark {
+  position: absolute;
+  right: -50px;
+  top: -60px;
+  width: 560px;
+  height: 560px;
+  color: var(--mark, oklch(.987 .008 230));
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.background-mark svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+.dark .background-mark {
+  color: var(--mark, oklch(.26 .027 230));
 }
 
 .top-waves-container {
@@ -962,3 +998,1239 @@ body {
     font-size: 28px !important;
   }
 }
+
+/* ==========================================================================
+   Aspire Client Marketing Reports V2 Custom Styling (From Zip)
+   ========================================================================== */
+.client-report-v2 {
+  --blue: #2563eb;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --pink: #ec4899;
+  --violet: #8b5cf6;
+  --sky: #0284c7;
+  --steel: #64748b;
+  --growth: #10b981;
+}
+
+.client-report-v2 .stats-grid-v2 {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+@media (max-width: 1100px) {
+  .client-report-v2 .stats-grid-v2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .client-report-v2 .stats-grid-v2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.client-report-v2 .stat-card-v2 {
+  border: 1px solid var(--portal-border);
+  border-radius: 12px;
+  background: var(--portal-card);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  min-width: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+.client-report-v2 .stat-card-v2:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.client-report-v2 .stat-icon-v2 {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #1e293b;
+}
+.dark .client-report-v2 .stat-icon-v2 {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.client-report-v2 .stat-card-v2 p {
+  margin: 0 0 2px;
+  color: var(--portal-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.client-report-v2 .stat-card-v2 .stat-value-v2 {
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 800;
+  display: block;
+  color: var(--portal-text);
+  letter-spacing: -0.02em;
+}
+
+.client-report-v2 .stat-card-v2 small {
+  font-size: 10px;
+  color: var(--portal-muted);
+  white-space: nowrap;
+  display: block;
+  margin-top: 2px;
+}
+
+.client-report-v2 .device-row-v2 {
+  display: grid;
+  grid-template-columns: 20px 58px 1fr 34px;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+}
+.client-report-v2 .device-bar-track {
+  background: #f1f5f9;
+  height: 7px;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.dark .client-report-v2 .device-bar-track {
+  background: #1e293b;
+}
+.client-report-v2 .device-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s ease-out;
+}
+
+.client-report-v2 .event-card-v2 {
+  border: 1px solid var(--portal-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--portal-card);
+  transition: all 0.2s ease;
+}
+.client-report-v2 .event-card-v2:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* ==========================================================================
+   Exact Styles from aspire-client-marketing-reports_v2
+   ========================================================================== */
+.client-marketing-view {
+  font-family: 'Lato', Arial, sans-serif !important;
+  --background: oklch(.947 .027 239);
+  --foreground: oklch(.365 .07 221);
+  --card: oklch(.995 .002 230);
+  --card-foreground: var(--foreground);
+  --primary: oklch(.375 .072 220);
+  --primary-foreground: #ffffff;
+  --secondary: oklch(.905 .037 221);
+  --muted: oklch(.965 .018 240);
+  --muted-foreground: oklch(.53 .003 240);
+  --accent: oklch(.935 .024 240);
+  --border: oklch(.78 .005 230);
+  --input: oklch(.925 .024 245);
+  --ring: oklch(.63 .12 235);
+  --blue: oklch(.59 .235 258);
+  --green: oklch(.77 .16 167);
+  --yellow: oklch(.83 .17 81);
+  --pink: oklch(.66 .24 355);
+  --violet: oklch(.62 .25 302);
+  --sky: oklch(.75 .135 248);
+  --steel: oklch(.68 .055 255);
+  --data-ink: oklch(.37 .12 279);
+  --data-muted: oklch(.66 .1 264);
+  --growth: oklch(.68 .075 213);
+  --grid: oklch(.947 .021 240);
+  --mark: oklch(.987 .008 230);
+  --bar-track: oklch(.933 .029 244);
+}
+
+.dark .client-marketing-view {
+  --background: oklch(.23 .029 230);
+  --foreground: oklch(.88 .045 221);
+  --card: oklch(.285 .023 230);
+  --primary: oklch(.48 .07 220);
+  --secondary: oklch(.39 .054 221);
+  --muted: oklch(.31 .023 240);
+  --muted-foreground: oklch(.73 .012 240);
+  --border: oklch(.44 .022 230);
+  --input: oklch(.38 .03 245);
+  --data-ink: oklch(.84 .07 266);
+  --data-muted: oklch(.73 .08 264);
+  --grid: oklch(.33 .021 240);
+  --mark: oklch(.26 .027 230);
+  --bar-track: oklch(.38 .029 244);
+  --accent: oklch(.35 .03 240);
+}
+
+/* Ensure client-marketing-view cards and panels use the exact colors */
+.client-marketing-view .stat-card,
+.client-marketing-view .panel {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+.client-marketing-view .heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.client-marketing-view .heading-row h1 {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 4px;
+  color: var(--foreground);
+}
+.client-marketing-view .heading-icon {
+  width: 44px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  background: transparent;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+.client-marketing-view .heading-icon svg {
+  width: 42px;
+  height: 38px;
+  stroke: var(--foreground);
+  stroke-width: 1.8;
+}
+.dark .client-marketing-view .heading-icon {
+  background: transparent;
+}
+.client-marketing-view .heading-row p {
+  margin: 0 0 0 8px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.client-marketing-view .back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid var(--input);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: none;
+  transition: all 0.15s ease;
+}
+.client-marketing-view .back-button:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.client-marketing-view .select-panel {
+  display: inline-flex;
+  width: auto;
+  gap: 10px;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+}
+.client-marketing-view .select-panel label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+.client-marketing-view .select-panel select {
+  border: 1px solid var(--input);
+  border-radius: 8px;
+  background: var(--muted);
+  color: var(--foreground);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 220px;
+}
+
+.client-marketing-view .action-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.client-marketing-view .report-tabs {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  min-width: 0;
+  scrollbar-width: none;
+}
+.client-marketing-view .report-tabs::-webkit-scrollbar {
+  display: none;
+}
+.client-marketing-view .report-tabs button {
+  background: transparent;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  border: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.client-marketing-view .report-tabs button:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.client-marketing-view .report-tabs button.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.client-marketing-view .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+  margin-bottom: 6px;
+}
+@media (max-width: 1050px) {
+  .client-marketing-view .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 650px) {
+  .client-marketing-view .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.client-marketing-view .stat-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 12px 12px;
+  min-width: 0;
+}
+.client-marketing-view .stat-icon {
+  width: 49px;
+  height: 49px;
+  border-radius: 50%;
+  background: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--foreground);
+}
+.client-marketing-view .stat-icon svg {
+  width: 34px;
+  height: 34px;
+  stroke: var(--foreground);
+  stroke-width: 1.4;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.client-marketing-view .stat-card p {
+  margin: 0 0 2px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.client-marketing-view .stat-value {
+  font-size: 33px;
+  line-height: 1.05;
+  font-weight: 900;
+  display: block;
+  color: var(--foreground);
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+.client-marketing-view .stat-card small {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  display: block;
+  margin-top: 4px;
+}
+
+.client-marketing-view .charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.08fr;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+@media (max-width: 1050px) {
+  .client-marketing-view .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.client-marketing-view .panel {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  min-width: 0;
+  padding: 12px 16px;
+}
+.client-marketing-view .panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  min-height: 26px;
+}
+.client-marketing-view .panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 800;
+  margin: 0;
+  color: var(--foreground);
+}
+.client-marketing-view .panel-heading select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted-foreground);
+  padding: 4px 8px;
+  background: var(--card);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.client-marketing-view .traffic-panel {
+  position: relative;
+}
+.client-marketing-view .traffic-content {
+  display: grid;
+  grid-template-columns: 42% 58%;
+  align-items: center;
+  gap: 12px;
+}
+.client-marketing-view .channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--data-ink);
+  padding-right: 6px;
+}
+.client-marketing-view .channel {
+  display: grid;
+  grid-template-columns: 1fr 34px 44px;
+  gap: 8px;
+  font-size: 11px;
+  align-items: center;
+}
+.client-marketing-view .channel span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.client-marketing-view .channel strong {
+  font-weight: 900;
+  text-align: right;
+  color: var(--foreground);
+}
+.client-marketing-view .channel small {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--data-muted);
+  text-align: right;
+}
+
+.client-marketing-view .triple-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 6px;
+}
+@media (max-width: 1050px) {
+  .client-marketing-view .triple-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.client-marketing-view .triple-grid .panel {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 12px;
+}
+.client-marketing-view .triple-grid table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: var(--data-ink);
+}
+.client-marketing-view .triple-grid th {
+  color: var(--data-muted);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--grid);
+  padding: 6px 6px;
+  text-align: center;
+}
+.client-marketing-view .triple-grid td {
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--grid);
+  text-align: center;
+  font-weight: 600;
+}
+.client-marketing-view .triple-grid th:first-child,
+.client-marketing-view .triple-grid td:first-child,
+.client-marketing-view .triple-grid th:nth-child(2),
+.client-marketing-view .triple-grid td:nth-child(2) {
+  text-align: left;
+}
+
+.client-marketing-view .devices {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
+.client-marketing-view .device {
+  display: grid;
+  grid-template-columns: 20px 58px 1fr 34px;
+  gap: 6px;
+  align-items: center;
+  color: var(--data-ink);
+  font-size: 11px;
+}
+.client-marketing-view .device strong {
+  font-weight: 700;
+}
+.client-marketing-view .device small {
+  font-size: 10px;
+  color: var(--data-muted);
+  font-weight: 800;
+  text-align: right;
+}
+.client-marketing-view .bar {
+  background: var(--grid);
+  height: 8px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.client-marketing-view .bar i {
+  display: block;
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.6s ease;
+}
+
+.client-marketing-view .full-report {
+  margin-top: auto;
+  align-self: flex-end;
+  background: transparent;
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 11px;
+  padding-top: 10px;
+  border: 0;
+  cursor: pointer;
+}
+
+.client-marketing-view .wide-events {
+  margin-bottom: 0;
+}
+.client-marketing-view .heading-note {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin-left: 6px;
+}
+.client-marketing-view .wide-events .events-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 1050px) {
+  .client-marketing-view .wide-events .events-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 650px) {
+  .client-marketing-view .wide-events .events-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.client-marketing-view .wide-events .event {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px;
+  background: var(--card);
+}
+.client-marketing-view .event h3 {
+  font-size: 11px;
+  color: var(--data-ink);
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+.client-marketing-view .event-body {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.client-marketing-view .event-legend {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--data-ink);
+}
+.client-marketing-view .event-legend > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.client-marketing-view .event-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.client-marketing-view .event-legend b {
+  font-weight: 900;
+}
+
+/* Donut & Chart Elements from Zip */
+.client-marketing-view .line-chart {
+  width: 100%;
+  height: 113px;
+}
+.client-marketing-view .line-chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.client-marketing-view .chart-grid-line {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+.client-marketing-view .chart-label {
+  fill: var(--data-muted);
+  font-size: 8px;
+}
+.client-marketing-view .total-line {
+  stroke: var(--blue);
+  fill: none;
+  stroke-width: 1.7;
+}
+.client-marketing-view .new-line {
+  stroke: var(--violet);
+  fill: none;
+  stroke-width: 1.5;
+}
+.client-marketing-view .total-dot {
+  fill: var(--blue);
+}
+.client-marketing-view .new-dot {
+  fill: var(--violet);
+}
+.client-marketing-view .chart-area {
+  fill: var(--blue);
+  opacity: 0.07;
+}
+.client-marketing-view .chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 19px;
+  font-size: 8px;
+  color: var(--data-muted);
+  margin-top: 5px;
+}
+.client-marketing-view .chart-legend span:before {
+  content: '';
+  display: inline-block;
+  height: 6px;
+  width: 6px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.client-marketing-view .legend-total:before {
+  background: var(--blue);
+}
+.client-marketing-view .legend-new:before {
+  background: var(--violet);
+}
+
+.client-marketing-view .donut {
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.client-marketing-view .donut:before {
+  content: '';
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  background: var(--card);
+}
+.client-marketing-view .large-donut {
+  width: 126px;
+  height: 126px;
+  margin: 10px auto 0;
+}
+.client-marketing-view .donut-center {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--data-ink);
+  pointer-events: none;
+}
+.client-marketing-view .donut-center strong {
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+}
+.client-marketing-view .donut-center small {
+  font-size: 9px;
+  margin-top: 2px;
+  color: var(--data-muted);
+}
+
+.client-marketing-view .channel span:before,
+.client-marketing-view .event-legend span:before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: -1px;
+  background: var(--series, currentColor);
+  flex-shrink: 0;
+}
+.client-marketing-view .channel.direct { --series: var(--blue); }
+.client-marketing-view .channel.organic { --series: var(--green); }
+.client-marketing-view .channel.referral { --series: var(--yellow); }
+.client-marketing-view .channel.paid { --series: var(--pink); }
+.client-marketing-view .channel.social { --series: var(--violet); }
+.client-marketing-view .channel.email { --series: var(--sky); }
+.client-marketing-view .channel.other { --series: var(--steel); }
+
+.client-marketing-view .event-donut {
+  width: 68px;
+  height: 68px;
+}
+.client-marketing-view .event-donut:before {
+  inset: 13%;
+}
+.client-marketing-view .event-donut .donut-center strong {
+  font-size: 13px;
+}
+.client-marketing-view .event-donut .donut-center small {
+  font-size: 7.5px;
+}
+
+/* ==========================================================================
+   Client Portal - Other Integrations Theme Matching GA4
+   ========================================================================== */
+.client-integration-theme {
+  width: 100%;
+}
+
+/* Remove unwanted outer container card wrap in client-report if rendered */
+.client-integration-theme > div > .bg-white.border.rounded-3xl,
+.client-integration-theme > div > div > .rounded-3xl,
+.client-integration-theme .rounded-3xl.shadow-sm,
+.client-integration-theme .bg-white.dark\:bg-slate-900.border.border-slate-200.rounded-3xl {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Transform KPI Stat Cards across all other integrations - ONLY target stat grids */
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-4"] > div[class*="rounded-2xl"],
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"] > div[class*="rounded-2xl"],
+.client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-4"] > div[class*="rounded-2xl"],
+.client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-5"] > div[class*="rounded-2xl"],
+.client-integration-theme .grid[class*="grid-cols-4"] > div[class*="rounded-2xl"],
+.client-integration-theme .grid[class*="grid-cols-5"] > div[class*="rounded-2xl"],
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-4"] > div[class*="rounded-xl"],
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"] > div[class*="rounded-xl"],
+.client-integration-theme .grid[class*="grid-cols-4"] > div[class*="rounded-xl"],
+.client-integration-theme .grid[class*="grid-cols-5"] > div[class*="rounded-xl"] {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  padding: 14px 16px 12px !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 13px !important;
+  min-height: 85px !important;
+}
+
+/* Ensure chart & table panels NEVER get forced into stat-card flex row */
+.client-integration-theme .grid-cols-1 > div,
+.client-integration-theme .lg\:grid-cols-2 > div,
+.client-integration-theme div:has(> table),
+.client-integration-theme div:has(> canvas),
+.client-integration-theme div:has(> div > canvas),
+.client-integration-theme div:has(> .overflow-x-auto),
+.client-integration-theme .events-breakdown-grid > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  min-height: auto !important;
+}
+
+/* Stat card icon badge matching GA4 stat-icon */
+.client-integration-theme .grid > div[class*="rounded-2xl"] > span:first-child[class*="rounded-full"],
+.client-integration-theme .grid > div[class*="rounded-xl"] > span:first-child[class*="rounded-full"] {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 50% !important;
+  background-color: var(--secondary) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: var(--foreground) !important;
+}
+
+.client-integration-theme .grid > div[class*="rounded-2xl"] > span:first-child[class*="rounded-full"] svg,
+.client-integration-theme .grid > div[class*="rounded-xl"] > span:first-child[class*="rounded-full"] svg {
+  width: 22px !important;
+  height: 22px !important;
+  stroke: var(--foreground) !important;
+  stroke-width: 1.8 !important;
+  fill: none !important;
+}
+
+/* Stat card label */
+.client-integration-theme .grid > div[class*="rounded-2xl"] span[class*="uppercase"],
+.client-integration-theme .grid > div[class*="rounded-xl"] span[class*="uppercase"] {
+  color: var(--muted-foreground) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  margin-bottom: 2px !important;
+  display: block !important;
+}
+
+/* Stat card values */
+.client-integration-theme .grid > div[class*="rounded-2xl"] span[class*="text-lg"],
+.client-integration-theme .grid > div[class*="rounded-2xl"] span[class*="text-xl"],
+.client-integration-theme .grid > div[class*="rounded-2xl"] span[class*="text-2xl"],
+.client-integration-theme .grid > div[class*="rounded-2xl"] span[class*="font-extrabold"],
+.client-integration-theme .grid > div[class*="rounded-xl"] span[class*="text-lg"],
+.client-integration-theme .grid > div[class*="rounded-xl"] span[class*="text-xl"],
+.client-integration-theme .grid > div[class*="rounded-xl"] span[class*="text-2xl"],
+.client-integration-theme .grid > div[class*="rounded-xl"] span[class*="font-extrabold"] {
+  font-size: 30px !important;
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--foreground) !important;
+  display: block !important;
+}
+
+/* Panels (Tables, Charts, Lists) */
+.client-integration-theme div[class*="bg-white"][class*="border"][class*="rounded-2xl"],
+.client-integration-theme div[class*="bg-white"][class*="border"][class*="rounded-xl"] {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+/* Panel headers */
+.client-integration-theme h4,
+.client-integration-theme h5 {
+  color: var(--foreground) !important;
+  font-weight: 800 !important;
+  font-size: 14px !important;
+}
+
+/* Tables across integrations */
+.client-integration-theme table {
+  color: var(--data-ink) !important;
+}
+.client-integration-theme thead,
+.client-integration-theme thead tr,
+.client-integration-theme thead th {
+  background: var(--muted) !important;
+  color: var(--muted-foreground) !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-weight: 700 !important;
+}
+.client-integration-theme tbody td {
+  border-bottom: 1px solid var(--grid) !important;
+}
+.client-integration-theme tbody tr:hover {
+  background: var(--accent) !important;
+}
+
+/* Dark mode overrides for other integrations */
+.dark .client-integration-theme .grid > div[class*="rounded-2xl"],
+.dark .client-integration-theme .grid > div[class*="rounded-xl"],
+.dark .client-integration-theme div[class*="border"][class*="rounded-2xl"],
+.dark .client-integration-theme div[class*="border"][class*="rounded-xl"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* Specific theme styling for Google Ads replica to match GA4 theme */
+.client-integration-theme [wire\:key*="gads-replica"] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible;
+  margin-bottom: 20px;
+}
+
+/* Transform Top 5 Google Ads selectors into 5 separate GA4 cards */
+.client-integration-theme [wire\:key*="gads-replica"] .grid.border-b {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+  border: 0 !important;
+  background: transparent !important;
+  margin-bottom: 8px !important;
+  divide-x: 0 !important;
+}
+@media (max-width: 1050px) {
+  .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+@media (max-width: 650px) {
+  .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+.client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div {
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  padding: 18px 20px !important;
+  height: auto !important;
+  min-height: 95px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 16px !important;
+  cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease;
+}
+
+.client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #e2f1f5 !important;
+  border: 1px solid #cce5ec !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #0b495b !important;
+  transition: all 0.2s ease;
+}
+
+.dark .client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon {
+  background: rgba(19, 78, 74, 0.35) !important;
+  border-color: rgba(19, 78, 74, 0.5) !important;
+  color: #5eead4 !important;
+}
+
+.client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: #0b495b !important;
+  stroke-width: 1.8;
+  fill: none;
+}
+
+.dark .client-integration-theme [wire\:key*="gads-replica"] .gads-card-icon svg {
+  stroke: #5eead4 !important;
+}
+
+.client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div:hover {
+  border-color: #b0cbd6 !important;
+  box-shadow: 0 4px 12px rgba(11, 73, 91, 0.08) !important;
+}
+
+/* Active selected card in Google Ads */
+.client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div[style*="color: white;"] {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  border-color: #0b495b !important;
+  border-width: 1px !important;
+  box-shadow: 0 2px 8px rgba(11, 73, 91, 0.08) !important;
+}
+
+.client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div span.text-\[13px\] {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--muted-foreground) !important;
+  white-space: nowrap;
+}
+
+.client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div div[class*="text-[26px]"] {
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  color: #0c3b4a !important;
+  letter-spacing: -0.02em;
+  margin-top: 2px;
+}
+
+.dark .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div div[class*="text-[26px]"] {
+  color: #ffffff !important;
+}
+
+/* Graph Panel in Google Ads (Wrap into GA4 panel box) */
+.client-integration-theme [wire\:key*="gads-replica"] div.p-6.bg-white {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  padding: 24px 24px 20px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+}
+.client-integration-theme [wire\:key*="gads-replica"] canvas {
+  background: transparent !important;
+}
+
+.client-integration-theme .border-slate-200,
+.client-integration-theme .border-slate-100 {
+  border-color: var(--border) !important;
+}
+.client-integration-theme div[class*="rounded-lg"],
+.client-integration-theme div[class*="rounded-xl"],
+.client-integration-theme div[class*="rounded-2xl"],
+.client-integration-theme div[class*="rounded-[2rem]"] {
+  border-radius: 10px !important;
+  border-color: var(--border) !important;
+}
+
+/* Section Headings Across All Integrations to match GA4 theme */
+.client-integration-theme h1,
+.client-integration-theme h2,
+.client-integration-theme h3,
+.client-integration-theme h4,
+.client-integration-theme h5 {
+  color: var(--foreground) !important;
+  font-weight: 800 !important;
+}
+
+/* Specific section heading bars (e.g. "Top Ad Campaigns", "Devices", "Device Intelligence", etc.) */
+.client-integration-theme div[class*="uppercase"][class*="tracking-widest"],
+.client-integration-theme div[class*="uppercase"][class*="tracking-wider"] {
+  color: var(--foreground) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Colored indicator dots next to headings - align with GA4 palette */
+.client-integration-theme div[class*="rounded-full"][class*="bg-indigo-500"],
+.client-integration-theme div[class*="rounded-full"][class*="bg-blue-500"] {
+  background-color: var(--primary) !important;
+}
+
+/* Keywords Summary Table Card & Heading */
+.client-integration-theme div[class*="font-sans"] div.px-5.py-4 {
+  background: var(--card) !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 14px 18px !important;
+}
+.client-integration-theme div[class*="font-sans"] div.px-5.py-4 h3 {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: var(--foreground) !important;
+}
+
+/* Keywords Table Headers & Cells */
+.client-integration-theme table thead tr[class*="bg-white"] {
+  background: var(--muted) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.client-integration-theme table th {
+  color: var(--muted-foreground) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 10px 14px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.client-integration-theme table th[class*="border-b-2"] {
+  border-bottom: 2px solid var(--primary) !important;
+  color: var(--foreground) !important;
+}
+.client-integration-theme table th svg {
+  color: var(--primary) !important;
+}
+.client-integration-theme table td {
+  padding: 10px 14px !important;
+  font-size: 12px !important;
+  color: var(--foreground) !important;
+  border-bottom: 1px solid var(--grid) !important;
+}
+.client-integration-theme table td span[class*="text-[#1a73e8]"] {
+  color: var(--primary) !important;
+  font-weight: 600 !important;
+}
+.client-integration-theme table td span[class*="bg-[#1e8e3e]"] {
+  background-color: var(--green) !important;
+}
+.client-integration-theme table td[class*="bg-[#8ab4f8]"] {
+  background-color: var(--accent) !important;
+  color: var(--foreground) !important;
+  font-weight: 700 !important;
+}
+.client-integration-theme table td[class*="bg-slate-100"] {
+  background-color: transparent !important;
+  color: var(--foreground) !important;
+}
+.client-integration-theme table td[class*="bg-slate-50"] {
+  background-color: transparent !important;
+  color: var(--foreground) !important;
+}
+
+/* Campaign Table styles */
+.client-integration-theme table td[class*="text-emerald-600"] {
+  color: var(--green) !important;
+  font-weight: 800 !important;
+}
+.client-integration-theme table td[class*="text-indigo-600"] {
+  color: var(--primary) !important;
+  font-weight: 800 !important;
+}
+
+/* Device Breakdown / Intelligence Section styling to match GA4 theme */
+.client-integration-theme div[class*="rounded-[2rem]"] {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  padding: 16px 20px !important;
+}
+.client-integration-theme div[class*="Smart Breakdown"] {
+  background: var(--secondary) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"]:hover {
+  border-color: var(--ring) !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] h4 {
+  color: var(--foreground) !important;
+  font-weight: 800 !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] p {
+  color: var(--muted-foreground) !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-clip-text"] {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: initial !important;
+  color: var(--primary) !important;
+  font-weight: 900 !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-white/80"],
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="dark:bg-slate-800/80"] {
+  background: var(--muted) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-white/80"] div[class*="text-slate-700"] {
+  color: var(--foreground) !important;
+  font-weight: 800 !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-white/80"] div[class*="text-slate-400"] {
+  color: var(--muted-foreground) !important;
+}
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-blue-500 to-indigo-600"],
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-amber-400 to-orange-500"],
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-rose-400 to-pink-500"],
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-violet-500 to-purple-600"] {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: #e2f1f5 !important;
+  border: 1px solid #cce5ec !important;
+  color: #0b495b !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-blue-500 to-indigo-600"],
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-amber-400 to-orange-500"],
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-rose-400 to-pink-500"],
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br from-violet-500 to-purple-600"] {
+  background: rgba(19, 78, 74, 0.35) !important;
+  border-color: rgba(19, 78, 74, 0.5) !important;
+  color: #5eead4 !important;
+}
+
+.client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br"] svg {
+  stroke: #0b495b !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br"] svg {
+  stroke: #5eead4 !important;
+}
+
+

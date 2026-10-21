@@ -1002,4 +1002,32 @@ trait LoadsMarketingReports
             $this->isSendingReport = false;
         }
     }
+
+    public function selectIntegration(string $typeId)
+    {
+        $this->activeReportIntegrationId = $typeId;
+        if (method_exists($this, 'updateActivePropertyId')) {
+            $this->updateActivePropertyId();
+        }
+        
+        $this->datePreset = 'last_28';
+        $this->dateFrom = \Carbon\Carbon::now()->subDays(28)->format('Y-m-d');
+        $this->dateTo = \Carbon\Carbon::now()->subDays(1)->format('Y-m-d');
+        
+        $this->compareDateFrom = '';
+        $this->compareDateTo = '';
+        
+        session()->forget([
+            'marketing_date_from',
+            'marketing_date_to',
+            'marketing_compare_date_from',
+            'marketing_compare_date_to',
+            'marketing_date_preset',
+            'marketing_compare_format',
+        ]);
+        
+        if (method_exists($this, 'loadReportData')) {
+            $this->loadReportData();
+        }
+    }
 }

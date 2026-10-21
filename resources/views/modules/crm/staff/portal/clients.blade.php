@@ -235,7 +235,7 @@
 
             @elseif ($activeTab === 'marketing')
                 <div class="animate-fadeIn">
-                    @livewire('client-marketing', ['clientId' => $clientDetails->id, 'isEmbedded' => true], key('marketing-reports-'.$clientDetails->id))
+                    @livewire('admin-client-marketing-tab', ['clientId' => $clientDetails->id], key('staff-marketing-tab-'.$clientDetails->id))
                 </div>
 
             @elseif ($activeTab === 'websites')

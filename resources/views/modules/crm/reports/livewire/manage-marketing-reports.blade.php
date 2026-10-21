@@ -14,16 +14,6 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Select a client and website to view integration reports.</p>
             </div>
         </div>
-        <div class="flex shrink-0">
-            @if($clientId)
-                <button type="button" wire:click="resetSelection()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Back
-                </button>
-            @endif
-        </div>
     </div>
 
     {{-- Filters --}}
