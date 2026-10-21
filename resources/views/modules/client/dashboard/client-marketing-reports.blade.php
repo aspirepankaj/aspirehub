@@ -297,83 +297,111 @@
                 </h1>
                 <p>Comprehensive multi-channel performance overview across all connected integrations.</p>
             </div>
-            <a href="{{ route('client.dashboard') }}" class="portal-button back-button" style="text-decoration:none;">
-                ← Back to Dashboard
-            </a>
         </section>
 
-        <!-- Select Website Panel -->
-        <section class="panel select-panel">
-            <label>
-                <span>Select Website</span>
-                @if(count($websites) > 0)
-                    <select wire:model.live="selectedWebsiteId" aria-label="Select website">
-                        @foreach($websites as $site)
-                            <option value="{{ $site->id }}">
-                                {{ $site->site_name }}
-                                @if(!empty($site->site_url))
-                                    ({{ rtrim(str_replace(['https://', 'http://'], '', $site->site_url), '/') }})
-                                @endif
-                            </option>
-                        @endforeach
-                    </select>
-                @else
-                    <span style="font-size: 11px; color: var(--muted-foreground);">No registered websites found</span>
-                @endif
-            </label>
-        </section>
-
-        <!-- Integration Tabs Bar (Only on Overview Page) -->
-        @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isLinkedinConnected)
-            <section class="action-row" style="margin-bottom: 16px;">
-                <nav class="report-tabs" aria-label="Integrations">
-                    <button type="button" wire:click="selectIntegration('overview')" class="active">
-                        Overview Dashboard
+        <!-- Integration Tabs Bar + Select Website Row (Only on Overview Page) -->
+        <section class="action-row flex flex-wrap items-center justify-between gap-3" style="margin-bottom: 16px;">
+            @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isLinkedinConnected)
+                <nav class="report-tabs flex items-center" aria-label="Integrations">
+                    {{-- 1. Overview Tab --}}
+                    <button type="button" 
+                            @if($activeReportIntegrationId === 'overview') disabled @else wire:click="selectIntegration('overview')" @endif
+                            class="inline-flex items-center gap-1.5 transition-all {{ $activeReportIntegrationId === 'overview' ? 'active cursor-default pointer-events-none' : 'cursor-pointer' }}">
+                        <svg wire:loading wire:target="selectIntegration('overview')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Overview</span>
                     </button>
-                    @if($isGbpConnected)
-                        <button type="button" wire:click="selectIntegration('gbp')">Business Profile</button>
-                    @endif
-                    @if($isFacebookConnected)
-                        <button type="button" wire:click="selectIntegration('facebook')">Facebook</button>
-                    @endif
-                    @if($isGadsConnected)
-                        <button type="button" wire:click="selectIntegration('gads')">Google Ads</button>
-                    @endif
-                    @if($isGa4Connected)
-                        <button type="button" wire:click="selectIntegration('ga4')">Google Analytics 4</button>
-                    @endif
-                    @if($isKeywordConnected)
-                        <button type="button" wire:click="selectIntegration('keyword')">Keyword.com</button>
-                    @endif
-                    @if($isLinkedinConnected)
-                        <button type="button" wire:click="selectIntegration('linkedin')">LinkedIn</button>
-                    @endif
-                    @if($isGscConnected)
-                        <button type="button" wire:click="selectIntegration('gsc')">Search Console</button>
-                    @endif
-                    @if($isGtmConnected)
-                        <button type="button" wire:click="selectIntegration('gtm')">Tag Manager</button>
-                    @endif
-                    @if($isYoutubeConnected)
-                        <button type="button" wire:click="selectIntegration('youtube')">YouTube</button>
-                    @endif
+
+                    @php
+                        $tabList = [
+                            'gbp' => ['connected' => $isGbpConnected, 'label' => 'Business Profile'],
+                            'facebook' => ['connected' => $isFacebookConnected, 'label' => 'Facebook'],
+                            'gads' => ['connected' => $isGadsConnected, 'label' => 'Google Ads'],
+                            'ga4' => ['connected' => $isGa4Connected, 'label' => 'Google Analytics 4'],
+                            'keyword' => ['connected' => $isKeywordConnected, 'label' => 'Keyword.com'],
+                            'linkedin' => ['connected' => $isLinkedinConnected, 'label' => 'LinkedIn'],
+                            'gsc' => ['connected' => $isGscConnected, 'label' => 'Search Console'],
+                            'gtm' => ['connected' => $isGtmConnected, 'label' => 'Tag Manager'],
+                            'youtube' => ['connected' => $isYoutubeConnected, 'label' => 'YouTube'],
+                        ];
+                    @endphp
+
+                    @foreach($tabList as $tKey => $tItem)
+                        @if($tItem['connected'])
+                            <button type="button" 
+                                    @if($activeReportIntegrationId === $tKey) disabled @else wire:click="selectIntegration('{{ $tKey }}')" @endif
+                                    class="inline-flex items-center gap-1.5 transition-all {{ $activeReportIntegrationId === $tKey ? 'active cursor-default pointer-events-none' : 'cursor-pointer' }}">
+                                <svg wire:loading wire:target="selectIntegration('{{ $tKey }}')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>{{ $tItem['label'] }}</span>
+                            </button>
+                        @endif
+                    @endforeach
                 </nav>
+            @else
+                <div></div>
+            @endif
+
+            <!-- Select Website Panel (Placed in the same row with integration tabs) -->
+            <section class="panel select-panel shrink-0" style="margin-bottom: 0;">
+                <label>
+                    <span>Select Website</span>
+                    @if(count($websites) > 0)
+                        <select wire:model.live="selectedWebsiteId" aria-label="Select website">
+                            @foreach($websites as $site)
+                                <option value="{{ $site->id }}">
+                                    {{ $site->site_name }}
+                                    @if(!empty($site->site_url))
+                                        ({{ rtrim(str_replace(['https://', 'http://'], '', $site->site_url), '/') }})
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                    @else
+                        <span style="font-size: 11px; color: var(--muted-foreground);">No registered websites found</span>
+                    @endif
+                </label>
             </section>
-        @endif
-    @else
-        <!-- Dedicated Single Integration Header (Matching Zip Design) -->
+        </section>
+    @endif
+
+    <!-- Dedicated Single Integration Header (Matching Zip Design) -->
+    @if($activeReportIntegrationId !== 'overview')
         <div class="mb-4">
-
-
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                     <h1 class="flex items-center gap-3 text-2xl font-extrabold text-slate-800 dark:text-slate-100">
+                        {{-- Platform Specific Dynamic Icon with Consistent Brand Theme Color --}}
                         <span class="inline-flex items-center justify-center text-[#0b495b] dark:text-[#5eead4]">
-                            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8">
-                                <rect x="3" y="15" width="4.5" height="10" rx="1" />
-                                <rect x="11.5" y="9" width="4.5" height="16" rx="1" />
-                                <rect x="20" y="3" width="4.5" height="22" rx="1" />
-                            </svg>
+                            @if($activeReportIntegrationId === 'ga4')
+                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                            @elseif($activeReportIntegrationId === 'gsc')
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                            @elseif($activeReportIntegrationId === 'gads')
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            @elseif($activeReportIntegrationId === 'facebook')
+                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
+                            @elseif($activeReportIntegrationId === 'gbp')
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            @elseif($activeReportIntegrationId === 'keyword')
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                            @elseif($activeReportIntegrationId === 'youtube')
+                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            @elseif($activeReportIntegrationId === 'linkedin')
+                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                            @elseif($activeReportIntegrationId === 'gtm')
+                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                            @else
+                                <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7">
+                                    <rect x="3" y="15" width="4.5" height="10" rx="1" />
+                                    <rect x="11.5" y="9" width="4.5" height="16" rx="1" />
+                                    <rect x="20" y="3" width="4.5" height="22" rx="1" />
+                                </svg>
+                            @endif
                         </span>
                         <span>
                             @if($activeReportIntegrationId === 'ga4') Google Analytics Website Traffic
@@ -406,9 +434,15 @@
                 <!-- Right Side: Back to Overview Button + Website Filter + Date Picker -->
                 <div class="flex flex-wrap items-center gap-2.5">
                     <!-- Back to Overview Button -->
-                    <button type="button" wire:click="selectIntegration('overview')" 
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all shadow-xs">
-                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <button type="button" 
+                            @if($activeReportIntegrationId === 'overview') disabled @else wire:click="selectIntegration('overview')" @endif
+                            wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all shadow-xs disabled:opacity-60 disabled:cursor-not-allowed">
+                        <svg wire:loading wire:target="selectIntegration('overview')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <svg wire:loading.remove wire:target="selectIntegration('overview')" class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         <span>Back to Overview</span>
@@ -449,50 +483,46 @@
         </div>
     @endif
 
-    <!-- Integration Views (Uses Admin/Staff Layout) -->
-    <div class="relative min-h-[400px] w-full mt-4">
-        {{-- Skeleton Loader --}}
-        <div wire:loading wire:target="selectIntegration, applyDateFilter" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
-            <div class="w-full h-full p-6">
-                <!-- Skeleton cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5 mb-6 relative" style="z-index: 10;">
-                    @for($i = 0; $i < 5; $i++)
-                        <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm h-32 flex flex-col justify-center">
-                            <div class="flex items-start gap-4 mb-2">
-                                <div class="w-12 h-12 rounded-full bg-slate-200/60 dark:bg-slate-800/60 shrink-0"></div>
-                                <div class="flex-1 space-y-2 py-1">
-                                    <div class="h-3 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/2"></div>
-                                    <div class="h-8 bg-slate-200/80 dark:bg-slate-700/80 rounded w-3/4"></div>
+    <!-- Content Views Area -->
+    <div class="relative min-h-[400px] w-full mt-2">
+        @if($activeReportIntegrationId === 'overview')
+            {{-- In Overview: show skeleton when loading overview data --}}
+            <div wire:loading wire:target="selectIntegration('overview'), selectedWebsiteId" class="w-full font-sans pb-8 animate-pulse mt-2 relative space-y-6">
+                @for($c = 0; $c < 4; $c++)
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                        <!-- Header skeleton with icon, title & button -->
+                        <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-5 bg-slate-200 dark:bg-slate-700/60 rounded"></div>
+                                <div class="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
+                                <div class="space-y-2">
+                                    <div class="h-4 w-36 bg-slate-200 dark:bg-slate-700/80 rounded"></div>
+                                    <div class="h-3 w-48 bg-slate-100 dark:bg-slate-800/80 rounded"></div>
                                 </div>
                             </div>
-                            <div class="mt-2 h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-2/3"></div>
+                            <div class="h-8 w-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
                         </div>
-                    @endfor
-                </div>
-                <!-- Skeleton Charts -->
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5 relative" style="z-index: 10;">
-                    <div class="lg:col-span-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-100 dark:border-slate-800 p-5 rounded-xl shadow-sm h-96 flex flex-col justify-center items-center">
-                        <div class="w-full h-full flex flex-col">
-                            <div class="h-4 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/4 mb-6"></div>
-                            <div class="flex-1 bg-slate-50/50 dark:bg-slate-800/30 rounded w-full flex items-center justify-center">
-                                <span class="text-2xl font-bold text-slate-300 dark:text-slate-700 tracking-wider">LOADING DATA</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="lg:col-span-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-100 dark:border-slate-800 p-5 rounded-xl shadow-sm h-96 flex flex-col">
-                        <div class="h-4 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/3 mb-6"></div>
-                        <div class="flex justify-center mb-8 flex-1 items-center">
-                            <div class="w-48 h-48 rounded-full border-[16px] border-slate-100 dark:border-slate-800/50 flex items-center justify-center">
-                                <div class="w-32 h-32 rounded-full border-[8px] border-slate-50 dark:border-slate-800/20"></div>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mt-auto"><div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-full"></div><div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-5/6"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div wire:loading.remove wire:target="selectIntegration, applyDateFilter" class="animate-fadeIn w-full">
+                        <!-- 5 Metric Cards Skeleton -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                            @for($i = 0; $i < 5; $i++)
+                                <div class="bg-slate-50/70 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 p-4 h-28 flex flex-col justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-slate-200/70 dark:bg-slate-700/60 shrink-0"></div>
+                                        <div class="flex-1 space-y-1.5">
+                                            <div class="h-2.5 bg-slate-200/80 dark:bg-slate-700/80 rounded w-2/3"></div>
+                                            <div class="h-6 bg-slate-200/90 dark:bg-slate-700 rounded w-4/5"></div>
+                                        </div>
+                                    </div>
+                                    <div class="h-2.5 bg-slate-200/50 dark:bg-slate-800 rounded w-1/2"></div>
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
+                @endfor
+            </div>
+
+            <div wire:loading.remove wire:target="selectIntegration('overview'), selectedWebsiteId" class="animate-fadeIn w-full">
             @if(!($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isGtmConnected || $isFacebookConnected || $isLinkedinConnected))
                 {{-- Data not found / No Integrations --}}
                 <div class="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
@@ -584,10 +614,16 @@
                                             <span class="text-xs text-slate-400">Website Traffic & Engagement</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('ga4')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'ga4') disabled @else wire:click="selectIntegration('ga4')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('ga4')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('ga4')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -724,10 +760,16 @@
                                             <span class="text-xs text-slate-400">Organic Search Performance</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('gsc')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'gsc') disabled @else wire:click="selectIntegration('gsc')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('gsc')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('gsc')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -860,10 +902,16 @@
                                             <span class="text-xs text-slate-400">Paid Campaigns & ROI</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('gads')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'gads') disabled @else wire:click="selectIntegration('gads')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('gads')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('gads')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -984,10 +1032,16 @@
                                             <span class="text-xs text-slate-400">Social Reach & Engagement</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('facebook')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'facebook') disabled @else wire:click="selectIntegration('facebook')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('facebook')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('facebook')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -1104,10 +1158,16 @@
                                             <span class="text-xs text-slate-400">Local Listing & Customer Actions</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('gbp')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'gbp') disabled @else wire:click="selectIntegration('gbp')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('gbp')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('gbp')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -1224,10 +1284,16 @@
                                             <span class="text-xs text-slate-400">SEO Keyword Rank Tracking</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('keyword')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'keyword') disabled @else wire:click="selectIntegration('keyword')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('keyword')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('keyword')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -1344,10 +1410,16 @@
                                             <span class="text-xs text-slate-400">Video Views & Channel Growth</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('youtube')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'youtube') disabled @else wire:click="selectIntegration('youtube')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('youtube')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('youtube')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -1460,10 +1532,16 @@
                                             <span class="text-xs text-slate-400">Professional Network Engagement</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('linkedin')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'linkedin') disabled @else wire:click="selectIntegration('linkedin')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('linkedin')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('linkedin')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -1576,10 +1654,16 @@
                                             <span class="text-xs text-slate-400">Container Overview & Assets</span>
                                         </div>
                                     </div>
-                                    <button type="button" wire:click="selectIntegration('gtm')" 
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                    <button type="button" 
+                                        @if($activeReportIntegrationId === 'gtm') disabled @else wire:click="selectIntegration('gtm')" @endif
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <svg wire:loading wire:target="selectIntegration('gtm')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
                                         <span>View Details</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <svg wire:loading.remove wire:target="selectIntegration('gtm')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                     </button>
                                 </div>
 
@@ -1651,22 +1735,186 @@
                             </div>
                         @endif
                     </div>
-                @else
-                    <div wire:key="integration-view-single-{{ $activeReportIntegrationId }}-{{ $selectedWebsiteId }}" class="client-integration-theme">
-                        @include('modules.crm.clients.client-report', [
-                            'hideHeader' => true, 
-                            'hideToolbar' => true,
-                            'activeReportData' => $activeReportData,
-                            'dateFrom' => $dateFrom,
-                            'dateTo' => $dateTo,
-                            'compareDateFrom' => $compareDateFrom,
-                            'compareDateTo' => $compareDateTo,
-                            'compareFormat' => $compareFormat ?? 'percentage',
-                            'compareStacked' => true
-                        ])
-                    </div>
                 @endif
             @endif
-        </div>
+            </div> {{-- closes wire:loading.remove wire:target="selectIntegration('overview')" --}}
+        @else
+            {{-- Single Integration View --}}
+            <div wire:key="integration-view-single-{{ $activeReportIntegrationId }}-{{ $selectedWebsiteId }}" class="client-integration-theme">
+                {{-- Skeleton Loader for Single Integration matching actual data layout --}}
+                <div wire:loading wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('linkedin'), applyDateFilter, selectedWebsiteId" class="w-full font-sans pb-8 animate-pulse relative">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm p-6 space-y-6">
+                        
+                        @if($activeReportIntegrationId === 'gads')
+                            {{-- Google Ads Exact Replica Skeleton --}}
+                            <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900">
+                                <!-- Top Metric Tabs Skeleton (5 equal columns) -->
+                                <div class="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200 dark:border-slate-800 divide-x divide-slate-200 dark:divide-slate-800">
+                                    @for($m = 0; $m < 5; $m++)
+                                        <div class="p-4 h-[100px] flex items-center gap-3 bg-slate-50/50 dark:bg-slate-800/30">
+                                            <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700/60 shrink-0"></div>
+                                            <div class="flex-1 space-y-2">
+                                                <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
+                                                <div class="h-6 bg-slate-300 dark:bg-slate-600 rounded w-20"></div>
+                                            </div>
+                                        </div>
+                                    @endfor
+                                </div>
+                                <!-- Large Line Chart Area Skeleton with simulated wave -->
+                                <div class="p-6 h-[320px] bg-slate-50/30 dark:bg-slate-800/20 flex flex-col justify-between">
+                                    <div class="flex justify-between items-center text-xs text-slate-300">
+                                        <div class="h-3 w-12 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        <div class="h-3 w-12 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                    </div>
+                                    <div class="w-full h-44 flex items-end gap-3 px-4">
+                                        @for($b = 0; $b < 20; $b++)
+                                            <div class="flex-1 bg-gradient-to-t from-blue-100 to-blue-200/40 dark:from-blue-900/30 dark:to-blue-800/10 rounded-t" style="height: {{ [30, 45, 60, 85, 50, 70, 95, 80, 40, 65, 90, 75, 55, 70, 85, 90, 60, 45, 30, 15][$b] }}%;"></div>
+                                        @endfor
+                                    </div>
+                                    <div class="flex justify-between text-xs text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                        @for($d = 0; $d < 7; $d++)
+                                            <div class="h-2.5 w-16 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        @endfor
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Top Ad Campaigns Table Skeleton -->
+                            <div class="border border-slate-200 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-900">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                    <div class="h-4 w-36 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="h-8 bg-slate-100 dark:bg-slate-800 rounded-lg w-full"></div>
+                                    <div class="h-10 bg-slate-50 dark:bg-slate-800/60 rounded-lg w-full"></div>
+                                    <div class="h-10 bg-slate-50 dark:bg-slate-800/60 rounded-lg w-full"></div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom 2 Cards Skeleton (Keywords & Devices) -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Keywords Table Skeleton -->
+                                <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900 space-y-3">
+                                    <div class="h-4 w-48 bg-slate-200 dark:bg-slate-700 rounded mb-4"></div>
+                                    @for($k = 0; $k < 6; $k++)
+                                        <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800/50">
+                                            <div class="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
+                                            <div class="flex gap-4">
+                                                <div class="h-3.5 bg-blue-100 dark:bg-blue-900/40 rounded w-14"></div>
+                                                <div class="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-10"></div>
+                                                <div class="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-12"></div>
+                                            </div>
+                                        </div>
+                                    @endfor
+                                </div>
+
+                                <!-- Devices Skeleton -->
+                                <div class="border border-slate-200 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-900 space-y-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <div class="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        <div class="h-5 w-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                                    </div>
+                                    @for($dev = 0; $dev < 3; $dev++)
+                                        <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                                                <div class="space-y-1.5">
+                                                    <div class="h-3.5 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                                    <div class="h-2.5 w-16 bg-slate-200 dark:bg-slate-700/60 rounded"></div>
+                                                </div>
+                                            </div>
+                                            <div class="h-6 w-14 bg-slate-300 dark:bg-slate-600 rounded"></div>
+                                        </div>
+                                    @endfor
+                                </div>
+                            </div>
+                        @else
+                            {{-- Standard KPI Cards + Charts Skeleton for GA4, GSC, YouTube, Facebook, LinkedIn, GBP --}}
+                            <!-- Top 5 Metric Cards (Matching GA4 / Facebook KPI style) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5">
+                                @for($i = 0; $i < 5; $i++)
+                                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center gap-4">
+                                        <div class="w-14 h-14 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 shrink-0"></div>
+                                        <div class="flex-1 space-y-2 py-1">
+                                            <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-20"></div>
+                                            <div class="h-7 bg-slate-300 dark:bg-slate-600 rounded w-28"></div>
+                                            <div class="h-2.5 bg-slate-200/60 dark:bg-slate-700/50 rounded w-24"></div>
+                                        </div>
+                                    </div>
+                                @endfor
+                            </div>
+
+                            <!-- Main Charts Row (Line Chart 60% + Donut/Side Chart 40%) -->
+                            <div class="flex flex-col lg:flex-row items-stretch gap-5">
+                                <!-- Left Line Chart Skeleton (60%) -->
+                                <div class="w-full lg:w-[60%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs flex flex-col justify-between h-[340px]">
+                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                                        <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-36"></div>
+                                        <div class="h-7 bg-slate-100 dark:bg-slate-800 rounded-lg w-32"></div>
+                                    </div>
+                                    <div class="w-full flex-1 flex items-end gap-3 py-6 px-4">
+                                        @for($b = 0; $b < 16; $b++)
+                                            <div class="flex-1 bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-700/40 rounded-t" style="height: {{ [40, 55, 75, 60, 80, 95, 70, 85, 65, 70, 90, 80, 60, 75, 85, 60][$b] }}%;"></div>
+                                        @endfor
+                                    </div>
+                                    <div class="flex justify-center gap-6 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                        <div class="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        <div class="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Donut / Breakdown Skeleton (40%) -->
+                                <div class="w-full lg:w-[40%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs flex flex-col justify-between h-[340px]">
+                                    <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-36 mb-4"></div>
+                                    <div class="flex items-center gap-6 flex-1">
+                                        <div class="w-36 h-36 rounded-full border-[14px] border-slate-200 dark:border-slate-700/60 shrink-0"></div>
+                                        <div class="flex-1 space-y-3">
+                                            @for($d = 0; $d < 4; $d++)
+                                                <div class="flex justify-between items-center">
+                                                    <div class="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                                    <div class="h-3 w-10 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                                </div>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom 3 Columns Table Skeleton -->
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                                @for($col = 0; $col < 3; $col++)
+                                    <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-3">
+                                        <div class="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded mb-4"></div>
+                                        @for($row = 0; $row < 4; $row++)
+                                            <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/50">
+                                                <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+                                                <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-12"></div>
+                                            </div>
+                                        @endfor
+                                    </div>
+                                @endfor
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+
+                {{-- Real Single Integration Report --}}
+                <div wire:loading.remove wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('linkedin'), applyDateFilter, selectedWebsiteId">
+                    @include('modules.crm.clients.client-report', [
+                        'hideHeader' => true, 
+                        'hideToolbar' => true,
+                        'activeReportData' => $activeReportData,
+                        'dateFrom' => $dateFrom,
+                        'dateTo' => $dateTo,
+                        'compareDateFrom' => $compareDateFrom,
+                        'compareDateTo' => $compareDateTo,
+                        'compareFormat' => $compareFormat ?? 'percentage',
+                        'compareStacked' => true
+                    ])
+                </div>
+            </div>
+        @endif
     </div>
 </div>

@@ -33,15 +33,16 @@ class AdminClientReport extends Component
     public bool $hideHeader = false;
 
     public function mount(
-        int $id,
-        string $integration,
-        $websiteId = null,
-        bool $hideHeader = false,
-        ?string $dateFrom = null,
+        int $id, 
+        string $integration, 
+        $websiteId = null, 
+        bool $hideHeader = false, 
+        ?string $dateFrom = null, 
         ?string $dateTo = null,
         ?string $compareDateFrom = null,
         ?string $compareDateTo = null
-    ): void {
+    ): void
+    {
         $this->clientId = $id;
         $this->integration = $integration;
         $this->activeReportIntegrationId = $integration;
@@ -78,14 +79,6 @@ class AdminClientReport extends Component
         if (empty($this->compareFormat)) $this->compareFormat = request('format', 'percentage');
 
         $this->initDateRange();
-
-        // If explicitly passed empty compare dates, ensure they remain empty
-        if ($compareDateFrom === '') {
-            $this->compareDateFrom = '';
-        }
-        if ($compareDateTo === '') {
-            $this->compareDateTo = '';
-        }
 
         $this->loadReport();
     }
