@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Monthly SEO &amp; Marketing Report - {{ $website->site_name }}</title>
+    <title>{{ !empty($singlePlatformTitle) ? ($singlePlatformTitle . ' Report') : 'Monthly SEO & Marketing Report' }} - {{ $website->site_name }}</title>
     <style>
         @page {
             size: {{ $isExplicitCompare ? '1920pt 1600pt' : '960pt 1600pt' }};

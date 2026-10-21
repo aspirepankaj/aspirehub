@@ -30,23 +30,28 @@ class MarketingReportPdfController extends Controller
         $dateTo = $request->filled('to') ? $request->query('to') : Carbon::now()->subDays(1)->format('Y-m-d');
         $compareDateFrom = $request->filled('cfrom') ? $request->query('cfrom') : null;
         $compareDateTo = $request->filled('cto') ? $request->query('cto') : null;
+        $integration = $request->query('integration');
+        if ($integration === 'overview' || $integration === 'all') {
+            $integration = null;
+        }
 
         if ($request->boolean('pdf')) {
-            $pdf = $this->reportService->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+            $pdf = $this->reportService->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo, $integration);
 
             $siteSlug = Str::slug($website->site_name ?: 'Website');
             $dateSlug = Carbon::parse($dateFrom)->format('M-Y');
+            $intSlug = (!empty($integration)) ? Str::slug($integration) . '-' : '';
 
             return response($pdf->output(), 200, [
                 'Content-Type'        => 'application/pdf',
-                'Content-Disposition' => "inline; filename=\"Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf\"",
+                'Content-Disposition' => "inline; filename=\"{$intSlug}Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf\"",
                 'Cache-Control'       => 'no-cache, no-store, must-revalidate, max-age=0',
                 'Pragma'              => 'no-cache',
                 'Expires'             => '0',
             ]);
         }
 
-        $reportData = $this->reportService->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+        $reportData = $this->reportService->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo, $integration);
 
         return response()->view('modules.crm.marketing.pdf-marketing-report', $reportData, 200, [
             'Cache-Control' => 'no-cache, no-store, must-revalidate, max-age=0',
@@ -67,12 +72,17 @@ class MarketingReportPdfController extends Controller
         $dateTo = $request->filled('to') ? $request->query('to') : Carbon::now()->subDays(1)->format('Y-m-d');
         $compareDateFrom = $request->filled('cfrom') ? $request->query('cfrom') : null;
         $compareDateTo = $request->filled('cto') ? $request->query('cto') : null;
+        $integration = $request->query('integration');
+        if ($integration === 'overview' || $integration === 'all') {
+            $integration = null;
+        }
 
-        $pdf = $this->reportService->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+        $pdf = $this->reportService->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo, $integration);
 
         $siteSlug = Str::slug($website->site_name ?: 'Website');
         $dateSlug = Carbon::parse($dateFrom)->format('M-Y');
+        $intSlug = (!empty($integration)) ? Str::slug($integration) . '-' : '';
 
-        return $pdf->download("Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf");
+        return $pdf->download("{$intSlug}Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf");
     }
 }

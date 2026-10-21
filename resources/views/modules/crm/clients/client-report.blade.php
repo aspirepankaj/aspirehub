@@ -69,9 +69,7 @@
         </div>
         {{-- Date Range Picker, Send Report & Back Button --}}
         <div class="flex flex-wrap items-center gap-3">
-            @if($activeReportIntegrationId !== 'overview')
-                @include('partials.marketing-report-send-modal')
-            @endif
+            @include('partials.marketing-report-send-modal')
 
             <a href="javascript:history.back()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -91,17 +89,15 @@
     @elseif(empty($hideToolbar))
         {{-- Toolbar for integrated view when hideHeader is true --}}
         <div class="flex items-center justify-end gap-3 mb-4">
+            @include('partials.marketing-report-send-modal')
             @if($activeReportIntegrationId !== 'overview')
-                @include('partials.marketing-report-send-modal')
-            @endif
-            @if($activeReportIntegrationId !== 'overview')
-                <div class="w-full sm:w-auto" wire:key="dp-box-{{ $activeReportIntegrationId }}-{{ $this->websiteId }}">
-                    @php
-                        $minDateBound = \Carbon\Carbon::now()->subDays(365)->format('Y-m-d');
-                        $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
-                    @endphp
-                    @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
-                </div>
+            <div class="w-full sm:w-auto" wire:key="dp-box-{{ $activeReportIntegrationId }}-{{ $this->websiteId }}">
+                @php
+                    $minDateBound = \Carbon\Carbon::now()->subDays(365)->format('Y-m-d');
+                    $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+                @endphp
+                @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+            </div>
             @endif
         </div>
     @endif

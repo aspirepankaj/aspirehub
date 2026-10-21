@@ -41,10 +41,12 @@
         $subject .= " - {$modalWebsite->site_name}";
     }
     $defaultSubject = isset($this) && !empty($this->reportEmailSubject) ? $this->reportEmailSubject : $subject;
+    $currentIntegration = $integration ?? (isset($this) && !empty($this->activeReportIntegrationId) ? $this->activeReportIntegrationId : (isset($this) && !empty($this->activeTab) ? $this->activeTab : 'overview'));
 @endphp
 
 <div data-preview-route="{{ $previewRoute }}"
      data-download-route="{{ $downloadRoute }}"
+     data-integration="{{ $currentIntegration }}"
      x-data="{
     openModal: false,
     isLoadingPdf: false,
@@ -58,6 +60,7 @@
     subjectInput: '{{ addslashes($defaultSubject) }}',
     messageInput: '',
     dateDisplay: '',
+    activeIntegrationTitle: 'Monthly SEO & Marketing Report',
     open() {
         let rootContainer = this.$el ? (this.$el.closest('[data-preview-route]') || this.$el) : null;
         let routePreview = (rootContainer && rootContainer.getAttribute('data-preview-route')) ? rootContainer.getAttribute('data-preview-route') : (this.basePreview || '{{ $previewRoute }}');
@@ -68,10 +71,41 @@
         let cfrom = ($wire && typeof $wire.get === 'function' && $wire.get('compareDateFrom')) ? $wire.get('compareDateFrom') : (($wire && $wire.compareDateFrom) ? $wire.compareDateFrom : '{{ $activeCFrom }}');
         let cto = ($wire && typeof $wire.get === 'function' && $wire.get('compareDateTo')) ? $wire.get('compareDateTo') : (($wire && $wire.compareDateTo) ? $wire.compareDateTo : '{{ $activeCTo }}');
         
+        // Detect current integration (from closest attribute or wire state)
+        let integration = (rootContainer && rootContainer.getAttribute('data-integration')) 
+            ? rootContainer.getAttribute('data-integration') 
+            : (($wire && typeof $wire.get === 'function' && $wire.get('activeTab')) 
+                ? $wire.get('activeTab') 
+                : (($wire && typeof $wire.get === 'function' && $wire.get('activeReportIntegrationId'))
+                    ? $wire.get('activeReportIntegrationId')
+                    : (($wire && $wire.activeReportIntegrationId) 
+                        ? $wire.activeReportIntegrationId 
+                        : (($wire && $wire.activeTab) ? $wire.activeTab : 'overview'))));
+
+        let intTitles = {
+            'overview': 'Monthly SEO & Marketing Report',
+            'all': 'Monthly SEO & Marketing Report',
+            'ga4': 'Google Analytics 4 Report',
+            'gsc': 'Google Search Console Report',
+            'keyword': 'Keyword.com Ranking Report',
+            'youtube': 'YouTube Analytics Report',
+            'gbp': 'Google Business Profile Report',
+            'gads': 'Google Ads Report',
+            'facebook': 'Facebook Performance Report',
+            'linkedin': 'LinkedIn Analytics Report',
+            'gtm': 'Google Tag Manager Report'
+        };
+
+        let reportTitle = intTitles[integration] || (integration && integration !== 'overview' ? (integration.toUpperCase() + ' Report') : 'Monthly SEO & Marketing Report');
+        this.activeIntegrationTitle = reportTitle;
+
         let ts = Date.now();
         let query = '?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&_v=' + ts;
         if (cfrom) query += '&cfrom=' + encodeURIComponent(cfrom);
         if (cto) query += '&cto=' + encodeURIComponent(cto);
+        if (integration && integration !== 'overview' && integration !== 'all') {
+            query += '&integration=' + encodeURIComponent(integration);
+        }
 
         let targetPreview = routePreview ? (routePreview + query) : '#';
         let targetDownload = routeDownload ? (routeDownload + query) : '#';
@@ -86,7 +120,7 @@
             return months[d.getMonth()] + ' ' + d.getFullYear();
         };
 
-        let dynSubject = 'Monthly SEO & Marketing Report - ' + getMonthYear(from);
+        let dynSubject = reportTitle + ' - ' + getMonthYear(from);
         if (cfrom) {
             dynSubject += ' vs ' + getMonthYear(cfrom);
         }
@@ -98,9 +132,7 @@
         if (!this.emailInput && this.defaultEmail) {
             this.emailInput = this.defaultEmail;
         }
-        if (!this.subjectInput || this.subjectInput.startsWith('Monthly SEO & Marketing Report -')) {
-            this.subjectInput = dynSubject;
-        }
+        this.subjectInput = dynSubject;
 
         this.isLoadingPdf = true;
         this.openModal = true;
@@ -147,7 +179,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                            Monthly SEO & Marketing Report
+                            <span x-text="activeIntegrationTitle"></span>
                             <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-white/20 text-teal-100">Live Preview</span>
                         </h3>
                         <p class="text-xs text-teal-100/80">

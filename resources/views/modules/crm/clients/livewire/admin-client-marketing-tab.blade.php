@@ -127,6 +127,15 @@
 
                 <div wire:loading.remove wire:target="switchTab, selectedWebsiteId" class="animate-fadeIn" wire:key="admin-client-tab-{{ $clientId }}-{{ $selectedWebsiteId }}-{{ $activeTab }}">
                     @if($activeTab === 'overview')
+                        {{-- Overview Toolbar: Preview & Send Full Report only (no calendar) --}}
+                        @php
+                            $currClient = \App\Modules\CRM\Clients\Models\Client::with('user')->find($clientId);
+                            $currWebsite = collect($websites)->firstWhere('id', $selectedWebsiteId) ?? \App\Modules\CRM\Websites\Models\Website::find($selectedWebsiteId);
+                        @endphp
+                        <div class="flex items-center justify-end gap-3 mb-2" wire:key="overview-toolbar-{{ $selectedWebsiteId }}">
+                            @include('partials.marketing-report-send-modal', ['client' => $currClient, 'website' => $currWebsite, 'integration' => 'overview'])
+                        </div>
+
                         {{-- Render Overview Cards --}}
                         <div class="space-y-6" wire:key="overview-dashboard-container">
                             @php

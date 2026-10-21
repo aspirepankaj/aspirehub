@@ -42,9 +42,9 @@ class MarketingReportPdfService
     }
 
     /**
-     * Prepare complete aggregated report data for all connected integrations.
+     * Prepare complete aggregated report data for all connected integrations or a single targeted integration.
      */
-    public function prepareReportData(Client $client, Website $website, string $dateFrom, string $dateTo, ?string $compareDateFrom = null, ?string $compareDateTo = null): array
+    public function prepareReportData(Client $client, Website $website, string $dateFrom, string $dateTo, ?string $compareDateFrom = null, ?string $compareDateTo = null, ?string $targetIntegration = null): array
     {
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;
@@ -77,6 +77,28 @@ class MarketingReportPdfService
             })
             ->keyBy('integration_type');
 
+        // If a specific single integration is targeted (and not 'overview' / 'all'), filter down to only that integration
+        $singlePlatformTitle = null;
+        if (!empty($targetIntegration) && !in_array(strtolower($targetIntegration), ['overview', 'all'])) {
+            $normalizedTarget = strtolower($targetIntegration);
+            $integrations = $integrations->filter(function ($item, $key) use ($normalizedTarget) {
+                return strtolower($key) === $normalizedTarget;
+            });
+
+            $platformNames = [
+                'ga4' => 'Google Analytics 4',
+                'gsc' => 'Google Search Console',
+                'keyword' => 'Keyword.com',
+                'youtube' => 'YouTube',
+                'gbp' => 'Google Business Profile',
+                'gads' => 'Google Ads',
+                'facebook' => 'Facebook',
+                'linkedin' => 'LinkedIn',
+                'gtm' => 'Google Tag Manager',
+            ];
+            $singlePlatformTitle = $platformNames[$normalizedTarget] ?? ucwords(str_replace(['_', '-'], ' ', $normalizedTarget));
+        }
+
         $hasGa4 = $integrations->has('ga4');
         $hasGsc = $integrations->has('gsc');
         $hasKeyword = $integrations->has('keyword');
@@ -86,7 +108,7 @@ class MarketingReportPdfService
         $hasFacebook = $integrations->has('facebook');
         $hasLinkedin = $integrations->has('linkedin');
 
-        // Dynamically load data for ALL connected integrations
+        // Dynamically load data for connected integrations
         $knownTypes = ['ga4', 'gsc', 'keyword', 'youtube', 'gbp', 'gads', 'facebook', 'linkedin'];
         $dynamicIntegrations = [];
 
@@ -310,7 +332,9 @@ class MarketingReportPdfService
             'isExplicitCompare' => $isExplicitCompare,
             'formattedDateRange' => $formattedDateRange,
             'formattedCompareRange' => $formattedCompareRange,
-            'hasGa4' => $hasGa4 || (!$hasGsc && !$hasKeyword && !$hasGbp),
+            'targetIntegration' => $targetIntegration,
+            'singlePlatformTitle' => $singlePlatformTitle,
+            'hasGa4' => $hasGa4 || (empty($targetIntegration) && !$hasGsc && !$hasKeyword && !$hasGbp),
             'hasGsc' => $hasGsc,
             'hasKeyword' => $hasKeyword,
             'hasYoutube' => $hasYoutube,
@@ -775,9 +799,9 @@ class MarketingReportPdfService
     /**
      * Generate the DomPDF object for the report.
      */
-    public function generatePdf(Client $client, Website $website, string $dateFrom, string $dateTo, ?string $compareDateFrom = null, ?string $compareDateTo = null): \Barryvdh\DomPDF\PDF
+    public function generatePdf(Client $client, Website $website, string $dateFrom, string $dateTo, ?string $compareDateFrom = null, ?string $compareDateTo = null, ?string $targetIntegration = null): \Barryvdh\DomPDF\PDF
     {
-        $reportData = $this->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+        $reportData = $this->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo, $targetIntegration);
         $isExplicitCompare = !empty($compareDateFrom) && !empty($compareDateTo);
 
         $pdf = Pdf::loadView('modules.crm.marketing.pdf-marketing-report', $reportData);
@@ -808,17 +832,21 @@ class MarketingReportPdfService
         string $subject,
         ?string $personalMessage = null,
         ?string $compareDateFrom = null,
-        ?string $compareDateTo = null
+        ?string $compareDateTo = null,
+        ?string $targetIntegration = null
     ): array {
         try {
-            $reportData = $this->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+            $reportData = $this->prepareReportData($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo, $targetIntegration);
             
-            $pdf = $this->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo);
+            $pdf = $this->generatePdf($client, $website, $dateFrom, $dateTo, $compareDateFrom, $compareDateTo, $targetIntegration);
             $pdfContent = $pdf->output();
 
             $siteSlug = Str::slug($website->site_name ?: 'Website');
             $dateSlug = Carbon::parse($dateFrom)->format('M-Y');
-            $pdfFilename = "Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf";
+            $intSlug = (!empty($targetIntegration) && !in_array(strtolower($targetIntegration), ['overview', 'all']))
+                ? Str::slug($targetIntegration) . '-'
+                : '';
+            $pdfFilename = "{$intSlug}Monthly-SEO-Report-{$siteSlug}-{$dateSlug}.pdf";
 
             Mail::to($recipientEmail)->send(new MarketingReportMail(
                 client: $client,

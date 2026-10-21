@@ -977,6 +977,11 @@ trait LoadsMarketingReports
             $activeTo = !empty($this->dateTo) ? $this->dateTo : Carbon::now()->subDays(1)->format('Y-m-d');
 
             $service = app(\App\Services\MarketingReportPdfService::class);
+            $targetIntegration = $this->activeReportIntegrationId ?? ($this->activeTab ?? null);
+            if ($targetIntegration === 'overview' || $targetIntegration === 'all') {
+                $targetIntegration = null;
+            }
+
             $result = $service->sendReportEmail(
                 client: $client,
                 website: $website,
@@ -986,7 +991,8 @@ trait LoadsMarketingReports
                 subject: $this->reportEmailSubject,
                 personalMessage: $this->reportEmailMessage,
                 compareDateFrom: $this->compareDateFrom,
-                compareDateTo: $this->compareDateTo
+                compareDateTo: $this->compareDateTo,
+                targetIntegration: $targetIntegration
             );
 
             if ($result['success']) {

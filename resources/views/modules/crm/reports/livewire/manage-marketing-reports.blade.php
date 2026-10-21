@@ -671,6 +671,15 @@
                             @endphp
 
                             <div class="space-y-6" wire:key="overview-dashboard-container-{{ $websiteId }}">
+                                {{-- Overview Toolbar: Preview & Send Full Report only (no calendar) --}}
+                                @php
+                                    $currClient = collect($clients)->firstWhere('id', $clientId) ?? \App\Modules\CRM\Clients\Models\Client::with('user')->find($clientId);
+                                    $currWebsite = collect($websites)->firstWhere('id', $websiteId) ?? \App\Modules\CRM\Websites\Models\Website::find($websiteId);
+                                @endphp
+                                <div class="flex items-center justify-end gap-3 mb-2" wire:key="overview-toolbar-{{ $websiteId }}">
+                                    @include('partials.marketing-report-send-modal', ['client' => $currClient, 'website' => $currWebsite, 'integration' => 'overview'])
+                                </div>
+
                                 {{-- 1. Google Analytics 4 --}}
                                 @if($isGa4Connected)
                                     @php

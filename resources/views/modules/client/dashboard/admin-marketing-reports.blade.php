@@ -379,19 +379,18 @@
                 </div>
             </div>
         @endif
-
-        @if($activeReportIntegrationId !== 'overview')
-            <div class="flex items-center gap-3 shrink-0">
-                @if(!request()->is('client*') && ($isEmbedded || auth()->user()?->staff || auth()->user()?->admin))
-                    @include('partials.marketing-report-send-modal')
-                @endif
+        <div class="flex items-center gap-3 shrink-0">
+            @if(!request()->is('client*') && ($isEmbedded || auth()->user()?->staff || auth()->user()?->admin))
+                @include('partials.marketing-report-send-modal')
+            @endif
+            @if($activeReportIntegrationId !== 'overview')
                 @php
                     $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
                     $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
                 @endphp
                 @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
     <!-- Integration Views (Uses Admin/Staff Layout) -->
