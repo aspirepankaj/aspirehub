@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Modules\Crm\Reports\Livewire;
+namespace App\Livewire\Modules\CRM\Reports\Livewire;
 
 use Livewire\Component;
 

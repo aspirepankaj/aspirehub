@@ -159,8 +159,8 @@
 
     <!-- Main Content Area -->
     <main class="portal-main {{ request()->routeIs('client.marketing*') ? 'is-marketing-report' : '' }}">
-        @if(request()->routeIs('client.marketing*'))
-            <!-- Giant Background Watermark Aspire Triangle Logo from User Image (Only on Client Marketing Reports) -->
+        @if(request()->routeIs('client.marketing*', 'client.dashboard*') || request()->is('client/dashboard*'))
+            <!-- Giant Background Watermark Aspire Triangle Logo (Client Marketing Reports & Dashboard) -->
             <div class="background-mark" aria-hidden="true">
                 <svg viewBox="0 0 450 461" fill="currentColor">
                     <path d="M260.5 41.2c-12.1 19.8-22 36.6-22 37.2s4.5 8.5 9.9 17.6c9.1 15.2 14.6 24.1 36.9 60.5 4.4 7.1 10.6 17.3 13.7 22.5s9.2 15.1 13.5 22c6.7 10.8 23.6 38.4 36.8 60 2.2 3.6 8.6 13.9 14.2 23 24.1 38.9 83.5 136.7 83.5 137.6 0 .2-8.6.3-19.1.2l-19.1-.3-8.9-14.5c-4.8-8-10.4-17.1-12.4-20.2l-3.6-5.8H175.3l-2.5 3.7c-1.4 2.1-7.8 12.3-14.3 22.8-12 19.5-18.6 30.1-26 41.6l-4.3 6.5 3.2.2c11.1.5 393.2-.1 406.3-.6l16.2-.7-12.1-20c-6.6-11-18.5-30.6-26.3-43.5s-18.2-30-23-38c-4.9-8-13.2-21.7-18.5-30.5s-11.1-18.3-12.7-21c-1.7-2.8-10.4-17.2-19.3-32-9-14.9-19.3-32-23-38-3.7-6.1-12.3-20.5-19.2-32-6.9-11.6-13.9-23.3-15.5-26-6.4-10.5-21.3-35.7-31-52-13.2-22.5-12.1-20.6-26.2-44.2-6.8-11.5-16.9-28.2-22.3-37.3-15.7-26.3-21.1-35-21.7-35-.3.1-10.5 16.3-22.6 36.2"/>
@@ -168,14 +168,15 @@
                 </svg>
             </div>
         @endif
-
-        @if(!request()->routeIs('client.marketing*'))
+{{--
+        @if(!request()->routeIs('client.marketing*', 'client.dashboard*') && !request()->is('client/dashboard*'))
             <!-- Top Wave Vector SVG (Only for Non-Marketing Client Pages) -->
             <svg class="top-waves-container" viewBox="0 0 1000 250" preserveAspectRatio="none">
                 <path d="M100 250C400 190 390 80 550 0H880C650 145 440 250 100 250Z" fill="#dcf1f7" opacity="0.6"/>
                 <path d="M250 250C600 210 570 45 680 0H1000C780 135 590 245 250 250Z" fill="#edf7fa" opacity="0.85"/>
             </svg>
         @endif
+--}}
 
         <div class="portal-inner">
             <!-- Topbar -->

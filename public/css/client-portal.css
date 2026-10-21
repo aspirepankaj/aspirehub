@@ -10,8 +10,9 @@
   --portal-card: #ffffff;
   --portal-border: #eef2f6;
   --portal-text: #0f172a;
-  --portal-muted: #64748b;
+  --portal-muted: #7a7b7c;
   --portal-primary: #135266;
+  --white-color:#ffffff;
   --portal-primary-hover: #0e3f4e;
   --portal-primary-shadow: 0 4px 14px rgba(19, 82, 102, 0.22);
   --portal-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
@@ -62,20 +63,20 @@ body {
   min-height: 100vh;
   width: 100%;
   position: relative;
-  background-color: var(--portal-bg);
+  background-color: #e6f1fa;
 }
 
 /* When on Marketing Report: apply the exact soft-tint background ONLY to this view */
 body:has(.is-marketing-report),
 .portal-layout:has(.is-marketing-report) {
-  background-color: oklch(.947 .027 239) !important;
+  background-color:#e6f1fa !important;
 }
 .dark body:has(.is-marketing-report),
 .dark .portal-layout:has(.is-marketing-report) {
   background-color: oklch(.23 .029 230) !important;
 }
 .portal-main.is-marketing-report {
-  background-color: oklch(.947 .027 239) !important;
+  background-color:#e6f1fa !important;
 }
 .dark .portal-main.is-marketing-report {
   background-color: oklch(.23 .029 230) !important;
@@ -352,9 +353,9 @@ body:has(.is-marketing-report),
 .background-mark {
   position: absolute;
   right: -50px;
-  top: -60px;
-  width: 560px;
-  height: 560px;
+  top: -150px;
+  width: 800px;
+  height: 800px;
   color: var(--mark, oklch(.987 .008 230));
   z-index: 0;
   pointer-events: none;
@@ -411,7 +412,7 @@ body:has(.is-marketing-report),
   align-items: center;
   justify-content: space-between;
   height: 38px;
-  margin-bottom: 22px;
+  margin-bottom: 55px;
 }
 
 .portal-breadcrumbs {
@@ -471,10 +472,10 @@ body:has(.is-marketing-report),
 }
 
 .welcome-eyebrow {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
-  color: var(--portal-muted);
+  color: var(--portal-primary);
   text-transform: uppercase;
   margin: 0 0 5px 0;
   opacity: 0.8;
@@ -484,13 +485,13 @@ body:has(.is-marketing-report),
   font-size: 46px !important;
   line-height: 1.13 !important;
   font-weight: 750 !important;
-  color: var(--portal-text) !important;
+  color: var(--portal-primary) !important;
   margin: 0 0 7px 0 !important;
   font-family: var(--portal-font) !important;
 }
 
 .welcome-title span.brand-teal {
-  color: var(--portal-primary) !important;
+  color: #76b2bd !important;
 }
 
 .welcome-desc {
@@ -570,7 +571,7 @@ body:has(.is-marketing-report),
 
 .stat-box {
   background: var(--portal-card);
-  border: 1px solid var(--portal-border);
+  border: 1px solid #c8ccce;
   border-radius: 13px;
   padding: 16px 18px;
   box-shadow: var(--portal-card-shadow);
@@ -597,10 +598,10 @@ body:has(.is-marketing-report),
   flex-shrink: 0;
 }
 
-.stat-circle-icon.blue { background: var(--blue-soft); color: var(--blue-icon); }
-.stat-circle-icon.mint { background: var(--mint-soft); color: var(--mint-icon); }
-.stat-circle-icon.violet { background: var(--violet-soft); color: var(--violet-icon); }
-.stat-circle-icon.orange { background: var(--orange-soft); color: var(--orange-icon); }
+.stat-circle-icon.blue { background: #d0e7ec; color: var(--portal-primary); }
+.stat-circle-icon.mint { background: #d0e7ec; color: var(--portal-primary); }
+.stat-circle-icon.violet { background: #d0e7ec; color: var(--portal-primary); }
+.stat-circle-icon.orange { background: #d0e7ec; color: var(--portal-primary);; }
 
 .stat-circle-icon svg, .stat-circle-icon i {
   width: 25px;
@@ -615,9 +616,9 @@ body:has(.is-marketing-report),
 }
 
 .stat-title {
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  color: var(--portal-muted) !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: var(--portal-primary) !important;
   margin: 0 0 10px 0 !important;
   white-space: nowrap;
 }
@@ -626,7 +627,7 @@ body:has(.is-marketing-report),
   font-size: 34px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
-  color: var(--portal-text) !important;
+  color: #80b6c2 !important;
   margin: 0 0 7px 0 !important;
 }
 
@@ -641,12 +642,12 @@ body:has(.is-marketing-report),
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
-  color: var(--portal-muted);
+  color: #4e4e4e;
   opacity: 0.78;
 }
 
 .stat-foot-arrow {
-  color: var(--portal-muted);
+  color: var(--portal-primary);
 }
 
 /* ── Section: Analytics & Reporting ── */
@@ -661,7 +662,7 @@ body:has(.is-marketing-report),
   font-size: 25px !important;
   line-height: 1.15 !important;
   font-weight: 700 !important;
-  color: var(--portal-text) !important;
+  color: var(--portal-primary) !important;
   margin: 0 0 4px 0 !important;
 }
 
@@ -672,9 +673,9 @@ body:has(.is-marketing-report),
 }
 
 .section-link {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: #0284c7;
+  color: var(--portal-primary);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -694,8 +695,8 @@ body:has(.is-marketing-report),
 }
 
 .platform-card-box {
-  background: var(--portal-card);
-  border: 1px solid var(--portal-border);
+  background: var(--portal-primary);
+  border: 1px solid #bebebe;
   border-radius: 12px;
   padding: 17px 20px 32px;
   box-shadow: var(--portal-card-shadow);
@@ -710,10 +711,14 @@ body:has(.is-marketing-report),
 }
 
 .platform-card-box:hover {
+  background-color: #76b2bd;
   transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(19, 82, 102, 0.12);
 }
 
+.platform-card-box svg path {
+  fill: var(--white-color);
+}
 .platform-logo-wrap {
   height: 44px;
   display: flex;
@@ -722,15 +727,15 @@ body:has(.is-marketing-report),
 }
 
 .platform-card-title {
-  font-size: 14px !important;
+  font-size: 18px !important;
   font-weight: 700 !important;
-  color: var(--portal-text) !important;
+  color: var(--white-color) !important;
   margin: 0 0 7px 0 !important;
 }
 
 .platform-card-desc {
-  font-size: 12px !important;
-  color: var(--portal-muted) !important;
+  font-size: 14px !important;
+  color: #e5e9eb !important;
   margin: 0 !important;
 }
 
@@ -766,14 +771,13 @@ body:has(.is-marketing-report),
 
 /* ── Encouragement Banner ── */
 .encouragement-banner {
-  height: 110px;
-  border: 1px solid #cbe7f2;
+  border: 1px solid #d1d1d1;
   border-radius: 12px;
-  background: linear-gradient(105deg, #e0f2fe, #f8fafc 42%, #edf7fa);
+  background: #f9f9f9;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 19px 32px;
+  padding: 20px 32px;
   position: relative;
   overflow: hidden;
   margin-bottom: 24px;
@@ -790,20 +794,20 @@ body:has(.is-marketing-report),
 }
 
 .encouragement-eyebrow {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 1px;
-  color: #0284c7;
+  color: var(--portal-primary);
   text-transform: uppercase;
-  margin-bottom: 7px;
 }
 
 .encouragement-heading {
   font-size: 24px !important;
   font-weight: 700 !important;
-  color: var(--portal-text) !important;
+  color: var(--portal-primary) !important;
   margin: 0 0 6px 0 !important;
 }
+.encouragement-heading span { color: #76b2bd ;}
 
 .dark .encouragement-heading {
   color: #f8fafc !important;
@@ -821,10 +825,10 @@ body:has(.is-marketing-report),
 
 .mountains-svg {
   position: absolute;
-  right: 240px;
+  right: 30%;
   bottom: 0;
-  width: 365px;
-  height: 105px;
+  width: 600px;
+  height: 120px;
   pointer-events: none;
 }
 
@@ -891,7 +895,7 @@ body:has(.is-marketing-report),
 }
 
 .portal-footer-left strong {
-  color: var(--portal-text);
+  color: var(--portal-primary);
 }
 
 .portal-footer-divider {
