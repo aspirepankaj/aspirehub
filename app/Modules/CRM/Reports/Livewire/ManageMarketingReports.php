@@ -10,21 +10,31 @@ use App\Services\AiMarketingReportService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+use App\Traits\LoadsMarketingReports;
+
 #[\Livewire\Attributes\Title('Marketing Reports')]
 class ManageMarketingReports extends Component
 {
+    use LoadsMarketingReports;
+
     #[\Livewire\Attributes\Url]
     public $clientId = null;
     
     #[\Livewire\Attributes\Url]
     public $websiteId = null;
     
-    public $activeTab = null;
+    public $activeTab = 'overview';
 
-    public $dateFrom = '';
-    public $dateTo = '';
-    public $compareDateFrom = '';
-    public $compareDateTo = '';
+    // Overview data containers (protected to avoid bulky Livewire state)
+    protected array $ga4Data = [];
+    protected array $gscData = [];
+    protected array $youtubeData = [];
+    protected array $keywordData = [];
+    protected array $gtmData = [];
+    protected array $gbpData = [];
+    protected array $gadsData = [];
+    protected array $facebookData = [];
+    protected array $linkedinData = [];
 
     // AI Marketing Report State (hidden by default as requested, can be toggled without removing any code)
     public bool $showAiMarketingReport = false;
@@ -49,15 +59,11 @@ class ManageMarketingReports extends Component
             $this->compareDateTo = '';
         }
 
-        if ($this->websiteId && empty($this->activeTab)) {
-            $website = Website::find($this->websiteId);
-            if ($website) {
-                $validIntegrations = $this->getValidIntegrations($website);
-                $firstIntegration = $validIntegrations->first();
-                if ($firstIntegration) {
-                    $this->activeTab = $firstIntegration->integration_type;
-                }
-            }
+        $tab = request()->query('tab');
+        if ($tab && in_array($tab, ['overview', 'ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'linkedin', 'gtm'])) {
+            $this->activeTab = $tab;
+        } elseif ($this->websiteId && empty($this->activeTab)) {
+            $this->activeTab = 'overview';
         }
     }
 
@@ -156,7 +162,7 @@ class ManageMarketingReports extends Component
 
     public function updatedWebsiteId($value)
     {
-        $this->activeTab = null;
+        $this->activeTab = 'overview';
         
         if ($value) {
             $this->js("
@@ -168,15 +174,6 @@ class ManageMarketingReports extends Component
                 u.searchParams.delete('cto'); 
                 window.history.replaceState({}, '', u.toString());
             ");
-            
-            $website = Website::find($value);
-            if ($website) {
-                $validIntegrations = $this->getValidIntegrations($website);
-                $firstIntegration = $validIntegrations->first();
-                if ($firstIntegration) {
-                    $this->activeTab = $firstIntegration->integration_type;
-                }
-            }
         }
     }
 
@@ -507,8 +504,54 @@ class ManageMarketingReports extends Component
             $website = Website::find($this->websiteId);
             if ($website) {
                 $integrations = $this->getValidIntegrations($website);
-                if ($this->activeTab && !$integrations->contains('integration_type', $this->activeTab)) {
-                    $this->activeTab = $integrations->first()?->integration_type;
+                if ($this->activeTab !== 'overview' && $this->activeTab && !$integrations->contains('integration_type', $this->activeTab)) {
+                    $this->activeTab = 'overview';
+                }
+
+                // When activeTab is 'overview', load overview summary data for connected integrations
+                if ($this->activeTab === 'overview') {
+                    $client = Client::with('user')->find($this->clientId);
+                    if ($client) {
+                        $userName = Str::slug(Str::lower($client->user->name ?? 'client'));
+                        $emailParts = explode('@', $client->user->email ?? '');
+                        $emailPrefix = Str::slug(Str::lower($emailParts[0] ?? ''));
+                        $clientFolder = "{$userName}-{$emailPrefix}";
+
+                        $websiteFolder = Str::slug(Str::lower($website->site_name ?? ''));
+                        if (empty($websiteFolder)) {
+                            $websiteFolder = 'site-' . $website->id;
+                        }
+
+                        $connectedTypes = $integrations->pluck('integration_type')->toArray();
+
+                        if (in_array('ga4', $connectedTypes)) {
+                            $this->ga4Data = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'ga4', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('gsc', $connectedTypes)) {
+                            $this->gscData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gsc', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('youtube', $connectedTypes)) {
+                            $this->youtubeData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'youtube', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('keyword', $connectedTypes)) {
+                            $this->keywordData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'keyword', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('gbp', $connectedTypes)) {
+                            $this->gbpData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gbp', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('gads', $connectedTypes)) {
+                            $this->gadsData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gads', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('facebook', $connectedTypes)) {
+                            $this->facebookData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('linkedin', $connectedTypes)) {
+                            $this->linkedinData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'linkedin', $this->dateFrom, $this->dateTo);
+                        }
+                        if (in_array('gtm', $connectedTypes)) {
+                            $this->gtmData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gtm', $this->dateFrom, $this->dateTo);
+                        }
+                    }
                 }
             }
         }
@@ -523,6 +566,15 @@ class ManageMarketingReports extends Component
             'activeTab'            => $this->activeTab,
             'dateFrom'             => $this->dateFrom,
             'dateTo'               => $this->dateTo,
+            'ga4Data'              => $this->ga4Data,
+            'gscData'              => $this->gscData,
+            'youtubeData'          => $this->youtubeData,
+            'keywordData'          => $this->keywordData,
+            'gtmData'              => $this->gtmData,
+            'gbpData'              => $this->gbpData,
+            'gadsData'             => $this->gadsData,
+            'facebookData'         => $this->facebookData,
+            'linkedinData'         => $this->linkedinData,
             'showAiMarketingReport'=> $this->showAiMarketingReport,
             'aiReport'             => $this->aiReport,
             'aiGeneratedHtml'      => $this->aiGeneratedHtml,

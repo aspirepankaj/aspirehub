@@ -104,6 +104,22 @@
                 ];
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                @if($clientDetails->user_id && $clientDetails->user_id !== auth()->id())
+                    <button type="button" 
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs rounded-xl shadow-sm transition active:scale-95"
+                            title="Switch to this client account"
+                            @click="$dispatch('open-switch-account-modal', {
+                                name: '{{ addslashes($clientDetails->user->name ?? 'Client') }}',
+                                email: '{{ addslashes($clientDetails->user->email ?? '') }}',
+                                company: '{{ addslashes($clientDetails->company_name ?? '') }}',
+                                initials: '{{ $clientDetails->getInitials() }}',
+                                role: 'client',
+                                url: '{{ route('impersonate.start', $clientDetails->user_id) }}'
+                            })">
+                        <img src="{{ asset('aspire-hub-staff-switch.svg') }}" class="w-4 h-4 shrink-0" alt="Switch Account" />
+                        <span>Switch Account</span>
+                    </button>
+                @endif
                 @if(!empty($detailClickUpFolderIds))
                     <button type="button"
                             wire:click="disconnectClickUpMapping({{ $clientDetails->id }})"
