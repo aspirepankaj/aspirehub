@@ -46,6 +46,23 @@
         this.$watch('tempStart', value => this.calculateCompareDates());
         this.$watch('tempEnd', value => this.calculateCompareDates());
         this.$watch('comparePreset', value => this.calculateCompareDates());
+        this.$watch('dateFrom', value => {
+            if (value) {
+                this.tempStart = value;
+                this.syncPresetFromDates();
+            }
+        });
+        this.$watch('dateTo', value => {
+            if (value) {
+                this.tempEnd = value;
+                this.syncPresetFromDates();
+            }
+        });
+        this.$watch('datePresetLive', value => {
+            if (value) {
+                this.selectedPreset = value;
+            }
+        });
         this.$watch('includeToday', value => {
             if(value && this.tempEnd) {
                 const today = new Date();

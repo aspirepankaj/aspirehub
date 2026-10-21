@@ -32,7 +32,7 @@ class AdminClientReport extends Component
     public string $websiteName = '';
     public bool $hideHeader = false;
 
-    public function mount(int $id, string $integration, $websiteId = null, $hideHeader = false): void
+    public function mount(int $id, string $integration, $websiteId = null, $hideHeader = false, ?string $dateFrom = null, ?string $dateTo = null): void
     {
         $this->clientId = $id;
         $this->integration = $integration;
@@ -40,9 +40,21 @@ class AdminClientReport extends Component
         $this->websiteId = $websiteId ?? (int) request('website', 0);
         $this->hideHeader = $hideHeader;
 
-        // Dates are handled by #[Url] now, but we can keep defaults if empty
-        if (empty($this->dateFrom)) $this->dateFrom = request('from', Carbon::now()->subDays(28)->format('Y-m-d'));
-        if (empty($this->dateTo)) $this->dateTo = request('to', Carbon::now()->subDays(1)->format('Y-m-d'));
+        // Prioritize explicit date parameters passed from parent, then request, then session, then default
+        if (!empty($dateFrom)) {
+            $this->dateFrom = $dateFrom;
+            session(['marketing_date_from' => $dateFrom]);
+        } elseif (empty($this->dateFrom)) {
+            $this->dateFrom = request('from', session('marketing_date_from', Carbon::now()->subDays(28)->format('Y-m-d')));
+        }
+
+        if (!empty($dateTo)) {
+            $this->dateTo = $dateTo;
+            session(['marketing_date_to' => $dateTo]);
+        } elseif (empty($this->dateTo)) {
+            $this->dateTo = request('to', session('marketing_date_to', Carbon::now()->subDays(1)->format('Y-m-d')));
+        }
+
         if (empty($this->compareDateFrom)) $this->compareDateFrom = request('cfrom', '');
         if (empty($this->compareDateTo)) $this->compareDateTo = request('cto', '');
         if (empty($this->compareFormat)) $this->compareFormat = request('format', 'percentage');
@@ -52,11 +64,20 @@ class AdminClientReport extends Component
         $this->loadReport();
     }
 
-    public function updatedDateFrom(): void { $this->loadReport(); }
-    public function updatedDateTo(): void { $this->loadReport(); }
+    public function updatedDateFrom(): void { $this->initDateRange(); $this->loadReport(); }
+    public function updatedDateTo(): void { $this->initDateRange(); $this->loadReport(); }
     public function updatedCompareDateFrom(): void { $this->loadReport(); }
     public function updatedCompareDateTo(): void { $this->loadReport(); }
     public function updatedCompareFormat(): void { } // re-render only
+
+    #[\Livewire\Attributes\On('update-report-dates')]
+    public function onUpdateReportDates(string $dateFrom, string $dateTo): void
+    {
+        $this->dateFrom = $dateFrom;
+        $this->dateTo = $dateTo;
+        $this->initDateRange();
+        $this->loadReport();
+    }
 
     public function loadReport(): void
     {
