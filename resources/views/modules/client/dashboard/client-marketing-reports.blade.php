@@ -131,7 +131,7 @@
         .client-integration-theme h4,
         .client-integration-theme h5 {
             font-family: 'Urbanist', system-ui, -apple-system, sans-serif !important;
-            color: #0c3b4a !important;
+            color: #135266 !important;
         }
         .dark .client-integration-theme h1,
         .dark .client-integration-theme h2,
@@ -141,7 +141,7 @@
             color: #ffffff !important;
         }
         .client-integration-theme .bg-white {
-            background-color: #ffffff !important;
+            /* background-color: #ffffff !important; */
             border-color: #d4e2e7 !important;
         }
         .dark .client-integration-theme .bg-white {
@@ -1958,7 +1958,8 @@
                         'compareDateFrom' => $compareDateFrom,
                         'compareDateTo' => $compareDateTo,
                         'compareFormat' => $compareFormat ?? 'percentage',
-                        'compareStacked' => true
+                        'compareStacked' => true,
+                        'isClientPortal' => true
                     ])
                 </div>
             </div>

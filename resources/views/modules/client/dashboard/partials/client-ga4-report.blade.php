@@ -529,7 +529,7 @@
                     </div>
                 </section>
 
-                <!-- Top Countries -->
+                {{-- Top Countries
                 <section class="panel countries-panel">
                     <div class="panel-heading">
                         <h2>
@@ -576,6 +576,7 @@
                         <span x-text="showAllCountries ? 'View Less' : 'View Full Report ›'">View Full Report ›</span>
                     </button>
                 </section>
+                --}}
             </div>
 
             <!-- 4. Top Events Grid -->

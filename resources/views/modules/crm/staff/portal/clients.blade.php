@@ -1189,7 +1189,7 @@
                                                 </span>
                                             </div>
                                         @endif
-<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6">
                                         <div class="p-4 bg-indigo-50/20 dark:bg-indigo-950/10 border border-indigo-100/30 dark:border-indigo-900/20 rounded-2xl">
                                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Active Users</span>
                                             <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">

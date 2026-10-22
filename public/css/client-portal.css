@@ -1488,12 +1488,16 @@ body:has(.is-marketing-report),
 
 .client-marketing-view .triple-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   margin-bottom: 6px;
 }
+.client-marketing-view .triple-grid:has(> :nth-child(3)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 @media (max-width: 1050px) {
-  .client-marketing-view .triple-grid {
+  .client-marketing-view .triple-grid,
+  .client-marketing-view .triple-grid:has(> :nth-child(3)) {
     grid-template-columns: 1fr;
   }
 }
@@ -1814,7 +1818,7 @@ body:has(.is-marketing-report),
   padding: 14px 16px 12px !important;
   position: relative !important;
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: row;
   align-items: start !important;
   gap: 13px !important;
   min-height: 85px !important;
@@ -1837,8 +1841,8 @@ body:has(.is-marketing-report),
 /* Stat card icon badge matching GA4 stat-icon */
 .client-integration-theme .grid > div[class*="rounded-2xl"] > span:first-child[class*="rounded-full"],
 .client-integration-theme .grid > div[class*="rounded-xl"] > span:first-child[class*="rounded-full"] {
-  width: 46px !important;
-  height: 46px !important;
+  width: 56px !important;
+  height: 56px !important;
   border-radius: 50% !important;
   background-color: #d0e7ec !important;
   display: flex !important;
@@ -1850,8 +1854,8 @@ body:has(.is-marketing-report),
 
 .client-integration-theme .grid > div[class*="rounded-2xl"] > span:first-child[class*="rounded-full"] svg,
 .client-integration-theme .grid > div[class*="rounded-xl"] > span:first-child[class*="rounded-full"] svg {
-  width: 22px !important;
-  height: 22px !important;
+  width: 28px !important;
+  height: 28px !important;
   stroke: #135266 !important;
   stroke-width: 1.8 !important;
   fill: none !important;
@@ -1881,7 +1885,7 @@ body:has(.is-marketing-report),
   line-height: 1.1 !important;
   font-weight: 900 !important;
   letter-spacing: -0.02em !important;
-  color: var(--foreground) !important;
+  color: var(--portal-primary) !important;
   display: block !important;
 }
 
@@ -1899,7 +1903,7 @@ body:has(.is-marketing-report),
 .client-integration-theme h5 {
   color: var(--foreground) !important;
   font-weight: 800 !important;
-  font-size: 18px !important;
+  font-size: 16px !important;
 }
 
 /* Tables across integrations */
@@ -2018,7 +2022,7 @@ body:has(.is-marketing-report),
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b > div[style*="color: white;"] {
   background-color: var(--card) !important;
   color: var(--foreground) !important;
-  border-color: #0b495b !important;
+  border-color: #bab6b7 !important;
   border-width: 1px !important;
   box-shadow: 0 2px 8px rgba(11, 73, 91, 0.08) !important;
 }

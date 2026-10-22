@@ -238,7 +238,7 @@
                 {{-- Daily Traffic Chart --}}
                 <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        <div class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-1">
                             <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Daily Traffic
                         </div>
                     </div>
@@ -566,7 +566,7 @@
                 <div class="mt-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center gap-2">
                         <div class="w-1.5 h-1.5 rounded-full bg-blue-600"></div> 
-                        <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Top Posts (Organic)</h4>
+                        <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest" style="color: #135266 !important;">Top Posts (Organic)</h4>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm whitespace-nowrap">
@@ -791,7 +791,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
                         <div>
-                            <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                            <div class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-4">
                                 <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Followers By Job Title
                             </div>
                             <div class="overflow-x-auto">
@@ -924,7 +924,7 @@
                 <!-- LinkedIn Post Performance Summary KPI Cards -->
                 <div class="mt-4 mb-6">
                     <div class="flex items-center gap-2 mb-4">
-                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                        <span class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-2">
                             <span class="w-2 h-2 rounded-full bg-sky-500"></span> Post Engagement Overview
                         </span>
                     </div>
@@ -1009,7 +1009,7 @@
                     <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">Posts table</h4>
+                            <h4 class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight flex">Posts table</h4>
                         </div>
                         <span class="text-[11px] font-semibold text-slate-400">{{ count($reportDataScope['top_posts'] ?? []) }} Posts</span>
                     </div>
@@ -1694,8 +1694,48 @@
             </div>
         </div>
 
+        @php
+            $isClientPortalScope = !empty($isClientPortal) || request()->is('client/*') || request()->routeIs('client.*');
+
+            $eventsData = $reportDataScope['events_report'] ?? [];
+            if (isset($eventsData[0]) && isset($eventsData[0]['event_name'])) {
+                $newFormat = [];
+                foreach ($eventsData as $item) {
+                    if (!isset($newFormat[$item['event_name']])) $newFormat[$item['event_name']] = [];
+                    $newFormat[$item['event_name']][] = [
+                        'channel' => $item['channel'] ?? 'Unknown',
+                        'count' => $item['count'] ?? 0
+                    ];
+                }
+                $eventsData = $newFormat;
+            }
+            if (empty($eventsData)) {
+                $eventsData = [
+                    'page_view' => [['channel'=>'Direct','count'=>1310],['channel'=>'Organic Search','count'=>933],['channel'=>'Referral','count'=>327],['channel'=>'Unassigned','count'=>107],['channel'=>'Organic Social','count'=>33]],
+                    'session_start' => [['channel'=>'Direct','count'=>780],['channel'=>'Organic Search','count'=>539],['channel'=>'Referral','count'=>144],['channel'=>'Unassigned','count'=>33],['channel'=>'Organic Social','count'=>23]],
+                    'user_engagement' => [['channel'=>'Organic Search','count'=>766],['channel'=>'Direct','count'=>641],['channel'=>'Referral','count'=>257],['channel'=>'Unassigned','count'=>74],['channel'=>'Organic Social','count'=>24]],
+                    'first_visit' => [['channel'=>'Direct','count'=>726],['channel'=>'Organic Search','count'=>369],['channel'=>'Referral','count'=>67],['channel'=>'Unassigned','count'=>25],['channel'=>'Organic Social','count'=>21]],
+                ];
+            }
+            
+            $eventColorsLists = [
+                ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                ['#f59e0b', '#8b5cf6', '#3b82f6', '#10b981', '#ec4899'],
+                ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ec4899'],
+                ['#10b981', '#f59e0b', '#8b5cf6', '#3b82f6', '#ec4899'],
+                ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'],
+                ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ec4899'],
+                ['#10b981', '#8b5cf6', '#3b82f6', '#f59e0b', '#ec4899'],
+                ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899']
+            ];
+        @endphp
+        @if($isClientPortalScope)
+        <!-- 3. Top Landing Pages (Full Width on Client Portal) -->
+        <div class="w-full mb-5">
+        @else
         <!-- 3. Tables Row (Landing Pages, Device Breakdown, Top Countries) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+        @endif
             
             <!-- Top Landing Pages -->
             <div x-data="{ showAll: false }" class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
@@ -1724,7 +1764,7 @@
                                 @endphp
                                 <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0" x-show="showAll || <?php echo $i; ?> < 5" x-transition>
                                     <td class="py-2.5 text-slate-400 font-medium">{{ $i + 1 }}</td>
-                                    <td class="py-2.5 font-medium truncate max-w-[140px]" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                    <td class="py-2.5 font-medium truncate max-w-[140px] md:max-w-none" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
                                     <td class="py-2.5 text-right font-semibold text-slate-800 dark:text-slate-100">{{ number_format($pageUsers) }}</td>
                                     <td class="py-2.5 text-right font-semibold text-slate-800 dark:text-slate-100">{{ number_format($pageSessions) }}</td>
                                     <td class="py-2.5 text-right">{{ $engRate }}</td>
@@ -1744,6 +1784,21 @@
                 </div>
             </div>
 
+            @if($isClientPortalScope)
+            </div>{{-- Close Top Landing Pages full width container --}}
+
+            <style>
+                @media (min-width: 1024px) {
+                    .client-ga4-split-grid {
+                        display: grid !important;
+                        grid-template-columns: 30% calc(70% - 1.25rem) !important;
+                    }
+                }
+            </style>
+            <!-- 4. Device Breakdown (30%) & Top Events (70%) in One Grid (Client Portal) -->
+            <div class="client-ga4-split-grid grid grid-cols-1 lg:grid-cols-10 gap-5 mb-5">
+            @endif
+
             <!-- Device Breakdown -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col hover:border-[#b0cbd6] transition-all">
                 <div class="flex items-center gap-2 mb-4">
@@ -1754,7 +1809,7 @@
                     </span>
                     <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Device Breakdown</h4>
                 </div>
-                <div class="space-y-4 flex-1">
+                <div class="space-y-4 flex-1 flex flex-col justify-around">
                     @php
                         // Standardize device array to match screenshot order (Desktop, Mobile, Tablet, Smart TV)
                         $mappedDevices = ['Desktop' => 0, 'Mobile' => 0, 'Tablet' => 0, 'Smart tv' => 0];
@@ -1771,7 +1826,7 @@
                         $deviceOrder = ['Desktop', 'Mobile', 'Tablet', 'Smart tv'];
                         $deviceColors = ['bg-[#2563eb]', 'bg-[#10b981]', 'bg-[#8b5cf6]', 'bg-[#94a3b8]'];
                         $deviceIcons = [
-                            'Desktop' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />',
+                            'Desktop' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />',
                             'Mobile' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />',
                             'Tablet' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />',
                             'Smart tv' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'
@@ -1803,6 +1858,102 @@
                 </div>
             </div>
 
+            @if($isClientPortalScope)
+            <!-- Top Events (Client Portal Grid Item) -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">                      
+                        <svg class="w-6 h-6" fill="#135266" version="1.1" id="fi_917647_cp" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                            <g>
+                                <g>
+                                    <path d="M71.002,256.001c0-77.879,47.891-143.606,114.279-171.048h0.01l21.3-38.26C112.578,68.687,41.002,153.352,41.002,256.001
+                                        c0,96.593,63.887,179.038,152.718,205.828l2.26-30.78C122.13,405.763,71.002,335.923,71.002,256.001z"></path>
+                                </g>
+                            </g>
+                            <g>
+                                <g>
+                                    <path d="M318.279,50.173l-2.26,30.78c73.85,25.286,124.979,95.125,124.979,175.048c0,77.803-47.835,143.583-114.279,171.048h-0.01
+                                        l-21.3,38.26c94.014-21.994,165.588-106.659,165.588-209.308C470.997,159.41,407.111,76.962,318.279,50.173z"></path>
+                                </g>
+                            </g>
+                            <g>
+                                <g>
+                                    <path d="M398.93,220.509c-2.694-4.584-7.614-7.399-12.932-7.399H276.241l14.459-197.009c0.515-7.019-3.918-13.452-10.66-15.469
+                                        c-6.742-2.021-13.98,0.923-17.404,7.072L112.897,276.592c-2.587,4.646-2.521,10.313,0.173,14.898
+                                        c2.694,4.584,7.615,7.399,12.932,7.399h109.758L221.3,495.899c-0.515,7.019,3.918,13.451,10.661,15.468
+                                        c6.797,2.036,14.01-0.976,17.404-7.072l149.738-268.887C401.69,230.762,401.624,225.094,398.93,220.509z"></path>
+                                </g>
+                            </g>
+                        </svg>
+                    </span>
+                    <h4 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 tracking-tight m-0">Top Events</h4>
+                </div>
+                
+                <div class="events-breakdown-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 flex-1">
+                    @php $eventIter = 0; @endphp
+                    @foreach($eventsData as $eventName => $channels)
+                        @php
+                            $totalEvents = array_sum(array_column($channels, 'count'));
+                            usort($channels, function($a, $b) { return $b['count'] <=> $a['count']; });
+                            $colorPalette = $eventColorsLists[$eventIter % count($eventColorsLists)];
+                            $eventIter++;
+                        @endphp
+                        <div class="event-breakdown-item bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3 shadow-xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between">
+                            <!-- Top: Event Name -->
+                            <div class="font-bold text-xs text-slate-900 dark:text-slate-100 mb-2 truncate w-full" title="{{ $eventName }}">
+                                {{ $eventName }}
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2 w-full">
+                                <!-- Donut Chart -->
+                                <div class="relative shrink-0 flex items-center justify-center w-[100px] h-[100px]">
+                                    <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
+                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" stroke-width="3.5"></circle>
+                                        @php
+                                            $cumulativePercent = 0;
+                                            $cIdx = 0;
+                                        @endphp
+                                        @foreach($channels as $channel)
+                                            @if($totalEvents > 0)
+                                                @php
+                                                    $percent = ($channel['count'] / $totalEvents) * 100;
+                                                    $dashArray = $percent . " " . (100 - $percent);
+                                                    $dashOffset = 100 - $cumulativePercent;
+                                                    $cumulativePercent += $percent;
+                                                    $c = $colorPalette[$cIdx % count($colorPalette)];
+                                                @endphp
+                                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="{{ $c }}" stroke-width="3.5" stroke-dasharray="{{ $dashArray }}" stroke-dashoffset="{{ $dashOffset }}"></circle>
+                                                @php $cIdx++; @endphp
+                                            @endif
+                                        @endforeach
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                                        <span class="text-[13px] font-black text-slate-800 dark:text-white leading-none">{{ number_format($totalEvents) }}</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right: Channel Breakdown List -->
+                                <div class="flex-1 space-y-1 overflow-hidden min-w-0 pl-1">
+                                    @php $cIdx = 0; @endphp
+                                    @foreach(array_slice($channels, 0, 5) as $channel)
+                                        @php $c = $colorPalette[$cIdx % count($colorPalette)]; @endphp
+                                        <div class="flex items-center justify-between text-[10px] leading-tight">
+                                            <div class="flex items-center gap-1 overflow-hidden min-w-0 pr-1">
+                                                <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: {{ $c }}"></span>
+                                                <span class="text-slate-600 dark:text-slate-300 truncate text-[10px]" title="{{ $channel['channel'] }}">{{ $channel['channel'] }}</span>
+                                            </div>
+                                            <span class="font-bold text-slate-800 dark:text-slate-100 shrink-0 text-right text-[10px]">{{ number_format($channel['count']) }}</span>
+                                        </div>
+                                        @php $cIdx++; @endphp
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            </div>{{-- Close Client Portal 2-Column Grid (Device Breakdown & Top Events) --}}
+            @else
             <!-- Top Countries -->
             <div x-data="{ showAll: false }" class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-5 shadow-xs overflow-hidden flex flex-col hover:border-[#b0cbd6] transition-all">
                 <div class="flex items-center gap-2 mb-4">
@@ -1872,8 +2023,10 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </div>{{-- Close Admin CRM 3-Column Grid --}}
+        @endif
 
+        @if(!$isClientPortalScope)
         <!-- 4. Bottom Row: Events Breakdown -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs overflow-hidden hover:border-[#b0cbd6] transition-all">
             <div class="flex items-center justify-between mb-5">
@@ -2034,6 +2187,7 @@
                 @endforeach
             </div>
         </div>
+        @endif
 
     </div>
 @endforeach
@@ -2315,7 +2469,7 @@
 
 
                 <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
-                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                    <div class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-4">
                         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Ad Campaigns
                     </div>
                     <div class="overflow-x-auto">
@@ -2355,7 +2509,7 @@
                         @if(count($keywords) > 0)
                             <div class="bg-white border border-slate-200 rounded-lg shadow-sm h-full overflow-hidden font-sans">
                                 <div class="px-5 py-4 border-b border-slate-200">
-                                    <h3 class="text-[15px] font-normal text-[#202124]">Summary of how your keywords are performing</h3>
+                                    <h3 class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight">Summary of how your keywords are performing</h3>
                                 </div>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left border-collapse">
@@ -2390,7 +2544,7 @@
                     
                     <!-- Ad performance across devices -->
                     <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-[2rem] shadow-sm hover:shadow-md transition-all duration-300">
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                        <div class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Devices
                         </div>
                         
@@ -2628,7 +2782,7 @@
                 {{-- Daily Views Chart --}}
                 <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        <div class="text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Daily Views
                         </div>
                     </div>
@@ -2766,7 +2920,7 @@
                 @endif
 
                 {{-- Summary Cards --}}
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6">
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>

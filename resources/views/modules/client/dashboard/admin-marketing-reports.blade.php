@@ -131,7 +131,7 @@
         .client-integration-theme h4,
         .client-integration-theme h5 {
             font-family: 'Urbanist', system-ui, -apple-system, sans-serif !important;
-            color: #0c3b4a !important;
+            color: #135266 !important;
         }
         .dark .client-integration-theme h1,
         .dark .client-integration-theme h2,
@@ -1598,7 +1598,7 @@
                     </div>
                 @else
                     <div wire:key="integration-view-single-{{ $activeReportIntegrationId }}" class="client-integration-theme">
-                        @include('modules.crm.clients.client-report', ['hideHeader' => true, 'hideToolbar' => true])
+                        @include('modules.crm.clients.client-report', ['hideHeader' => true, 'hideToolbar' => true, 'isClientPortal' => true])
                     </div>
                 @endif
             @endif
