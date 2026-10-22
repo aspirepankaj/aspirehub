@@ -27,7 +27,7 @@
                 zoom: 0.65;
             }
             body {
-                padding: 20px 0;
+                padding: 0px 0;
                 display: flex;
                 flex-direction: column;
                 background-color: #f1f5f9;
@@ -407,6 +407,23 @@
         return '<span class="stat-delta-neutral">0%</span>';
     };
 
+    // Helper function for unified circle + vector badge in SVG (prevents any DomPDF alignment bugs)
+    $renderKpiBadge = function(int $size, string $bg, string $border, int $iconSize, int $vbSize, string $innerSvg) {
+        $r = ($size / 2) - 0.5;
+        $cx = $size / 2;
+        $cy = $size / 2;
+        $scale = round($iconSize / $vbSize, 6);
+        $offset = round(($size - $iconSize) / 2, 2);
+        $strokeAttr = $border ? 'stroke="' . $border . '" stroke-width="1"' : '';
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $size . '" height="' . $size . '" viewBox="0 0 ' . $size . ' ' . $size . '">
+            <circle cx="' . $cx . '" cy="' . $cy . '" r="' . $r . '" fill="' . $bg . '" ' . $strokeAttr . '/>
+            <g transform="translate(' . $offset . ', ' . $offset . ') scale(' . $scale . ')">
+                ' . $innerSvg . '
+            </g>
+        </svg>';
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    };
+
     // Dynamically count total report pages based ONLY on connected integrations
     $dynamicCount = !empty($dynamicIntegrations) ? count($dynamicIntegrations) : 0;
     $totalPages = ($hasGa4 ? 1 : 0) + ($hasGsc ? 1 : 0) + ($hasKeyword ? 1 : 0) + ($hasGbp ? 1 : 0) + ($hasGads ? 1 : 0) + ($hasFacebook ? 1 : 0) + ($hasLinkedin ? 1 : 0) + ($hasYoutube ? 1 : 0) + $dynamicCount;
@@ -548,6 +565,13 @@
 
         <div class="content-body">
             {{-- 1. Modern 5 Top Cards Bar (Matching Single Dashboard) --}}
+            @php
+                $ga4BadgeTotalUsers = $renderKpiBadge(48, '#d0e7ec', '#cce5ec', 24, 32, '<path fill="#135266" d="m15.867 14.881a4.941 4.941 0 1 0 -4.941-4.94 4.946 4.946 0 0 0 4.941 4.94zm0-7.881a2.941 2.941 0 1 1 -2.941 2.941 2.945 2.945 0 0 1 2.941-2.941z"></path><path fill="#135266" d="m6.533 17.785a3.8 3.8 0 1 0 -3.8-3.8 3.8 3.8 0 0 0 3.8 3.8zm0-5.6a1.8 1.8 0 1 1 -1.8 1.8 1.8 1.8 0 0 1 1.8-1.8z"></path><path fill="#135266" d="m25.2 17.785a3.8 3.8 0 1 0 -3.8-3.8 3.8 3.8 0 0 0 3.8 3.8zm0-5.6a1.8 1.8 0 1 1 -1.8 1.8 1.8 1.8 0 0 1 1.8-1.8z"></path><path fill="#135266" d="m25.333 19.791a5.269 5.269 0 0 0 -2.506.653 8.237 8.237 0 0 0 -6.827-3.837 8.237 8.237 0 0 0 -6.827 3.837 5.269 5.269 0 0 0 -2.506-.653 5.963 5.963 0 0 0 -5.667 6.209 1 1 0 0 0 2 0 3.971 3.971 0 0 1 3.667-4.209 3.272 3.272 0 0 1 1.577.419 10.085 10.085 0 0 0 -.711 3.732 1 1 0 0 0 2 0c0-4.045 2.9-7.335 6.467-7.335s6.467 3.29 6.467 7.335a1 1 0 0 0 2 0 10.085 10.085 0 0 0 -.711-3.732 3.272 3.272 0 0 1 1.577-.419 3.971 3.971 0 0 1 3.667 4.209 1 1 0 0 0 2 0 5.963 5.963 0 0 0 -5.667-6.209z"></path>');
+                $ga4BadgeNewUsers = $renderKpiBadge(48, '#d0e7ec', '#cce5ec', 22, 24, '<path fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4" fill="none" stroke="#135266" stroke-width="2"/><line x1="20" y1="8" x2="20" y2="14" stroke="#135266" stroke-width="2" stroke-linecap="round"/><line x1="23" y1="11" x2="17" y2="11" stroke="#135266" stroke-width="2" stroke-linecap="round"/>');
+                $ga4BadgeReturningUsers = $renderKpiBadge(48, '#d0e7ec', '#cce5ec', 22, 24, '<path fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#135266" stroke-width="2"/><path fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>');
+                $ga4BadgeClock = $renderKpiBadge(48, '#d0e7ec', '#cce5ec', 22, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#135266" stroke-width="2"/><polyline points="12 6 12 12 16 14" fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>');
+                $ga4BadgeEvents = $renderKpiBadge(48, '#d0e7ec', '#cce5ec', 24, 447, '<path fill="#135266" d="M223.5,80c22.056,0,40-17.944,40-40s-17.944-40-40-40c-22.056,0-40,17.944-40,40S201.444,80,223.5,80z M223.5,20 c11.028,0,20,8.972,20,20s-8.972,20-20,20c-11.028,0-20-8.972-20-20S212.472,20,223.5,20z"></path><path fill="#135266" d="M163.5,170c5.523,0,10-4.478,10-10c0-27.57,22.43-50,50-50s50,22.43,50,50c0,5.522,4.478,10,10,10s10-4.478,10-10 c0-38.598-31.402-70-70-70c-38.598,0-70,31.402-70,70C153.5,165.522,157.977,170,163.5,170z"></path><path fill="#135266" d="M308.971,378.429L322.758,200H353.5c5.522,0,10-4.478,10-10s-4.478-10-10-10h-120v-39.76c0-5.522-4.478-10-10-10 c-5.523,0-10,4.478-10,10V180h-120c-5.523,0-10,4.478-10,10s4.477,10,10,10h30.743l13.787,178.429 c0.405,5.244,4.786,9.23,9.959,9.23c0.258,0,0.52-0.011,0.781-0.03c5.506-0.426,9.625-5.234,9.2-10.741L144.302,200h158.395 l-13.668,176.888c-0.425,5.507,3.694,10.315,9.2,10.741c0.263,0.02,0.522,0.03,0.781,0.03 C304.184,387.659,308.565,383.673,308.971,378.429z"></path>');
+            @endphp
             <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 16px;">
                 <tr>
                     {{-- Total Users --}}
@@ -556,19 +580,12 @@
                             <table class="modern-kpi-card-table">
                                 <tr>
                                     <td style="width: 52px; vertical-align: top;">
-                                        <div class="modern-kpi-icon-wrap">
-                                            <svg width="24" height="24" viewBox="0 0 32 32" fill="#135266" style="vertical-align: middle; display: inline-block;">
-                                                <path d="m15.867 14.881a4.941 4.941 0 1 0 -4.941-4.94 4.946 4.946 0 0 0 4.941 4.94zm0-7.881a2.941 2.941 0 1 1 -2.941 2.941 2.945 2.945 0 0 1 2.941-2.941z"></path>
-                                                <path d="m6.533 17.785a3.8 3.8 0 1 0 -3.8-3.8 3.8 3.8 0 0 0 3.8 3.8zm0-5.6a1.8 1.8 0 1 1 -1.8 1.8 1.8 1.8 0 0 1 1.8-1.8z"></path>
-                                                <path d="m25.2 17.785a3.8 3.8 0 1 0 -3.8-3.8 3.8 3.8 0 0 0 3.8 3.8zm0-5.6a1.8 1.8 0 1 1 -1.8 1.8 1.8 1.8 0 0 1 1.8-1.8z"></path>
-                                                <path d="m25.333 19.791a5.269 5.269 0 0 0 -2.506.653 8.237 8.237 0 0 0 -6.827-3.837 8.237 8.237 0 0 0 -6.827 3.837 5.269 5.269 0 0 0 -2.506-.653 5.963 5.963 0 0 0 -5.667 6.209 1 1 0 0 0 2 0 3.971 3.971 0 0 1 3.667-4.209 3.272 3.272 0 0 1 1.577.419 10.085 10.085 0 0 0 -.711 3.732 1 1 0 0 0 2 0c0-4.045 2.9-7.335 6.467-7.335s6.467 3.29 6.467 7.335a1 1 0 0 0 2 0 10.085 10.085 0 0 0 -.711-3.732 3.272 3.272 0 0 1 1.577-.419 3.971 3.971 0 0 1 3.667 4.209 1 1 0 0 0 2 0 5.963 5.963 0 0 0 -5.667-6.209z"></path>
-                                            </svg>
-                                        </div>
+                                        <img src="{{ $ga4BadgeTotalUsers }}" width="48" height="48" style="display: block;" alt="Total Users" />
                                     </td>
-                                    <td style="vertical-align: top;">
+                                    <td style="vertical-align: top; padding-left: 8px;">
                                         <div class="modern-kpi-title">Total Users</div>
                                         <div class="modern-kpi-val">{{ number_format($activeUsers) }}</div>
-                                        <div class="modern-kpi-delta {{ $deltaUsers['trend'] }}">{{ $deltaUsers['trend'] === 'up' ? '&#8593;' : '&#8595;' }} {{ $deltaUsers['val'] }}</div>
+                                        <div class="modern-kpi-delta {{ $deltaUsers['trend'] }}">{!! $deltaUsers['trend'] === 'up' ? '&#8593;' : '&#8595;' !!} {{ $deltaUsers['val'] }}</div>
                                         <div class="modern-kpi-sub">vs. previous {{ $daysDiff }} days</div>
                                     </td>
                                 </tr>
@@ -582,19 +599,12 @@
                             <table class="modern-kpi-card-table">
                                 <tr>
                                     <td style="width: 52px; vertical-align: top;">
-                                        <div class="modern-kpi-icon-wrap">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; display: inline-block;">
-                                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                                <circle cx="8.5" cy="7" r="4"></circle>
-                                                <line x1="20" y1="8" x2="20" y2="14"></line>
-                                                <line x1="23" y1="11" x2="17" y2="11"></line>
-                                            </svg>
-                                        </div>
+                                        <img src="{{ $ga4BadgeNewUsers }}" width="48" height="48" style="display: block;" alt="New Users" />
                                     </td>
-                                    <td style="vertical-align: top;">
+                                    <td style="vertical-align: top; padding-left: 8px;">
                                         <div class="modern-kpi-title">New Users</div>
                                         <div class="modern-kpi-val">{{ number_format($newUsers) }}</div>
-                                        <div class="modern-kpi-delta {{ $deltaNewUsers['trend'] }}">{{ $deltaNewUsers['trend'] === 'up' ? '&#8593;' : '&#8595;' }} {{ $deltaNewUsers['val'] }}</div>
+                                        <div class="modern-kpi-delta {{ $deltaNewUsers['trend'] }}">{!! $deltaNewUsers['trend'] === 'up' ? '&#8593;' : '&#8595;' !!} {{ $deltaNewUsers['val'] }}</div>
                                         <div class="modern-kpi-sub">vs. previous {{ $daysDiff }} days</div>
                                     </td>
                                 </tr>
@@ -608,19 +618,12 @@
                             <table class="modern-kpi-card-table">
                                 <tr>
                                     <td style="width: 52px; vertical-align: top;">
-                                        <div class="modern-kpi-icon-wrap">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; display: inline-block;">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                                <circle cx="9" cy="7" r="4"></circle>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                            </svg>
-                                        </div>
+                                        <img src="{{ $ga4BadgeReturningUsers }}" width="48" height="48" style="display: block;" alt="Returning Users" />
                                     </td>
-                                    <td style="vertical-align: top;">
+                                    <td style="vertical-align: top; padding-left: 8px;">
                                         <div class="modern-kpi-title">Returning Users</div>
                                         <div class="modern-kpi-val">{{ number_format($returningUsers) }}</div>
-                                        <div class="modern-kpi-delta {{ $deltaReturningUsers['trend'] }}">{{ $deltaReturningUsers['trend'] === 'up' ? '&#8593;' : '&#8595;' }} {{ $deltaReturningUsers['val'] }}</div>
+                                        <div class="modern-kpi-delta {{ $deltaReturningUsers['trend'] }}">{!! $deltaReturningUsers['trend'] === 'up' ? '&#8593;' : '&#8595;' !!} {{ $deltaReturningUsers['val'] }}</div>
                                         <div class="modern-kpi-sub">vs. previous {{ $daysDiff }} days</div>
                                     </td>
                                 </tr>
@@ -634,17 +637,12 @@
                             <table class="modern-kpi-card-table">
                                 <tr>
                                     <td style="width: 52px; vertical-align: top;">
-                                        <div class="modern-kpi-icon-wrap">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; display: inline-block;">
-                                                <circle cx="12" cy="12" r="10"></circle>
-                                                <polyline points="12 6 12 12 16 14"></polyline>
-                                            </svg>
-                                        </div>
+                                        <img src="{{ $ga4BadgeClock }}" width="48" height="48" style="display: block;" alt="Engagement Time" />
                                     </td>
-                                    <td style="vertical-align: top;">
+                                    <td style="vertical-align: top; padding-left: 8px;">
                                         <div class="modern-kpi-title">Engagement Time</div>
                                         <div class="modern-kpi-val">{{ $avgSessionDuration }}</div>
-                                        <div class="modern-kpi-delta {{ $deltaDuration['trend'] }}">{{ $deltaDuration['trend'] === 'up' ? '&#8593;' : '&#8595;' }} {{ $deltaDuration['val'] }}</div>
+                                        <div class="modern-kpi-delta {{ $deltaDuration['trend'] }}">{!! $deltaDuration['trend'] === 'up' ? '&#8593;' : '&#8595;' !!} {{ $deltaDuration['val'] }}</div>
                                         <div class="modern-kpi-sub">vs. previous {{ $daysDiff }} days</div>
                                     </td>
                                 </tr>
@@ -658,18 +656,12 @@
                             <table class="modern-kpi-card-table">
                                 <tr>
                                     <td style="width: 52px; vertical-align: top;">
-                                        <div class="modern-kpi-icon-wrap">
-                                            <svg width="24" height="24" viewBox="0 0 447 447" fill="#135266" style="vertical-align: middle; display: inline-block;">
-                                                <path d="M223.5,80c22.056,0,40-17.944,40-40s-17.944-40-40-40c-22.056,0-40,17.944-40,40S201.444,80,223.5,80z M223.5,20 c11.028,0,20,8.972,20,20s-8.972,20-20,20c-11.028,0-20-8.972-20-20S212.472,20,223.5,20z"></path>
-                                                <path d="M163.5,170c5.523,0,10-4.478,10-10c0-27.57,22.43-50,50-50s50,22.43,50,50c0,5.522,4.478,10,10,10s10-4.478,10-10 c0-38.598-31.402-70-70-70c-38.598,0-70,31.402-70,70C153.5,165.522,157.977,170,163.5,170z"></path>
-                                                <path d="M308.971,378.429L322.758,200H353.5c5.522,0,10-4.478,10-10s-4.478-10-10-10h-120v-39.76c0-5.522-4.478-10-10-10 c-5.523,0-10,4.478-10,10V180h-120c-5.523,0-10,4.478-10,10s4.477,10,10,10h30.743l13.787,178.429 c0.405,5.244,4.786,9.23,9.959,9.23c0.258,0,0.52-0.011,0.781-0.03c5.506-0.426,9.625-5.234,9.2-10.741L144.302,200h158.395 l-13.668,176.888c-0.425,5.507,3.694,10.315,9.2,10.741c0.263,0.02,0.522,0.03,0.781,0.03 C304.184,387.659,308.565,383.673,308.971,378.429z"></path>
-                                            </svg>
-                                        </div>
+                                        <img src="{{ $ga4BadgeEvents }}" width="48" height="48" style="display: block;" alt="Key Events" />
                                     </td>
-                                    <td style="vertical-align: top;">
+                                    <td style="vertical-align: top; padding-left: 8px;">
                                         <div class="modern-kpi-title">Key Events</div>
                                         <div class="modern-kpi-val">{{ number_format($keyEventsCount) }}</div>
-                                        <div class="modern-kpi-delta {{ $deltaEvents['trend'] }}">{{ $deltaEvents['trend'] === 'up' ? '&#8593;' : '&#8595;' }} {{ $deltaEvents['val'] }}</div>
+                                        <div class="modern-kpi-delta {{ $deltaEvents['trend'] }}">{!! $deltaEvents['trend'] === 'up' ? '&#8593;' : '&#8595;' !!} {{ $deltaEvents['val'] }}</div>
                                         <div class="modern-kpi-sub">vs. previous {{ $daysDiff }} days</div>
                                     </td>
                                 </tr>
@@ -714,9 +706,9 @@
                     <td style="width: 42%; padding: 0; vertical-align: top;">
                         <div class="chart-box-card" style="height: 290px;">
                             <div class="chart-box-header" style="margin-bottom: 8px;">Traffic by Channel</div>
-                            <div style="text-align: center;">
+                            <div style="text-align: center; padding-top: 6px;">
                                 @if(!empty($gSet['donut']))
-                                    <img src="{{ $gSet['donut'] }}" width="365" height="225" alt="Traffic by Channel" style="display: block; margin: 0 auto; max-width: 100%;" />
+                                    <img src="{{ $gSet['donut'] }}" width="365" height="190" alt="Traffic by Channel" style="display: block; margin: 0 auto; max-width: 100%;" />
                                 @endif
                             </div>
                         </div>
@@ -1092,6 +1084,12 @@
 
     <div class="content-body">
         {{-- 4 Modern Summary Cards matching on-screen UI --}}
+        @php
+            $gscBadgeClicks = $renderKpiBadge(34, '#eef2ff', '#e0e7ff', 18, 24, '<path fill="#4f46e5" d="M3 3l7 18 3-7 7-3L3 3z"/>');
+            $gscBadgeImpr = $renderKpiBadge(34, '#f0fdf4', '#dcfce7', 18, 24, '<path fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="#16a34a" stroke-width="2"/>');
+            $gscBadgeCtr = $renderKpiBadge(34, '#fefce8', '#fef08a', 18, 24, '<line x1="19" y1="5" x2="5" y2="19" stroke="#ca8a04" stroke-width="2.5" stroke-linecap="round"/><circle cx="6.5" cy="6.5" r="2.5" fill="none" stroke="#ca8a04" stroke-width="2"/><circle cx="17.5" cy="17.5" r="2.5" fill="none" stroke="#ca8a04" stroke-width="2"/>');
+            $gscBadgePos = $renderKpiBadge(34, '#fdf2f8', '#fce7f3', 18, 24, '<line x1="4" y1="9" x2="20" y2="9" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/><line x1="4" y1="15" x2="20" y2="15" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/><line x1="10" y1="3" x2="8" y2="21" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="3" x2="14" y2="21" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/>');
+        @endphp
         <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 12px;">
             <tr>
                 {{-- Total Clicks --}}
@@ -1100,9 +1098,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #eef2ff; color: #4f46e5; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#10148;
-                                    </div>
+                                    <img src="{{ $gscBadgeClicks }}" width="34" height="34" style="display: block;" alt="Clicks" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Total Clicks</div>
@@ -1119,9 +1115,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #f0fdf4; color: #16a34a; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128065;
-                                    </div>
+                                    <img src="{{ $gscBadgeImpr }}" width="34" height="34" style="display: block;" alt="Impressions" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Total Impressions</div>
@@ -1138,9 +1132,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #fefce8; color: #ca8a04; text-align: center; line-height: 34px; font-size: 14px; font-weight: bold;">
-                                        %
-                                    </div>
+                                    <img src="{{ $gscBadgeCtr }}" width="34" height="34" style="display: block;" alt="CTR" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Avg. CTR</div>
@@ -1157,9 +1149,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #fdf2f8; color: #db2777; text-align: center; line-height: 34px; font-size: 15px;">
-                                        #
-                                    </div>
+                                    <img src="{{ $gscBadgePos }}" width="34" height="34" style="display: block;" alt="Position" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Avg. Position</div>
@@ -1346,6 +1336,13 @@
 
     <div class="content-body">
         {{-- 5 Rounded Icon Summary Cards matching on-screen UI --}}
+        @php
+            $kwBadgeTotal = $renderKpiBadge(30, '#f1f5f9', '#e2e8f0', 16, 24, '<circle cx="11" cy="11" r="8" fill="none" stroke="#475569" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="#475569" stroke-width="2" stroke-linecap="round"/>');
+            $kwBadgeTop10 = $renderKpiBadge(30, '#fefce8', '#fef08a', 16, 24, '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#ca8a04" stroke="#ca8a04" stroke-width="1"/>');
+            $kwBadgeTop15 = $renderKpiBadge(30, '#f0fdf4', '#dcfce7', 16, 24, '<polyline points="20 6 9 17 4 12" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
+            $kwBadgeTop10p = $renderKpiBadge(30, '#eef2ff', '#e0e7ff', 16, 24, '<path fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#4f46e5" stroke-width="2"/>');
+            $kwBadgeTop15p = $renderKpiBadge(30, '#faf5ff', '#f3e8ff', 16, 24, '<path fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1" fill="none" stroke="#9333ea" stroke-width="2"/>');
+        @endphp
         <table style="width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-bottom: 12px;">
             <tr>
                 {{-- Total Keywords --}}
@@ -1354,9 +1351,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 32px; vertical-align: middle;">
-                                    <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-align: center; line-height: 30px; font-size: 13px;">
-                                        &#128269;
-                                    </div>
+                                    <img src="{{ $kwBadgeTotal }}" width="30" height="30" style="display: block;" alt="Keywords" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 6px;">
                                     <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Keywords</div>
@@ -1373,9 +1368,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 32px; vertical-align: middle;">
-                                    <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #fefce8; color: #ca8a04; text-align: center; line-height: 30px; font-size: 13px;">
-                                        &#9733;
-                                    </div>
+                                    <img src="{{ $kwBadgeTop10 }}" width="30" height="30" style="display: block;" alt="Top 10" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 6px;">
                                     <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 10</div>
@@ -1392,9 +1385,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 32px; vertical-align: middle;">
-                                    <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #f0fdf4; color: #16a34a; text-align: center; line-height: 30px; font-size: 13px;">
-                                        &#10003;
-                                    </div>
+                                    <img src="{{ $kwBadgeTop15 }}" width="30" height="30" style="display: block;" alt="Top 15" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 6px;">
                                     <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 15</div>
@@ -1411,9 +1402,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 32px; vertical-align: middle;">
-                                    <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #eef2ff; color: #4f46e5; text-align: center; line-height: 30px; font-size: 13px;">
-                                        &#128196;
-                                    </div>
+                                    <img src="{{ $kwBadgeTop10p }}" width="30" height="30" style="display: block;" alt="Top 10 Pages" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 6px;">
                                     <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 10 Pages</div>
@@ -1430,9 +1419,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 32px; vertical-align: middle;">
-                                    <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #faf5ff; color: #9333ea; text-align: center; line-height: 30px; font-size: 13px;">
-                                        &#128203;
-                                    </div>
+                                    <img src="{{ $kwBadgeTop15p }}" width="30" height="30" style="display: block;" alt="Top 15 Pages" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 6px;">
                                     <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 15 Pages</div>
@@ -1596,6 +1583,10 @@
 
         @php
             $currentData = $gSet['data'];
+            $gbpBadgeViews = $renderKpiBadge(34, '#f1f5f9', '#e2e8f0', 18, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="#475569" stroke-width="2"/>');
+            $gbpBadgeSearches = $renderKpiBadge(34, '#eef2ff', '#e0e7ff', 18, 24, '<circle cx="11" cy="11" r="7" fill="none" stroke="#4f46e5" stroke-width="2.2"/><line x1="21" y1="21" x2="16" y2="16" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round"/>');
+            $gbpBadgeInteractions = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<polygon points="3 3 10 20 13 13 20 10 3 3" fill="#059669"/>');
+            $gbpBadgeCalls = $renderKpiBadge(34, '#fefce8', '#fef08a', 18, 24, '<path fill="none" stroke="#ca8a04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>');
         @endphp
     {{-- Header Banner --}}
     <div class="header-banner">
@@ -1630,9 +1621,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128065;
-                                    </div>
+                                    <img src="{{ $gbpBadgeViews }}" width="34" height="34" style="display: block;" alt="Views" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Views</div>
@@ -1649,9 +1638,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #eef2ff; color: #4f46e5; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128269;
-                                    </div>
+                                    <img src="{{ $gbpBadgeSearches }}" width="34" height="34" style="display: block;" alt="Searches" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Searches</div>
@@ -1668,9 +1655,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #ecfdf5; color: #059669; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#10003;
-                                    </div>
+                                    <img src="{{ $gbpBadgeInteractions }}" width="34" height="34" style="display: block;" alt="Interactions" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Interactions</div>
@@ -1687,9 +1672,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #fefce8; color: #ca8a04; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128222;
-                                    </div>
+                                    <img src="{{ $gbpBadgeCalls }}" width="34" height="34" style="display: block;" alt="Calls" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Calls</div>
@@ -1809,6 +1792,10 @@
             $currentData = $fSet['data'];
             $fbSummary = $currentData['summary'] ?? [];
             $topPosts = array_slice($currentData['top_posts'] ?? [], 0, 7);
+            $fbBadgeFollowers = $renderKpiBadge(34, '#f1f5f9', '#e2e8f0', 18, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#475569" stroke-width="2"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>');
+            $fbBadgeReach = $renderKpiBadge(34, '#fef2f2', '#fee2e2', 18, 24, '<circle cx="12" cy="12" r="2" fill="#ef4444"/><path fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>');
+            $fbBadgeViews = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
+            $fbBadgeEngaged = $renderKpiBadge(34, '#eff6ff', '#dbeafe', 18, 24, '<path fill="#2563eb" d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>');
         @endphp
 
     {{-- Header Banner --}}
@@ -1844,9 +1831,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128101;
-                                    </div>
+                                    <img src="{{ $fbBadgeFollowers }}" width="34" height="34" style="display: block;" alt="Followers" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Page Followers</div>
@@ -1863,9 +1848,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #fef2f2; color: #ef4444; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128065;
-                                    </div>
+                                    <img src="{{ $fbBadgeReach }}" width="34" height="34" style="display: block;" alt="Reach" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Reach</div>
@@ -1882,9 +1865,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #ecfdf5; color: #059669; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#10148;
-                                    </div>
+                                    <img src="{{ $fbBadgeViews }}" width="34" height="34" style="display: block;" alt="Views" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Views</div>
@@ -1901,9 +1882,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #eff6ff; color: #2563eb; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#10003;
-                                    </div>
+                                    <img src="{{ $fbBadgeEngaged }}" width="34" height="34" style="display: block;" alt="Engaged" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Engaged</div>
@@ -2024,6 +2003,10 @@
             $currentData = $lSet['data'];
             $liSummary = $currentData['summary'] ?? [];
             $liTopPosts = $currentData['top_posts'] ?? [];
+            $liBadgeFollowers = $renderKpiBadge(26, '#f1f5f9', '#e2e8f0', 14, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#475569" stroke-width="2"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>');
+            $liBadgeImpr = $renderKpiBadge(26, '#e0f2fe', '#bae6fd', 14, 24, '<path fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="#0284c7" stroke-width="2"/>');
+            $liBadgeClicks = $renderKpiBadge(26, '#dcfce7', '#bbf7d0', 14, 24, '<polygon points="3 3 10 20 13 13 20 10 3 3" fill="#16a34a"/>');
+            $liBadgeEngage = $renderKpiBadge(26, '#ede9fe', '#ddd6fe', 14, 24, '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
         @endphp
 
     {{-- Modern Dark Header Banner --}}
@@ -2055,9 +2038,7 @@
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="width: 28px; vertical-align: middle;">
-                            <div style="width: 26px; height: 26px; border-radius: 50%; background-color: #f1f5f9; text-align: center; line-height: 26px; font-size: 11px; color: #475569;">
-                                &bull;
-                            </div>
+                            <img src="{{ $liBadgeFollowers }}" width="26" height="26" style="display: block;" alt="Followers" />
                         </td>
                         <td style="padding-left: 8px; vertical-align: middle;">
                             <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
@@ -2075,9 +2056,7 @@
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="width: 28px; vertical-align: middle;">
-                            <div style="width: 26px; height: 26px; border-radius: 50%; background-color: #e0f2fe; text-align: center; line-height: 26px; font-size: 11px; color: #0284c7;">
-                                &bull;
-                            </div>
+                            <img src="{{ $liBadgeImpr }}" width="26" height="26" style="display: block;" alt="Impressions" />
                         </td>
                         <td style="padding-left: 8px; vertical-align: middle;">
                             <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
@@ -2095,9 +2074,7 @@
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="width: 28px; vertical-align: middle;">
-                            <div style="width: 26px; height: 26px; border-radius: 50%; background-color: #dcfce7; text-align: center; line-height: 26px; font-size: 11px; color: #16a34a;">
-                                &bull;
-                            </div>
+                            <img src="{{ $liBadgeClicks }}" width="26" height="26" style="display: block;" alt="Clicks" />
                         </td>
                         <td style="padding-left: 8px; vertical-align: middle;">
                             <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
@@ -2115,9 +2092,7 @@
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="width: 28px; vertical-align: middle;">
-                            <div style="width: 26px; height: 26px; border-radius: 50%; background-color: #ede9fe; text-align: center; line-height: 26px; font-size: 11px; color: #7c3aed;">
-                                &bull;
-                            </div>
+                            <img src="{{ $liBadgeEngage }}" width="26" height="26" style="display: block;" alt="Engagement" />
                         </td>
                         <td style="padding-left: 8px; vertical-align: middle;">
                             <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
@@ -2341,6 +2316,12 @@
             $costc_mob = round((($ds['mobile']['cost'] ?? 0) / $tcost) * 100, 1);
             $costc_desk = round((($ds['desktop']['cost'] ?? 0) / $tcost) * 100, 1);
             $costc_tab = max(0, 100 - $costc_mob - $costc_desk);
+
+            $gadsIconClicks = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><polygon points="3 3 10 20 13 13 20 10 3 3" fill="#ffffff"/></svg>');
+            $gadsIconImpr = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="#ffffff" stroke-width="2"/></svg>');
+            $gadsIconCpc = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#8e24aa" stroke-width="2"/><line x1="12" y1="3" x2="12" y2="7" stroke="#8e24aa" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12" y2="21" stroke="#8e24aa" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="12" x2="7" y2="12" stroke="#8e24aa" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="12" x2="21" y2="12" stroke="#8e24aa" stroke-width="2" stroke-linecap="round"/></svg>');
+            $gadsIconCost = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><text x="12" y="17" font-size="16" font-family="sans-serif" font-weight="900" text-anchor="middle" fill="#f9ab00">$</text></svg>');
+            $gadsIconConv = 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" fill="none" stroke="#1e8e3e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>');
         @endphp
 
     {{-- Header Banner --}}
@@ -2376,7 +2357,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 24px; vertical-align: middle;">
-                                    <span style="font-size: 16px;">&#10148;</span>
+                                    <img src="{{ $gadsIconClicks }}" width="16" height="16" style="display: block;" alt="Clicks" />
                                 </td>
                                 <td style="vertical-align: middle;">
                                     <div style="font-size: 11px; font-weight: 700; color: #ffffff; opacity: 0.95;">Clicks</div>
@@ -2391,7 +2372,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 24px; vertical-align: middle;">
-                                    <span style="font-size: 16px;">&#128065;</span>
+                                    <img src="{{ $gadsIconImpr }}" width="16" height="16" style="display: block;" alt="Impressions" />
                                 </td>
                                 <td style="vertical-align: middle;">
                                     <div style="font-size: 11px; font-weight: 700; color: #ffffff; opacity: 0.95;">Impressions</div>
@@ -2407,8 +2388,8 @@
                     <td style="width: 20%; background-color: #ffffff; color: #3c4043; padding: 12px 10px; border-right: 1px solid #e2e8f0; vertical-align: top;">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 24px; vertical-align: middle; color: #8e24aa;">
-                                    <span style="font-size: 15px;">&#9906;</span>
+                                <td style="width: 24px; vertical-align: middle;">
+                                    <img src="{{ $gadsIconCpc }}" width="16" height="16" style="display: block;" alt="CPC" />
                                 </td>
                                 <td style="vertical-align: middle;">
                                     <div style="font-size: 11px; font-weight: 700; color: #5f6368;">Avg. CPC</div>
@@ -2422,8 +2403,8 @@
                     <td style="width: 20%; background-color: #ffffff; color: #3c4043; padding: 12px 10px; border-right: 1px solid #e2e8f0; vertical-align: top;">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 24px; vertical-align: middle; color: #f9ab00;">
-                                    <span style="font-size: 15px;">$</span>
+                                <td style="width: 24px; vertical-align: middle;">
+                                    <img src="{{ $gadsIconCost }}" width="16" height="16" style="display: block;" alt="Cost" />
                                 </td>
                                 <td style="vertical-align: middle;">
                                     <div style="font-size: 11px; font-weight: 700; color: #5f6368;">Cost</div>
@@ -2437,8 +2418,8 @@
                     <td style="width: 20%; background-color: #ffffff; color: #3c4043; padding: 12px 10px; vertical-align: top;">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 24px; vertical-align: middle; color: #1e8e3e;">
-                                    <span style="font-size: 15px;">&#10003;</span>
+                                <td style="width: 24px; vertical-align: middle;">
+                                    <img src="{{ $gadsIconConv }}" width="16" height="16" style="display: block;" alt="Conversions" />
                                 </td>
                                 <td style="vertical-align: middle;">
                                     <div style="font-size: 11px; font-weight: 700; color: #5f6368;">Conversions</div>
@@ -2667,6 +2648,10 @@
             $currentData = $ySet['data'];
             $ytSummary = $currentData['summary'] ?? [];
             $topVideos = array_slice($currentData['top_videos'] ?? [], 0, 7);
+            $ytBadgeViews = $renderKpiBadge(34, '#fef2f2', '#fee2e2', 18, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#ef4444"/>');
+            $ytBadgeWatch = $renderKpiBadge(34, '#fffbeb', '#fef3c7', 18, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#d97706" stroke-width="2"/><polyline points="12 6 12 12 16 14" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>');
+            $ytBadgeSubs = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<path fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#059669" stroke-width="2"/><path fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>');
+            $ytBadgeDuration = $renderKpiBadge(34, '#f1f5f9', '#e2e8f0', 18, 24, '<circle cx="12" cy="13" r="8" fill="none" stroke="#475569" stroke-width="2"/><line x1="12" y1="9" x2="12" y2="13" stroke="#475569" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="5" x2="12" y2="2" stroke="#475569" stroke-width="2" stroke-linecap="round"/>');
         @endphp
 
     {{-- Header Banner --}}
@@ -2702,9 +2687,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #fef2f2; color: #ef4444; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128065;
-                                    </div>
+                                    <img src="{{ $ytBadgeViews }}" width="34" height="34" style="display: block;" alt="Views" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Views</div>
@@ -2721,9 +2704,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #fffbeb; color: #d97706; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#9201;
-                                    </div>
+                                    <img src="{{ $ytBadgeWatch }}" width="34" height="34" style="display: block;" alt="Watch Time" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Watch Time (hrs)</div>
@@ -2740,9 +2721,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #ecfdf5; color: #059669; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#128101;
-                                    </div>
+                                    <img src="{{ $ytBadgeSubs }}" width="34" height="34" style="display: block;" alt="Subscribers" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Subscribers</div>
@@ -2759,9 +2738,7 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 38px; vertical-align: middle;">
-                                    <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-align: center; line-height: 34px; font-size: 15px;">
-                                        &#9200;
-                                    </div>
+                                    <img src="{{ $ytBadgeDuration }}" width="34" height="34" style="display: block;" alt="Duration" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
                                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Avg Duration</div>

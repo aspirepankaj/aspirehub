@@ -500,12 +500,12 @@ class MarketingReportPdfService
         }
 
         $total = array_sum(array_column($slices, 'value')) ?: 1;
-        $cx = 85;
-        $cy = 95;
-        $r = 75;
-        $innerR = 46;
+        $cx = 95;
+        $cy = round($height / 2);
+        $r = 80;
+        $innerR = 50;
 
-        $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\">\n";
+        $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\" preserveAspectRatio=\"xMidYMid meet\">\n";
         $currentAngle = -90;
 
         foreach ($slices as $slice) {
@@ -543,22 +543,24 @@ class MarketingReportPdfService
         $svg .= "  <text x=\"{$cx}\" y=\"" . ($cy + 16) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"8\" font-weight=\"800\" fill=\"#777777\" text-anchor=\"middle\" letter-spacing=\"0.5\">SESSIONS</text>\n";
 
         // Right-aligned clean legend list matching reference PDF & Single View
-        $legX = 175;
-        $legStartY = 12;
-        $rowGap = min(22, max(16, (int)floor(170 / max(1, count($slices)))));
+        $legX = 195;
+        $sliceCount = max(1, count($slices));
+        $rowGap = min(24, max(18, (int)floor(($height - 30) / $sliceCount)));
+        $totalLegH = ($sliceCount - 1) * $rowGap;
+        $legStartY = round(($height - $totalLegH) / 2);
 
         foreach ($slices as $i => $slice) {
             $ly = $legStartY + ($i * $rowGap);
             $c = $slice['color'];
             $n = htmlspecialchars($slice['name']);
-            if (strlen($n) > 25) $n = substr($n, 0, 23) . '..';
+            if (strlen($n) > 23) $n = substr($n, 0, 21) . '..';
             $v = number_format($slice['value']);
             $p = round(($slice['value'] / $total) * 100, 1) . '%';
 
-            $svg .= "  <circle cx=\"{$legX}\" cy=\"{$ly}\" r=\"4\" fill=\"{$c}\" />\n";
-            $svg .= "  <text x=\"" . ($legX + 10) . "\" y=\"" . ($ly + 3) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9.5\" font-weight=\"700\" fill=\"#222222\">{$n}</text>\n";
-            $svg .= "  <text x=\"" . ($width - 45) . "\" y=\"" . ($ly + 3) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9.5\" font-weight=\"900\" fill=\"#111111\" text-anchor=\"end\">{$v}</text>\n";
-            $svg .= "  <text x=\"" . ($width - 5) . "\" y=\"" . ($ly + 3) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" font-weight=\"700\" fill=\"#666666\" text-anchor=\"end\">{$p}</text>\n";
+            $svg .= "  <circle cx=\"{$legX}\" cy=\"{$ly}\" r=\"4.5\" fill=\"{$c}\" />\n";
+            $svg .= "  <text x=\"" . ($legX + 12) . "\" y=\"" . ($ly + 3.5) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"10\" font-weight=\"700\" fill=\"#222222\">{$n}</text>\n";
+            $svg .= "  <text x=\"" . ($width - 50) . "\" y=\"" . ($ly + 3.5) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"10\" font-weight=\"900\" fill=\"#111111\" text-anchor=\"end\">{$v}</text>\n";
+            $svg .= "  <text x=\"" . ($width - 5) . "\" y=\"" . ($ly + 3.5) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9.5\" font-weight=\"700\" fill=\"#666666\" text-anchor=\"end\">{$p}</text>\n";
         }
 
         $svg .= "</svg>";
