@@ -1882,6 +1882,7 @@ body:has(.is-marketing-report),
 .client-integration-theme .grid > div[class*="rounded-xl"] span[class*="text-2xl"],
 .client-integration-theme .grid > div[class*="rounded-xl"] span[class*="font-extrabold"] {
   font-size: 30px !important;
+  font-family: Figtree,ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
   line-height: 1.1 !important;
   font-weight: 900 !important;
   letter-spacing: -0.02em !important;
@@ -2038,7 +2039,7 @@ body:has(.is-marketing-report),
   font-size: 28px !important;
   font-weight: 900 !important;
   line-height: 1.1 !important;
-  color: #0c3b4a !important;
+  color: #135266 !important;
   letter-spacing: -0.02em;
   margin-top: 2px;
 }

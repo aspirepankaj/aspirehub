@@ -1762,7 +1762,7 @@
                                     $pageSessions = $page['pageviews'] ?? 0; // fallback to pageviews since native JSON lacks sessions in pages_report
                                     $engRate = rand(55, 75) . '.' . rand(0, 9) . '%'; // Mock engagement rate as it is missing in typical JSON
                                 @endphp
-                                <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0" x-show="showAll || <?php echo $i; ?> < 5" x-transition>
+                                <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0" x-show="showAll || <?php echo $i; ?> < 10" x-transition>
                                     <td class="py-2.5 text-slate-400 font-medium">{{ $i + 1 }}</td>
                                     <td class="py-2.5 font-medium truncate max-w-[140px] md:max-w-none" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
                                     <td class="py-2.5 text-right font-semibold text-slate-800 dark:text-slate-100">{{ number_format($pageUsers) }}</td>
