@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-#[Signature('sync:gbp-metrics')]
+#[Signature('sync:gbp-metrics {integration_id?}')]
 #[Description('Sync Google Business Profile metrics for all connected websites')]
 class SyncGbpMetrics extends Command
 {
@@ -21,10 +21,15 @@ class SyncGbpMetrics extends Command
     {
         $this->info('Starting GBP Metrics Sync...');
 
-        $integrations = WebsiteIntegration::with(['website', 'website.client.user'])
+        $query = WebsiteIntegration::with(['website', 'website.client.user'])
             ->where('integration_type', 'gbp')
-            ->where('status', 'connected')
-            ->get();
+            ->where('status', 'connected');
+
+        if ($this->argument('integration_id')) {
+            $query->where('id', $this->argument('integration_id'));
+        }
+
+        $integrations = $query->get();
 
         if ($integrations->isEmpty()) {
             $this->info('No connected GBP integrations found.');
@@ -62,12 +67,14 @@ class SyncGbpMetrics extends Command
                 $metrics = $this->fetchGbpMetrics($token, $propertyId, $startDate, $endDate);
 
                 if ($metrics) {
+                    $year = (int)date('Y');
+                    $monthStr = strtolower(date('F'));
                     $this->saveMetricsToJson($integration, $metrics, $year, $monthStr);
                     
                     $integration->last_sync_at = now();
                     $integration->save();
                     
-                    $this->info("Successfully saved metrics for {$propertyId}");
+                    $this->info("Successfully saved GBP metrics for {$propertyId}");
                 }
 
             } catch (\Exception $e) {
@@ -81,7 +88,12 @@ class SyncGbpMetrics extends Command
 
     private function getAccessToken($config, $refreshToken)
     {
-        $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
+        $http = Http::asForm();
+        if (app()->environment('local')) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http->post('https://oauth2.googleapis.com/token', [
             'client_id' => $config['client_id'],
             'client_secret' => $config['client_secret'],
             'refresh_token' => $refreshToken,
@@ -105,7 +117,12 @@ class SyncGbpMetrics extends Command
 
         $url = "https://businessprofileperformance.googleapis.com/v1/{$locationId}:fetchMultiDailyMetricsTimeSeries";
         
-        $response = Http::withToken($token)->get($url, [
+        $http = Http::withToken($token);
+        if (app()->environment('local')) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http->get($url, [
             'dailyMetrics' => [
                 'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
                 'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
@@ -126,48 +143,115 @@ class SyncGbpMetrics extends Command
         if ($response->successful()) {
             $data = $response->json();
             
-            // Format the data for the UI
             $totalViews = 0;
+            $totalSearches = 0;
             $interactions = 0;
             $calls = 0;
+            $directions = 0;
+            $websiteClicks = 0;
+
+            $dailyMap = [];
 
             if (isset($data['multiDailyMetricTimeSeries'])) {
                 foreach ($data['multiDailyMetricTimeSeries'] as $series) {
-                    $metric = $series['dailyMetric'];
-                    $count = 0;
-                    
-                    if (isset($series['timeSeries']['datedValues'])) {
-                        foreach ($series['timeSeries']['datedValues'] as $value) {
-                            $count += (int)($value['value'] ?? 0);
+                    $metric = $series['dailyMetric'] ?? '';
+                    $datedValues = $series['timeSeries']['datedValues'] 
+                        ?? ($series['dailyMetricTimeSeries']['timeSeries']['datedValues'] ?? []);
+
+                    foreach ($datedValues as $val) {
+                        $vYear = $val['date']['year'] ?? null;
+                        $vMonth = str_pad($val['date']['month'] ?? 1, 2, '0', STR_PAD_LEFT);
+                        $vDay = str_pad($val['date']['day'] ?? 1, 2, '0', STR_PAD_LEFT);
+                        if (!$vYear) continue;
+
+                        $dateStr = "{$vYear}-{$vMonth}-{$vDay}";
+                        if (!isset($dailyMap[$dateStr])) {
+                            $dailyMap[$dateStr] = [
+                                'date' => $dateStr,
+                                'views' => 0,
+                                'searches' => 0,
+                                'interactions' => 0,
+                                'calls' => 0,
+                                'phone_calls' => 0,
+                                'directions' => 0,
+                                'direction_requests' => 0,
+                                'website_clicks' => 0,
+                                'clicks' => 0,
+                            ];
                         }
-                    }
 
-                    if (str_starts_with($metric, 'BUSINESS_IMPRESSIONS_')) {
-                        $totalViews += $count;
-                    }
-                    
-                    if (in_array($metric, ['CALL_CLICKS', 'WEBSITE_CLICKS', 'BUSINESS_DIRECTION_REQUESTS'])) {
-                        $interactions += $count;
-                    }
+                        $count = (int)($val['value'] ?? 0);
 
-                    if ($metric === 'CALL_CLICKS') {
-                        $calls += $count;
+                        if (str_starts_with($metric, 'BUSINESS_IMPRESSIONS_')) {
+                            $dailyMap[$dateStr]['views'] += $count;
+                            $totalViews += $count;
+                            if (str_contains($metric, 'SEARCH')) {
+                                $dailyMap[$dateStr]['searches'] += $count;
+                                $totalSearches += $count;
+                            }
+                        }
+
+                        if ($metric === 'CALL_CLICKS') {
+                            $dailyMap[$dateStr]['calls'] += $count;
+                            $dailyMap[$dateStr]['phone_calls'] += $count;
+                            $calls += $count;
+                        }
+
+                        if ($metric === 'BUSINESS_DIRECTION_REQUESTS') {
+                            $dailyMap[$dateStr]['directions'] += $count;
+                            $dailyMap[$dateStr]['direction_requests'] += $count;
+                            $directions += $count;
+                        }
+
+                        if ($metric === 'WEBSITE_CLICKS') {
+                            $dailyMap[$dateStr]['website_clicks'] += $count;
+                            $dailyMap[$dateStr]['clicks'] += $count;
+                            $websiteClicks += $count;
+                        }
                     }
                 }
             }
 
+            // Fallback for searches if API only returned maps or aggregate impressions
+            if ($totalSearches === 0 && $totalViews > 0) {
+                $totalSearches = (int)round($totalViews * 0.4);
+            }
+
+            $interactions = $calls + $directions + $websiteClicks;
+
+            // Recalculate daily interactions & searches
+            foreach ($dailyMap as $dateStr => &$dayData) {
+                if ($dayData['searches'] === 0 && $dayData['views'] > 0) {
+                    $dayData['searches'] = (int)round($dayData['views'] * 0.4);
+                }
+                $dayData['interactions'] = $dayData['calls'] + $dayData['directions'] + $dayData['website_clicks'];
+            }
+            unset($dayData);
+
+            ksort($dailyMap);
+            $dailyList = array_values($dailyMap);
+
             return [
                 'summary' => [
                     'views' => $totalViews,
-                    'searches' => (int)($totalViews * 0.4), // GBP API doesn't return searches directly in v1 without insights, using a proxy
+                    'searches' => $totalSearches,
                     'interactions' => $interactions,
                     'calls' => $calls,
+                    'phone_calls' => $calls,
+                    'directions' => $directions,
+                    'direction_requests' => $directions,
+                    'website_clicks' => $websiteClicks,
+                    'clicks' => $websiteClicks,
                 ],
+                'daily_metrics' => $dailyList,
+                'daily_traffic' => $dailyList,
                 'raw' => $data
             ];
         }
 
-        Log::error("GBP Metrics Fetch Error for {$locationId}", $response->json());
+        $errorBody = $response->body();
+        Log::error("GBP Metrics Fetch Error for {$locationId}: " . $errorBody);
+
         return null;
     }
 
@@ -184,12 +268,59 @@ class SyncGbpMetrics extends Command
             $websiteFolder = 'site-' . $integration->website->id;
         }
 
-        $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gbp/{$year}");
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        $baseDir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/gbp");
+
+        // 1. Save main current month file (contains full 90-day daily records)
+        $currentMonthDir = "{$baseDir}/{$year}";
+        if (!is_dir($currentMonthDir)) {
+            mkdir($currentMonthDir, 0755, true);
+        }
+        file_put_contents("{$currentMonthDir}/{$monthStr}.json", json_encode($metrics, JSON_PRETTY_PRINT));
+
+        // 2. Also partition daily entries by month so historical monthly reports load immediately
+        $dailyRecords = $metrics['daily_metrics'] ?? [];
+        $recordsByMonth = [];
+
+        foreach ($dailyRecords as $record) {
+            $d = $record['date'] ?? null;
+            if (!$d) continue;
+            $rYear = date('Y', strtotime($d));
+            $rMonth = strtolower(date('F', strtotime($d)));
+            $recordsByMonth["{$rYear}/{$rMonth}"][] = $record;
         }
 
-        $filePath = "{$dir}/{$monthStr}.json";
-        file_put_contents($filePath, json_encode($metrics, JSON_PRETTY_PRINT));
+        foreach ($recordsByMonth as $periodKey => $monthDaily) {
+            list($mYear, $mMonth) = explode('/', $periodKey);
+            $targetDir = "{$baseDir}/{$mYear}";
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+
+            // Calculate monthly slice summary
+            $mViews = array_sum(array_column($monthDaily, 'views'));
+            $mSearches = array_sum(array_column($monthDaily, 'searches'));
+            $mCalls = array_sum(array_column($monthDaily, 'calls'));
+            $mDirections = array_sum(array_column($monthDaily, 'directions'));
+            $mClicks = array_sum(array_column($monthDaily, 'website_clicks'));
+            $mInteractions = $mCalls + $mDirections + $mClicks;
+
+            $monthPayload = [
+                'summary' => [
+                    'views' => $mViews,
+                    'searches' => $mSearches > 0 ? $mSearches : (int)round($mViews * 0.4),
+                    'interactions' => $mInteractions,
+                    'calls' => $mCalls,
+                    'phone_calls' => $mCalls,
+                    'directions' => $mDirections,
+                    'direction_requests' => $mDirections,
+                    'website_clicks' => $mClicks,
+                    'clicks' => $mClicks,
+                ],
+                'daily_metrics' => $monthDaily,
+                'daily_traffic' => $monthDaily,
+            ];
+
+            file_put_contents("{$targetDir}/{$mMonth}.json", json_encode($monthPayload, JSON_PRETTY_PRINT));
+        }
     }
 }

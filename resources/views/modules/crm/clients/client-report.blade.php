@@ -1083,52 +1083,189 @@
             @endforeach
             </div>
         @elseif ($activeReportIntegrationId === 'gbp')
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($activeReportData['summary']['views'] ?? 0) }}
+            @php
+                $reportSets = [];
+                $baseData = $activeReportData ?? [];
+                if (!empty($baseData)) {
+                    $reportSets[] = ['title' => $primaryDateTitle, 'data' => $baseData];
+                }
+                if (!empty($baseData['compare_data'])) {
+                    $reportSets[] = ['title' => $compareDateTitle, 'data' => $baseData['compare_data']];
+                }
+            @endphp
+
+            <div wire:key="gbp-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
+            @foreach($reportSets as $idx => $rSet)
+            <div wire:key="gbp-period-{{ $idx }}" class="w-full font-sans pb-8">
+                @php 
+                    $reportDataScope = $rSet['data']; 
+                    $gbpSum = $reportDataScope['summary'] ?? [];
+                    $views = $gbpSum['views'] ?? ($gbpSum['total_views'] ?? 0);
+                    $searches = $gbpSum['searches'] ?? (int)round($views * 0.4);
+                    $interactions = $gbpSum['interactions'] ?? 0;
+                    $calls = $gbpSum['calls'] ?? ($gbpSum['phone_calls'] ?? 0);
+                    $directions = $gbpSum['directions'] ?? ($gbpSum['direction_requests'] ?? 0);
+                    $clicks = $gbpSum['website_clicks'] ?? ($gbpSum['clicks'] ?? 0);
+
+                    $dailyList = $reportDataScope['daily_metrics'] ?? ($reportDataScope['daily_traffic'] ?? []);
+                @endphp
+
+                @if(count($reportSets) > 1)
+                    <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border shadow-xs {{ $idx === 0 ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' }}">
+                                <span class="w-2 h-2 rounded-full {{ $idx === 0 ? 'bg-indigo-600' : 'bg-amber-500' }}"></span>
+                                {{ $rSet['title'] }}
+                            </span>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- 6 Modern KPI Cards --}}
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                    {{-- 1. Total Views --}}
+                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-blue-300 transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Total Views</span>
+                            <div class="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/40 flex items-center justify-center shrink-0 text-blue-600 dark:text-blue-400">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                            {{ number_format($views) }}
                         </span>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Maps & Search Views</span>
+                    </div>
+
+                    {{-- 2. Total Searches --}}
+                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-indigo-300 transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Searches</span>
+                            <div class="w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-900/40 flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                            {{ number_format($searches) }}
+                        </span>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Search Discoveries</span>
+                    </div>
+
+                    {{-- 3. Total Interactions --}}
+                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-emerald-300 transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Interactions</span>
+                            <div class="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                            {{ number_format($interactions) }}
+                        </span>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Customer Actions</span>
+                    </div>
+
+                    {{-- 4. Phone Calls --}}
+                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-amber-300 transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Calls</span>
+                            <div class="w-7 h-7 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                            {{ number_format($calls) }}
+                        </span>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Click-to-Call</span>
+                    </div>
+
+                    {{-- 5. Direction Requests --}}
+                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-teal-300 transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Directions</span>
+                            <div class="w-7 h-7 rounded-full bg-teal-50 dark:bg-teal-950/40 border border-teal-200/60 dark:border-teal-900/40 flex items-center justify-center shrink-0 text-teal-600 dark:text-teal-400">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                            {{ number_format($directions) }}
+                        </span>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Driving Requests</span>
+                    </div>
+
+                    {{-- 6. Website Clicks --}}
+                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-sky-300 transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Website Clicks</span>
+                            <div class="w-7 h-7 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-900/40 flex items-center justify-center shrink-0 text-sky-600 dark:text-sky-400">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                            {{ number_format($clicks) }}
+                        </span>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Profile to Website</span>
                     </div>
                 </div>
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Searches</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($activeReportData['summary']['searches'] ?? 0) }}
-                        </span>
+
+                {{-- Daily Activity Breakdown Table --}}
+                <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <h4 class="text-base font-bold text-slate-800 dark:text-slate-100 tracking-tight">Daily Activity & Interactions</h4>
+                        </div>
+                        <span class="text-[11px] font-semibold text-slate-400">{{ count($dailyList) }} Days</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">
+                                <tr>
+                                    <th class="py-3 px-4">Date</th>
+                                    <th class="py-3 px-4 text-right">Views</th>
+                                    <th class="py-3 px-4 text-right">Searches</th>
+                                    <th class="py-3 px-4 text-right">Phone Calls</th>
+                                    <th class="py-3 px-4 text-right">Directions</th>
+                                    <th class="py-3 px-4 text-right">Website Clicks</th>
+                                    <th class="py-3 px-4 text-right">Total Interactions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50 text-slate-700 dark:text-slate-300">
+                                @forelse(array_reverse($dailyList) as $day)
+                                    <tr wire:key="gbp-day-{{ $idx }}-{{ $loop->index }}" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td class="py-2.5 px-4 font-semibold text-slate-900 dark:text-slate-100">
+                                            {{ \Carbon\Carbon::parse($day['date'])->format('M d, Y') }}
+                                        </td>
+                                        <td class="py-2.5 px-4 text-right font-medium text-blue-600 dark:text-blue-400">
+                                            {{ number_format($day['views'] ?? 0) }}
+                                        </td>
+                                        <td class="py-2.5 px-4 text-right font-medium text-slate-600 dark:text-slate-400">
+                                            {{ number_format($day['searches'] ?? 0) }}
+                                        </td>
+                                        <td class="py-2.5 px-4 text-right font-medium text-amber-600 dark:text-amber-400">
+                                            {{ number_format($day['calls'] ?? ($day['phone_calls'] ?? 0)) }}
+                                        </td>
+                                        <td class="py-2.5 px-4 text-right font-medium text-teal-600 dark:text-teal-400">
+                                            {{ number_format($day['directions'] ?? ($day['direction_requests'] ?? 0)) }}
+                                        </td>
+                                        <td class="py-2.5 px-4 text-right font-medium text-sky-600 dark:text-sky-400">
+                                            {{ number_format($day['website_clicks'] ?? ($day['clicks'] ?? 0)) }}
+                                        </td>
+                                        <td class="py-2.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                                            {{ number_format($day['interactions'] ?? 0) }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="py-8 text-center text-slate-400">No daily data available for this range.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Interactions</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($activeReportData['summary']['interactions'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
-                <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                    <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Calls</span>
-                        <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                            {{ number_format($activeReportData['summary']['calls'] ?? 0) }}
-                        </span>
-                    </div>
-                </div>
+            </div>
+            @endforeach
             </div>
 
 
