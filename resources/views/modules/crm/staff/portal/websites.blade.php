@@ -1124,7 +1124,7 @@
                 <button type="button" @click="show = false" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-355 font-bold text-xs rounded-xl border border-slate-200/50 dark:border-slate-800/50 active:scale-95 transition-all">
                     Cancel
                 </button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-755 text-white text-xs font-semibold shadow active:scale-95 transition-all">
+                <button type="submit" class="px-4 py-2 rounded-xl bg-[#135266] hover:bg-indigo-755 text-white text-xs font-semibold shadow active:scale-95 transition-all">
                     Update Details
                 </button>
             </div>

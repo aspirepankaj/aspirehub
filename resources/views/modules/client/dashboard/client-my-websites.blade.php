@@ -1,11 +1,11 @@
 <div>
     <div class="mb-6 sm:mb-8">
 
-        <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
+        <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-[#135266] dark:text-slate-500">
             My Websites
         </div>
 
-        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#135266] dark:text-white">
             All your websites.
         </h1>
 

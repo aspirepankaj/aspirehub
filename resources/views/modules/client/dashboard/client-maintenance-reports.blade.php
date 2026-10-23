@@ -1,10 +1,10 @@
 <div>
 
     <div class="mb-6 sm:mb-8">
-        <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400">
+        <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-[#135266]">
             Maintenance Reports
         </div>
-        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#135266] dark:text-white">
             Everything we did, in plain language.
         </h1>
         <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
