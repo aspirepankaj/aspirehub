@@ -512,6 +512,62 @@ Jab aap live server par git pull lete hain, toh terminal par ye commands run kar
 - **Toggle Visibility**: Control report display via `$showAiMarketingReport` in `ManageMarketingReports.php` without removing underlying AI telemetry logic.
 </details>
 
+<details>
+<summary><b>12. 📍 Google Business Profile (GBP) Integration Guide</b> (Click to expand)</summary>
+
+### A. Google Cloud Console Setup
+1. Log in to [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable the required APIs in your project:
+   - **Google Business Profile Performance API** (`businessprofileperformance.googleapis.com`)
+   - **My Business Account Management API** (`mybusinessaccountmanagement.googleapis.com`)
+   - **My Business Business Information API** (`mybusinessbusinessinformation.googleapis.com`)
+3. Navigate to **APIs & Services > Credentials**:
+   - Create an **OAuth 2.0 Client ID** (Application type: **Web application**).
+   - Under **Authorized redirect URIs**, add both:
+     ```text
+     http://127.0.0.1:8000/admin/integrations/google/callback
+     https://hub.aspiredigitalsolutions.com/admin/integrations/google/callback
+     ```
+4. Download the credentials file and keep it named **`credentials.json`**.
+
+---
+
+### B. Upload & Connect in Aspire Hub
+1. Navigate to **Clients > [Select Client] > Integrations > Google Business Profile**.
+2. Click **Configure Credentials**:
+   - Upload the downloaded **`credentials.json`** file.
+   - Click **Save Configuration**.
+3. Click **Connect with Google**:
+   - Google OAuth consent screen open hoga.
+   - Apne Google account se sign in karke permissions approve karein (`https://www.googleapis.com/auth/business.manage`).
+4. Select or Enter **Location ID**:
+   - Callback ke baad dropdown automatically aapke account ke Business Locations load karega.
+   - Dropdown se location select karein ya manually enter karein (*Tip: GBP > 3 dots > Business Profile settings > Advanced settings > Copy Business Profile ID*).
+   - Click **Save**.
+
+---
+
+### C. Sync Metrics & Reports
+1. **Sync Command**:
+   ```bash
+   php artisan sync:gbp-metrics
+   # Or sync a specific integration ID:
+   php artisan sync:gbp-metrics 5
+   ```
+2. **Automated Daily Sync**:
+   `routes/console.php` ke under daily scheduler automatically registered hai:
+   ```php
+   Schedule::command('sync:gbp-metrics')->daily();
+   ```
+3. **Data & Reporting**:
+   - Telemetry JSON automatically `storage/app/adscljson/{client}/{website}/gbp/{year}/{month}.json` mein store hoti hai.
+   - Metrics available in:
+     - **Admin & Staff Client Marketing Reports** (KPI Cards: Total Views, Searches, Interactions, Calls, Direction Requests, Website Clicks + Daily Activity Table).
+     - **Client Portal** (`/client/marketing-reports?tab=gbp`).
+     - **Exportable PDF Reports**.
+     - **AI Marketing Intelligence Reports**.
+</details>
+
 ---
 
 ## 📧 Email & SMTP Configuration

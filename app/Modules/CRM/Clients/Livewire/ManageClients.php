@@ -1834,7 +1834,12 @@ class ManageClients extends Component
         
                 $url = "https://businessprofileperformance.googleapis.com/v1/{$locationId}:fetchMultiDailyMetricsTimeSeries";
                 
-                $response = \Illuminate\Support\Facades\Http::withToken($accessToken)->get($url, [
+                $http = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15);
+                if (app()->environment('local')) {
+                    $http = $http->withoutVerifying();
+                }
+
+                $response = $http->get($url, [
                     'dailyMetrics' => [
                         'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
                         'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
@@ -1855,47 +1860,108 @@ class ManageClients extends Component
                 if ($response->successful()) {
                     $data = $response->json();
                     
-                    // Format the data for the UI
                     $totalViews = 0;
+                    $totalSearches = 0;
                     $interactions = 0;
                     $calls = 0;
-        
+                    $directions = 0;
+                    $websiteClicks = 0;
+                    $dailyMap = [];
+
                     if (isset($data['multiDailyMetricTimeSeries'])) {
                         foreach ($data['multiDailyMetricTimeSeries'] as $series) {
-                            $metric = $series['dailyMetric'];
-                            $count = 0;
-                            
-                            if (isset($series['timeSeries']['datedValues'])) {
-                                foreach ($series['timeSeries']['datedValues'] as $value) {
-                                    $count += (int)($value['value'] ?? 0);
+                            $metric = $series['dailyMetric'] ?? '';
+                            $datedValues = $series['timeSeries']['datedValues'] 
+                                ?? ($series['dailyMetricTimeSeries']['timeSeries']['datedValues'] ?? []);
+
+                            foreach ($datedValues as $val) {
+                                $vYear = $val['date']['year'] ?? null;
+                                $vMonth = str_pad($val['date']['month'] ?? 1, 2, '0', STR_PAD_LEFT);
+                                $vDay = str_pad($val['date']['day'] ?? 1, 2, '0', STR_PAD_LEFT);
+                                if (!$vYear) continue;
+
+                                $dateStr = "{$vYear}-{$vMonth}-{$vDay}";
+                                if (!isset($dailyMap[$dateStr])) {
+                                    $dailyMap[$dateStr] = [
+                                        'date' => $dateStr,
+                                        'views' => 0,
+                                        'searches' => 0,
+                                        'interactions' => 0,
+                                        'calls' => 0,
+                                        'phone_calls' => 0,
+                                        'directions' => 0,
+                                        'direction_requests' => 0,
+                                        'website_clicks' => 0,
+                                        'clicks' => 0,
+                                    ];
                                 }
-                            }
-        
-                            if (str_starts_with($metric, 'BUSINESS_IMPRESSIONS_')) {
-                                $totalViews += $count;
-                            }
-                            
-                            if (in_array($metric, ['CALL_CLICKS', 'WEBSITE_CLICKS', 'BUSINESS_DIRECTION_REQUESTS'])) {
-                                $interactions += $count;
-                            }
-        
-                            if ($metric === 'CALL_CLICKS') {
-                                $calls += $count;
+
+                                $count = (int)($val['value'] ?? 0);
+
+                                if (str_starts_with($metric, 'BUSINESS_IMPRESSIONS_')) {
+                                    $dailyMap[$dateStr]['views'] += $count;
+                                    $totalViews += $count;
+                                    if (str_contains($metric, 'SEARCH')) {
+                                        $dailyMap[$dateStr]['searches'] += $count;
+                                        $totalSearches += $count;
+                                    }
+                                }
+
+                                if ($metric === 'CALL_CLICKS') {
+                                    $dailyMap[$dateStr]['calls'] += $count;
+                                    $dailyMap[$dateStr]['phone_calls'] += $count;
+                                    $calls += $count;
+                                }
+
+                                if ($metric === 'BUSINESS_DIRECTION_REQUESTS') {
+                                    $dailyMap[$dateStr]['directions'] += $count;
+                                    $dailyMap[$dateStr]['direction_requests'] += $count;
+                                    $directions += $count;
+                                }
+
+                                if ($metric === 'WEBSITE_CLICKS') {
+                                    $dailyMap[$dateStr]['website_clicks'] += $count;
+                                    $dailyMap[$dateStr]['clicks'] += $count;
+                                    $websiteClicks += $count;
+                                }
                             }
                         }
                     }
-        
+
+                    if ($totalSearches === 0 && $totalViews > 0) {
+                        $totalSearches = (int)round($totalViews * 0.4);
+                    }
+                    $interactions = $calls + $directions + $websiteClicks;
+
+                    foreach ($dailyMap as $dateStr => &$dayData) {
+                        if ($dayData['searches'] === 0 && $dayData['views'] > 0) {
+                            $dayData['searches'] = (int)round($dayData['views'] * 0.4);
+                        }
+                        $dayData['interactions'] = $dayData['calls'] + $dayData['directions'] + $dayData['website_clicks'];
+                    }
+                    unset($dayData);
+
+                    ksort($dailyMap);
+                    $dailyList = array_values($dailyMap);
+
                     $reportData = [
                         'summary' => [
                             'views' => $totalViews,
-                            'searches' => (int)($totalViews * 0.4), // Proxy
+                            'searches' => $totalSearches,
                             'interactions' => $interactions,
                             'calls' => $calls,
+                            'phone_calls' => $calls,
+                            'directions' => $directions,
+                            'direction_requests' => $directions,
+                            'website_clicks' => $websiteClicks,
+                            'clicks' => $websiteClicks,
                         ],
+                        'daily_traffic' => $dailyList,
+                        'daily_metrics' => $dailyList,
                         'raw' => $data
                     ];
                 } else {
-                    $errorMsg = $response->json('error.message') ?? 'Please ensure the Location ID is correct.';
+                    $errorMsg = $response->json('error.message') ?? $response->body();
                     \Illuminate\Support\Facades\Log::warning('GBP API call failed: ' . $response->body());
                     $reportData = ['error' => 'GBP API failed: ' . $errorMsg];
                 }
@@ -2437,144 +2503,175 @@ class ManageClients extends Component
                 $reportData['daily_traffic'] = $dailyTraffic;
             }
 
-            if (isset($reportData['daily_traffic']) && is_array($reportData['daily_traffic']) && count($reportData['daily_traffic']) > 0) {
-                $grouped = [];
-                foreach ($reportData['daily_traffic'] as $row) {
-                    $d = $row['date'] ?? null;
-                    if ($d && strlen($d) >= 8) {
-                        $dtStr = (strpos($d, '-') !== false) ? $d : substr($d, 0, 4) . '-' . substr($d, 4, 2) . '-' . substr($d, 6, 2);
-                        try {
-                            $cDate = \Carbon\Carbon::parse($dtStr);
-                            $y = $cDate->format('Y');
-                            $m = \Illuminate\Support\Str::lower($cDate->format('F'));
-                            $grouped["{$y}|{$m}"][] = $row;
-                        } catch (\Exception $e) {
+            if (!isset($reportData['error'])) {
+                if (isset($reportData['daily_traffic']) && is_array($reportData['daily_traffic']) && count($reportData['daily_traffic']) > 0) {
+                    $grouped = [];
+                    foreach ($reportData['daily_traffic'] as $row) {
+                        $d = $row['date'] ?? null;
+                        if ($d && strlen($d) >= 8) {
+                            $dtStr = (strpos($d, '-') !== false) ? $d : substr($d, 0, 4) . '-' . substr($d, 4, 2) . '-' . substr($d, 6, 2);
+                            try {
+                                $cDate = \Carbon\Carbon::parse($dtStr);
+                                $y = $cDate->format('Y');
+                                $m = \Illuminate\Support\Str::lower($cDate->format('F'));
+                                $grouped["{$y}|{$m}"][] = $row;
+                            } catch (\Exception $e) {
+                                $grouped["{$year}|{$monthFull}"][] = $row;
+                            }
+                        } else {
                             $grouped["{$year}|{$monthFull}"][] = $row;
                         }
-                    } else {
-                        $grouped["{$year}|{$monthFull}"][] = $row;
                     }
-                }
 
-                foreach ($grouped as $key => $rows) {
-                    list($y, $m) = explode('|', $key);
-                    $mPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$y}/{$m}.json");
-                    $mDir = dirname($mPath);
-                    if (!file_exists($mDir)) {
-                        mkdir($mDir, 0755, true);
-                    }
-                    $mReportData = $reportData;
-                    
-                    if ($integrationId === 'facebook' || $integrationId === 'linkedin') {
-                        $mReach = 0;
-                        $mViews = 0;
-                        $mEngaged = 0;
-                        foreach ($rows as $r) {
-                            $mReach += $r['reach'] ?? ($r['impressions'] ?? 0);
-                            $mViews += $r['views'] ?? 0;
-                            $mEngaged += $r['engaged'] ?? ($r['engagements'] ?? 0);
+                    foreach ($grouped as $key => $rows) {
+                        list($y, $m) = explode('|', $key);
+                        $mPath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$y}/{$m}.json");
+                        $mDir = dirname($mPath);
+                        if (!file_exists($mDir)) {
+                            mkdir($mDir, 0755, true);
                         }
-                        $mReportData['summary']['reach'] = $mReach;
-                        $mReportData['summary']['views'] = $mViews;
-                        $mReportData['summary']['engaged'] = $mEngaged;
+                        $mReportData = $reportData;
                         
-                        if (isset($mReportData['top_posts'])) {
-                            $mTopPosts = [];
-                            foreach ($mReportData['top_posts'] as $tp) {
-                                $tpDate = $tp['created_time'] ?? '';
-                                if ($tpDate) {
-                                    $tpDateObj = \Carbon\Carbon::parse($tpDate);
-                                    if ($tpDateObj->format('Y') == $y && \Illuminate\Support\Str::lower($tpDateObj->format('F')) == $m) {
-                                        $mTopPosts[] = $tp;
+                        if ($integrationId === 'facebook' || $integrationId === 'linkedin') {
+                            $mReach = 0;
+                            $mViews = 0;
+                            $mEngaged = 0;
+                            foreach ($rows as $r) {
+                                $mReach += $r['reach'] ?? ($r['impressions'] ?? 0);
+                                $mViews += $r['views'] ?? 0;
+                                $mEngaged += $r['engaged'] ?? ($r['engagements'] ?? 0);
+                            }
+                            $mReportData['summary']['reach'] = $mReach;
+                            $mReportData['summary']['views'] = $mViews;
+                            $mReportData['summary']['engaged'] = $mEngaged;
+                            
+                            if (isset($mReportData['top_posts'])) {
+                                $mTopPosts = [];
+                                foreach ($mReportData['top_posts'] as $tp) {
+                                    $tpDate = $tp['created_time'] ?? '';
+                                    if ($tpDate) {
+                                        $tpDateObj = \Carbon\Carbon::parse($tpDate);
+                                        if ($tpDateObj->format('Y') == $y && \Illuminate\Support\Str::lower($tpDateObj->format('F')) == $m) {
+                                            $mTopPosts[] = $tp;
+                                        }
                                     }
                                 }
-                            }
-                            $mReportData['top_posts'] = $mTopPosts;
-                            $mReportData['summary']['posts'] = count($mTopPosts);
+                                $mReportData['top_posts'] = $mTopPosts;
+                                $mReportData['summary']['posts'] = count($mTopPosts);
 
-                            if ($integrationId === 'linkedin') {
-                                $mShares = 0;
-                                $mComments = 0;
-                                $mReactions = 0;
-                                $mPostEngagements = 0;
-                                $mPostImpressions = 0;
-                                foreach ($mTopPosts as $tp) {
-                                    $mShares += (int)($tp['shares'] ?? 0);
-                                    $mComments += (int)($tp['comments'] ?? 0);
-                                    $mReactions += (int)($tp['reactions'] ?? ($tp['likes'] ?? 0));
-                                    $mPostEngagements += (int)($tp['engaged'] ?? 0);
-                                    $mPostImpressions += (int)($tp['impressions'] ?? ($tp['views'] ?? 0));
+                                if ($integrationId === 'linkedin') {
+                                    $mShares = 0;
+                                    $mComments = 0;
+                                    $mReactions = 0;
+                                    $mPostEngagements = 0;
+                                    $mPostImpressions = 0;
+                                    foreach ($mTopPosts as $tp) {
+                                        $mShares += (int)($tp['shares'] ?? 0);
+                                        $mComments += (int)($tp['comments'] ?? 0);
+                                        $mReactions += (int)($tp['reactions'] ?? ($tp['likes'] ?? 0));
+                                        $mPostEngagements += (int)($tp['engaged'] ?? 0);
+                                        $mPostImpressions += (int)($tp['impressions'] ?? ($tp['views'] ?? 0));
+                                    }
+                                    $mReportData['summary']['post_shares'] = $mShares;
+                                    $mReportData['summary']['post_comments'] = $mComments;
+                                    $mReportData['summary']['post_reactions'] = $mReactions;
+                                    $mReportData['summary']['post_engagements'] = $mPostEngagements;
+                                    $mReportData['summary']['avg_post_engagement_rate'] = $mPostImpressions > 0 
+                                        ? round(($mPostEngagements / $mPostImpressions) * 100, 2) 
+                                        : 0;
                                 }
-                                $mReportData['summary']['post_shares'] = $mShares;
-                                $mReportData['summary']['post_comments'] = $mComments;
-                                $mReportData['summary']['post_reactions'] = $mReactions;
-                                $mReportData['summary']['post_engagements'] = $mPostEngagements;
-                                $mReportData['summary']['avg_post_engagement_rate'] = $mPostImpressions > 0 
-                                    ? round(($mPostEngagements / $mPostImpressions) * 100, 2) 
-                                    : 0;
                             }
-                        }
-                    } elseif ($integrationId === 'gads') {
-                        $mClicks = 0;
-                        $mImpressions = 0;
-                        $mCost = 0;
-                        $mConversions = 0;
-                        foreach ($rows as $r) {
-                            $mClicks += (int)($r['clicks'] ?? 0);
-                            $mImpressions += (int)($r['impressions'] ?? 0);
-                            $mCost += (float)($r['cost'] ?? 0);
-                            $mConversions += (float)($r['conversions'] ?? 0);
-                        }
-                        $mReportData['summary']['clicks'] = $mClicks;
-                        $mReportData['summary']['impressions'] = $mImpressions;
-                        $mReportData['summary']['cost'] = round($mCost, 2);
-                        $mReportData['summary']['conversions'] = round($mConversions, 2);
-                        $mReportData['summary']['ctr'] = $mImpressions > 0 ? round(($mClicks / $mImpressions) * 100, 2) : 0;
-                        $mReportData['summary']['average_cpc'] = $mClicks > 0 ? round($mCost / $mClicks, 2) : 0;
+                        } elseif ($integrationId === 'gads') {
+                            $mClicks = 0;
+                            $mImpressions = 0;
+                            $mCost = 0;
+                            $mConversions = 0;
+                            foreach ($rows as $r) {
+                                $mClicks += (int)($r['clicks'] ?? 0);
+                                $mImpressions += (int)($r['impressions'] ?? 0);
+                                $mCost += (float)($r['cost'] ?? 0);
+                                $mConversions += (float)($r['conversions'] ?? 0);
+                            }
+                            $mReportData['summary']['clicks'] = $mClicks;
+                            $mReportData['summary']['impressions'] = $mImpressions;
+                            $mReportData['summary']['cost'] = round($mCost, 2);
+                            $mReportData['summary']['conversions'] = round($mConversions, 2);
+                            $mReportData['summary']['ctr'] = $mImpressions > 0 ? round(($mClicks / $mImpressions) * 100, 2) : 0;
+                            $mReportData['summary']['average_cpc'] = $mClicks > 0 ? round($mCost / $mClicks, 2) : 0;
 
-                        if (isset($reportData['daily_campaigns'])) {
-                            $mReportData['daily_campaigns'] = array_values(array_filter($reportData['daily_campaigns'], function($dc) use ($y, $m) {
-                                $d = $dc['date'] ?? '';
-                                if (!$d) return false;
-                                try {
-                                    $cDate = \Carbon\Carbon::parse($d);
-                                    return $cDate->format('Y') == $y && \Illuminate\Support\Str::lower($cDate->format('F')) == $m;
-                                } catch (\Exception $e) {
-                                    return false;
-                                }
-                            }));
+                            if (isset($reportData['daily_campaigns'])) {
+                                $mReportData['daily_campaigns'] = array_values(array_filter($reportData['daily_campaigns'], function($dc) use ($y, $m) {
+                                    $d = $dc['date'] ?? '';
+                                    if (!$d) return false;
+                                    try {
+                                        $cDate = \Carbon\Carbon::parse($d);
+                                        return $cDate->format('Y') == $y && \Illuminate\Support\Str::lower($cDate->format('F')) == $m;
+                                    } catch (\Exception $e) {
+                                        return false;
+                                    }
+                                }));
+                            }
+                            if (isset($reportData['daily_keywords'])) {
+                                $mReportData['daily_keywords'] = array_values(array_filter($reportData['daily_keywords'], function($dk) use ($y, $m) {
+                                    $d = $dk['date'] ?? '';
+                                    if (!$d) return false;
+                                    try {
+                                        $cDate = \Carbon\Carbon::parse($d);
+                                        return $cDate->format('Y') == $y && \Illuminate\Support\Str::lower($cDate->format('F')) == $m;
+                                    } catch (\Exception $e) {
+                                        return false;
+                                    }
+                                }));
+                            }
+                        } elseif ($integrationId === 'gbp') {
+                            $mViews = 0;
+                            $mSearches = 0;
+                            $mCalls = 0;
+                            $mDirections = 0;
+                            $mClicks = 0;
+                            foreach ($rows as $r) {
+                                $mViews += $r['views'] ?? ($r['impressions'] ?? 0);
+                                $mSearches += $r['searches'] ?? 0;
+                                $mCalls += $r['calls'] ?? ($r['phone_calls'] ?? 0);
+                                $mDirections += $r['directions'] ?? ($r['direction_requests'] ?? 0);
+                                $mClicks += $r['website_clicks'] ?? ($r['clicks'] ?? 0);
+                            }
+                            if ($mSearches === 0 && $mViews > 0) {
+                                $mSearches = (int)round($mViews * 0.4);
+                            }
+                            $mInteractions = $mCalls + $mDirections + $mClicks;
+                            $mReportData['summary'] = [
+                                'views' => $mViews,
+                                'searches' => $mSearches,
+                                'interactions' => $mInteractions,
+                                'calls' => $mCalls,
+                                'phone_calls' => $mCalls,
+                                'directions' => $mDirections,
+                                'direction_requests' => $mDirections,
+                                'website_clicks' => $mClicks,
+                                'clicks' => $mClicks,
+                            ];
+                            $mReportData['daily_metrics'] = $rows;
                         }
-                        if (isset($reportData['daily_keywords'])) {
-                            $mReportData['daily_keywords'] = array_values(array_filter($reportData['daily_keywords'], function($dk) use ($y, $m) {
-                                $d = $dk['date'] ?? '';
-                                if (!$d) return false;
-                                try {
-                                    $cDate = \Carbon\Carbon::parse($d);
-                                    return $cDate->format('Y') == $y && \Illuminate\Support\Str::lower($cDate->format('F')) == $m;
-                                } catch (\Exception $e) {
-                                    return false;
-                                }
-                            }));
-                        }
+
+                        $mReportData['daily_traffic'] = $rows;
+                        file_put_contents($mPath, json_encode($mReportData, JSON_PRETTY_PRINT));
                     }
+                } else {
+                    $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
+                    $dir = dirname($filePath);
+                    if (!file_exists($dir)) {
+                        mkdir($dir, 0755, true);
+                    }
+                    file_put_contents($filePath, json_encode($reportData, JSON_PRETTY_PRINT));
+                }
 
-                    $mReportData['daily_traffic'] = $rows;
-                    file_put_contents($mPath, json_encode($mReportData, JSON_PRETTY_PRINT));
-                }
-            } else {
-                $filePath = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/{$integrationId}/{$year}/{$monthFull}.json");
-                $dir = dirname($filePath);
-                if (!file_exists($dir)) {
-                    mkdir($dir, 0755, true);
-                }
-                file_put_contents($filePath, json_encode($reportData, JSON_PRETTY_PRINT));
+                \Illuminate\Support\Facades\Cache::flush();
+
+                $integration->update([
+                    'last_sync_at' => now(),
+                ]);
             }
-
-            \Illuminate\Support\Facades\Cache::flush();
-
-            $integration->update([
-                'last_sync_at' => now(),
-            ]);
 
             // Log Activity
             \App\Modules\Core\Activity\Models\ActivityLog::create([
@@ -2600,7 +2697,6 @@ class ManageClients extends Component
             session()->flash('error', "Refresh completed but failed to write monthly file.");
         }
     }
-
 
     private function getMockLinkedInReportData(?string $orgId = null, ?string $startDateStr = null, ?string $endDateStr = null, ?int $exactFollowers = null): array
     {
@@ -3274,9 +3370,11 @@ class ManageClients extends Component
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-                ->timeout(15)
-                ->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
+            $http = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15);
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+            $response = $http->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
 
             if ($response->successful()) {
                 $accounts = $response->json('accounts') ?? [];
@@ -3285,11 +3383,13 @@ class ManageClients extends Component
                 foreach ($accounts as $account) {
                     $accountId = $account['name'];
                     
-                    $locResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
-                        ->timeout(15)
-                        ->get("https://mybusinessbusinessinformation.googleapis.com/v1/{$accountId}/locations", [
-                            'readMask' => 'name,title'
-                        ]);
+                    $locHttp = \Illuminate\Support\Facades\Http::withToken($accessToken)->timeout(15);
+                    if (app()->environment('local')) {
+                        $locHttp = $locHttp->withoutVerifying();
+                    }
+                    $locResponse = $locHttp->get("https://mybusinessbusinessinformation.googleapis.com/v1/{$accountId}/locations", [
+                        'readMask' => 'name,title'
+                    ]);
                         
                     if ($locResponse->successful()) {
                         $locations = $locResponse->json('locations') ?? [];

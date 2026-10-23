@@ -668,6 +668,7 @@ Output strictly valid JSON with this exact schema:
                         $kpis['Top 10 Rankings'] = number_format((int) ($summary['top_10'] ?? 0));
                         $kpis['Share of Voice'] = ($summary['share_of_voice'] ?? '0%');
                     } elseif ($platform === 'gbp') {
+                        $kpis['Total Views'] = number_format((int) ($summary['views'] ?? 0));
                         $kpis['Total Interactions'] = number_format((int) ($summary['interactions'] ?? 0));
                         $kpis['Calls'] = number_format((int) ($summary['calls'] ?? 0));
                         $kpis['Website Clicks'] = number_format((int) ($summary['website_clicks'] ?? 0));
