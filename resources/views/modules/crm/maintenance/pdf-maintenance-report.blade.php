@@ -6,17 +6,31 @@
     <style>
         @page {
             margin: 0;
+            size: 595.28pt 841.89pt;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
         }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: #000000;
             font-size: 11px;
-            line-height: 1.6;
+            line-height: 1.5;
             margin: 0;
-            padding: 40px 45px;
+            padding: 0;
             background-color: #ffffff;
         }
-        
+        .page {
+            width: 595.28pt;
+            height: auto;
+            position: relative;
+            background-color: #ffffff;
+            box-sizing: border-box;
+        }
+        .page-break-container {
+            page-break-before: always;
+        }
 
         /* Watermark */
         .watermark {
@@ -32,50 +46,123 @@
             width: 250px;
             height: auto;
         }
-        /* Top Brand Accent Stripe */
-        .brand-accent-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: #135266;
-        }
-        
-        /* Header section */
-        .header-table {
+
+        /* ── Dark Teal Header Banner (Matching Marketing Report) ── */
+        .header-banner {
             width: 100%;
+            background-color: #0c4a60;
             border-collapse: collapse;
-            margin-top: 15px;
-            margin-bottom: 25px;
+            table-layout: fixed;
+            margin: 0;
+            border: 0;
         }
-        .header-table td {
-            padding: 0;
+        .header-banner td {
             vertical-align: middle;
         }
-        .brand-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #135266;
-            letter-spacing: -0.5px;
-            margin: 0;
+        .header-left {
+            padding: 16px 0 14px 32px;
+            vertical-align: middle;
+        }
+        .header-right {
+            padding: 16px 32px 14px 0;
+            vertical-align: middle;
+            text-align: right;
+            width: 210px;
+        }
+        .logo-img {
+            height: 22px;
+            width: auto;
+            max-width: 130px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .header-title-white {
+            font-size: 19px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
             text-transform: uppercase;
         }
-        .brand-subtitle {
-            font-size: 10px;
-            color: #222222;
-            margin-top: 4px;
+        .header-title-cyan {
+            font-size: 19px;
+            font-weight: 800;
+            color: #4ea6b7;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+        .header-divider {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+            margin: 4px 0 4px 0;
+            width: 100%;
+        }
+        .header-subtitle {
+            font-size: 9.5px;
+            color: #ffffff;
             font-weight: 500;
+            opacity: 0.95;
+            line-height: 1.3;
             letter-spacing: 0.2px;
         }
-        .report-tag {
+
+        /* Filter Date Pill Top Right */
+        .filter-pill {
+            background-color: #ffffff;
+            color: #1e293b;
+            border-radius: 12px;
+            padding: 4px 12px;
+            display: inline-block;
             font-size: 9.5px;
             font-weight: 800;
-            color: #135266;
-            background-color: #e6f0f2;
-            padding: 5px 12px;
-            border-radius: 4px;
+            border: 1px solid #d0d0d0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .header-report-tag {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 800;
+            color: #ffffffcc;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* ── Content Wrapper ── */
+        .content-body {
+            padding: 20px 32px 55pt 32px;
+            box-sizing: border-box;
+        }
+
+        /* ── Page Footer (Matching Marketing Report) ── */
+        .page-footer {
+            position: absolute;
+            bottom: 25pt;
+            left: 32px;
+            right: 32px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 8px;
+            box-sizing: border-box;
+        }
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .footer-table td {
+            vertical-align: middle;
+            padding: 0;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #475569;
+        }
+        .footer-left {
+            text-align: left;
+        }
+        .footer-right {
+            text-align: right;
         }
         
         /* Meta Information Grid */
@@ -291,38 +378,66 @@
     </style>
 </head>
 <body>
+@php
+    $logoBase64 = '';
+    $svgPath = public_path('Aspire_Logo-01-White-2.svg');
+    if (file_exists($svgPath)) {
+        $logoBase64 = 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($svgPath));
+    } elseif (file_exists(public_path('Aspire_Logo-01-White-2.png'))) {
+        $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('Aspire_Logo-01-White-2.png')));
+    }
+
+    $totalPages = 1;
+    if (!$report->plugins->isEmpty()) {
+        $totalPages++;
+    }
+    if ($report->attachments_visible_to_client && $report->attachments->isNotEmpty()) {
+        $totalPages++;
+    }
+    $currentPageNum = 1;
+@endphp
 
     <!-- Watermark Background -->
     <div class="watermark">
         <img src="{{ public_path('aspire-triangle.svg') }}" alt="Watermark">
     </div>
 
-    <!-- Top Branding Line -->
-    <div class="brand-accent-bar"></div>
-
-    <!-- Header Block -->
-    <table class="header-table">
+    <!-- Page 1 -->
+    <div class="page">
+        <!-- Header Banner -->
+    <table class="header-banner" cellpadding="0" cellspacing="0">
         <tr>
-            <td>
-                <div class="brand-title">Website Audit & Maintenance</div>
-                <div class="brand-subtitle">Monthly execution report for platform upgrades, performance logs & security shields</div>
+            <td class="header-left">
+                @if(!empty($logoBase64))
+                    <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                @else
+                    <div style="font-size: 14px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; margin-bottom: 4px;">ASPIRE DIGITAL SOLUTIONS</div>
+                @endif
+                <div>
+                    <span class="header-title-white">WEBSITE AUDIT &amp; </span><span class="header-title-cyan">MAINTENANCE</span>
+                </div>
+                <div class="header-divider"></div>
+                <div class="header-subtitle">Monthly execution report for platform upgrades, performance logs &amp; security shields</div>
             </td>
-            <td align="right" style="width: 200px;">
-                <table style="border-collapse: collapse; border: 0; float: right;">
+            <td class="header-right" align="right">
+                <table style="border-collapse: collapse; float: right;">
                     <tr>
-                        <td align="right" style="padding-bottom: 8px;">
-                            <span style="font-size: 16px; font-weight: 800; color: #135266; letter-spacing: 0.5px; text-transform: uppercase;">Aspire Digital Solutions</span>
+                        <td align="right">
+                            <span class="filter-pill">{{ $report->maintenance_month }}</span>
                         </td>
                     </tr>
                     <tr>
-                        <td align="right">
-                            <span class="report-tag">REPORT #{{ $report->id }}</span>
+                        <td align="right" style="padding-top: 4px;">
+                            <span class="header-report-tag">REPORT #{{ $report->id }}</span>
                         </td>
                     </tr>
                 </table>
             </td>
         </tr>
     </table>
+
+    <!-- Content Wrapper Page 1 -->
+    <div class="content-body">
 
     <table class="meta-strip">
         <tr>
@@ -594,83 +709,193 @@
             </div>
         @endif
     </div>
+    </div> {{-- Close content-body of Page 1 --}}
+
+    <!-- Page 1 Footer -->
+    <div class="page-footer">
+        <table class="footer-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td align="left" class="footer-left">
+                    {{ $report->website->site_name ?? 'Website' }} &bull; Aspire Digital Solutions
+                </td>
+                <td align="right" class="footer-right">
+                    Website Audit &amp; Maintenance &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}
+                </td>
+            </tr>
+        </table>
+    </div>
+    </div> {{-- Close Page 1 --}}
 
     <!-- Section 4 -->
     @if(!$report->plugins->isEmpty())
-        <div class="page-break"></div>
-        <table class="section-header">
-            <tr>
-                <td class="section-title">04. Plugins Upgrade Log</td>
-                <td style="width: 100%;"><div class="section-line"></div></td>
-            </tr>
-        </table>
-        
-        <table class="data-table" cellpadding="0" cellspacing="0">
-            <thead>
+        <div class="page page-break-container">
+            <!-- Page 2 Header Banner -->
+            <table class="header-banner" cellpadding="0" cellspacing="0">
                 <tr>
-                    <th width="35%">Plugin Name</th>
-                    <th width="15%">Previous</th>
-                    <th width="15%">New Version</th>
-                    <th width="15%">Status</th>
-                    <th width="20%">Notes</th>
+                    <td class="header-left">
+                        @if(!empty($logoBase64))
+                            <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                        @else
+                            <div style="font-size: 14px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; margin-bottom: 4px;">ASPIRE DIGITAL SOLUTIONS</div>
+                        @endif
+                        <div>
+                            <span class="header-title-white">WEBSITE AUDIT &amp; </span><span class="header-title-cyan">MAINTENANCE</span>
+                        </div>
+                        <div class="header-divider"></div>
+                        <div class="header-subtitle">Monthly execution report for platform upgrades, performance logs &amp; security shields</div>
+                    </td>
+                    <td class="header-right" align="right">
+                        <table style="border-collapse: collapse; float: right;">
+                            <tr>
+                                <td align="right">
+                                    <span class="filter-pill">{{ $report->maintenance_month }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right" style="padding-top: 4px;">
+                                    <span class="header-report-tag">REPORT #{{ $report->id }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach($report->plugins as $plugin)
+            </table>
+
+            <div class="content-body" style="padding-top: 15px;">
+                <table class="section-header" style="margin-top: 0;">
                     <tr>
-                        <td style="font-weight: 700; color: #2d3748;">{{ $plugin->plugin_name }}</td>
-                        <td style="color:#718096; font-family: monospace;">{{ $plugin->old_version ?: '—' }}</td>
-                        <td style="color:#2d3748; font-family: monospace; font-weight: 600;">{{ $plugin->new_version ?: '—' }}</td>
-                        <td>
-                            <span class="status-pill {{ $plugin->status === 'updated' ? 'status-success' : '' }} {{ $plugin->status === 'failed' ? 'status-danger' : '' }} {{ $plugin->status === 'license_required' ? 'status-warning' : '' }}">
-                                {{ $plugin->status }}
-                            </span>
-                        </td>
-                        <td style="font-size: 10px; color: #718096;">{{ $plugin->notes ?: 'Upgraded successfully.' }}</td>
+                        <td class="section-title">04. Plugins Upgrade Log</td>
+                        <td style="width: 100%;"><div class="section-line"></div></td>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </table>
+                
+                <table class="data-table" cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="35%">Plugin Name</th>
+                            <th width="15%">Previous</th>
+                            <th width="15%">New Version</th>
+                            <th width="15%">Status</th>
+                            <th width="20%">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($report->plugins as $plugin)
+                            <tr>
+                                <td style="font-weight: 700; color: #2d3748;">{{ $plugin->plugin_name }}</td>
+                                <td style="color:#718096; font-family: monospace;">{{ $plugin->old_version ?: '—' }}</td>
+                                <td style="color:#2d3748; font-family: monospace; font-weight: 600;">{{ $plugin->new_version ?: '—' }}</td>
+                                <td>
+                                    <span class="status-pill {{ $plugin->status === 'updated' ? 'status-success' : '' }} {{ $plugin->status === 'failed' ? 'status-danger' : '' }} {{ $plugin->status === 'license_required' ? 'status-warning' : '' }}">
+                                        {{ $plugin->status }}
+                                    </span>
+                                </td>
+                                <td style="font-size: 10px; color: #718096;">{{ $plugin->notes ?: 'Upgraded successfully.' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Page 2 Footer -->
+            <div class="page-footer">
+                <table class="footer-table" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td align="left" class="footer-left">
+                            {{ $report->website->site_name ?? 'Website' }} &bull; Aspire Digital Solutions
+                        </td>
+                        <td align="right" class="footer-right">
+                            Website Audit &amp; Maintenance &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
     @endif
 
     <!-- Attachments -->
     @if($report->attachments_visible_to_client && $report->attachments->isNotEmpty())
-        <div class="page-break"></div>
-        <table class="section-header">
-            <tr>
-                <td class="section-title">05. Audit Attachments</td>
-                <td style="width: 100%;"><div class="section-line"></div></td>
-            </tr>
-        </table>
-        
-        <div style="margin-top: 15px;">
-            @foreach($report->attachments as $att)
-                @php
-                    $extension = pathinfo($att->file_path, PATHINFO_EXTENSION);
-                    $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
-                    $fullPath = storage_path('app/public/' . $att->file_path);
-                @endphp
-                <div style="margin-bottom: 25px; page-break-inside: avoid;">
-                    <div style="font-size: 12px; font-weight: bold; color: #2d3748; margin-bottom: 8px;">
-                        {{ $att->file_name }}
-                    </div>
-                    @if($isImage && file_exists($fullPath))
-                        <div style="border: 1px solid #edf2f7; border-radius: 6px; overflow: hidden; background: #ffffff; text-align: center; padding: 10px;">
-                            <img src="{{ $fullPath }}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;" />
+        <div class="page page-break-container">
+            <!-- Page 3 Header Banner -->
+            <table class="header-banner" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="header-left">
+                        @if(!empty($logoBase64))
+                            <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                        @else
+                            <div style="font-size: 14px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; margin-bottom: 4px;">ASPIRE DIGITAL SOLUTIONS</div>
+                        @endif
+                        <div>
+                            <span class="header-title-white">WEBSITE AUDIT &amp; </span><span class="header-title-cyan">MAINTENANCE</span>
                         </div>
-                    @else
-                        <div style="padding: 12px; background: #f7fafc; border: 1px solid #edf2f7; border-radius: 6px; font-size: 11px; color: #718096;">
-                            Attachment: <strong>{{ $att->file_name }}</strong> (Available for download in Aspire Digital Solutions portal)
+                        <div class="header-divider"></div>
+                        <div class="header-subtitle">Monthly execution report for platform upgrades, performance logs &amp; security shields</div>
+                    </td>
+                    <td class="header-right" align="right">
+                        <table style="border-collapse: collapse; float: right;">
+                            <tr>
+                                <td align="right">
+                                    <span class="filter-pill">{{ $report->maintenance_month }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right" style="padding-top: 4px;">
+                                    <span class="header-report-tag">REPORT #{{ $report->id }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="content-body" style="padding-top: 15px;">
+                <table class="section-header" style="margin-top: 0;">
+                    <tr>
+                        <td class="section-title">05. Audit Attachments</td>
+                        <td style="width: 100%;"><div class="section-line"></div></td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 15px;">
+                    @foreach($report->attachments as $att)
+                        @php
+                            $extension = pathinfo($att->file_path, PATHINFO_EXTENSION);
+                            $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
+                            $fullPath = storage_path('app/public/' . $att->file_path);
+                        @endphp
+                        <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                            <div style="font-size: 12px; font-weight: bold; color: #2d3748; margin-bottom: 8px;">
+                                {{ $att->file_name }}
+                            </div>
+                            @if($isImage && file_exists($fullPath))
+                                <div style="border: 1px solid #edf2f7; border-radius: 6px; overflow: hidden; background: #ffffff; text-align: center; padding: 10px;">
+                                    <img src="{{ $fullPath }}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;" />
+                                </div>
+                            @else
+                                <div style="padding: 12px; background: #f7fafc; border: 1px solid #edf2f7; border-radius: 6px; font-size: 11px; color: #718096;">
+                                    Attachment: <strong>{{ $att->file_name }}</strong> (Available for download in Aspire Digital Solutions portal)
+                                </div>
+                            @endif
                         </div>
-                    @endif
+                    @endforeach
                 </div>
-            @endforeach
+            </div>
+
+            <!-- Page 3 Footer -->
+            <div class="page-footer">
+                <table class="footer-table" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td align="left" class="footer-left">
+                            {{ $report->website->site_name ?? 'Website' }} &bull; Aspire Digital Solutions
+                        </td>
+                        <td align="right" class="footer-right">
+                            Website Audit &amp; Maintenance &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     @endif
-
-    <div class="footer">
-        For any enquiries, please email support@aspiredigitalsolutions.com
-    </div>
 
 </body>
 </html>
