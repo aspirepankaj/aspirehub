@@ -39,7 +39,7 @@
             left: 30%;
             width: 40%;
             text-align: center;
-            opacity: 0.15;
+            opacity: 0.05;
             z-index: -1000;
         }
         .watermark img {
@@ -783,7 +783,7 @@
                         @foreach($report->plugins as $plugin)
                             <tr>
                                 <td style="font-weight: 700; color: #2d3748;">{{ $plugin->plugin_name }}</td>
-                                <td style="color:#718096; font-family: monospace;">{{ $plugin->old_version ?: '—' }}</td>
+                                <td style="color:#000; font-family: monospace;">{{ $plugin->old_version ?: '—' }}</td>
                                 <td style="color:#2d3748; font-family: monospace; font-weight: 600;">{{ $plugin->new_version ?: '—' }}</td>
                                 <td>
                                     <span class="status-pill {{ $plugin->status === 'updated' ? 'status-success' : '' }} {{ $plugin->status === 'failed' ? 'status-danger' : '' }} {{ $plugin->status === 'license_required' ? 'status-warning' : '' }}">
@@ -868,8 +868,8 @@
                                 {{ $att->file_name }}
                             </div>
                             @if($isImage && file_exists($fullPath))
-                                <div style="border: 1px solid #edf2f7; border-radius: 6px; overflow: hidden; background: #ffffff; text-align: center; padding: 10px;">
-                                    <img src="{{ $fullPath }}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;" />
+                                <div style="overflow: hidden; background: #ffffff; text-align: start;margin:0;">
+                                    <img src="{{ $fullPath }}" style="border: 1px solid #edf2f7; max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;" />
                                 </div>
                             @else
                                 <div style="padding: 12px; background: #f7fafc; border: 1px solid #edf2f7; border-radius: 6px; font-size: 11px; color: #718096;">
