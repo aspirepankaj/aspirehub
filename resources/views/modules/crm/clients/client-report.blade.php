@@ -2357,7 +2357,6 @@
                 @endif
                 <!-- Google Ads UI Replica -->
                 <div class="bg-white border border-slate-200 rounded-lg shadow-sm mb-6 overflow-hidden font-sans" wire:key="gads-replica-{{ $idx }}-{{ $this->dateFrom }}-{{ $this->dateTo }}" x-data="{
-                    chart: null,
                     metrics: {
                         'clicks': { label: 'Clicks', value: 0, color: '#1a73e8', selected: true, order: 1, type: 'clicks' },
                         'impressions': { label: 'Impressions', value: 0, color: '#d93025', selected: true, order: 2, isAbbr: true, type: 'impressions' },
@@ -2404,18 +2403,30 @@
                             activeKeys.slice(2).forEach(k => this.metrics[k].selected = false);
                         }
 
-                        this.renderChart();
+                        this.$nextTick(() => {
+                            this.renderChart();
+                        });
                     },
 
                     toggleMetric(key) {
-                        this.metrics[key].selected = !this.metrics[key].selected;
-                        
+                        let isCurrentlySelected = !!this.metrics[key].selected;
                         let activeKeys = Object.keys(this.metrics).filter(k => this.metrics[k].selected);
-                        if (activeKeys.length === 0) {
-                            this.metrics[key].selected = true; // Prevent unselecting everything
-                            return;
+                        
+                        if (isCurrentlySelected) {
+                            // Don't unselect if it's the only one selected
+                            if (activeKeys.length <= 1) return;
+                            this.metrics[key].selected = false;
+                        } else {
+                            // Max 2 selected at a time: if already 2 selected, remove the last selected one
+                            if (activeKeys.length >= 2) {
+                                this.metrics[activeKeys[activeKeys.length - 1]].selected = false;
+                            }
+                            this.metrics[key].selected = true;
                         }
-                        this.renderChart();
+
+                        this.$nextTick(() => {
+                            this.renderChart();
+                        });
                     },
 
                     formatValue(val, metric) {
@@ -2433,12 +2444,10 @@
                     },
 
                     renderChart() {
-                        const ctx = this.$refs.canvas.getContext('2d');
-                        
-                        // Destroy old chart to completely wipe scales and datasets
-                        if (this.chart) {
-                            this.chart.destroy();
-                        }
+                        const canvas = this.$refs.canvas;
+                        if (!canvas) return;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) return;
 
                         let activeKeys = Object.keys(this.metrics).filter(k => this.metrics[k].selected);
                         let datasets = [];
@@ -2454,9 +2463,8 @@
                                 }
                                 return Number(d[k] || 0);
                             });
-                            let yId = 'y' + index; // Independent axis for each line
+                            let yId = 'y' + index;
 
-                            // Create subtle gradient fill
                             let gradient = ctx.createLinearGradient(0, 0, 0, 300);
                             if (index === 0) {
                                 gradient.addColorStop(0, 'rgba(59, 130, 246, 0.18)');
@@ -2482,8 +2490,8 @@
                                 yAxisID: yId
                             });
 
-                            let isRight = index % 2 !== 0; // alternate left/right
-                            let showAxis = index < 2; // only show axis labels for the first 2 metrics
+                            let isRight = index % 2 !== 0;
+                            let showAxis = index < 2;
                             
                             yAxes[yId] = { 
                                 type: 'linear', 
@@ -2491,8 +2499,8 @@
                                 position: isRight ? 'right' : 'left', 
                                 border: { display: false }, 
                                 grid: { 
-                                    color: isRight || !showAxis ? 'transparent' : '#f1f5f9',
-                                    drawBorder: false
+                                     color: isRight || !showAxis ? 'transparent' : '#f1f5f9',
+                                     drawBorder: false
                                 }, 
                                 ticks: { 
                                     color: '#94a3b8', 
@@ -2507,7 +2515,30 @@
                             };
                         });
 
-                        let self = this;
+                        // Always store chart on canvas DOM element to avoid Alpine reactivity proxy recursion
+                        let chartInstance = canvas._chartInstance || (typeof Chart !== 'undefined' && Chart.getChart ? Chart.getChart(canvas) : null);
+
+                        if (chartInstance) {
+                            chartInstance.stop();
+                            chartInstance.data.labels = this.labels;
+                            chartInstance.data.datasets = datasets;
+                            chartInstance.options.scales = {
+                                x: { 
+                                    grid: { display: false }, 
+                                    border: { display: false }, 
+                                    ticks: {
+                                        color: '#94a3b8',
+                                        font: {size: 11, weight: '500'},
+                                        maxTicksLimit: 7,
+                                        padding: 10
+                                    } 
+                                },
+                                ...yAxes
+                            };
+                            chartInstance.update('none');
+                            return;
+                        }
+
                         let options = {
                             responsive: true, 
                             maintainAspectRatio: false,
@@ -2541,7 +2572,7 @@
                                     }
                                 }
                             },
-                            animation: { duration: 400, easing: 'easeOutQuart' },
+                            animation: false,
                             scales: {
                                 x: { 
                                     grid: { display: false }, 
@@ -2557,7 +2588,7 @@
                             }
                         };
 
-                        this.chart = new Chart(ctx, {
+                        canvas._chartInstance = new Chart(ctx, {
                             type: 'line',
                             data: { labels: this.labels, datasets: datasets },
                             options: options
