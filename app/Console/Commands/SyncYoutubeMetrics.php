@@ -64,7 +64,7 @@ class SyncYoutubeMetrics extends Command
                 $metrics = $this->fetchYoutubeMetrics($token, $propertyId, $startDate, $endDate);
 
                 if ($metrics) {
-                    $this->saveMetricsToJson($integration, $metrics, (int)date('Y'), strtolower(date('F')));
+                    $this->saveMetricsToJson($integration, $metrics);
                     
                     $integration->last_sync_at = now();
                     $integration->save();
@@ -223,7 +223,7 @@ class SyncYoutubeMetrics extends Command
         ];
     }
 
-    private function saveMetricsToJson($integration, $metrics, $year, $monthStr)
+    private function saveMetricsToJson($integration, $metrics)
     {
         $clientDetails = $integration->website->client;
         $userName = Str::slug(Str::lower($clientDetails->user->name ?? 'client'));
@@ -236,13 +236,70 @@ class SyncYoutubeMetrics extends Command
             $websiteFolder = 'site-' . $integration->website->id;
         }
 
-        $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/youtube/{$year}");
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        $dailyTraffic = $metrics['daily_traffic'] ?? [];
+        if (empty($dailyTraffic)) {
+            $year = date('Y');
+            $month = strtolower(date('F'));
+            $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/youtube/{$year}");
+            if (!is_dir($dir)) mkdir($dir, 0755, true);
+            file_put_contents("{$dir}/{$month}.json", json_encode($metrics, JSON_PRETTY_PRINT));
+            return;
         }
 
-        $filePath = "{$dir}/{$monthStr}.json";
-        file_put_contents($filePath, json_encode($metrics, JSON_PRETTY_PRINT));
+        $grouped = [];
+        foreach ($dailyTraffic as $row) {
+            $d = $row['date'] ?? null;
+            if ($d && strlen($d) >= 8) {
+                $dtStr = (strpos($d, '-') !== false) ? $d : substr($d, 0, 4) . '-' . substr($d, 4, 2) . '-' . substr($d, 6, 2);
+                try {
+                    $cDate = \Carbon\Carbon::parse($dtStr);
+                    $y = $cDate->format('Y');
+                    $m = Str::lower($cDate->format('F'));
+                    $grouped["{$y}|{$m}"][] = $row;
+                } catch (\Exception $e) {
+                    $grouped[now()->format('Y') . '|' . Str::lower(now()->format('F'))][] = $row;
+                }
+            }
+        }
+
+        foreach ($grouped as $key => $rows) {
+            list($y, $m) = explode('|', $key);
+            $dir = storage_path("app/adscljson/{$clientFolder}/{$websiteFolder}/youtube/{$y}");
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $filePath = "{$dir}/{$m}.json";
+
+            $mReportData = $metrics;
+            $mViews = 0;
+            $mWatchTime = 0;
+            $mSubs = 0;
+            $mTotalAvgDuration = 0;
+            foreach ($rows as $r) {
+                $mViews += (int)($r['views'] ?? 0);
+                $mWatchTime += (float)($r['watch_time'] ?? 0);
+                $mSubs += (int)($r['subscribers'] ?? 0);
+                $mTotalAvgDuration += (float)($r['avg_view_duration'] ?? 0);
+            }
+
+            $avgDurSec = count($rows) > 0 ? round($mTotalAvgDuration / count($rows)) : 0;
+            $formattedDuration = gmdate("H:i:s", $avgDurSec);
+            if (str_starts_with($formattedDuration, '00:00:')) $formattedDuration = (int)substr($formattedDuration, 6) . 's';
+            elseif (str_starts_with($formattedDuration, '00:')) $formattedDuration = (int)substr($formattedDuration, 3, 2) . 'm ' . (int)substr($formattedDuration, 6) . 's';
+
+            $mReportData['summary'] = [
+                'views' => $mViews,
+                'subscribers' => $mSubs,
+                'video_count' => count($metrics['top_videos'] ?? []),
+                'watch_time' => round($mWatchTime, 2),
+                'avg_view_duration' => $formattedDuration
+            ];
+            $mReportData['daily_traffic'] = $rows;
+
+            file_put_contents($filePath, json_encode($mReportData, JSON_PRETTY_PRINT));
+        }
+
+        \Illuminate\Support\Facades\Cache::flush();
     }
 }
 
