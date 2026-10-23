@@ -687,11 +687,11 @@
                                     </td>
                                 </tr>
                             </table>
-                            <div style="text-align: center; margin-top: 4px;">
+                            <div style="margin-top: 4px;">
                                 @if(!empty($gSet['lineChart']))
-                                    <img src="{{ $gSet['lineChart'] }}" width="500" height="205" alt="Users and New Line Chart" style="display: block; margin: 0 auto; max-width: 100%;" />
+                                    <img src="{{ $gSet['lineChart'] }}" width="100%" height="205" alt="Users and New Line Chart" style="display: block; width: 100%;" />
                                 @elseif(!empty($gSet['ts']))
-                                    <img src="{{ $gSet['ts'] }}" width="500" height="205" alt="Daily Traffic Trend" style="display: block; margin: 0 auto; max-width: 100%;" />
+                                    <img src="{{ $gSet['ts'] }}" width="100%" height="205" alt="Daily Traffic Trend" style="display: block; width: 100%;" />
                                 @endif
                             </div>
                             <div style="text-align: center; margin-top: 6px; font-size: 11px; font-weight: 700; color: #64748b;">
@@ -2009,26 +2009,30 @@
             $liBadgeEngage = $renderKpiBadge(26, '#ede9fe', '#ddd6fe', 14, 24, '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
         @endphp
 
-    {{-- Modern Dark Header Banner --}}
-    <div style="background-color: #0b132b; border-radius: 10px; padding: 14px 18px; margin-bottom: 14px;">
-        <table style="width: 100%; border-collapse: collapse;">
+    {{-- Header Banner --}}
+    <div class="header-banner">
+        <table class="header-table">
             <tr>
-                <td style="vertical-align: middle;">
-                    <div style="font-size: 8px; font-weight: 800; color: #38bdf8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px;">
-                        PLATFORM PERFORMANCE
+                <td style="width: 72%;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                    @else
+                        <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
+                    @endif
+                    <div>
+                        <span class="header-title-white" style="font-size: 21px;">LINKEDIN </span><span class="header-title-cyan" style="font-size: 21px;">&bull; PERFORMANCE &amp; POST INTELLIGENCE</span>
                     </div>
-                    <div style="font-size: 16px; font-weight: 900; color: #ffffff; letter-spacing: 0.3px;">
-                        LinkedIn &bull; Performance &amp; Post Intelligence
-                    </div>
+                    <div class="header-divider"></div>
+                    <div class="header-subtitle">Source: LinkedIn</div>
                 </td>
-                <td style="vertical-align: middle; text-align: right;">
-                    <div style="display: inline-block; background-color: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 4px 12px; font-size: 8px; font-weight: 700; color: #94a3b8;">
-                        Date Range: <span style="color: #ffffff;">{{ $lSet['title'] }}</span>
-                    </div>
+                <td style="width: 28%; text-align: right; vertical-align: middle;">
+                    <span class="filter-pill">{{ $lSet['title'] }}</span>
                 </td>
             </tr>
         </table>
     </div>
+
+    <div class="content-body">
 
     {{-- 4 Modern Top Summary Cards (Followers, Impressions, Total Clicks, Engagement) --}}
     <table style="width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-bottom: 12px;">
@@ -2229,6 +2233,7 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
     </div>
 
     {{-- Footer --}}

@@ -874,7 +874,7 @@ class MarketingReportPdfService
         } else {
             foreach ($dailyTraffic as $d) {
                 $u = (int)($d['users'] ?? ($d['sessions'] ?? 0));
-                $nu = isset($d['new_users']) ? (int)$d['new_users'] : max(0, round($u * 0.72));
+                $nu = (!empty($d['new_users']) && (int)$d['new_users'] > 0) ? (int)$d['new_users'] : max(0, round($u * 0.72));
                 $d1[] = $u;
                 $d2[] = $nu;
 
@@ -902,12 +902,6 @@ class MarketingReportPdfService
         else $maxScale = ceil($maxVal / 5000) * 5000;
 
         $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\">\n";
-        $svg .= "  <defs>\n";
-        $svg .= "    <linearGradient id=\"blueGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">\n";
-        $svg .= "      <stop offset=\"0%\" stop-color=\"#3b82f6\" stop-opacity=\"0.22\" />\n";
-        $svg .= "      <stop offset=\"100%\" stop-color=\"#3b82f6\" stop-opacity=\"0.01\" />\n";
-        $svg .= "    </linearGradient>\n";
-        $svg .= "  </defs>\n";
 
         // Grid lines (4 levels)
         for ($i = 0; $i <= 4; $i++) {
@@ -921,10 +915,17 @@ class MarketingReportPdfService
 
         // X-axis date labels
         $step = max(1, (int)floor($dCount / 6));
+        $lastPrintedJ = 0;
         for ($j = 0; $j < $dCount; $j += $step) {
             $x = $padL + ($j / max(1, $dCount - 1)) * $plotW;
             $lbl = $xLabels[$j] ?? '';
             $svg .= "  <text x=\"{$x}\" y=\"" . ($height - 8) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" fill=\"#94a3b8\" text-anchor=\"middle\">{$lbl}</text>\n";
+            $lastPrintedJ = $j;
+        }
+        if ($dCount > 1 && ($dCount - 1 - $lastPrintedJ) >= 2) {
+            $xLast = $padL + $plotW;
+            $lastLbl = $xLabels[$dCount - 1] ?? '';
+            $svg .= "  <text x=\"{$xLast}\" y=\"" . ($height - 8) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" fill=\"#94a3b8\" text-anchor=\"end\">{$lastLbl}</text>\n";
         }
 
         // Generate coordinate points
@@ -938,12 +939,12 @@ class MarketingReportPdfService
             $p2[] = round($x, 1) . ',' . round($y2, 1);
         }
 
-        // Shaded polygon for Total Users
+        // Shaded polygon for Total Users (Translucent blue fill compatible with DomPDF and browsers)
         $bottomY = $padT + $plotH;
         $firstX = $padL;
         $lastX = $padL + $plotW;
         $areaPoints = "{$firstX},{$bottomY} " . implode(' ', $p1) . " {$lastX},{$bottomY}";
-        $svg .= "  <polygon points=\"{$areaPoints}\" fill=\"url(#blueGrad)\" />\n";
+        $svg .= "  <polygon points=\"{$areaPoints}\" fill=\"#3b82f6\" fill-opacity=\"0.12\" />\n";
 
         // Total Users line (Blue #3b82f6)
         $svg .= "  <polyline points=\"" . implode(' ', $p1) . "\" fill=\"none\" stroke=\"#3b82f6\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
@@ -1017,16 +1018,6 @@ class MarketingReportPdfService
         $maxImpScale = $maxImp <= 100 ? 100 : ($maxImp <= 1000 ? ceil($maxImp / 100) * 100 : ceil($maxImp / 500) * 500);
 
         $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\">\n";
-        $svg .= "  <defs>\n";
-        $svg .= "    <linearGradient id=\"gadsBlueGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">\n";
-        $svg .= "      <stop offset=\"0%\" stop-color=\"#1a73e8\" stop-opacity=\"0.25\" />\n";
-        $svg .= "      <stop offset=\"100%\" stop-color=\"#1a73e8\" stop-opacity=\"0.02\" />\n";
-        $svg .= "    </linearGradient>\n";
-        $svg .= "    <linearGradient id=\"gadsRedGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">\n";
-        $svg .= "      <stop offset=\"0%\" stop-color=\"#d93025\" stop-opacity=\"0.20\" />\n";
-        $svg .= "      <stop offset=\"100%\" stop-color=\"#d93025\" stop-opacity=\"0.02\" />\n";
-        $svg .= "    </linearGradient>\n";
-        $svg .= "  </defs>\n";
 
         // Grid lines (3 horizontal lines)
         for ($i = 0; $i <= 3; $i++) {
@@ -1065,13 +1056,13 @@ class MarketingReportPdfService
         $firstX = $padL;
         $lastX = $padL + $plotW;
 
-        // Area polygon for Impressions (Red)
+        // Area polygon for Impressions (Red - translucent for DomPDF and preview)
         $areaImpPoints = "{$firstX},{$bottomY} " . implode(' ', $pImp) . " {$lastX},{$bottomY}";
-        $svg .= "  <polygon points=\"{$areaImpPoints}\" fill=\"url(#gadsRedGrad)\" />\n";
+        $svg .= "  <polygon points=\"{$areaImpPoints}\" fill=\"#d93025\" fill-opacity=\"0.08\" />\n";
 
-        // Area polygon for Clicks (Blue)
+        // Area polygon for Clicks (Blue - translucent for DomPDF and preview)
         $areaClicksPoints = "{$firstX},{$bottomY} " . implode(' ', $pClicks) . " {$lastX},{$bottomY}";
-        $svg .= "  <polygon points=\"{$areaClicksPoints}\" fill=\"url(#gadsBlueGrad)\" />\n";
+        $svg .= "  <polygon points=\"{$areaClicksPoints}\" fill=\"#1a73e8\" fill-opacity=\"0.12\" />\n";
 
         // Line for Impressions (#d93025)
         $svg .= "  <polyline points=\"" . implode(' ', $pImp) . "\" fill=\"none\" stroke=\"#d93025\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
@@ -1145,16 +1136,6 @@ class MarketingReportPdfService
         $maxImpScale = $maxImp <= 100 ? 100 : ($maxImp <= 1000 ? ceil($maxImp / 100) * 100 : ceil($maxImp / 500) * 500);
 
         $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\">\n";
-        $svg .= "  <defs>\n";
-        $svg .= "    <linearGradient id=\"gscClicksGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">\n";
-        $svg .= "      <stop offset=\"0%\" stop-color=\"#4f46e5\" stop-opacity=\"0.15\" />\n";
-        $svg .= "      <stop offset=\"100%\" stop-color=\"#4f46e5\" stop-opacity=\"0.01\" />\n";
-        $svg .= "    </linearGradient>\n";
-        $svg .= "    <linearGradient id=\"gscImpGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">\n";
-        $svg .= "      <stop offset=\"0%\" stop-color=\"#0ea5e9\" stop-opacity=\"0.15\" />\n";
-        $svg .= "      <stop offset=\"100%\" stop-color=\"#0ea5e9\" stop-opacity=\"0.01\" />\n";
-        $svg .= "    </linearGradient>\n";
-        $svg .= "  </defs>\n";
 
         // Grid lines (3 horizontal lines)
         for ($i = 0; $i <= 3; $i++) {
@@ -1191,13 +1172,13 @@ class MarketingReportPdfService
         $firstX = $padL;
         $lastX = $padL + $plotW;
 
-        // Area polygon for Impressions
+        // Area polygon for Impressions (#0ea5e9 - translucent for DomPDF and preview)
         $areaImpPoints = "{$firstX},{$bottomY} " . implode(' ', $pImp) . " {$lastX},{$bottomY}";
-        $svg .= "  <polygon points=\"{$areaImpPoints}\" fill=\"url(#gscImpGrad)\" />\n";
+        $svg .= "  <polygon points=\"{$areaImpPoints}\" fill=\"#0ea5e9\" fill-opacity=\"0.08\" />\n";
 
-        // Area polygon for Clicks
+        // Area polygon for Clicks (#4f46e5 - translucent for DomPDF and preview)
         $areaClicksPoints = "{$firstX},{$bottomY} " . implode(' ', $pClicks) . " {$lastX},{$bottomY}";
-        $svg .= "  <polygon points=\"{$areaClicksPoints}\" fill=\"url(#gscClicksGrad)\" />\n";
+        $svg .= "  <polygon points=\"{$areaClicksPoints}\" fill=\"#4f46e5\" fill-opacity=\"0.12\" />\n";
 
         // Line for Impressions (#0ea5e9)
         $svg .= "  <polyline points=\"" . implode(' ', $pImp) . "\" fill=\"none\" stroke=\"#0ea5e9\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
@@ -1369,12 +1350,6 @@ class MarketingReportPdfService
         $maxScale = $maxVal <= 10 ? 10 : ($maxVal <= 100 ? ceil($maxVal / 10) * 10 : ($maxVal <= 1000 ? ceil($maxVal / 100) * 100 : ceil($maxVal / 500) * 500));
 
         $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\">\n";
-        $svg .= "  <defs>\n";
-        $svg .= "    <linearGradient id=\"ytRedGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">\n";
-        $svg .= "      <stop offset=\"0%\" stop-color=\"#dc2626\" stop-opacity=\"0.18\" />\n";
-        $svg .= "      <stop offset=\"100%\" stop-color=\"#dc2626\" stop-opacity=\"0.01\" />\n";
-        $svg .= "    </linearGradient>\n";
-        $svg .= "  </defs>\n";
 
         for ($i = 0; $i <= 3; $i++) {
             $y = $padT + ($plotH / 3) * $i;
@@ -1404,7 +1379,7 @@ class MarketingReportPdfService
         $lastX = $padL + $plotW;
 
         $areaPoints = "{$firstX},{$bottomY} " . implode(' ', $pViews) . " {$lastX},{$bottomY}";
-        $svg .= "  <polygon points=\"{$areaPoints}\" fill=\"url(#ytRedGrad)\" />\n";
+        $svg .= "  <polygon points=\"{$areaPoints}\" fill=\"#dc2626\" fill-opacity=\"0.12\" />\n";
         $svg .= "  <polyline points=\"" . implode(' ', $pViews) . "\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
 
         for ($i = 0; $i < $dCount; $i++) {
