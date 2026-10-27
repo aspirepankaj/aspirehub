@@ -233,11 +233,26 @@
             color: #5eead4 !important;
         }
         .metric-trend-sub {
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        color: #8aa0ac !important;
-    }
-</style>
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            color: #8aa0ac !important;
+        }
+
+        /* Universal Typography: Headings 18px Bold, Table Content 16px Normal across all integrations */
+        .client-integration-theme h2,
+        .client-integration-theme h3,
+        .client-integration-theme h4 {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            line-height: 1.3 !important;
+        }
+        .client-integration-theme table tbody tr td,
+        .client-integration-theme table tbody td {
+            font-size: 16px !important;
+            font-weight: 400 !important;
+            line-height: 1.4 !important;
+        }
+    </style>
     {{-- Breadcrumbs --}}
     @if(!$isEmbedded)
         <x-admin.breadcrumbs :items="['Marketing Reports' => null]" />

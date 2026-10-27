@@ -1461,9 +1461,10 @@ body:has(.is-marketing-report),
 }
 .client-marketing-view .channel {
   display: grid;
-  grid-template-columns: 1fr 34px 44px;
-  gap: 8px;
-  font-size: 11px;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 400;
   align-items: center;
 }
 .client-marketing-view .channel span {
@@ -1473,15 +1474,18 @@ body:has(.is-marketing-report),
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 16px;
+  font-weight: 400;
 }
 .client-marketing-view .channel strong {
-  font-weight: 900;
+  font-weight: 600;
+  font-size: 16px;
   text-align: right;
   color: var(--foreground);
 }
 .client-marketing-view .channel small {
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 400;
   color: var(--data-muted);
   text-align: right;
 }
@@ -2115,9 +2119,9 @@ body:has(.is-marketing-report),
 }
 .client-integration-theme table th {
   color: var(--muted-foreground) !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
-  padding: 10px 14px !important;
+  padding: 12px 14px !important;
   border-bottom: 1px solid var(--border) !important;
 }
 .client-integration-theme table th[class*="border-b-2"] {
@@ -2128,8 +2132,8 @@ body:has(.is-marketing-report),
   color: var(--primary) !important;
 }
 .client-integration-theme table td {
-  padding: 10px 14px !important;
-  font-size: 12px !important;
+  padding: 12px 14px !important;
+  font-size: 14.5px !important;
   color: var(--foreground) !important;
   border-bottom: 1px solid var(--grid) !important;
 }

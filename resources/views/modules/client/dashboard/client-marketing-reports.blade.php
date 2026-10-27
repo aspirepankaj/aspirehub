@@ -256,8 +256,21 @@
             width: auto !important;
             min-width: 145px !important;
             max-width: 180px !important;
-            display: inline-block !important;
             margin: 0 !important;
+        }
+        /* Universal Typography: Headings 18px Bold, Table Content 16px Normal across all integrations */
+        .client-integration-theme h2,
+        .client-integration-theme h3,
+        .client-integration-theme h4 {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            line-height: 1.3 !important;
+        }
+        .client-integration-theme table tbody tr td,
+        .client-integration-theme table tbody td {
+            font-size: 16px !important;
+            font-weight: 400 !important;
+            line-height: 1.4 !important;
         }
     </style>
     @php

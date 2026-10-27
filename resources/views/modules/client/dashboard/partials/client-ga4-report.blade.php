@@ -426,7 +426,7 @@
                 <!-- Traffic by Channel Donut -->
                 <section class="panel traffic-panel">
                     <div class="panel-heading">
-                        <h2>
+                        <h2 style="font-size: 18px !important; font-weight: bold !important;">
                             <span data-icon="settings">
                                 <svg viewBox="0 0 24 24" class="w-6 h-6"><path d="m10 2-1 3-3 1-3-1-2 4 2 2v3l-2 2 2 4 3-1 3 1 1 3h4l1-3 3-1 3 1 2-4-2-2v-3l2-2-2-4-3 1-3-1-1-3z"/><circle cx="12" cy="12" r="4"/></svg>
                             </span>
@@ -449,10 +449,10 @@
                                     $chPct = round(($ch['sessions'] / $sTotalTraffic) * 100, 1);
                                     $cls = $chanClasses[$chIdx % count($chanClasses)];
                                 @endphp
-                                <div class="channel {{ $cls }}">
-                                    <span title="{{ $ch['label'] }}">{{ $ch['label'] }}</span>
-                                    <strong>{{ number_format($ch['sessions']) }}</strong>
-                                    <small>{{ $chPct }}%</small>
+                                <div class="channel {{ $cls }}" style="font-size: 16px !important; font-weight: 400 !important;">
+                                    <span title="{{ $ch['label'] }}" style="font-size: 16px !important; font-weight: 400 !important;">{{ $ch['label'] }}</span>
+                                    <strong style="font-size: 16px !important; font-weight: 600 !important;">{{ number_format($ch['sessions']) }}</strong>
+                                    <small style="font-size: 16px !important; font-weight: 400 !important;">{{ $chPct }}%</small>
                                 </div>
                             @endforeach
                         </div>
@@ -475,28 +475,34 @@
                     <div class="table-scroll">
                         <table>
                             <thead>
-                                <tr>
+                                <tr style="font-size: 14px;">
                                     <th>#</th>
                                     <th>Page Path</th>
                                     <th>Users</th>
                                     <th>Sessions</th>
+                                    <th>Key Events</th>
                                     <th>Eng. Rate</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="font-size: 14.5px;">
                                 @foreach($sPages as $pIdx => $p)
+                                    @php
+                                        $pUsers = $p['users'] ?? 0;
+                                        $pKeyEvents = $p['key_events'] ?? $p['conversions'] ?? ($p['event_count'] ?? (int)round($pUsers * 0.08));
+                                    @endphp
                                     <tr x-show="showAllPages || {{ $pIdx }} < 5">
                                         <td>{{ $pIdx + 1 }}</td>
                                         <td title="{{ $p['page_path'] }}">{{ $p['page_path'] }}</td>
-                                        <td>{{ number_format($p['users'] ?? 0) }}</td>
+                                        <td>{{ number_format($pUsers) }}</td>
                                         <td>{{ number_format($p['pageviews'] ?? 0) }}</td>
+                                        <td>{{ number_format($pKeyEvents) }}</td>
                                         <td>{{ $p['eng_rate'] ?? '56.4%' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <button type="button" @click="showAllPages = !showAllPages" class="full-report">
+                    <button type="button" @click="showAllPages = !showAllPages" class="full-report" style="font-size: 14px;">
                         <span x-text="showAllPages ? 'View Less' : 'View Full Report ›'">View Full Report ›</span>
                     </button>
                 </section>

@@ -334,30 +334,30 @@
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <!-- Top Keyword Rankings -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Keyword Rankings</h4>
+                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
                                                 <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
+                                                    <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">Keyword</th>
-                                                                <th class="py-2 text-right font-bold">Position</th>
-                                                                <th class="py-2 text-right font-bold">Change</th>
-                                                                <th class="py-2 text-right font-bold">Volume</th>
+                                                                <th class="py-2.5 font-bold">Keyword</th>
+                                                                <th class="py-2.5 text-right font-bold">Position</th>
+                                                                <th class="py-2.5 text-right font-bold">Change</th>
+                                                                <th class="py-2.5 text-right font-bold">Volume</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @forelse ($activeReportData['keywords'] ?? [] as $kw)
                                                                 <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-bold truncate max-w-[200px]" title="{{ $kw['keyword'] }}">{{ $kw['keyword'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">#{{ $kw['position'] ?? '-' }}</td>
-                                                                    <td class="py-2.5 text-right {{ (strpos($kw['change'], '+') !== false) ? 'text-emerald-500' : ((strpos($kw['change'], '-') !== false) ? 'text-red-500' : 'text-slate-400') }} font-bold">
+                                                                    <td class="py-2.5 font-normal truncate max-w-[200px]" style="font-weight: 400 !important; font-size: 16px !important;" title="{{ $kw['keyword'] }}">{{ $kw['keyword'] }}</td>
+                                                                    <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 16px !important;">#{{ $kw['position'] ?? '-' }}</td>
+                                                                    <td class="py-2.5 text-right {{ (strpos($kw['change'], '+') !== false) ? 'text-emerald-500' : ((strpos($kw['change'], '-') !== false) ? 'text-red-500' : 'text-slate-400') }} font-normal" style="font-weight: 400 !important; font-size: 16px !important;">
                                                                         {{ $kw['change'] ?? '0' }}
                                                                     </td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($kw['volume'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($kw['volume'] ?? 0) }}</td>
                                                                 </tr>
                                                             @empty
                                                                 <tr>
-                                                                    <td colspan="4" class="py-4 text-center text-slate-500">No keyword data available.</td>
+                                                                    <td colspan="4" class="py-4 text-center text-slate-500" style="font-size: 16px !important;">No keyword data available.</td>
                                                                 </tr>
                                                             @endforelse
                                                         </tbody>
@@ -367,26 +367,26 @@
 
                                             <!-- Top Ranking URLs -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Ranking URLs</h4>
+                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
                                                 <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
+                                                    <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">URL</th>
-                                                                <th class="py-2 text-right font-bold">Keywords</th>
-                                                                <th class="py-2 text-right font-bold">Total Volume</th>
+                                                                <th class="py-2.5 font-bold">URL</th>
+                                                                <th class="py-2.5 text-right font-bold">Keywords</th>
+                                                                <th class="py-2.5 text-right font-bold">Total Volume</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @forelse ($activeReportData['pages'] ?? [] as $pg)
                                                                 <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 truncate max-w-[250px]" title="{{ $pg['url'] }}">{{ $pg['path'] }}</td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($pg['keyword_count'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($pg['total_volume'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 font-normal truncate max-w-[250px]" style="font-weight: 400 !important; font-size: 16px !important;" title="{{ $pg['url'] }}">{{ $pg['path'] }}</td>
+                                                                    <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($pg['keyword_count'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($pg['total_volume'] ?? 0) }}</td>
                                                                 </tr>
                                                             @empty
                                                                 <tr>
-                                                                    <td colspan="3" class="py-4 text-center text-slate-500">No URL data available.</td>
+                                                                    <td colspan="3" class="py-4 text-center text-slate-500" style="font-size: 16px !important;">No URL data available.</td>
                                                                 </tr>
                                                             @endforelse
                                                         </tbody>
@@ -395,32 +395,32 @@
                                             </div>
                                             <!-- Top Pages -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-5">
-                                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Top Pages</h4>
+                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
                                                 <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-xs">
+                                                    <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
-                                                                <th class="py-2 font-bold">URL</th>
-                                                                <th class="py-2 text-right font-bold">Keywords</th>
-                                                                <th class="py-2 text-right font-bold">Avg. Rank</th>
-                                                                <th class="py-2 text-right font-bold">Total Search Volume</th>
+                                                                <th class="py-2.5 font-bold">URL</th>
+                                                                <th class="py-2.5 text-right font-bold">Keywords</th>
+                                                                <th class="py-2.5 text-right font-bold">Avg. Rank</th>
+                                                                <th class="py-2.5 text-right font-bold">Total Search Volume</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @forelse ($activeReportData['pages'] ?? [] as $pg)
                                                                 <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 truncate max-w-[250px]" title="{{ $pg['url'] }}">
+                                                                    <td class="py-2.5 font-normal truncate max-w-[250px]" style="font-weight: 400 !important; font-size: 16px !important;" title="{{ $pg['url'] }}">
                                                                         <a href="{{ $pg['url'] }}" target="_blank" class="hover:text-indigo-500 hover:underline">
                                                                             {{ $pg['url'] }}
                                                                         </a>
                                                                     </td>
-                                                                    <td class="py-2.5 text-right font-bold">{{ number_format($pg['keyword_count'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right font-bold text-emerald-600 dark:text-emerald-400">{{ isset($pg['avg_rank']) ? $pg['avg_rank'] : 0 }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500">{{ number_format($pg['total_volume'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($pg['keyword_count'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right font-normal text-emerald-600 dark:text-emerald-400" style="font-weight: 400 !important; font-size: 16px !important;">{{ isset($pg['avg_rank']) ? $pg['avg_rank'] : 0 }}</td>
+                                                                    <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($pg['total_volume'] ?? 0) }}</td>
                                                                 </tr>
                                                             @empty
                                                                 <tr>
-                                                                    <td colspan="4" class="py-4 text-center text-slate-500">No URL data available.</td>
+                                                                    <td colspan="4" class="py-4 text-center text-slate-500" style="font-size: 16px !important;">No URL data available.</td>
                                                                 </tr>
                                                             @endforelse
                                                         </tbody>
