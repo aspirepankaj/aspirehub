@@ -25,7 +25,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Reports</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalReportsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalReportsCount }}</h3>
             </div>
             <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-xl">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -38,7 +38,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Completed</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $completedReportsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $completedReportsCount }}</h3>
             </div>
             <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -51,7 +51,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Pending (Draft)</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $pendingReportsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $pendingReportsCount }}</h3>
             </div>
             <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -164,7 +164,7 @@
             <div id="staffMaintenanceReportsTableLoading" class="overflow-x-auto rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
                 <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                     <thead>
-                        <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                        <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-bse !font-normal text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                             <th class="px-4 py-4 font-semibold text-left">Report ID</th>
                             <th class="px-4 py-4 font-semibold text-left">Client</th>
                             <th class="px-4 py-4 font-semibold text-left">Website</th>
@@ -211,7 +211,7 @@
                 }">
                     <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                         <thead>
-                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-base font-normal text-slate-400 dark:text-slate-500 capitalize tracking-wider">
                                 <th class="px-4 py-4 font-semibold text-left">Report ID</th>
                                 <th class="px-4 py-4 font-semibold text-left">Client</th>
                                 <th class="px-4 py-4 font-semibold text-left">Website</th>
@@ -221,7 +221,7 @@
                                 <th class="px-4 py-4 font-semibold text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-sm">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-base">
                     @foreach($reports as $report)
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                             <td class="px-4 py-4 font-bold text-slate-900 dark:text-white text-sm">
@@ -232,7 +232,7 @@
                                     <div class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-650 dark:group-hover:text-indigo-400">
                                         {{ $report->client->user->name }}
                                     </div>
-                                    <div class="text-xs text-slate-400 dark:text-slate-500">
+                                    <div class="text-sm text-slate-400 dark:text-slate-500">
                                         {{ $report->client->company_name }}
                                     </div>
                                 </a>
@@ -243,14 +243,14 @@
                                         {{ $report->website->site_name }}
                                     </a>
                                 </div>
-                                <div class="text-[11px] mt-0.5 text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium underline">
+                                <div class="text-sm mt-0.5 text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium underline">
                                     <a href="{{ $report->website->url }}" target="_blank">{{ $report->website->url }}</a>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 text-slate-550 dark:text-slate-400 font-semibold text-xs">
+                            <td class="px-4 py-4 text-slate-550 dark:text-slate-400 font-semibold text-sm">
                                 {{ $report->maintenance_month }}
                             </td>
-                            <td class="px-4 py-4 text-slate-600 dark:text-slate-300 text-xs">
+                            <td class="px-4 py-4 text-slate-600 dark:text-slate-300 text-sm">
                                 {{ $report->developer->name }}
                             </td>
                             <td class="px-4 py-4">

@@ -1756,7 +1756,7 @@
                                         <!-- 2. Top Queries Table (GSC) -->
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Search Queries</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Search Queries</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -1780,7 +1780,7 @@
                                             </div>
 
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Ranking URLs</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Ranking URLs</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -1809,7 +1809,7 @@
                                         <!-- 3. Devices and Countries -->
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Device Breakdown</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Device Breakdown</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -1833,7 +1833,7 @@
                                             </div>
 
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Countries</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Countries</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -2273,7 +2273,7 @@
                     $donutTotal = array_sum(array_column($donutItems, 'value'));
                     $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Events' : 'Sessions';
                 @endphp
-                <div class="flex items-center gap-2 text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
+                <div class="flex items-center gap-2 text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
                     <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> {{ $donutTitle }}
                 </div>
                 <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-8">
@@ -2853,7 +2853,7 @@
                                             <!-- Top Keyword Rankings -->
                                             <!-- Top Keyword Rankings -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -2886,7 +2886,7 @@
 
                                             <!-- Top Ranking URLs -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -2914,7 +2914,7 @@
                                             </div>
                                             <!-- Top Pages -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-5">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -3123,7 +3123,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Clients</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalClientsCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalClientsCount }}</h3>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1">
                         <span class="text-emerald-500 font-bold">{{ $activeClientsCount }} active</span>
                         <span>•</span>
@@ -3141,7 +3141,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Clients</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $activeClientsCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $activeClientsCount }}</h3>
                     <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">active accounts</p>
                 </div>
                 <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
@@ -3155,7 +3155,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactive Clients</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $inactiveClientsCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $inactiveClientsCount }}</h3>
                     <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1.5">inactive / paused</p>
                 </div>
                 <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
@@ -3169,7 +3169,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Websites</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
                     <p class="text-[11px] text-indigo-500 dark:text-indigo-400 font-semibold mt-1.5 flex items-center gap-1">
                         <span class="text-emerald-500 font-bold">{{ $activeWebsitesCount }} active</span>
                         <span>•</span>
@@ -3385,7 +3385,7 @@
                                                 @endif
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <button type="button" wire:click="viewClientDetail({{ $client->id }})" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block text-left transition-colors" title="{{ $client->user->name ?? 'Deleted User' }}">
+                                                <button type="button" wire:click="viewClientDetail({{ $client->id }})" class="font-medium font-momo text-[#135266] dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block text-left transition-colors" title="{{ $client->user->name ?? 'Deleted User' }}">
                                                     {{ $client->user->name ?? 'Deleted User' }}
                                                 </button>
                                                 <div class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal" title="{{ $client->user->email ?? 'N/A' }}">{{ $client->user->email ?? 'N/A' }}</div>
@@ -3596,7 +3596,7 @@
                     <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Basic Profile</h4>
+                    <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Basic Profile</h4>
                 </div>
 
                 <!-- Profile Image -->
@@ -3681,7 +3681,7 @@
                         <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Phone Numbers</h4>
+                        <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Phone Numbers</h4>
                     </div>
                     <template x-if="phones && phones.length < 5">
                         <button type="button" @click="addPhone()" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition flex items-center gap-1.5 active:scale-95">
@@ -3728,7 +3728,7 @@
                     <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Assignment & Plans</h4>
+                    <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Assignment & Plans</h4>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -3789,7 +3789,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Address Details</h4>
+                    <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Address Details</h4>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -3867,7 +3867,7 @@
                     <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Basic Profile</h4>
+                    <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Basic Profile</h4>
                 </div>
 
                 <!-- Profile Image -->
@@ -3962,7 +3962,7 @@
                         <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Phone Numbers</h4>
+                        <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Phone Numbers</h4>
                     </div>
                     <template x-if="phones && phones.length < 5">
                         <button type="button" @click="addPhone()" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition flex items-center gap-1.5 active:scale-95">
@@ -4009,7 +4009,7 @@
                     <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Assignment & Plans</h4>
+                    <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Assignment & Plans</h4>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -4070,7 +4070,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Address Details</h4>
+                    <h4 class="text-xs font-medium uppercase tracking-wider text-slate-700 dark:text-slate-300">Address Details</h4>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">

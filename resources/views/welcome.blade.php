@@ -7,11 +7,6 @@
 
         <title>Aspire Digital Solutions</title>
 
-        <!-- Google Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
         <!-- Alpine.js -->
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -19,9 +14,6 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
-            body {
-                font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
-            }
             .glass {
                 background: rgba(255, 255, 255, 0.45);
                 backdrop-filter: blur(16px);

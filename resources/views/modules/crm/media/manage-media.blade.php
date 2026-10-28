@@ -6,7 +6,7 @@
             <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-1">
                 {{ __('Media Library') }}
             </div>
-            <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 class="text-3xl font-medium text-[#135266] dark:text-white tracking-tight">
                 {{ __('Manage Media') }}
             </h1>
             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-2xl">

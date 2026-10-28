@@ -7,7 +7,7 @@
     </div>
 
     <div class="mb-5">
-        <h1 class="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Settings Center</h1>
+        <h1 class="text-2xl font-medium text-[#135266] dark:text-slate-100 tracking-tight">Settings Center</h1>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">Manage platform taxonomies, options, and general configurations.</p>
     </div>
 

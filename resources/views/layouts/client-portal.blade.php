@@ -50,12 +50,6 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/svg+xml" href="{{ asset('aspire-triangle.svg') }}">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&display=swap" rel="stylesheet">
-
     <!-- Tailwind / App Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -63,16 +57,6 @@
     <link rel="stylesheet" href="{{ asset('css/client-portal.css') }}?v={{ time() }}" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
-    <style>
-        h1 {
-            font-family: "Momo Trust Display", sans-serif !important;
-            letter-spacing: 2px !important;
-        }
-        h2, h3, h4, h5, h6 {
-            font-family: "Momo Trust Display", sans-serif !important;
-        }
-    </style>
 
     @livewireStyles
 </head>

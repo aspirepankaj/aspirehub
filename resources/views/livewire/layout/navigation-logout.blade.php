@@ -24,12 +24,12 @@ new class extends Component
         @if($profileImageUrl)
             <img src="{{ $profileImageUrl }}" alt="{{ auth()->user()->name }}" class="flex-shrink-0 w-9 h-9 rounded-xl object-cover border border-slate-200/50 dark:border-slate-800/50 shadow-sm" onerror="this.outerHTML=`<div class='flex-shrink-0 w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm'>{{ auth()->user()->getInitials() }}</div>`" />
         @else
-            <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+            <div class="flex-shrink-0 w-9 h-9 rounded-full bg-[#d0e7ec] text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
                 {{ auth()->user()->getInitials() }}
             </div>
         @endif
         <div class="min-w-0">
-            <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ auth()->user()->name }}</p>
+            <p class="text-xs font-medium font-momo text-[#135266] dark:text-slate-200 truncate">{{ auth()->user()->name }}</p>
             <p class="text-[10px] font-medium text-slate-400 dark:text-slate-500 truncate">{{ auth()->user()->email }}</p>
         </div>
     </div>

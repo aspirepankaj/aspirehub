@@ -17,7 +17,7 @@
                     </div>
                 @endif
                 <div>
-                    <h2 class="text-xl font-black text-slate-900 dark:text-white">{{ auth()->user()->name }}</h2>
+                    <h2 class="text-xl font-medium text-[#135266] dark:text-white">{{ auth()->user()->name }}</h2>
                     <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Admin Account Details & Preferences</p>
                     @if(auth()->user()->admin?->phone)
                         <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1.5 flex items-center gap-1">

@@ -255,7 +255,7 @@
                             </span>
                         </div>
 
-                        <h4 class="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 mb-1">
+                        <h4 class="text-xs font-medium text-slate-900 dark:text-white line-clamp-1 mb-1">
                             {{ $t->subject }}
                         </h4>
 
@@ -500,7 +500,7 @@
                 </div>
             @else
                 <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-12 text-center h-full flex flex-col items-center justify-center">
-                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Select a Ticket</h3>
+                    <h3 class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Select a Ticket</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Select any ticket from the list to view details and manage conversation.</p>
                 </div>
             @endif

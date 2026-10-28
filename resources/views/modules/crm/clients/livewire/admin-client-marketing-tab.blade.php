@@ -205,7 +205,7 @@
                                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Google Analytics 4</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Google Analytics 4</h3>
                                                 <span class="text-xs text-slate-400">Website Traffic & Engagement</span>
                                             </div>
                                         </div>
@@ -219,7 +219,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Users</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($ga4ActiveUsers) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($ga4ActiveUsers) }}</div>
                                             @if($hasGa4Comp)
                                                 @php $d = $getDelta($ga4ActiveUsers, $compGa4Users); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -231,7 +231,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">New Users</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($ga4NewUsers) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($ga4NewUsers) }}</div>
                                             @if($hasGa4Comp)
                                                 @php $d = $getDelta($ga4NewUsers, $compGa4New); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -243,7 +243,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Returning Users</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($ga4ReturningUsers) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($ga4ReturningUsers) }}</div>
                                             @if($hasGa4Comp)
                                                 @php $d = $getDelta($ga4ReturningUsers, $compGa4Ret); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -255,7 +255,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Engagement Time</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ $ga4AvgDuration }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ $ga4AvgDuration }}</div>
                                             @if($hasGa4Comp)
                                                 @php $d = $getDelta($currDurSecs, $compDurSecs); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -267,7 +267,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Key Events</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($ga4EventsCount) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($ga4EventsCount) }}</div>
                                             @if($hasGa4Comp)
                                                 @php $d = $getDelta($ga4EventsCount, $compGa4Events); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -301,7 +301,7 @@
                                                 <svg class="w-5 h-5 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Search Console</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Search Console</h3>
                                                 <span class="text-xs text-slate-400">Organic Search Performance</span>
                                             </div>
                                         </div>
@@ -315,7 +315,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Clicks</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gscClicks) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gscClicks) }}</div>
                                             @if($hasGscComp)
                                                 @php $d = $getDelta($gscClicks, $gscCompSum['clicks'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -327,7 +327,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Impressions</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gscImpr) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gscImpr) }}</div>
                                             @if($hasGscComp)
                                                 @php $d = $getDelta($gscImpr, $gscCompSum['impressions'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -339,7 +339,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Avg. CTR</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ $gscCtr }}%</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ $gscCtr }}%</div>
                                             @if($hasGscComp)
                                                 @php $d = $getDelta($gscCtr, $gscCompSum['ctr'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -351,7 +351,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Avg. Position</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ $gscPos }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ $gscPos }}</div>
                                             @if($hasGscComp)
                                                 @php 
                                                     $pDiff = (float)$gscPos - (float)($gscCompSum['position'] ?? 0);
@@ -400,7 +400,7 @@
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Google Ads</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Google Ads</h3>
                                                 <span class="text-xs text-slate-400">Paid Campaigns & ROI</span>
                                             </div>
                                         </div>
@@ -414,7 +414,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Spend</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">${{ number_format($gadsCost) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">${{ number_format($gadsCost) }}</div>
                                             @if($hasGadsComp)
                                                 @php $d = $getDelta($gadsCost, $compGadsCost); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -426,7 +426,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Clicks</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gadsClicks) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gadsClicks) }}</div>
                                             @if($hasGadsComp)
                                                 @php $d = $getDelta($gadsClicks, $compGadsClicks); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -438,7 +438,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Conversions</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gadsConv) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gadsConv) }}</div>
                                             @if($hasGadsComp)
                                                 @php $d = $getDelta($gadsConv, $compGadsConv); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -450,7 +450,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Cost per conv.</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">${{ number_format($costPerConv, 2) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">${{ number_format($costPerConv, 2) }}</div>
                                             @if($hasGadsComp)
                                                 @php 
                                                     $cpcDiff = $costPerConv - $compCostPerConv;
@@ -488,7 +488,7 @@
                                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Facebook</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Facebook</h3>
                                                 <span class="text-xs text-slate-400">Social Reach & Engagement</span>
                                             </div>
                                         </div>
@@ -502,7 +502,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Page Followers</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($fbFollowers) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($fbFollowers) }}</div>
                                             @if($hasFbComp)
                                                 @php $d = $getDelta($fbFollowers, $fbCompSum['followers'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -514,7 +514,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Reach</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($fbReach) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($fbReach) }}</div>
                                             @if($hasFbComp)
                                                 @php $d = $getDelta($fbReach, $fbCompSum['reach'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -526,7 +526,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Views</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($fbViews) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($fbViews) }}</div>
                                             @if($hasFbComp)
                                                 @php $d = $getDelta($fbViews, $fbCompSum['views'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -538,7 +538,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Engaged</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($fbEngaged) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($fbEngaged) }}</div>
                                             @if($hasFbComp)
                                                 @php $d = $getDelta($fbEngaged, $fbCompSum['engaged'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -572,7 +572,7 @@
                                                 <svg class="w-5 h-5 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Google Business Profile</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Google Business Profile</h3>
                                                 <span class="text-xs text-slate-400">Local Listing & Customer Actions</span>
                                             </div>
                                         </div>
@@ -586,7 +586,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Views</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gbpViews) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gbpViews) }}</div>
                                             @if($hasGbpComp)
                                                 @php $d = $getDelta($gbpViews, $gbpCompSum['views'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -598,7 +598,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Searches</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gbpSearches) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gbpSearches) }}</div>
                                             @if($hasGbpComp)
                                                 @php $d = $getDelta($gbpSearches, $gbpCompSum['searches'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -610,7 +610,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Interactions</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gbpInteractions) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gbpInteractions) }}</div>
                                             @if($hasGbpComp)
                                                 @php $d = $getDelta($gbpInteractions, $gbpCompSum['interactions'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -622,7 +622,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Calls</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gbpCalls) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gbpCalls) }}</div>
                                             @if($hasGbpComp)
                                                 @php $d = $getDelta($gbpCalls, $gbpCompSum['calls'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -656,7 +656,7 @@
                                                 <svg class="w-5 h-5 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Keyword.com</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Keyword.com</h3>
                                                 <span class="text-xs text-slate-400">SEO Keyword Rank Tracking</span>
                                             </div>
                                         </div>
@@ -670,7 +670,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Keywords</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($kwTotal) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($kwTotal) }}</div>
                                             @if($hasKwComp)
                                                 @php $d = $getDelta($kwTotal, $kwCompSum['total_keywords'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -682,7 +682,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Top 10 Keywords</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($kwTop10) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($kwTop10) }}</div>
                                             @if($hasKwComp)
                                                 @php $d = $getDelta($kwTop10, $kwCompSum['top_10'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -694,7 +694,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Top 15 Keywords</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($kwTop15) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($kwTop15) }}</div>
                                             @if($hasKwComp)
                                                 @php $d = $getDelta($kwTop15, $kwCompSum['top_15'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -706,7 +706,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Top 10 Pages</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($kwPages) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($kwPages) }}</div>
                                             @if($hasKwComp)
                                                 @php $d = $getDelta($kwPages, $kwCompSum['top_10_pages'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -740,7 +740,7 @@
                                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">YouTube</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">YouTube</h3>
                                                 <span class="text-xs text-slate-400">Video Views & Channel Growth</span>
                                             </div>
                                         </div>
@@ -754,7 +754,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Views</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($ytViews) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($ytViews) }}</div>
                                             @if($hasYtComp)
                                                 @php $d = $getDelta($ytViews, $ytCompSum['views'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -766,7 +766,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Watch Time (hrs)</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($ytWatchTime, 1) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($ytWatchTime, 1) }}</div>
                                             @if($hasYtComp)
                                                 @php $d = $getDelta($ytWatchTime, $ytCompSum['watch_time'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -778,7 +778,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Subscribers</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($ytSubs) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($ytSubs) }}</div>
                                             @if($hasYtComp)
                                                 @php $d = $getDelta($ytSubs, $ytCompSum['subscribers'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -790,7 +790,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Avg Duration</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ $ytAvgDuration }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ $ytAvgDuration }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -817,7 +817,7 @@
                                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">LinkedIn</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">LinkedIn</h3>
                                                 <span class="text-xs text-slate-400">Professional Network Engagement</span>
                                             </div>
                                         </div>
@@ -831,7 +831,7 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Followers</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($liFollowers) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($liFollowers) }}</div>
                                             @if($hasLiComp)
                                                 @php $d = $getDelta($liFollowers, $liCompSum['followers'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -843,7 +843,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Impressions</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($liImpr) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($liImpr) }}</div>
                                             @if($hasLiComp)
                                                 @php $d = $getDelta($liImpr, $liCompSum['impressions'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -855,7 +855,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Clicks</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($liClicks) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($liClicks) }}</div>
                                             @if($hasLiComp)
                                                 @php $d = $getDelta($liClicks, $liCompSum['clicks'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -867,7 +867,7 @@
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Engagements</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($liEngagements) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($liEngagements) }}</div>
                                             @if($hasLiComp)
                                                 @php $d = $getDelta($liEngagements, $liCompSum['engagements'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
@@ -897,7 +897,7 @@
                                                 <svg class="w-5 h-5 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Tag Manager</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Tag Manager</h3>
                                                 <span class="text-xs text-slate-400">Container Overview & Assets</span>
                                             </div>
                                         </div>
@@ -911,22 +911,22 @@
                                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Tags</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gtmTags) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gtmTags) }}</div>
                                         </div>
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Triggers</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gtmTriggers) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gtmTriggers) }}</div>
                                         </div>
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Variables</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gtmVariables) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gtmVariables) }}</div>
                                         </div>
 
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Folders</div>
-                                            <div class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{{ number_format($gtmFolders) }}</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($gtmFolders) }}</div>
                                         </div>
                                     </div>
                                 </div>

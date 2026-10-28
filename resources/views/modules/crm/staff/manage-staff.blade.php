@@ -436,7 +436,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Staff</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalStaffCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalStaffCount }}</h3>
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1">
                     <span class="text-emerald-500 font-bold">{{ $activeStaffCount }} active</span>
                     <span>•</span>
@@ -454,7 +454,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Staff</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $activeStaffCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $activeStaffCount }}</h3>
                 <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">active staff members</p>
             </div>
             <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
@@ -468,7 +468,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactive Staff</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $inactiveStaffCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $inactiveStaffCount }}</h3>
                 <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1.5">inactive / paused</p>
             </div>
             <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
@@ -482,7 +482,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Assigned Clients</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalAssignedClientsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalAssignedClientsCount }}</h3>
                 <p class="text-[11px] text-indigo-500 dark:text-indigo-400 font-semibold mt-1.5 flex items-center gap-1">
                     <span class="text-emerald-500 font-bold">{{ $activeAssignedClientsCount }} active</span>
                     <span>•</span>
@@ -691,7 +691,7 @@
                                             @endif
                                         </a>
                                         <div class="min-w-0 flex-1">
-                                            <a href="{{ route('admin.staff.detail', ['id' => $staff->id]) }}" wire:navigate class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block" title="{{ $staff->user->name ?? 'Deleted User' }}">{{ $staff->user->name ?? 'Deleted User' }}</a>
+                                            <a href="{{ route('admin.staff.detail', ['id' => $staff->id]) }}" wire:navigate class="font-medium font-momo text-[#135266] dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal block" title="{{ $staff->user->name ?? 'Deleted User' }}">{{ $staff->user->name ?? 'Deleted User' }}</a>
                                             <div class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[160px] sm:max-w-[200px] lg:max-w-none lg:whitespace-normal" title="{{ $staff->user->email ?? 'N/A' }}">{{ $staff->user->email ?? 'N/A' }}</div>
                                         </div>
                                     </div>

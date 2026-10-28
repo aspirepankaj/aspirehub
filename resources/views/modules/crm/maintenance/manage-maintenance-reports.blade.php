@@ -25,7 +25,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Reports</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalReportsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalReportsCount }}</h3>
                 <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5 flex items-center gap-0.5">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -44,7 +44,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Completed</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $completedReportsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $completedReportsCount }}</h3>
                 <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">on schedule</p>
             </div>
             <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
@@ -58,7 +58,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Pending</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $pendingReportsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $pendingReportsCount }}</h3>
                 <p class="text-[11px] text-amber-500 dark:text-amber-400 font-semibold mt-1.5">awaiting approval</p>
             </div>
             <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
@@ -72,7 +72,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Avg Score</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $averageDesktopScore }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $averageDesktopScore }}</h3>
                 @if($scoreChange > 0)
                     <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">+{{ $scoreChange }} vs last month</p>
                 @elseif($scoreChange < 0)
@@ -402,7 +402,7 @@
                             </td>
                             <td class="px-4 py-4">
                                 <a href="{{ route('admin.clients.detail', ['id' => $report->client->id]) }}" class="no-underline group">
-                                    <div class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                    <div class="font-medium text-[#135266] font-momo dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                                         {{ $report->client->user->name }}
                                     </div>
                                     <div class="text-xs text-slate-400 dark:text-slate-500">

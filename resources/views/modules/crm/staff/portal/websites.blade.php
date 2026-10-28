@@ -229,13 +229,13 @@
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm">
                 @if($websiteMaintenanceReports->isEmpty())
                     <div class="p-12 text-center">
-                        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">No Maintenance Reports</h3>
+                        <h3 class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">No Maintenance Reports</h3>
                         <p class="text-xs text-slate-400 dark:text-slate-500">There are no maintenance reports submitted for this website yet.</p>
                     </div>
                 @else
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
-                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-base font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                                 <th class="px-6 py-4">Report Month</th>
                                 <th class="px-6 py-4">Developer</th>
                                 <th class="px-6 py-4">Status</th>
@@ -268,7 +268,7 @@
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm">
                 @if($websiteActivityLogs->isEmpty())
                     <div class="p-12 text-center">
-                        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">No Activity Logged</h3>
+                        <h3 class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">No Activity Logged</h3>
                         <p class="text-xs text-slate-400 dark:text-slate-500">No activity logs recorded for this website yet.</p>
                     </div>
                 @else
@@ -320,7 +320,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Website Clients</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalClientsCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalClientsCount }}</h3>
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1">
                     <span class="text-emerald-500 font-bold">{{ $activeClientsCount }} active</span>
                     <span>•</span>
@@ -338,7 +338,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Websites</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $activeWebsitesCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $activeWebsitesCount }}</h3>
                 <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">active websites</p>
             </div>
             <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
@@ -352,7 +352,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactive Websites</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $inactiveWebsitesCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $inactiveWebsitesCount }}</h3>
                 <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1.5">inactive / paused</p>
             </div>
             <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
@@ -366,7 +366,7 @@
         <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Websites</p>
-                <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
+                <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
                 <p class="text-[11px] text-indigo-500 dark:text-indigo-400 font-semibold mt-1.5 flex items-center gap-1">
                     <span class="text-emerald-500 font-bold">{{ $activeWebsitesCount }} active</span>
                     <span>•</span>
@@ -486,9 +486,9 @@
             }">
                 <table class="w-full text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                     <thead>
-                        <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                        <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-base font-normal text-slate-400 dark:text-slate-500 capitalize tracking-wider">
                             <th class="px-4 py-4">Website</th>
-                            <th class="px-4 py-4">Client</th>
+                            <th class="px-4 py-4">Client</th>       
                             <th class="px-4 py-4">Service Type</th>
                             <th class="px-4 py-4">Status</th>
                             <th class="px-4 py-4">Hosting</th>
@@ -501,7 +501,7 @@
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                                 {{-- Website Name + URL --}}
                                 <td class="px-4 py-4">
-                                    <a href="{{ route('staff.websites.detail', ['id' => $website->id]) }}" wire:navigate class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left block">{{ $website->site_name }}</a>
+                                    <a href="{{ route('staff.websites.detail', ['id' => $website->id]) }}" wire:navigate class="text-base font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left block">{{ $website->site_name }}</a>
                                     <a href="{{ $website->url }}" target="_blank"
                                        class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 font-medium truncate max-w-[200px] block">
                                         {{ $website->url }}
@@ -510,9 +510,9 @@
 
                                 {{-- Client --}}
                                 <td class="px-4 py-4">
-                                     <div class="text-sm">
+                                     <div class="text-base">
                                          @if($website->client)
-                                             <a href="{{ route('staff.clients.detail', ['id' => $website->client_id]) }}" class="font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                             <a href="{{ route('staff.clients.detail', ['id' => $website->client_id]) }}" class="font-medium font-momo text-[#135266] dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
                                                  {{ $website->client->user->name ?? '—' }}
                                              </a>
                                          @else

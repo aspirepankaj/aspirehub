@@ -32,7 +32,7 @@
             <div class="flex items-center gap-3">
                 <!-- Left brand accent indicator -->
                 <div class="w-1.5 h-5 rounded bg-white"></div>
-                <h3 class="text-base sm:text-lg font-bold text-white dark:text-white tracking-tight">{{ $title ?? 'Modal Window' }}</h3>
+                <h3 class="text-base sm:text-lg font-medium text-white dark:text-white tracking-tight">{{ $title ?? 'Modal Window' }}</h3>
             </div>
             <button @click="show = false" class="p-1.5 text-white hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

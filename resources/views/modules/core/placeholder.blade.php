@@ -17,7 +17,7 @@
             </svg>
         </div>
 
-        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">{{ $title }}</h2>
+        <h2 class="text-2xl font-medium text-[#135266] dark:text-white tracking-tight mb-2">{{ $title }}</h2>
         <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8 font-medium text-sm leading-relaxed">
             This module is prepared as part of the Phase 1 Folder Architecture. The underlying business logic and database tables will be built in Phase 2.
         </p>

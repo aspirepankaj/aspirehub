@@ -90,7 +90,7 @@
                             </span>
                         </div>
 
-                        <h4 class="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 mb-1">
+                        <h4 class="text-xs font-medium text-slate-900 dark:text-white line-clamp-1 mb-1">
                             {{ $t->subject }}
                         </h4>
 

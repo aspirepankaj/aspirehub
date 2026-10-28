@@ -1030,7 +1030,7 @@
                                         <!-- 2. Top Queries Table (GSC) -->
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Search Queries</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Search Queries</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -1054,7 +1054,7 @@
                                             </div>
 
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Ranking URLs</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Ranking URLs</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -1083,7 +1083,7 @@
                                         <!-- 3. Devices and Countries -->
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Device Breakdown</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Device Breakdown</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -1107,7 +1107,7 @@
                                             </div>
 
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Countries</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Countries</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
@@ -1261,7 +1261,7 @@
                     $donutTotal = array_sum(array_column($donutItems, 'value'));
                     $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Events' : 'Sessions';
                 @endphp
-                <div class="flex items-center gap-2 text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
+                <div class="flex items-center gap-2 text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
                     <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> {{ $donutTitle }}
                 </div>
                 <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-8">
@@ -1837,7 +1837,7 @@
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <!-- Top Keyword Rankings -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -1870,7 +1870,7 @@
 
                                             <!-- Top Ranking URLs -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -1898,7 +1898,7 @@
                                             </div>
                                             <!-- Top Pages -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-5">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -2509,7 +2509,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Clients</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalClientsCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalClientsCount }}</h3>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1">
                         <span class="text-emerald-500 font-bold">{{ $activeClientsCount }} active</span>
                         <span>•</span>
@@ -2527,7 +2527,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Clients</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $activeClientsCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $activeClientsCount }}</h3>
                     <p class="text-[11px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1.5">active accounts</p>
                 </div>
                 <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
@@ -2541,7 +2541,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactive Clients</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $inactiveClientsCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $inactiveClientsCount }}</h3>
                     <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1.5">inactive / paused</p>
                 </div>
                 <div class="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-xl">
@@ -2555,7 +2555,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5 shadow-sm flex justify-between items-center">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Websites</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
+                    <h3 class="text-3xl font-medium text-[#135266] dark:text-white mt-1">{{ $totalWebsitesCount }}</h3>
                     <p class="text-[11px] text-indigo-500 dark:text-indigo-400 font-semibold mt-1.5 flex items-center gap-1">
                         <span class="text-emerald-500 font-bold">{{ $activeWebsitesCount }} active</span>
                         <span>•</span>
@@ -2686,7 +2686,7 @@
                 }">
                     <table class="w-full min-w-[1100px] text-left border-collapse bg-white/40 dark:bg-slate-900/10 backdrop-blur-md">
                         <thead>
-                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-base font-normal text-slate-400 dark:text-slate-500 capitalize tracking-wider">
                                 <th class="px-6 py-4 w-[280px]">Client Details</th>
                                 <th class="px-6 py-4 w-[220px]">Company Name</th>
                                 <th class="px-6 py-4 w-[150px]">Plans</th>
@@ -2706,13 +2706,13 @@
                                                 @if($client->profile_image)
                                                     <img src="{{ asset('storage/' . $client->profile_image) }}" alt="{{ $client->user->name }}" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800" />
                                                 @else
-                                                    <div class="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                                                    <div class="w-9 h-9 rounded-full bg-[#d0e7ec] dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xs font-medium font-momo text-[#135266] dark:text-indigo-400">
                                                         {{ $client->getInitials() }}
                                                     </div>
                                                 @endif
                                             </a>
                                             <div>
-                                                <a href="{{ route('staff.clients.detail', ['id' => $client->id]) }}" wire:navigate class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition block">
+                                                <a href="{{ route('staff.clients.detail', ['id' => $client->id]) }}" wire:navigate class="font-medium  text-[#135266] font-momo dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition block">
                                                     {{ $client->user->name ?? 'Deleted User' }}
                                                 </a>
                                                 <div class="text-xs text-slate-400 dark:text-slate-500">{{ $client->user->email ?? 'N/A' }}</div>

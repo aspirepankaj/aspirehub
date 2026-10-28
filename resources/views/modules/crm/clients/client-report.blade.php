@@ -225,7 +225,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['clicks'] ?? 0) : number_format($reportDataScope['summary']['clicks'] ?? 0) }}
                             </span>
                         </div>
@@ -236,7 +236,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['impressions'] ?? 0) : number_format($reportDataScope['summary']['impressions'] ?? 0) }}
                             </span>
                         </div>
@@ -247,7 +247,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CTR</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ $reportDataScope['summary']['ctr'] ?? 0 }}%
                             </span>
                         </div>
@@ -258,7 +258,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. Position</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ $reportDataScope['summary']['position'] ?? 0 }}
                             </span>
                         </div>
@@ -268,7 +268,7 @@
                 {{-- Daily Traffic Chart --}}
                 <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-1">
+                        <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex gap-2 items-center mb-1">
                             <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Daily Traffic
                         </h3>
                     </div>
@@ -330,7 +330,7 @@
                 {{-- Queries and URLs --}}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                        <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Search Queries</h4>
+                        <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Search Queries</h4>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                 <thead>
@@ -354,7 +354,7 @@
                     </div>
 
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                        <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
+                        <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                 <thead>
@@ -383,7 +383,7 @@
                 {{-- Devices and Countries --}}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                        <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Device Breakdown</h4>
+                        <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Device Breakdown</h4>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                 <thead>
@@ -407,7 +407,7 @@
                     </div>
 
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                        <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Countries</h4>
+                        <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Countries</h4>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                 <thead>
@@ -464,7 +464,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Followers</span>
-                            <span class="text-lg font-extrabold !text-[#135266] dark:text-slate-100">
+                            <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
                             </span>
                         </div>
@@ -475,7 +475,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Reach</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['reach'] ?? 0) }}
                             </span>
                         </div>
@@ -486,7 +486,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
                             </span>
                         </div>
@@ -497,7 +497,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Engaged</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['engaged'] ?? 0) }}
                             </span>
                         </div>
@@ -507,9 +507,9 @@
                 <!-- FB Graph Area -->
                 <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-[18px] font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
+                        <h3 class="text-[18px] font-medium font-momo text-[#135266] dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
                             <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Reach, Views & Engaged Over Time
-                        </div>
+                        </h3>
                     </div>
                     <div class="w-full" wire:ignore>
                         <div class="h-64" wire:key="fb-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
@@ -596,10 +596,10 @@
                 <div class="mt-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-blue-600"></div> 
-                        <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight" style="color: #135266 !important; font-size: 18px !important; margin: 0 !important;">Top Posts (Organic)</h4>
+                        <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight" style="color: #135266 !important; font-size: 18px !important; margin: 0 !important;">Top Posts (Organic)</h4>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm whitespace-nowrap">
+                        <table class="w-full text-left text-base whitespace-nowrap">
                             <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400">
                                 <tr>
                                     <th class="py-3 px-5 font-bold">Post</th>
@@ -704,7 +704,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Followers</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
                             </span>
                         </div>
@@ -715,7 +715,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['impressions'] ?? 0) }}
                             </span>
                         </div>
@@ -726,7 +726,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['clicks'] ?? 0) }}
                             </span>
                         </div>
@@ -737,7 +737,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Engagement</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['engagements'] ?? 0) }}
                             </span>
                         </div>
@@ -747,7 +747,7 @@
                 <!-- LI Graph Area -->
                 <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
+                        <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
                             <div class="w-1.5 h-1.5 rounded-full bg-sky-500"></div> Impressions & Engagements
                         </h3>
                     </div>
@@ -821,7 +821,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
                         <div>
-                            <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-4">
+                            <h3 class="text-[18px] !font-normal font-momo text-[#135266] dark:text-slate-100 tracking-tight flex gap-2 items-center mb-4">
                                 <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Followers By Job Title
                             </h3>
                             <div class="overflow-x-auto">
@@ -846,7 +846,7 @@
                     </div>
                     
                     <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between">
-                        <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2 mb-4" style="font-size: 18px !important; line-height: 1.3 !important;">
+                        <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex items-center gap-2 mb-4" style="font-size: 18px !important; line-height: 1.3 !important;">
                             <div class="w-1.5 h-1.5 rounded-full bg-sky-500"></div> Follower Demographics
                         </h3>
                         @php
@@ -954,7 +954,7 @@
                 <!-- LinkedIn Post Performance Summary KPI Cards -->
                 <div class="mt-4 mb-6">
                     <div class="flex items-center gap-2 mb-2 mt-6">
-                        <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center">
+                        <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex gap-2 items-center">
                             <span class="w-2 h-2 rounded-full bg-sky-500"></span> Post Engagement Overview
                         </h3>
                     </div>
@@ -1039,7 +1039,7 @@
                     <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                            <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex">Posts table</h4>
+                            <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex">Posts table</h4>
                         </div>
                         <span class="text-[11px] font-semibold text-slate-400">{{ count($reportDataScope['top_posts'] ?? []) }} Posts</span>
                     </div>
@@ -1068,7 +1068,7 @@
                                                     AS
                                                 </div>
                                                 <div>
-                                                    <span class="font-bold text-slate-800 dark:text-slate-200 block text-[14px] whitespace-nowrap">Aspire Digital Solutions</span>
+                                                    <span class="font-bold text-slate-800 dark:text-slate-200 block text-base whitespace-nowrap">Aspire Digital Solutions</span>
                                                     <span class="text-[10px] text-sky-600 dark:text-sky-400 font-medium whitespace-nowrap">
                                                         {{ !empty($post['created_time']) ? \Carbon\Carbon::parse($post['created_time'])->format('M d, H:i') : '' }}
                                                     </span>
@@ -1086,7 +1086,7 @@
                                                              onerror="this.style.display='none'">
                                                     </div>
                                                 @endif
-                                                <a href="{{ $post['url'] ?? '#' }}" target="_blank" class="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-sky-600 line-clamp-2 block leading-snug" title="{{ $post['message'] ?? '' }}">
+                                                <a href="{{ $post['url'] ?? '#' }}" target="_blank" class="text-base font-medium text-slate-700 dark:text-slate-300 hover:text-sky-600 line-clamp-2 block leading-snug" title="{{ $post['message'] ?? '' }}">
                                                     {{ $post['message'] ?? 'No message' }}
                                                 </a>
                                             </div>
@@ -1243,7 +1243,7 @@
                     <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight" style="font-size: 18px !important;">Daily Activity & Interactions</h4>
+                            <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight" style="font-size: 18px !important;">Daily Activity & Interactions</h4>
                         </div>
                         <span class="text-[14px] font-semibold text-slate-400">{{ count($dailyList) }} Days</span>
                     </div>
@@ -1708,7 +1708,7 @@
                         <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4] mr-2">
                         <svg class="w-6 h-6" fill="#135266" id="fi_2991112" enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg"><g><path d="m446.605 124.392-119.997-119.997c-2.801-2.802-6.624-4.395-10.608-4.395h-210c-24.813 0-45 20.187-45 45v422c0 24.813 20.187 45 45 45h300c24.813 0 45-20.187 45-45v-332c0-4.09-1.717-7.931-4.395-10.608zm-115.605-73.179 68.787 68.787h-53.787c-8.271 0-15-6.729-15-15zm75 430.787h-300c-8.271 0-15-6.729-15-15v-422c0-8.271 6.729-15 15-15h195v75c0 24.813 20.187 45 45 45h75v317c0 8.271-6.729 15-15 15z"></path><path d="m346 212h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 272h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 332h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m286 392h-120c-8.284 0-15 6.716-15 15s6.716 15 15 15h120c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path></g></svg>
                         </span>
-                        <h2 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight" style="margin: 0 !important; display: inline-block !important; font-size: 18px !important; line-height: 1.2 !important;" x-text="
+                        <h2 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight" style="margin: 0 !important; display: inline-block !important; font-size: 18px !important; line-height: 1.2 !important;" x-text="
                             metric === 'users' ? 'Users & New' : 
                             (metric === 'sessions' ? 'Sessions & Engaged' : 
                             (metric === 'pageviews' ? 'Pageviews' : 
@@ -1760,7 +1760,7 @@
                     <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
                     </span>
-                    <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight" style="font-size: 18px !important; line-height: 1.3 !important; margin: 0 !important;">Traffic by Channel</h4>
+                    <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight" style="font-size: 18px !important; line-height: 1.3 !important; margin: 0 !important;">Traffic by Channel</h4>
                 </div>
                 
                 @php
@@ -1865,7 +1865,7 @@
                     <span class="inline-flex items-center gap-2 justify-center text-[#135266] dark:text-[#5eead4]">
                        <svg class="w-6 h-6" fill="#135266" id="fi_2991112" enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512" xmlns="http://www.w3.org/2000/svg"><g><path d="m446.605 124.392-119.997-119.997c-2.801-2.802-6.624-4.395-10.608-4.395h-210c-24.813 0-45 20.187-45 45v422c0 24.813 20.187 45 45 45h300c24.813 0 45-20.187 45-45v-332c0-4.09-1.717-7.931-4.395-10.608zm-115.605-73.179 68.787 68.787h-53.787c-8.271 0-15-6.729-15-15zm75 430.787h-300c-8.271 0-15-6.729-15-15v-422c0-8.271 6.729-15 15-15h195v75c0 24.813 20.187 45 45 45h75v317c0 8.271-6.729 15-15 15z"></path><path d="m346 212h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 272h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m346 332h-180c-8.284 0-15 6.716-15 15s6.716 15 15 15h180c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path><path d="m286 392h-120c-8.284 0-15 6.716-15 15s6.716 15 15 15h120c8.284 0 15-6.716 15-15s-6.716-15-15-15z"></path></g></svg>
                     </span>
-                    <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Top Landing Pages</h4>
+                    <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Top Landing Pages</h4>
                 </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left">
@@ -2099,7 +2099,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
                         </svg>
                     </span>
-                    <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Traffic By Source (Primary Channel Group)</h4>
+                    <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Traffic By Source (Primary Channel Group)</h4>
                 </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left">
@@ -2213,7 +2213,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
                     </span>
-                    <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Device Breakdown</h4>
+                    <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Device Breakdown</h4>
                 </div>
                 <div class="space-y-4 flex-1 flex flex-col justify-around">
                     @php
@@ -2252,12 +2252,12 @@
                             <div class="flex-1 w-full">
                                 <div class="flex justify-between items-center mb-1.5">
                                     <span class="text-base font-bold text-slate-800 dark:text-slate-100">{{ $devName === 'Smart tv' ? 'Smart TV' : $devName }}</span>
-                                    <span class="text-[11px] text-slate-500 font-semibold">{{ $pct }}</span>
+                                    <span class="text-[14px] text-slate-500 font-semibold">{{ $pct }}</span>
                                 </div>
                                 <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-1">
                                     <div class="{{ $deviceColors[$i] }} h-full rounded-full" style="width: {{ $pctNum > 0 ? max(2, $pctNum) : 0 }}%"></div>
                                 </div>
-                                <div class="text-[10px] text-slate-400 font-medium">{{ number_format($dUsers) }} users</div>
+                                <div class="text-[14px] text-slate-400 font-medium">{{ number_format($dUsers) }} users</div>
                             </div>
                         </div>
                     @endforeach
@@ -2292,7 +2292,7 @@
                             </g>
                         </svg>
                     </span>
-                    <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Top Events</h4>
+                    <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Top Events</h4>
                 </div>
                 
                 <div class="events-breakdown-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 flex-1">
@@ -2370,7 +2370,7 @@
                             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                         </svg>
                     </span>
-                    <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Top Countries</h4>
+                    <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important; line-height: 1.3 !important;">Top Countries</h4>
                 </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left">
@@ -2491,7 +2491,7 @@
                         </g>
                         </svg>
                     </span>
-                    <h4 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important;">Top Events</h4>
+                    <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight m-0" style="font-size: 18px !important;">Top Events</h4>
                     <!-- <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">Key events from your website.</span> -->
                 </div>
             </div>
@@ -2906,18 +2906,18 @@
 
 
                 <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
-                    <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-4">
+                    <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex gap-2 items-center mb-4">
                         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Ad Campaigns
                     </h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-[16px] text-left">
+                        <table class="w-full text-base text-left">
                             <thead>
-                                <tr class="text-[13px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
-                                    <th class="py-2 font-bold">Campaign Name</th>
-                                    <th class="py-2 text-right font-bold">Clicks</th>
-                                    <th class="py-2 text-right font-bold">Imp.</th>
-                                    <th class="py-2 text-right font-bold">Cost</th>
-                                    <th class="py-2 text-right font-bold">Conv.</th>
+                                <tr class="text-base capitalize tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
+                                    <th class="py-2">Campaign Name</th>
+                                    <th class="py-2 text-right">Clicks</th>
+                                    <th class="py-2 text-right">Imp.</th>
+                                    <th class="py-2 text-right">Cost</th>
+                                    <th class="py-2 text-right">Conv.</th>
                                 </tr>
                             </thead>
                             <tbody class="text-[16px] font-normal">
@@ -2946,12 +2946,12 @@
                         @if(count($keywords) > 0)
                             <div class="bg-white border border-slate-200 rounded-lg shadow-sm h-full overflow-hidden font-sans">
                                 <div class="px-5 py-4 border-b border-slate-200">
-                                    <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight" style="font-size: 18px !important; line-height: 1.3 !important; margin: 0 !important;">Summary of how your keywords are performing</h3>
+                                    <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight" style="font-size: 18px !important; line-height: 1.3 !important; margin: 0 !important;">Summary of how your keywords are performing</h3>
                                 </div>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left border-collapse text-[16px]">
                                         <thead>
-                                            <tr class="bg-white text-[13px] text-[#5f6368] border-b border-slate-200">
+                                            <tr class="bg-white text-base text-[#5f6368] border-b border-slate-200">
                                                 <th class="px-5 py-3 font-medium w-1/2"></th>
                                                 <th class="px-5 py-3 font-medium text-right border-b-2 border-[#1a73e8]">Cost <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
                                                 <th class="px-5 py-3 font-medium text-right">Clicks <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
@@ -2981,9 +2981,9 @@
                     
                     <!-- Ad performance across devices -->
                     <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-[2rem] shadow-sm hover:shadow-md transition-all duration-300">
-                        <div class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-2">
+                        <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex gap-2 items-center mb-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Devices
-                        </div>
+                        </h3>
                         
                         @php
                             $ds = $reportDataScope['device_summary'] ?? ['desktop' => ['clicks'=>0,'impressions'=>0,'cost'=>0,'conversions'=>0], 'mobile' => ['clicks'=>0,'impressions'=>0,'cost'=>0,'conversions'=>0], 'tablet' => ['clicks'=>0,'impressions'=>0,'cost'=>0,'conversions'=>0]];
@@ -3028,26 +3028,26 @@
                                         </div>
                                         <div>
                                             <h4 class="font-medium text-slate-800 dark:text-slate-100 text-sm tracking-tight">Mobile Traffic</h4>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Primary Device</p>
+                                            <p class="text-sm text-slate-400 font-bold uppercase tracking-wider">Primary Device</p>
                                         </div>
                                     </div>
                                     <div class="text-right">
                                         <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">{{ $cc_mob }}%</div>
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-3 relative z-10">
                                     <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
-                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['mobile']['cost']??0, 2) }}</div>
+                                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
+                                        <div class="text-base font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['mobile']['cost']??0, 2) }}</div>
                                         <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
                                             <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style="width: {{ $costc_mob }}%"></div>
                                         </div>
                                     </div>
                                     <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
-                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['mobile']['impressions']??0) }}</div>
+                                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
+                                        <div class="text-base font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['mobile']['impressions']??0) }}</div>
                                         <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
                                             <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style="width: {{ $ic_mob }}%"></div>
                                         </div>
@@ -3066,26 +3066,26 @@
                                         </div>
                                         <div>
                                             <h4 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm tracking-tight">Desktop</h4>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Workstations</p>
+                                            <p class="text-sm text-slate-400 font-bold uppercase tracking-wider">Workstations</p>
                                         </div>
                                     </div>
                                     <div class="text-right">
                                         <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-400 dark:to-orange-400">{{ $cc_desk }}%</div>
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-3 relative z-10">
                                     <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
-                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['desktop']['cost']??0, 2) }}</div>
+                                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
+                                        <div class="text-base font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['desktop']['cost']??0, 2) }}</div>
                                         <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
                                             <div class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full" style="width: {{ $costc_desk }}%"></div>
                                         </div>
                                     </div>
                                     <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
-                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['desktop']['impressions']??0) }}</div>
+                                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
+                                        <div class="text-base font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['desktop']['impressions']??0) }}</div>
                                         <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
                                             <div class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full" style="width: {{ $ic_desk }}%"></div>
                                         </div>
@@ -3104,26 +3104,26 @@
                                         </div>
                                         <div>
                                             <h4 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm tracking-tight">Tablet</h4>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Portable</p>
+                                            <p class="text-sm text-slate-400 font-bold uppercase tracking-wider">Portable</p>
                                         </div>
                                     </div>
                                     <div class="text-right">
                                         <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600 dark:from-rose-400 dark:to-pink-400">{{ $cc_tab }}%</div>
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Of Clicks</div>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-3 relative z-10">
                                     <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
-                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['tablet']['cost']??0, 2) }}</div>
+                                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cost</div>
+                                        <div class="text-base font-black text-slate-700 dark:text-slate-200">${{ number_format($ds['tablet']['cost']??0, 2) }}</div>
                                         <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
                                             <div class="h-full bg-gradient-to-r from-rose-400 to-rose-500 rounded-full" style="width: {{ $costc_tab }}%"></div>
                                         </div>
                                     </div>
                                     <div class="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-white dark:border-slate-700/50 shadow-sm">
-                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
-                                        <div class="text-xs font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['tablet']['impressions']??0) }}</div>
+                                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Impressions</div>
+                                        <div class="text-base font-black text-slate-700 dark:text-slate-200">{{ number_format($ds['tablet']['impressions']??0) }}</div>
                                         <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
                                             <div class="h-full bg-gradient-to-r from-rose-400 to-rose-500 rounded-full" style="width: {{ $ic_tab }}%"></div>
                                         </div>
@@ -3176,7 +3176,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
                             </span>
                         </div>
@@ -3187,7 +3187,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Watch Time (hrs)</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['watch_time'] ?? 0, 1) }}
                             </span>
                         </div>
@@ -3198,7 +3198,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Subscribers</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['subscribers'] ?? 0) }}
                             </span>
                         </div>
@@ -3209,7 +3209,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Duration</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ $reportDataScope['summary']['avg_view_duration'] ?? '0s' }}
                             </span>
                         </div>
@@ -3219,7 +3219,7 @@
                 {{-- Daily Views Chart --}}
                 <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full mb-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex gap-2 items-center mb-2">
+                        <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex gap-2 items-center mb-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Daily Views
                         </h3>
                     </div>
@@ -3282,11 +3282,11 @@
 
                 {{-- Top Videos Table --}}
                 <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                    <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Performing Videos</h4>
+                    <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Performing Videos</h4>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-[16px]">
                             <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[13px]">
+                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
                                     <th class="py-2 font-bold w-3/5">Video</th>
                                     <th class="py-2 text-right font-bold">Views</th>
                                     <th class="py-2 text-right font-bold">Watch Time</th>
@@ -3364,7 +3364,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Keywords</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['total_keywords'] ?? 0) }}
                             </span>
                         </div>
@@ -3375,7 +3375,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['top_10'] ?? 0) }}
                             </span>
                         </div>
@@ -3386,7 +3386,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['top_15'] ?? 0) }}
                             </span>
                         </div>
@@ -3397,7 +3397,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 10 Pages</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['top_10_pages'] ?? 0) }}
                             </span>
                         </div>
@@ -3408,7 +3408,7 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Top 15 Pages</span>
-                            <span class="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                 {{ number_format($reportDataScope['summary']['top_15_pages'] ?? 0) }}
                             </span>
                         </div>
@@ -3419,7 +3419,7 @@
                 <div class="grid grid-cols-1 mb-6">
                     <div class="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 w-full rounded-2xl">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
+                            <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
                                 <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Ranking Distribution
                              </h3>
                         </div>
@@ -3486,7 +3486,7 @@
                 {{-- Rankings and Pages Tables --}}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                        <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
+                        <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                 <thead>
@@ -3512,7 +3512,7 @@
                     </div>
 
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                        <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
+                        <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                 <thead>
@@ -3575,11 +3575,11 @@
             
             @if(!empty($activeReportData['tags_list']))
             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
-                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Tags</h4>
+                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Tags</h4>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-[16px]">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[13px]">
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
                                 <th class="py-2 font-bold">Tag Name</th>
                                 <th class="py-2 text-right font-bold">Type</th>
                             </tr>
@@ -3600,11 +3600,11 @@
             
             @if(!empty($activeReportData['triggers_list']))
             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
-                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Triggers</h4>
+                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Triggers</h4>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-[16px]">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[13px]">
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
                                 <th class="py-2 font-bold">Trigger Name</th>
                                 <th class="py-2 text-right font-bold">Type</th>
                             </tr>
@@ -3624,11 +3624,11 @@
 
             @if(!empty($activeReportData['variables_list']))
             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
-                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Variables</h4>
+                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Variables</h4>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-[16px]">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[13px]">
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
                                 <th class="py-2 font-bold">Variable Name</th>
                                 <th class="py-2 text-right font-bold">Type</th>
                             </tr>

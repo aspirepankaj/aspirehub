@@ -6,7 +6,7 @@
         <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
         <div class="relative z-10 space-y-2">
             <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-100 bg-white/10 px-3 py-1 rounded-full">Staff Access Area</span>
-            <h2 class="text-2xl sm:text-3xl font-black tracking-tight mt-1">Hello, {{ auth()->user()->name }}!</h2>
+            <h2 class="text-2xl sm:text-3xl font-medium tracking-tight mt-1">Hello, {{ auth()->user()->name }}!</h2>
             <p class="text-sm text-indigo-100/90 max-w-xl font-medium">Welcome back to your workspace. Here is a summary of your assigned clients, monitored sites, and recent maintenance progress.</p>
         </div>
     </div>
@@ -17,7 +17,7 @@
         <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm backdrop-blur-md flex items-center justify-between hover:-translate-y-0.5 transition-all duration-200">
             <div>
                 <span class="text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">Assigned Clients</span>
-                <h4 class="text-2xl font-black text-slate-850 dark:text-white mt-1">{{ $clientsCount }}</h4>
+                <h4 class="text-2xl font-medium text-[#135266] dark:text-white mt-1">{{ $clientsCount }}</h4>
             </div>
             <div class="p-3 rounded-xl bg-indigo-500/10 text-indigo-650 dark:text-indigo-400">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -30,7 +30,7 @@
         <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm backdrop-blur-md flex items-center justify-between hover:-translate-y-0.5 transition-all duration-200">
             <div>
                 <span class="text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">Websites Monitored</span>
-                <h4 class="text-2xl font-black text-slate-850 dark:text-white mt-1">{{ $websitesCount }}</h4>
+                <h4 class="text-2xl font-medium text-[#135266] dark:text-white mt-1">{{ $websitesCount }}</h4>
             </div>
             <div class="p-3 rounded-xl bg-indigo-500/10 text-indigo-650 dark:text-indigo-400">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -43,7 +43,7 @@
         <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-6 shadow-sm backdrop-blur-md flex items-center justify-between hover:-translate-y-0.5 transition-all duration-200">
             <div>
                 <span class="text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">Maintenance Logs</span>
-                <h4 class="text-2xl font-black text-slate-850 dark:text-white mt-1">{{ $reportsCount }}</h4>
+                <h4 class="text-2xl font-medium text-[#135266] dark:text-white mt-1">{{ $reportsCount }}</h4>
             </div>
             <div class="p-3 rounded-xl bg-purple-500/10 text-purple-650 dark:text-purple-400">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -59,7 +59,7 @@
         <div class="lg:col-span-2 space-y-4">
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl overflow-hidden shadow-sm backdrop-blur-md">
                 <div class="border-b border-slate-200/50 dark:border-slate-800/40 p-5 flex items-center justify-between">
-                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Recent Maintenance Cycles</h3>
+                    <h3 class="text-lg font-medium text-[#135266] dark:text-slate-200 capitalize tracking-wider">Recent Maintenance Cycles</h3>
                     <a href="{{ route('staff.maintenance') }}" class="text-xs font-bold text-indigo-650 dark:text-indigo-400 hover:underline">View All</a>
                 </div>
 
@@ -69,14 +69,14 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                <tr class="border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20 text-base font-normal text-slate-400 dark:text-slate-500 capitalize tracking-wider">
                                     <th class="px-6 py-3">Client / Site</th>
                                     <th class="px-6 py-3">Period</th>
                                     <th class="px-6 py-3">Health Score</th>
                                     <th class="px-6 py-3">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-xs font-medium">
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-900/50 text-base font-medium">
                                 @foreach($recentReports as $rep)
                                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors">
                                         <td class="px-6 py-4">
@@ -110,7 +110,7 @@
         {{-- Activity Timeline --}}
         <div class="space-y-4">
             <div class="bg-white/60 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-2xl p-5 shadow-sm backdrop-blur-md">
-                <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">Assigned Activity Logs</h3>
+                <h3 class="text-lg font-medium text-[#135266] dark:text-slate-200 uppercase tracking-wider mb-4">Assigned Activity Logs</h3>
                 
                 @if($recentActivities->isEmpty())
                     <div class="text-center py-8 text-slate-500 dark:text-slate-500 text-xs">No client logs reported recently.</div>
@@ -120,8 +120,8 @@
                             <li class="flex items-start space-x-3 text-xs">
                                 <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 shrink-0"></div>
                                 <div class="flex-1">
-                                    <p class="text-slate-650 dark:text-slate-350 leading-relaxed font-semibold">{{ $act->description }}</p>
-                                    <span class="text-[9px] text-slate-400 dark:text-slate-550 block mt-1">{{ $act->created_at->diffForHumans() }}</span>
+                                    <p class="text-slate-650 dark:text-slate-350 leading-relaxed font-semibold text-base">{{ $act->description }}</p>
+                                    <span class="text-sm text-slate-400 dark:text-slate-550 block mt-1">{{ $act->created_at->diffForHumans() }}</span>
                                 </div>
                             </li>
                         @endforeach

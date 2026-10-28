@@ -334,7 +334,7 @@
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                             <!-- Top Keyword Rankings -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Keyword Rankings</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -367,7 +367,7 @@
 
                                             <!-- Top Ranking URLs -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>
@@ -395,7 +395,7 @@
                                             </div>
                                             <!-- Top Pages -->
                                             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-5">
-                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
+                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Pages</h4>
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
                                                         <thead>

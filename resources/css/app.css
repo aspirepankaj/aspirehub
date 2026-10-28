@@ -1,3 +1,62 @@
+/* ==========================================================================
+   CENTRAL FONT CONTROLLER (Single Source of Truth)
+   Puri website ki font family sirf yahan se control hogi.
+   Koi bhi font change karni ho, sirf ye do variables aur @import change karein:
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Momo Trust Display', sans-serif;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html, body {
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading) !important;
+  }
+
+  button, a, input, select, textarea {
+    font-family: var(--font-body);
+  }
+}
+
+/* Global guarantee across all views, components, and overlays */
+body, button, a, input, select, textarea, p, span, li, td, th {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6, .heading-font {
+  font-family: var(--font-heading) !important;
+}
+
+h1 {
+  letter-spacing: 2px;
+}
+
+/* ==========================================================================
+   FONT UTILITY CLASSES
+   Directly kisi bhi HTML element par class lagane ke liye:
+   - Body/Text:    class="font-body" ya class="font-jakarta"
+   - Headings:     class="font-heading" ya class="font-momo"
+   ========================================================================== */
+.font-body,
+.font-text,
+.font-jakarta,
+.font-plus-jakarta {
+  font-family: var(--font-body) !important;
+}
+
+.font-heading,
+.font-display,
+.font-momo,
+.font-momo-trust {
+  font-family: var(--font-heading) !important;
+}

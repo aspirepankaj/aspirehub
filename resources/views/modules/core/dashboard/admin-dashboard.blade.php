@@ -17,7 +17,7 @@
                     </svg>
                 </div>
             </div>
-            <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ number_format($stats['total_clients']) }}</h2>
+            <h2 class="text-3xl font-medium text-slate-900 dark:text-white tracking-tight">{{ number_format($stats['total_clients']) }}</h2>
             <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/50 text-[10px] font-bold text-slate-400 dark:text-slate-500">
                 <div>
                     <span class="block text-emerald-500">{{ number_format($stats['active_clients']) }}</span>
@@ -45,7 +45,7 @@
                     </svg>
                 </div>
             </div>
-            <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ $stats['total_staff'] }}</h2>
+            <h2 class="text-3xl font-medium text-slate-900 dark:text-white tracking-tight">{{ $stats['total_staff'] }}</h2>
             <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">Active portal users</p>
         </x-admin.card>
 
@@ -60,7 +60,7 @@
                     </svg>
                 </div>
             </div>
-            <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ $stats['total_websites'] }}</h2>
+            <h2 class="text-3xl font-medium text-slate-900 dark:text-white tracking-tight">{{ $stats['total_websites'] }}</h2>
             <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">All domains online</p>
         </x-admin.card>
 
@@ -75,7 +75,7 @@
                     </svg>
                 </div>
             </div>
-            <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">${{ number_format($stats['monthly_revenue']) }}</h2>
+            <h2 class="text-3xl font-medium text-slate-900 dark:text-white tracking-tight">${{ number_format($stats['monthly_revenue']) }}</h2>
             <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/50">
                 <p class="text-xs text-emerald-500 font-semibold flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

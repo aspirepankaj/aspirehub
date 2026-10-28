@@ -14,7 +14,12 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['var(--font-body)', ...defaultTheme.fontFamily.sans],
+                body: ['var(--font-body)', ...defaultTheme.fontFamily.sans],
+                jakarta: ['var(--font-body)', ...defaultTheme.fontFamily.sans],
+                heading: ['var(--font-heading)', 'sans-serif'],
+                display: ['var(--font-heading)', 'sans-serif'],
+                momo: ['var(--font-heading)', 'sans-serif'],
             },
             colors: {
                 indigo: {
