@@ -1,10 +1,10 @@
 <div>
 
     <div class="mb-8">
-        <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-[#135266]">
+        <div class="text-[11px] font-medium tracking-[0.3em] text-[#135266]">
             My Profile
         </div>
-        <h1 class="mt-2 text-5xl font-black tracking-tight text-[#135266] dark:text-white">
+        <h1 class="mt-2 text-5xl font-medium tracking-tight text-[#135266] dark:text-white">
             Your account.
         </h1>
     </div>
@@ -49,7 +49,7 @@
                     </div>
                     
                     <div class="text-center sm:text-left flex-1">
-                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ $name }}</h2>
+                        <h2 class="text-2xl font-medium text-slate-900 dark:text-white">{{ $name }}</h2>
                         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-semibold">{{ $company_name ?: 'Meridian Wellness Group' }}</p>
                     </div>
 
@@ -111,7 +111,7 @@
                 <input type="text" name="username" value="{{ auth()->user()->email }}" autocomplete="username" class="hidden" style="display:none;" aria-hidden="true" />
 
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Change password</h3>
+                    <h3 class="text-lg font-medium text-slate-900 dark:text-white">Change password</h3>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -175,7 +175,7 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ $manager->name }}</h4>
+                                        <h4 class="text-sm font-medium text-slate-900 dark:text-white">{{ $manager->name }}</h4>
                                         <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ $manager->department ?: 'Account Manager' }}</p>
                                     </div>
                                 </div>
@@ -199,7 +199,7 @@
                 <div class="space-y-4 divide-y divide-slate-100 dark:divide-slate-800">
                     @forelse ($plans as $p)
                         <div class="pt-3 first:pt-0">
-                            <h3 class="text-xl font-black text-slate-900 dark:text-white">
+                            <h3 class="text-xl font-medium text-slate-900 dark:text-white">
                                 {{ $p->name }}
                             </h3>
                             <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">

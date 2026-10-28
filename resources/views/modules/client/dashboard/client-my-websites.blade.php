@@ -87,7 +87,7 @@
                 {{-- Content --}}
                 <div class="p-4 sm:p-6">
 
-                    <h3 class="text-xl sm:text-3xl font-bold text-slate-900 dark:text-white truncate">
+                    <h3 class="text-xl sm:text-3xl font-medium text-slate-900 dark:text-white truncate">
 
                         {{ $website->site_name }}
 

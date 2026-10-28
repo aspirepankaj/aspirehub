@@ -1914,9 +1914,9 @@
                                             <!-- LI Graph Area -->
                                             <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
                                                 <div class="flex items-center justify-between mb-4">
-                                                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                                                    <h3 class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                                                         <div class="w-1.5 h-1.5 rounded-full bg-sky-500"></div> Impressions & Engagements
-                                                    </div>
+                                                     </h3>
                                                 </div>
                                                 <div class="w-full">
                                                     <div class="h-64" wire:key="li-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
@@ -1990,7 +1990,7 @@
                                                         <div class="overflow-x-auto">
                                                             <table class="w-full text-sm text-left">
                                                                 <thead>
-                                                                    <tr class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
+                                                                    <tr class="text-[16px] uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
                                                                         <th class="py-2 font-bold">Job Title</th>
                                                                         <th class="py-2 text-right font-bold">Count</th>
                                                                     </tr>
@@ -2273,7 +2273,7 @@
                     $donutTotal = array_sum(array_column($donutItems, 'value'));
                     $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Events' : 'Sessions';
                 @endphp
-                <div class="flex items-center gap-2 text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
+                <div class="flex items-center gap-2 text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
                     <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> {{ $donutTitle }}
                 </div>
                 <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-8">

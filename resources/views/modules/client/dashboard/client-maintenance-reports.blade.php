@@ -4,7 +4,7 @@
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-[#135266]">
             Maintenance Reports
         </div>
-        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#135266] dark:text-white">
+        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-[#135266] dark:text-white">
             Everything we did, in plain language.
         </h1>
         <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
@@ -76,7 +76,7 @@
                         <div class="text-[10px] font-extrabold text-slate-400 dark:text-slate-550 uppercase tracking-wider mb-1 truncate">
                             {{ $report->site_name }}
                         </div>
-                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                        <h3 class="text-xl sm:text-2xl font-medium text-slate-900 dark:text-white">
                             <a href="{{ route('client.maintenance.view', $report->id) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
                                 {{ $formattedMonth }}
                             </a>

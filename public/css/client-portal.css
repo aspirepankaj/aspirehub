@@ -3,6 +3,7 @@
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&display=swap');
 
 :root {
   --portal-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -51,6 +52,15 @@ body {
   background-color: var(--portal-bg) !important;
   color: var(--portal-text) !important;
   -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-family: "Momo Trust Display", sans-serif !important;
+  letter-spacing: 2px !important;
+}
+
+h2, h3, h4, h5, h6 {
+  font-family: "Momo Trust Display", sans-serif !important;
 }
 
 * {
@@ -276,7 +286,8 @@ body:has(.is-marketing-report),
 
 .portal-profile-name {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 400;
+  font-family: "Momo Trust Display", sans-serif;
   color: var(--portal-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -484,10 +495,9 @@ body:has(.is-marketing-report),
 .welcome-title {
   font-size: 46px !important;
   line-height: 1.13 !important;
-  font-weight: 750 !important;
+  font-weight: 500 !important;
   color: var(--portal-primary) !important;
   margin: 0 0 7px 0 !important;
-  font-family: var(--portal-font) !important;
 }
 
 .welcome-title span.brand-teal {
@@ -617,18 +627,20 @@ body:has(.is-marketing-report),
 
 .stat-title {
   font-size: 16px !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   color: var(--portal-primary) !important;
   margin: 0 0 10px 0 !important;
   white-space: nowrap;
+   font-family: "Momo Trust Display", sans-serif;
 }
 
 .stat-number {
   font-size: 34px !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   line-height: 1 !important;
   color: #80b6c2 !important;
   margin: 0 0 7px 0 !important;
+  font-family: "Momo Trust Display", sans-serif;
 }
 
 .stat-number.report-month {
@@ -661,7 +673,7 @@ body:has(.is-marketing-report),
 .section-title {
   font-size: 25px !important;
   line-height: 1.15 !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   color: var(--portal-primary) !important;
   margin: 0 0 4px 0 !important;
 }
@@ -728,7 +740,7 @@ body:has(.is-marketing-report),
 
 .platform-card-title {
   font-size: 18px !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   color: var(--white-color) !important;
   margin: 0 0 7px 0 !important;
 }
@@ -803,7 +815,7 @@ body:has(.is-marketing-report),
 
 .encouragement-heading {
   font-size: 24px !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   color: var(--portal-primary) !important;
   margin: 0 0 6px 0 !important;
 }
@@ -1196,7 +1208,7 @@ body:has(.is-marketing-report),
   align-items: center;
   gap: 13px;
   font-size: 23px;
-  font-weight: 800;
+  font-weight: 500;
   line-height: 1.2;
   margin: 0 0 4px;
   color: var(--foreground);
@@ -2108,7 +2120,7 @@ body:has(.is-marketing-report),
 }
 .client-integration-theme div[class*="font-sans"] div.px-5.py-4 h3 {
   font-size: 14px !important;
-  font-weight: 800 !important;
+  font-weight: 500 !important;
   color: var(--foreground) !important;
 }
 
@@ -2119,7 +2131,7 @@ body:has(.is-marketing-report),
 }
 .client-integration-theme table th {
   color: var(--muted-foreground) !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   padding: 12px 14px !important;
   border-bottom: 1px solid var(--border) !important;
@@ -2190,7 +2202,7 @@ body:has(.is-marketing-report),
 }
 .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] h4 {
   color: var(--foreground) !important;
-  font-weight: 800 !important;
+  font-weight: 500 !important;
 }
 .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] p {
   color: var(--muted-foreground) !important;

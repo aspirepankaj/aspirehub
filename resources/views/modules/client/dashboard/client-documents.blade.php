@@ -4,7 +4,7 @@
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-[#135266]">
             Resources
         </div>
-        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#135266] dark:text-white">
+        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-[#135266] dark:text-white">
             Your files, always accessible.
         </h1>
         <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
@@ -125,7 +125,7 @@
                 <svg class="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V4a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                 </svg>
-                <h3 class="mt-4 text-sm font-bold text-slate-850 dark:text-slate-300">No Resources Found</h3>
+                <h3 class="mt-4 text-sm font-medium text-slate-850 dark:text-slate-300">No Resources Found</h3>
                 <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">There are currently no resources or links added for your account.</p>
             </div>
         @endforelse

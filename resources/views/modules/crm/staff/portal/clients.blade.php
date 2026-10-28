@@ -1261,7 +1261,7 @@
                     $donutTotal = array_sum(array_column($donutItems, 'value'));
                     $donutTotalLabel = !empty($reportDataScope['key_events']) ? 'Events' : 'Sessions';
                 @endphp
-                <div class="flex items-center gap-2 text-[18px] font-bold text-slate-800 dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
+                <div class="flex items-center gap-2 text-[18px] !font-normal text-slate-800 dark:text-slate-100 tracking-tight mb-4" style="font-size: 18px !important;">
                     <div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> {{ $donutTitle }}
                 </div>
                 <div class="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-8">

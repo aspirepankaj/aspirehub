@@ -2,6 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&display=swap" rel="stylesheet">
 <style>
     /* Top-left corner badges */
         .metric-corner-badge {
@@ -539,7 +540,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Google Analytics 4</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">Google Analytics 4</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Website Traffic & Engagement</span>
                                         </div>
@@ -679,7 +680,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Search Console</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">Search Console</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Organic Search Performance</span>
                                         </div>
@@ -815,7 +816,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Google Ads</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">Google Ads</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Paid Campaigns & ROI</span>
                                         </div>
@@ -939,7 +940,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Facebook</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">Facebook</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Social Reach & Engagement</span>
                                         </div>
@@ -1059,7 +1060,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Google Business Profile</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">Google Business Profile</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Local Listing & Customer Actions</span>
                                         </div>
@@ -1179,7 +1180,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Keyword.com</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">Keyword.com</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">SEO Keyword Rank Tracking</span>
                                         </div>
@@ -1299,7 +1300,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">YouTube</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">YouTube</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Video Views & Channel Growth</span>
                                         </div>
@@ -1415,7 +1416,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">LinkedIn</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">LinkedIn</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Professional Network Engagement</span>
                                         </div>
@@ -1531,7 +1532,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-bold text-slate-800 dark:text-white">Tag Manager</h3>
+                                                <h3 class="text-base font-medium text-slate-800 dark:text-white">Tag Manager</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Container Overview & Assets</span>
                                         </div>
