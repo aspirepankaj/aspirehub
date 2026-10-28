@@ -6,7 +6,7 @@
         <div>
             <p class="welcome-eyebrow">WELCOME BACK</p>
             <h1 class="welcome-title">
-                Good <span id="greetingTime">Morning</span>, <span class="brand-teal">{{ explode(' ', $clientName)[0] }}.</span>
+                Good <span id="greetingTime" class="font-momo">Morning</span>, <span class="brand-teal font-momo">{{ explode(' ', $clientName)[0] }}.</span>
             </h1>
             <p class="welcome-desc">Here's a quick look at your digital performance and connected platforms.</p>
         </div>
