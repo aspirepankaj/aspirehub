@@ -5,7 +5,7 @@
             My Websites
         </div>
 
-        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#135266] dark:text-white">
+        <h1 class="mt-2 text-2xl font-medium tracking-tight text-[#135266] dark:text-white">
             All your websites.
         </h1>
 

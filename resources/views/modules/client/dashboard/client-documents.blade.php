@@ -4,7 +4,7 @@
         <div class="text-[11px] font-extrabold uppercase tracking-[0.3em] text-[#135266]">
             Resources
         </div>
-        <h1 class="mt-2 text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-[#135266] dark:text-white">
+        <h1 class="mt-2 text-2xl font-medium tracking-tight text-[#135266] dark:text-white">
             Your files, always accessible.
         </h1>
         <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">

@@ -4,7 +4,7 @@
         <div class="text-[11px] font-medium tracking-[0.3em] text-[#135266]">
             My Profile
         </div>
-        <h1 class="mt-2 text-5xl font-medium tracking-tight text-[#135266] dark:text-white">
+        <h1 class="mt-2 text-2xl font-medium tracking-tight text-[#135266] dark:text-white">
             Your account.
         </h1>
     </div>

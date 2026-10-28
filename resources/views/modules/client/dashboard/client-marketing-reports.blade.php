@@ -302,12 +302,12 @@
         <section class="heading-row">
             <div>
                 <h1>
-                    <span class="heading-icon">
+                    <span class="heading-icon font-momo">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 sm:w-10 sm:h-10 text-primary">
                             <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
                         </svg>
                     </span>
-                    <span>Marketing Performance Overview</span>
+                    <span class="font-momo">Marketing Performance Overview</span>
                 </h1>
                 <p>Comprehensive multi-channel performance overview across all connected integrations.</p>
             </div>
