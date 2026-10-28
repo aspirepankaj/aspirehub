@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between mb-4">
             <div>
                 @if($title)
-                    <h3 class="text-base font-medium text-slate-900 dark:text-white leading-tight">{{ $title }}</h3>
+                    <h3 class="text-lg font-medium text-[#135266] dark:text-white leading-tight">{{ $title }}</h3>
                 @endif
                 @if($subtitle)
                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ $subtitle }}</p>
