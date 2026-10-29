@@ -3226,108 +3226,167 @@
                 @endphp
 
                 <div class="mb-6">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
                         {{-- 1. Keywords Up --}}
-                        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                            <div class="flex items-start justify-between gap-1 mb-2">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-tight">Keywords Up</span>
-                                {!! $renderSparkline('keywords_up', false) !!}
-                            </div>
-                            <div class="my-1">
-                                <span class="text-2xl sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ number_format($curKwUp) }}</span>
-                            </div>
-                            <div class="mt-2 text-[11px] text-slate-400 font-medium">
-                                for {{ $kwDaysDiff }} days
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                            <span class="w-11 h-11 rounded-full bg-[#dcf0f5] dark:bg-teal-950/60 flex items-center justify-center shrink-0 text-[#135266] dark:text-teal-400">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1 truncate">
+                                    Keywords Up
+                                </span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                        {{ number_format($curKwUp) }}
+                                    </span>
+                                </div>
+                                <span class="text-[10px] text-slate-400 font-medium block mt-0.5 truncate">
+                                    for {{ $kwDaysDiff }} days
+                                </span>
                             </div>
                         </div>
 
                         {{-- 2. In Top 3 --}}
-                        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                            <div class="flex items-start justify-between gap-1 mb-2">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-tight">In Top 3</span>
-                                {!! $renderSparkline('top_3', $dTop3 < 0) !!}
-                            </div>
-                            <div class="my-1 flex items-baseline gap-0.5">
-                                <span class="text-2xl sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ number_format($curTop3) }}</span>
-                                <span class="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
-                            </div>
-                            <div class="mt-2 text-[11px] font-bold flex items-center justify-between">
-                                <span class="{{ $dTop3 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
-                                    {{ $dTop3 > 0 ? '+'.$dTop3 : $dTop3 }} &nbsp;{{ $pctTop3 }}%
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                            <span class="w-11 h-11 rounded-full bg-[#dcf0f5] dark:bg-teal-950/60 flex items-center justify-center shrink-0 text-[#135266] dark:text-teal-400">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                                    <path d="M4 22h16"/>
+                                    <path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"/>
+                                    <path d="M18 4H6v7a6 6 0 0 0 12 0V4z"/>
+                                </svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1 truncate">
+                                    In Top 3
                                 </span>
-                                <span class="text-slate-400 font-medium text-[10px]">for {{ $kwDaysDiff }} days</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                        {{ number_format($curTop3) }}
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
+                                </div>
+                                <div class="text-[10px] font-bold flex items-center gap-1 mt-0.5 truncate">
+                                    <span class="{{ $dTop3 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
+                                        {{ $dTop3 > 0 ? '+'.$dTop3 : $dTop3 }} &nbsp;{{ $pctTop3 }}%
+                                    </span>
+                                    <span class="text-slate-400 font-medium text-[9px]">({{ $kwDaysDiff }}d)</span>
+                                </div>
                             </div>
                         </div>
 
                         {{-- 3. In Top 1 Page --}}
-                        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                            <div class="flex items-start justify-between gap-1 mb-2">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-tight">In Top 1 Page</span>
-                                {!! $renderSparkline('top_10', $dTop10 < 0) !!}
-                            </div>
-                            <div class="my-1 flex items-baseline gap-0.5">
-                                <span class="text-2xl sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ number_format($curTop10) }}</span>
-                                <span class="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
-                            </div>
-                            <div class="mt-2 text-[11px] font-bold flex items-center justify-between">
-                                <span class="{{ $dTop10 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
-                                    {{ $dTop10 > 0 ? '+'.$dTop10 : $dTop10 }} &nbsp;{{ $pctTop10 }}%
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                            <span class="w-11 h-11 rounded-full bg-[#dcf0f5] dark:bg-teal-950/60 flex items-center justify-center shrink-0 text-[#135266] dark:text-teal-400">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1 truncate">
+                                    In Top 1 Page
                                 </span>
-                                <span class="text-slate-400 font-medium text-[10px]">for {{ $kwDaysDiff }} days</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                        {{ number_format($curTop10) }}
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
+                                </div>
+                                <div class="text-[10px] font-bold flex items-center gap-1 mt-0.5 truncate">
+                                    <span class="{{ $dTop10 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
+                                        {{ $dTop10 > 0 ? '+'.$dTop10 : $dTop10 }} &nbsp;{{ $pctTop10 }}%
+                                    </span>
+                                    <span class="text-slate-400 font-medium text-[9px]">({{ $kwDaysDiff }}d)</span>
+                                </div>
                             </div>
                         </div>
 
                         {{-- 4. In Top 2 Pages --}}
-                        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                            <div class="flex items-start justify-between gap-1 mb-2">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-tight">In Top 2 Pages</span>
-                                {!! $renderSparkline('top_20', $dTop20 < 0) !!}
-                            </div>
-                            <div class="my-1 flex items-baseline gap-0.5">
-                                <span class="text-2xl sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ number_format($curTop20) }}</span>
-                                <span class="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
-                            </div>
-                            <div class="mt-2 text-[11px] font-bold flex items-center justify-between">
-                                <span class="{{ $dTop20 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
-                                    {{ $dTop20 > 0 ? '+'.$dTop20 : $dTop20 }} &nbsp;{{ $pctTop20 }}%
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                            <span class="w-11 h-11 rounded-full bg-[#dcf0f5] dark:bg-teal-950/60 flex items-center justify-center shrink-0 text-[#135266] dark:text-teal-400">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="m9 12 2 2 4-4"/>
+                                </svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1 truncate">
+                                    In Top 2 Pages
                                 </span>
-                                <span class="text-slate-400 font-medium text-[10px]">for {{ $kwDaysDiff }} days</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                        {{ number_format($curTop20) }}
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
+                                </div>
+                                <div class="text-[10px] font-bold flex items-center gap-1 mt-0.5 truncate">
+                                    <span class="{{ $dTop20 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
+                                        {{ $dTop20 > 0 ? '+'.$dTop20 : $dTop20 }} &nbsp;{{ $pctTop20 }}%
+                                    </span>
+                                    <span class="text-slate-400 font-medium text-[9px]">({{ $kwDaysDiff }}d)</span>
+                                </div>
                             </div>
                         </div>
 
                         {{-- 5. In Top 3 Pages --}}
-                        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                            <div class="flex items-start justify-between gap-1 mb-2">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-tight">In Top 3 Pages</span>
-                                {!! $renderSparkline('top_30', $dTop30 < 0) !!}
-                            </div>
-                            <div class="my-1 flex items-baseline gap-0.5">
-                                <span class="text-2xl sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ number_format($curTop30) }}</span>
-                                <span class="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
-                            </div>
-                            <div class="mt-2 text-[11px] font-bold flex items-center justify-between">
-                                <span class="{{ $dTop30 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
-                                    {{ $dTop30 > 0 ? '+'.$dTop30 : $dTop30 }} &nbsp;{{ $pctTop30 }}%
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                            <span class="w-11 h-11 rounded-full bg-[#dcf0f5] dark:bg-teal-950/60 flex items-center justify-center shrink-0 text-[#135266] dark:text-teal-400">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1 truncate">
+                                    In Top 3 Pages
                                 </span>
-                                <span class="text-slate-400 font-medium text-[10px]">for {{ $kwDaysDiff }} days</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                        {{ number_format($curTop30) }}
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
+                                </div>
+                                <div class="text-[10px] font-bold flex items-center gap-1 mt-0.5 truncate">
+                                    <span class="{{ $dTop30 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
+                                        {{ $dTop30 > 0 ? '+'.$dTop30 : $dTop30 }} &nbsp;{{ $pctTop30 }}%
+                                    </span>
+                                    <span class="text-slate-400 font-medium text-[9px]">({{ $kwDaysDiff }}d)</span>
+                                </div>
                             </div>
                         </div>
 
                         {{-- 6. In Top 10 Pages --}}
-                        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                            <div class="flex items-start justify-between gap-1 mb-2">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-tight">In Top 10 Pages</span>
-                                {!! $renderSparkline('top_100', $dTop100 < 0) !!}
-                            </div>
-                            <div class="my-1 flex items-baseline gap-0.5">
-                                <span class="text-2xl sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{{ number_format($curTop100) }}</span>
-                                <span class="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
-                            </div>
-                            <div class="mt-2 text-[11px] font-bold flex items-center justify-between">
-                                <span class="{{ $dTop100 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
-                                    {{ $dTop100 > 0 ? '+'.$dTop100 : $dTop100 }} &nbsp;{{ $pctTop100 }}%
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                            <span class="w-11 h-11 rounded-full bg-[#dcf0f5] dark:bg-teal-950/60 flex items-center justify-center shrink-0 text-[#135266] dark:text-teal-400">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1 truncate">
+                                    In Top 10 Pages
                                 </span>
-                                <span class="text-slate-400 font-medium text-[10px]">for {{ $kwDaysDiff }} days</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                        {{ number_format($curTop100) }}
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">/{{ $curKwTotal }}</span>
+                                </div>
+                                <div class="text-[10px] font-bold flex items-center gap-1 mt-0.5 truncate">
+                                    <span class="{{ $dTop100 < 0 ? 'text-rose-500' : 'text-emerald-500' }}">
+                                        {{ $dTop100 > 0 ? '+'.$dTop100 : $dTop100 }} &nbsp;{{ $pctTop100 }}%
+                                    </span>
+                                    <span class="text-slate-400 font-medium text-[9px]">({{ $kwDaysDiff }}d)</span>
+                                </div>
                             </div>
                         </div>
                     </div>
