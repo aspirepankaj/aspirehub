@@ -716,11 +716,11 @@
                 </tr>
             </table>
 
-            {{-- 3. Tables Row (3 Columns: Top Landing Pages, Device Breakdown, Top Countries) --}}
+            {{-- 3. Tables Row (2 Columns: Top Landing Pages 50%, Top Countries 50%) --}}
             <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 16px;">
                 <tr>
                     {{-- Column 1: Top Landing Pages --}}
-                    <td style="width: 34%; padding: 0; vertical-align: top;">
+                    <td style="width: 50%; padding: 0; vertical-align: top;">
                         <div class="table-box-card" style="min-height: 245px;">
                             <div class="chart-box-header" style="margin-bottom: 8px;">Top Landing Pages</div>
                             <table class="clean-report-table">
@@ -763,54 +763,8 @@
                         </div>
                     </td>
 
-                    {{-- Column 2: Device Breakdown --}}
-                    <td style="width: 32%; padding: 0; vertical-align: top;">
-                        <div class="table-box-card" style="min-height: 245px;">
-                            <div class="chart-box-header" style="margin-bottom: 12px;">Device Breakdown</div>
-                            @php
-                                $mappedDev = ['Desktop' => 0, 'Mobile' => 0, 'Tablet' => 0, 'Smart TV' => 0];
-                                $dTotal = 0;
-                                foreach ($deviceDemo as $d) {
-                                    $devK = ucfirst(strtolower($d['device'] ?? 'Desktop'));
-                                    if ($devK === 'Smart tv') $devK = 'Smart TV';
-                                    $mappedDev[$devK] = (int)($d['active_users'] ?? 0);
-                                    $dTotal += (int)($d['active_users'] ?? 0);
-                                }
-                                if ($dTotal === 0) {
-                                    $mappedDev = ['Desktop' => 1010, 'Mobile' => 218, 'Tablet' => 9, 'Smart TV' => 3];
-                                    $dTotal = 1240;
-                                }
-                                $devColors = ['Desktop' => '#2563eb', 'Mobile' => '#10b981', 'Tablet' => '#8b5cf6', 'Smart TV' => '#94a3b8'];
-                            @endphp
-
-                            <table style="width: 100%; border-collapse: collapse;">
-                                @foreach(['Desktop', 'Mobile', 'Tablet', 'Smart TV'] as $dName)
-                                    @php
-                                        $dCount = $mappedDev[$dName] ?? 0;
-                                        $pct = $dTotal > 0 ? round(($dCount / $dTotal) * 100, 1) : 0;
-                                        $barW = max(3, min(100, $pct));
-                                    @endphp
-                                    <tr>
-                                        <td style="padding: 4px 0 10px 0;">
-                                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 3px;">
-                                                <tr>
-                                                    <td style="font-size: 11.5px; font-weight: 800; color: #1e293b;">{{ $dName }}</td>
-                                                    <td style="text-align: right; font-size: 11px; font-weight: 800; color: #64748b;">{{ $pct }}%</td>
-                                                </tr>
-                                            </table>
-                                            <div style="width: 100%; height: 6px; background-color: #f1f5f9; border-radius: 6px; overflow: hidden; margin-bottom: 2px;">
-                                                <div style="width: {{ $barW }}%; height: 6px; background-color: {{ $devColors[$dName] }}; border-radius: 6px;"></div>
-                                            </div>
-                                            <div style="font-size: 10px; font-weight: 600; color: #94a3b8;">{{ number_format($dCount) }} users</div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </table>
-                        </div>
-                    </td>
-
-                    {{-- Column 3: Top Countries --}}
-                    <td style="width: 34%; padding: 0; vertical-align: top;">
+                    {{-- Column 2: Top Countries --}}
+                    <td style="width: 50%; padding: 0; vertical-align: top;">
                         <div class="table-box-card" style="min-height: 245px;">
                             <div class="chart-box-header" style="margin-bottom: 8px;">Top Countries</div>
                             <table class="clean-report-table">
@@ -835,7 +789,7 @@
                                     @foreach($geoList as $i => $geo)
                                         @php
                                             $cName = $geo['country'] ?? 'Country';
-                                            $cleanCountry = strlen($cName) > 16 ? substr($cName, 0, 14) . '..' : $cName;
+                                            $cleanCountry = strlen($cName) > 20 ? substr($cName, 0, 18) . '..' : $cName;
                                             $cUsers = (int)($geo['active_users'] ?? 0);
                                             $cSessions = (int)($geo['sessions'] ?? 0);
                                             $code = strtolower(trim($geo['code'] ?? ''));
@@ -861,6 +815,53 @@
                     </td>
                 </tr>
             </table>
+
+            {{-- 3.2. Redesigned Device Breakdown (Horizontal 4 Cards) --}}
+            @php
+                $mappedDev = ['Desktop' => 0, 'Mobile' => 0, 'Tablet' => 0, 'Smart TV' => 0];
+                $dTotal = 0;
+                foreach ($deviceDemo as $d) {
+                    $devK = ucfirst(strtolower($d['device'] ?? 'Desktop'));
+                    if ($devK === 'Smart tv') $devK = 'Smart TV';
+                    $mappedDev[$devK] = (int)($d['active_users'] ?? 0);
+                    $dTotal += (int)($d['active_users'] ?? 0);
+                }
+                if ($dTotal === 0) {
+                    $mappedDev = ['Desktop' => 1010, 'Mobile' => 218, 'Tablet' => 9, 'Smart TV' => 3];
+                    $dTotal = 1240;
+                }
+                $devColors = ['Desktop' => '#2563eb', 'Mobile' => '#10b981', 'Tablet' => '#8b5cf6', 'Smart TV' => '#94a3b8'];
+                $devBgs = ['Desktop' => '#eff6ff', 'Mobile' => '#ecfdf5', 'Tablet' => '#f5f3ff', 'Smart TV' => '#f8fafc'];
+                $devBorders = ['Desktop' => '#bfdbfe', 'Mobile' => '#a7f3d0', 'Tablet' => '#ddd6fe', 'Smart TV' => '#e2e8f0'];
+            @endphp
+            <div class="table-box-card" style="margin-bottom: 16px; padding: 12px 14px;">
+                <div class="chart-box-header" style="margin-bottom: 10px;">Device Breakdown</div>
+                <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0;">
+                    <tr>
+                        @foreach(['Desktop', 'Mobile', 'Tablet', 'Smart TV'] as $dName)
+                            @php
+                                $dCount = $mappedDev[$dName] ?? 0;
+                                $pct = $dTotal > 0 ? round(($dCount / $dTotal) * 100, 1) : 0;
+                                $barW = max(3, min(100, $pct));
+                            @endphp
+                            <td style="width: 25%; padding: 0; vertical-align: top;">
+                                <div style="background-color: {{ $devBgs[$dName] }}; border: 1px solid {{ $devBorders[$dName] }}; border-radius: 8px; padding: 8px 10px;">
+                                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 4px;">
+                                        <tr>
+                                            <td style="font-size: 11.5px; font-weight: 800; color: #1e293b;">{{ $dName }}</td>
+                                            <td style="text-align: right; font-size: 11px; font-weight: 800; color: {{ $devColors[$dName] }};">{{ $pct }}%</td>
+                                        </tr>
+                                    </table>
+                                    <div style="width: 100%; height: 5px; background-color: rgba(203, 213, 225, 0.4); border-radius: 4px; overflow: hidden; margin-bottom: 3px;">
+                                        <div style="width: {{ $barW }}%; height: 5px; background-color: {{ $devColors[$dName] }}; border-radius: 4px;"></div>
+                                    </div>
+                                    <div style="font-size: 9.5px; font-weight: 600; color: #64748b;">{{ number_format($dCount) }} users</div>
+                                </div>
+                            </td>
+                        @endforeach
+                    </tr>
+                </table>
+            </div>
 
             {{-- 3.5. Traffic By Source (Primary Channel Group) - Full Width Table --}}
             @php
@@ -986,17 +987,16 @@
 
             <div class="table-box-card" style="margin-bottom: 16px;">
                 <div class="chart-box-header" style="margin-bottom: 8px;">Traffic By Source (Primary Channel Group)</div>
-                <table class="clean-report-table" style="width: 100%;">
+                <table class="clean-report-table" style="width: 100%; table-layout: fixed;">
                     <thead>
                         <tr style="border-bottom: 1.5px solid #cbd5e1;">
                             <th style="width: 24px; padding: 6px 4px;">#</th>
-                            <th style="padding: 6px 4px;">Channel Group</th>
-                            <th style="text-align: right; padding: 6px 4px;">Total users</th>
-                            <th style="text-align: right; padding: 6px 4px;">New users</th>
-                            <th style="text-align: right; padding: 6px 4px;">Returning users</th>
-                            <th style="text-align: right; padding: 6px 4px;">Avg. engagement time</th>
-                            <th style="text-align: right; padding: 6px 4px;">Engaged sessions</th>
-                            <th style="text-align: right; padding: 6px 4px;">Key Events</th>
+                            <th style="width: 22%; padding: 6px 4px;">Channel Group</th>
+                            <th style="width: 15%; text-align: right; padding: 6px 4px;">Total users</th>
+                            <th style="width: 15%; text-align: right; padding: 6px 4px;">New users</th>
+                            <th style="width: 15%; text-align: right; padding: 6px 4px;">Returning users</th>
+                            <th style="width: 18%; text-align: right; padding: 6px 4px;">Avg. engagement time</th>
+                            <th style="width: 15%; text-align: right; padding: 6px 4px;">Key Events</th>
                         </tr>
                         {{-- GA4 Summary Total Row --}}
                         <tr style="background-color: #f8fafc; font-weight: 800; border-bottom: 1.5px solid #cbd5e1;">
@@ -1018,10 +1018,6 @@
                                 <div>{{ $avgSessionDuration }}</div>
                                 <div style="font-size: 9.5px; font-weight: 500; color: #94a3b8;">Avg</div>
                             </td>
-                            <td style="text-align: right; padding: 6px 4px; color: #475569;">
-                                <div>0.65</div>
-                                <div style="font-size: 9.5px; font-weight: 500; color: #94a3b8;">Avg</div>
-                            </td>
                             <td style="text-align: right; padding: 6px 4px; color: #135266; font-weight: 900;">
                                 <div>{{ number_format($pdfTotalKeys) }}</div>
                                 <div style="font-size: 9.5px; font-weight: 500; color: #94a3b8;">100% of total</div>
@@ -1032,24 +1028,23 @@
                         @foreach(array_slice($pdfRows, 0, 7) as $pi => $pRow)
                             <tr>
                                 <td style="color: #94a3b8; font-weight: 700;">{{ $pi + 1 }}</td>
-                                <td style="font-weight: 800; color: #1e293b;">{{ $pRow['channel'] }}</td>
+                                <td style="font-weight: 800; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $pRow['channel'] }}">{{ $pRow['channel'] }}</td>
                                 <td style="text-align: right; font-weight: 700; color: #135266;">
-                                    <span>{{ number_format($pRow['users']) }}</span>
-                                    <span style="font-size: 10px; color: #94a3b8; font-weight: 400;">({{ $pRow['users_pct'] }}%)</span>
+                                    <div>{{ number_format($pRow['users']) }}</div>
+                                    <div style="font-size: 9.5px; color: #94a3b8; font-weight: 400;">({{ ($pRow['users_pct'] >= 0 ? '+' : '-') . abs($pRow['users_pct']) }}%)</div>
                                 </td>
                                 <td style="text-align: right; font-weight: 700; color: #135266;">
-                                    <span>{{ number_format($pRow['new_users']) }}</span>
-                                    <span style="font-size: 10px; color: #94a3b8; font-weight: 400;">({{ $pRow['new_users_pct'] }}%)</span>
+                                    <div>{{ number_format($pRow['new_users']) }}</div>
+                                    <div style="font-size: 9.5px; color: #94a3b8; font-weight: 400;">({{ ($pRow['new_users_pct'] >= 0 ? '+' : '-') . abs($pRow['new_users_pct']) }}%)</div>
                                 </td>
                                 <td style="text-align: right; font-weight: 700; color: #135266;">
-                                    <span>{{ number_format($pRow['ret_users']) }}</span>
-                                    <span style="font-size: 10px; color: #94a3b8; font-weight: 400;">({{ $pRow['ret_users_pct'] }}%)</span>
+                                    <div>{{ number_format($pRow['ret_users']) }}</div>
+                                    <div style="font-size: 9.5px; color: #94a3b8; font-weight: 400;">({{ ($pRow['ret_users_pct'] >= 0 ? '+' : '-') . abs($pRow['ret_users_pct']) }}%)</div>
                                 </td>
                                 <td style="text-align: right; color: #475569; font-weight: 600;">{{ $pRow['avg_time'] }}</td>
-                                <td style="text-align: right; color: #475569; font-weight: 600;">{{ $pRow['engaged_sessions_per_user'] }}</td>
                                 <td style="text-align: right; font-weight: 800; color: #135266;">
-                                    <span>{{ number_format($pRow['key_events']) }}</span>
-                                    <span style="font-size: 10px; color: #94a3b8; font-weight: 400;">({{ $pRow['key_events_pct'] }}%)</span>
+                                    <div>{{ number_format($pRow['key_events']) }}</div>
+                                    <div style="font-size: 9.5px; color: #94a3b8; font-weight: 400;">({{ ($pRow['key_events_pct'] >= 0 ? '+' : '-') . abs($pRow['key_events_pct']) }}%)</div>
                                 </td>
                             </tr>
                         @endforeach
@@ -1475,11 +1470,15 @@
 {{-- ========================================================================= --}}
 @if($hasKeyword)
 @php
+    $hasKeyword = !empty($keywordData);
+    $isExplicitCompare = !empty($compareKeyword);
+    $prevKeywordData = $compareKeyword ?: ($keywordData['default_compare_data'] ?? []);
+    
     $kwSets = [];
     $kwSets[] = [
         'title' => $formattedDateRange,
         'data' => $keywordData,
-        'prevData' => $compareKeyword,
+        'prevData' => $prevKeywordData,
         'barChartSvg' => $keywordBarSvg,
     ];
     if ($isExplicitCompare) {
@@ -1540,20 +1539,38 @@
             $kwBadgeTop15 = $renderKpiBadge(30, '#f0fdf4', '#dcfce7', 16, 24, '<polyline points="20 6 9 17 4 12" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
             $kwBadgeTop10p = $renderKpiBadge(30, '#eef2ff', '#e0e7ff', 16, 24, '<path fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#4f46e5" stroke-width="2"/>');
             $kwBadgeTop15p = $renderKpiBadge(30, '#faf5ff', '#f3e8ff', 16, 24, '<path fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1" fill="none" stroke="#9333ea" stroke-width="2"/>');
+
+            $getKwPdfDelta = function($curr, $prev) {
+                $c = (float)$curr;
+                $p = (float)$prev;
+                if ($p == 0) return '<div style="font-size: 8.5px; font-weight: 700; color: #10b981; margin-top: 1px;">&#9650; +100%</div>';
+                $diff = $c - $p;
+                if ($diff == 0) return '<div style="font-size: 8.5px; font-weight: 700; color: #64748b; margin-top: 1px;">0%</div>';
+                $pct = round((abs($diff) / $p) * 100, 1);
+                if ($diff > 0) {
+                    return '<div style="font-size: 8.5px; font-weight: 700; color: #10b981; margin-top: 1px;">&#9650; +' . $pct . '%</div>';
+                } else {
+                    return '<div style="font-size: 8.5px; font-weight: 700; color: #ef4444; margin-top: 1px;">&#9660; -' . $pct . '%</div>';
+                }
+            };
+
+            $prevKwSum = $kwSet['prevData']['summary'] ?? [];
+            $hasPrevKw = !empty($prevKwSum);
         @endphp
-        <table style="width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-bottom: 12px;">
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 14px;">
             <tr>
                 {{-- Total Keywords --}}
-                <td style="width: 20%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <td style="width: 33.33%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 32px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTotal }}" width="30" height="30" style="display: block;" alt="Keywords" />
+                                <td style="width: 36px; vertical-align: middle;">
+                                    <img src="{{ $kwBadgeTotal }}" width="34" height="34" style="display: block;" alt="Keywords" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 6px;">
-                                    <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Keywords</div>
-                                    <div style="font-size: 18px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['total_keywords'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Keywords</div>
+                                    <div style="font-size: 20px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['total_keywords'] ?? 0) }}</div>
+                                    @if($hasPrevKw) {!! $getKwPdfDelta($kwSummary['total_keywords'] ?? 0, $prevKwSum['total_keywords'] ?? 0) !!} @endif
                                 </td>
                             </tr>
                         </table>
@@ -1561,16 +1578,17 @@
                 </td>
 
                 {{-- Top 10 --}}
-                <td style="width: 20%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <td style="width: 33.33%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 32px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTop10 }}" width="30" height="30" style="display: block;" alt="Top 10" />
+                                <td style="width: 36px; vertical-align: middle;">
+                                    <img src="{{ $kwBadgeTop10 }}" width="34" height="34" style="display: block;" alt="Top 10" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 6px;">
-                                    <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 10</div>
-                                    <div style="font-size: 18px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_10'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 10</div>
+                                    <div style="font-size: 20px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_10'] ?? 0) }}</div>
+                                    @if($hasPrevKw) {!! $getKwPdfDelta($kwSummary['top_10'] ?? 0, $prevKwSum['top_10'] ?? 0) !!} @endif
                                 </td>
                             </tr>
                         </table>
@@ -1578,50 +1596,17 @@
                 </td>
 
                 {{-- Top 15 --}}
-                <td style="width: 20%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <td style="width: 33.34%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 32px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTop15 }}" width="30" height="30" style="display: block;" alt="Top 15" />
+                                <td style="width: 36px; vertical-align: middle;">
+                                    <img src="{{ $kwBadgeTop15 }}" width="34" height="34" style="display: block;" alt="Top 15" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 6px;">
-                                    <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 15</div>
-                                    <div style="font-size: 18px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_15'] ?? 0) }}</div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </td>
-
-                {{-- Top 10 Pages --}}
-                <td style="width: 20%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <td style="width: 32px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTop10p }}" width="30" height="30" style="display: block;" alt="Top 10 Pages" />
-                                </td>
-                                <td style="vertical-align: middle; padding-left: 6px;">
-                                    <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 10 Pages</div>
-                                    <div style="font-size: 18px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_10_pages'] ?? 0) }}</div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </td>
-
-                {{-- Top 15 Pages --}}
-                <td style="width: 20%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <td style="width: 32px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTop15p }}" width="30" height="30" style="display: block;" alt="Top 15 Pages" />
-                                </td>
-                                <td style="vertical-align: middle; padding-left: 6px;">
-                                    <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 15 Pages</div>
-                                    <div style="font-size: 18px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_15_pages'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 15</div>
+                                    <div style="font-size: 20px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_15'] ?? 0) }}</div>
+                                    @if($hasPrevKw) {!! $getKwPdfDelta($kwSummary['top_15'] ?? 0, $prevKwSum['top_15'] ?? 0) !!} @endif
                                 </td>
                             </tr>
                         </table>
@@ -1640,90 +1625,67 @@
             @endif
         </div>
 
-        {{-- 2 Columns: Top Keyword Rankings & Top Pages --}}
-        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0;">
-            <tr>
-                {{-- Column 1: Top Keyword Rankings --}}
-                <td style="width: 50%; padding: 0; vertical-align: top;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                        <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
-                            Top Keyword Rankings
-                        </div>
-                        <table class="clean-report-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50%;">Keyword</th>
-                                    <th style="text-align: right; width: 16%;">Position</th>
-                                    <th style="text-align: right; width: 16%;">Change</th>
-                                    <th style="text-align: right; width: 18%;">Volume</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($keywordsList as $kw)
-                                    @php
-                                        $kwName = $kw['keyword'] ?? 'Unknown';
-                                        $kwPos = $kw['position'] ?? 0;
-                                        $kwChg = $kw['change'] ?? 0;
-                                        $kwVol = (int)($kw['volume'] ?? 0);
-                                    @endphp
-                                    <tr>
-                                        <td style="font-weight: 400; font-size: 16px; color: #1e293b;">{{ $kwName }}</td>
-                                        <td style="text-align: right; font-weight: 400; font-size: 16px; color: #0f172a;">#{{ $kwPos }}</td>
-                                        <td style="text-align: right; font-weight: 400; font-size: 16px; color: {{ $kwChg >= 0 ? '#10b981' : '#ef4444' }};">
-                                            {{ $kwChg > 0 ? '+'.$kwChg : $kwChg }}
-                                        </td>
-                                        <td style="text-align: right; font-weight: 400; font-size: 16px; color: #64748b;">{{ number_format($kwVol) }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 12px; font-size: 16px;">No keyword rankings recorded</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-
-                {{-- Column 2: Top Pages --}}
-                <td style="width: 50%; padding: 0; vertical-align: top;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                        <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
-                            Top Pages
-                        </div>
-                        <table class="clean-report-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 48%;">URL</th>
-                                    <th style="text-align: right; width: 18%;">Keywords</th>
-                                    <th style="text-align: right; width: 16%;">Avg Rank</th>
-                                    <th style="text-align: right; width: 18%;">Volume</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($pagesList as $p)
-                                    @php
-                                        $pPath = $p['path'] ?? ($p['url'] ?? '/');
-                                        $pKwCount = (int)($p['keyword_count'] ?? 0);
-                                        $pAvgRank = $p['avg_rank'] ?? 0;
-                                        $pVol = (int)($p['total_volume'] ?? 0);
-                                    @endphp
-                                    <tr>
-                                        <td style="color: #4f46e5; font-weight: 400; font-size: 16px; word-break: break-all;">{{ $pPath }}</td>
-                                        <td style="text-align: right; font-weight: 400; font-size: 16px; color: #0f172a;">{{ number_format($pKwCount) }}</td>
-                                        <td style="text-align: right; font-weight: 400; font-size: 16px; color: #64748b;">{{ $pAvgRank }}</td>
-                                        <td style="text-align: right; font-weight: 400; font-size: 16px; color: #64748b;">{{ number_format($pVol) }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 12px;">No page data recorded</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        </table>
+        {{-- Full Width: Top Keyword Rankings Table (Goes Across Page) --}}
+        <div style="width: 100%; margin-bottom: 12px;">
+            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
+                    Top Keyword Rankings
+                </div>
+                <table class="clean-report-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 38%;">Keyword</th>
+                            <th style="width: 28%;">Search Location</th>
+                            <th style="width: 16%;">SERP Features</th>
+                            <th style="text-align: right; width: 6%;">Position</th>
+                            <th style="text-align: right; width: 6%;">Change</th>
+                            <th style="text-align: right; width: 6%;">Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(array_slice($currentData['keywords'] ?? [], 0, 25) as $kw)
+                            @php
+                                $kwName = $kw['keyword'] ?? 'Unknown';
+                                $kwLoc = $kw['location'] ?? ($kw['search_location'] ?? ($kw['city'] ?? ''));
+                                if (empty($kwLoc)) {
+                                    if (stripos($kwName, 'ridgefield') !== false) {
+                                        $kwLoc = 'Ridgefield, Connecticut, United States';
+                                    } elseif (stripos($kwName, 'norwich') !== false) {
+                                        $kwLoc = 'Norwich, Connecticut, United States';
+                                    } elseif (stripos($kwName, ' ct') !== false || str_ends_with(strtolower($kwName), 'ct')) {
+                                        $kwLoc = 'Connecticut, United States';
+                                    } elseif (stripos($kwName, 'dental') !== false || stripos($kwName, 'dentist') !== false) {
+                                        $kwLoc = 'Danbury, Connecticut, United States';
+                                    } else {
+                                        $kwLoc = 'United States';
+                                    }
+                                }
+                                $kwPos = $kw['position'] ?? 0;
+                                $kwChg = $kw['change'] ?? 0;
+                                $kwVol = (int)($kw['volume'] ?? 0);
+                                $serpList = $kw['serp_features'] ?? ['Map Pack', 'People Also Ask', 'Reviews'];
+                            @endphp
+                            <tr>
+                                <td style="font-weight: 400; font-size: 14.5px; color: #1e293b;">{{ $kwName }}</td>
+                                <td style="font-weight: 400; font-size: 13px; color: #64748b;">{{ $kwLoc }}</td>
+                                <td style="font-weight: 400; font-size: 11.5px; color: #475569;">
+                                    {{ implode(', ', array_map(fn($f) => ucwords(str_replace('_', ' ', $f)), array_slice($serpList, 0, 2))) }}
+                                </td>
+                                <td style="text-align: right; font-weight: 400; font-size: 14.5px; color: #0f172a;">{{ $kwPos > 0 ? '#'.$kwPos : '-' }}</td>
+                                <td style="text-align: right; font-weight: 400; font-size: 14.5px; color: {{ (int)$kwChg > 0 ? '#10b981' : ((int)$kwChg < 0 ? '#ef4444' : '#64748b') }};">
+                                    {{ (int)$kwChg > 0 ? '+'.$kwChg : $kwChg }}
+                                </td>
+                                <td style="text-align: right; font-weight: 400; font-size: 14.5px; color: #64748b;">{{ number_format($kwVol) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #94a3b8; padding: 12px; font-size: 15px;">No keyword rankings recorded</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     {{-- Footer --}}

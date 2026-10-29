@@ -706,6 +706,27 @@ trait LoadsMarketingReports
                 $allData['summary']['website_clicks'] = $totalWebsiteClicks;
                 $allData['summary']['clicks'] = $totalWebsiteClicks;
             }
+            // Re-calculate Keyword.com summary dynamically based on filtered date range daily records
+            elseif ($integrationType === 'keyword') {
+                // Find the latest day's ranking snapshot in the selected date range
+                $lastDaySnapshot = null;
+                foreach (array_reverse($mergedDaily) as $dayData) {
+                    if (isset($dayData['top_10']) && $dayData['top_10'] !== null && $dayData['top_10'] > 0) {
+                        $lastDaySnapshot = $dayData;
+                        break;
+                    }
+                }
+                if ($lastDaySnapshot) {
+                    $allData['summary']['top_10'] = (int)$lastDaySnapshot['top_10'];
+                    $allData['summary']['top_15'] = (int)($lastDaySnapshot['top_15'] ?? $lastDaySnapshot['top_10']);
+                    if (isset($lastDaySnapshot['top_3'])) {
+                        $allData['summary']['top_3'] = (int)$lastDaySnapshot['top_3'];
+                    }
+                    if (isset($lastDaySnapshot['top_50'])) {
+                        $allData['summary']['top_50'] = (int)$lastDaySnapshot['top_50'];
+                    }
+                }
+            }
         }
 
         if ($fetchDefaultCompare && !empty($startDate) && !empty($endDate)) {
