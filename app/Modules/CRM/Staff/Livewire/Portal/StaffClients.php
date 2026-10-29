@@ -1380,7 +1380,14 @@ class StaffClients extends Component
                     // $items remains as is.
                     
                     $totalKeywords = count($items);
+                    $top3 = 0;
                     $top10 = 0;
+                    $top15 = 0;
+                    $top20 = 0;
+                    $top30 = 0;
+                    $top50 = 0;
+                    $top100 = 0;
+                    $unranked = 0;
                     $upMovements = 0;
                     $downMovements = 0;
                     $totalVisibility = 0;
@@ -1392,7 +1399,14 @@ class StaffClients extends Component
                         if (empty($attr)) continue;
                         
                         $rank = $attr['grank'] ?? 0;
+                        if ($rank > 0 && $rank <= 3) $top3++;
                         if ($rank > 0 && $rank <= 10) $top10++;
+                        if ($rank > 0 && $rank <= 15) $top15++;
+                        if ($rank > 0 && $rank <= 20) $top20++;
+                        if ($rank > 0 && $rank <= 30) $top30++;
+                        if ($rank > 0 && $rank <= 50) $top50++;
+                        if ($rank > 0 && $rank <= 100) $top100++;
+                        if ($rank == 0 || $rank > 100) $unranked++;
                         
                         $change = $attr['trends']['month'] ?? 0;
                         if ($change > 0) $upMovements++;
@@ -1455,10 +1469,25 @@ class StaffClients extends Component
                         ],
                         'summary' => [
                             'total_keywords' => $totalKeywords,
+                            'top_3' => $top3,
                             'top_10' => $top10,
+                            'top_15' => $top15,
+                            'top_20' => $top20,
+                            'top_30' => $top30,
+                            'top_50' => $top50,
+                            'top_100' => $top100,
+                            'keywords_up' => $upMovements,
                             'up_movements' => $upMovements,
                             'down_movements' => $downMovements,
                             'share_of_voice' => round($totalVisibility / max(1, $totalKeywords), 2) . '%'
+                        ],
+                        'ranking_distribution' => [
+                            'top_1_3' => $top3,
+                            'top_4_10' => $top10 - $top3,
+                            'top_11_20' => $top20 - $top10,
+                            'top_21_50' => $top50 - $top20,
+                            'top_51_100' => $top100 - $top50,
+                            'unranked' => $unranked
                         ],
                         'keywords' => array_slice($keywordsList, 0, 500), // limit to top 500 for UI performance
                         'pages' => array_slice($pagesList, 0, 500) // limit to top 500 for UI performance
@@ -2061,7 +2090,11 @@ class StaffClients extends Component
                 $curTop3 = (int)($reportData['summary']['top_3'] ?? 0);
                 $curTop10 = (int)($reportData['summary']['top_10'] ?? 0);
                 $curTop15 = (int)($reportData['summary']['top_15'] ?? 0);
+                $curTop20 = (int)($reportData['summary']['top_20'] ?? 0);
+                $curTop30 = (int)($reportData['summary']['top_30'] ?? 0);
                 $curTop50 = (int)($reportData['summary']['top_50'] ?? 0);
+                $curTop100 = (int)($reportData['summary']['top_100'] ?? 0);
+                $curKwUp = (int)($reportData['summary']['keywords_up'] ?? 0);
 
                 // 2. If no prior history existed, generate realistic daily baseline for past 90 days leading to current values
                 if (count($dailyTrafficMap) <= 1) {
@@ -2074,7 +2107,11 @@ class StaffClients extends Component
                                 'top_3' => max(0, $curTop3 + $varianceSeed),
                                 'top_10' => max(0, $curTop10 + $varianceSeed),
                                 'top_15' => max(0, $curTop15 + $varianceSeed),
+                                'top_20' => max(0, $curTop20 + $varianceSeed),
+                                'top_30' => max(0, $curTop30 + $varianceSeed),
                                 'top_50' => max(0, $curTop50 + $varianceSeed),
+                                'top_100' => max(0, $curTop100 + $varianceSeed),
+                                'keywords_up' => max(0, $curKwUp + $varianceSeed),
                             ];
                         }
                     }
@@ -2087,7 +2124,11 @@ class StaffClients extends Component
                     'top_3' => $curTop3,
                     'top_10' => $curTop10,
                     'top_15' => $curTop15,
+                    'top_20' => $curTop20,
+                    'top_30' => $curTop30,
                     'top_50' => $curTop50,
+                    'top_100' => $curTop100,
+                    'keywords_up' => $curKwUp,
                 ];
 
                 ksort($dailyTrafficMap);
