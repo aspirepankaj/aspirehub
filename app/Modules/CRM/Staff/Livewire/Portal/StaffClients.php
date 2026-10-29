@@ -1746,16 +1746,20 @@ class StaffClients extends Component
                 $fbStartDate = $startDateStr;
                 $fbEndDate = $endDateStr;
 
-                // Get Page Access Token if a User Token was provided
+                // Get Page Access Token if a User Token was provided, along with connected Instagram Business Account
                 $pageAccessToken = $accessToken;
                 $tokenResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}", [
-                    'fields' => 'access_token,followers_count',
+                    'fields' => 'access_token,followers_count,instagram_business_account{id,username,name,profile_picture_url,followers_count,media_count}',
                     'access_token' => $accessToken
                 ]);
                 $pageFollowers = 0;
+                $igAccount = null;
+                $igFollowers = 0;
                 if ($tokenResponse->successful()) {
                     $pageAccessToken = $tokenResponse->json('access_token') ?? $accessToken;
                     $pageFollowers = $tokenResponse->json('followers_count') ?? 0;
+                    $igAccount = $tokenResponse->json('instagram_business_account');
+                    $igFollowers = $igAccount['followers_count'] ?? 0;
                 }
 
                 // Fetch Daily Page Insights for accurate graph and summary
@@ -1839,23 +1843,117 @@ class StaffClients extends Component
                     \Illuminate\Support\Facades\Log::error('FB Posts Insights Error: ' . $postsResponse->body());
                     throw new \Exception('Facebook API failed: ' . $errorMsg);
                 }
+
+                // 3. Instagram Media & Insights (if Instagram Business Account is connected)
+                $igTopMedia = [];
+                $igSummaryReach = 0;
+                $igSummaryViews = 0;
+                $igSummaryEngaged = 0;
+                $igPostsCount = 0;
+
+                if (!empty($igAccount['id'])) {
+                    $igUserId = $igAccount['id'];
                     
-                    ksort($dailyTraffic);
+                    try {
+                        $igMediaResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$igUserId}/media", [
+                            'fields' => 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count,insights.metric(reach,impressions,total_interactions)',
+                            'limit' => 100,
+                            'since' => $fbStartDate,
+                            'access_token' => $pageAccessToken
+                        ]);
+
+                        if ($igMediaResponse->successful()) {
+                            $igMediaData = $igMediaResponse->json('data') ?? [];
+                            $igPostsCount = count($igMediaData);
+
+                            foreach ($igMediaData as $item) {
+                                $likes = $item['like_count'] ?? 0;
+                                $comments = $item['comments_count'] ?? 0;
+                                $reach = 0;
+                                $views = 0;
+                                $engaged = $likes + $comments;
+
+                                if (isset($item['insights']['data'])) {
+                                    foreach ($item['insights']['data'] as $insight) {
+                                        if ($insight['name'] === 'reach') {
+                                            $val = $insight['values'][0]['value'] ?? 0;
+                                            if ($val > $reach) $reach = $val;
+                                        }
+                                        if ($insight['name'] === 'impressions') {
+                                            $val = $insight['values'][0]['value'] ?? 0;
+                                            if ($val > $views) $views = $val;
+                                        }
+                                        if ($insight['name'] === 'total_interactions') {
+                                            $val = $insight['values'][0]['value'] ?? 0;
+                                            if ($val > $engaged) $engaged = $val;
+                                        }
+                                    }
+                                }
+
+                                $dateStr = \Carbon\Carbon::parse($item['timestamp'])->format('Y-m-d');
+                                if (isset($dailyTraffic[$dateStr])) {
+                                    $dailyTraffic[$dateStr]['ig_reach'] = ($dailyTraffic[$dateStr]['ig_reach'] ?? 0) + $reach;
+                                    $dailyTraffic[$dateStr]['ig_views'] = ($dailyTraffic[$dateStr]['ig_views'] ?? 0) + $views;
+                                    $dailyTraffic[$dateStr]['ig_engaged'] = ($dailyTraffic[$dateStr]['ig_engaged'] ?? 0) + $engaged;
+                                }
+
+                                $igSummaryReach += $reach;
+                                $igSummaryViews += $views;
+                                $igSummaryEngaged += $engaged;
+
+                                $igTopMedia[] = [
+                                    'id' => $item['id'] ?? '',
+                                    'message' => \Illuminate\Support\Str::limit($item['caption'] ?? 'Instagram Post', 60),
+                                    'created_time' => $item['timestamp'] ?? '',
+                                    'picture' => $item['thumbnail_url'] ?? ($item['media_url'] ?? null),
+                                    'url' => $item['permalink'] ?? '#',
+                                    'media_type' => $item['media_type'] ?? 'IMAGE',
+                                    'likes' => $likes,
+                                    'comments' => $comments,
+                                    'shares' => 0,
+                                    'reach' => $reach,
+                                    'views' => $views,
+                                    'viewers' => $engaged,
+                                ];
+                            }
+
+                            usort($igTopMedia, function($a, $b) {
+                                return $b['views'] <=> $a['views'];
+                            });
+                            $igTopMedia = array_slice($igTopMedia, 0, 15);
+                        }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::warning('IG API Fetch Warning: ' . $e->getMessage());
+                    }
+                }
                     
-                    $reportData = [
-                        'summary' => [
-                            'reach' => $summaryReach,
-                            'views' => $summaryViews,
-                            'engaged' => $summaryEngaged,
-                            'followers' => $pageFollowers,
-                            'posts' => count($postsData),
-                        ],
-                        'daily_traffic' => array_values($dailyTraffic),
-                        'top_posts' => $topPosts,
-                        'raw' => [
-                            'posts' => $postsData
-                        ]
-                    ];
+                ksort($dailyTraffic);
+                
+                $reportData = [
+                    'summary' => [
+                        'reach' => $summaryReach,
+                        'views' => $summaryViews,
+                        'engaged' => $summaryEngaged,
+                        'followers' => $pageFollowers,
+                        'posts' => count($postsData),
+                    ],
+                    'instagram_connected' => !empty($igAccount['id']),
+                    'instagram_account' => $igAccount,
+                    'instagram_summary' => [
+                        'followers' => $igFollowers,
+                        'reach' => $igSummaryReach,
+                        'views' => $igSummaryViews,
+                        'engaged' => $igSummaryEngaged,
+                        'posts' => $igPostsCount,
+                    ],
+                    'daily_traffic' => array_values($dailyTraffic),
+                    'top_posts' => $topPosts,
+                    'instagram_posts' => $igTopMedia,
+                    'raw' => [
+                        'posts' => $postsData,
+                        'instagram_account' => $igAccount
+                    ]
+                ];
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('Facebook API failed: ' . $e->getMessage());
                 $reportData = ['error' => 'Facebook API failed: ' . $e->getMessage()];

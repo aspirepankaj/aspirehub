@@ -71,7 +71,7 @@
                         @elseif($activeReportIntegrationId === 'gads')
                             Google Ads &mdash; Detailed Report
                         @elseif($activeReportIntegrationId === 'facebook')
-                            Facebook &mdash; Detailed Report
+                            Meta Social (Facebook &amp; Instagram) &mdash; Detailed Report
                         @elseif($activeReportIntegrationId === 'linkedin')
                             LinkedIn &mdash; Detailed Report
                         @else
@@ -446,73 +446,99 @@
             }
             @endphp
             
-            <div wire:key="fb-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
+            <div wire:key="fb-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-10 mb-8">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="fb-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="flex-1 w-full overflow-hidden">
-                @php $reportDataScope = $rSet['data']; @endphp
+            <div wire:key="fb-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="w-full font-sans pb-10 overflow-hidden {{ $idx > 0 ? 'mt-8 pt-8 border-t-4 border-slate-200 dark:border-slate-700/80' : '' }}">
+                @php 
+                    $reportDataScope = $rSet['data']; 
+                    $igConnected = !empty($reportDataScope['instagram_connected']) || !empty($reportDataScope['instagram_summary']['followers']) || !empty($reportDataScope['instagram_posts']);
+                    $igSummary = $reportDataScope['instagram_summary'] ?? [];
+                @endphp
                 @if(count($reportSets) > 1)
-                    <div class="col-span-full mb-3 mt-4">
-                        <span class="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded">
-                            {{ $rSet['title'] }}
-                        </span>
+                    <div class="mb-6 flex items-center justify-between pb-3 border-b-2 {{ $idx === 0 ? 'border-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-950/20' : 'border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/20' }} p-3.5 rounded-xl">
+                        <div class="flex items-center gap-2.5">
+                            <span class="inline-flex items-center gap-2 text-xs font-bold px-3.5 py-1.5 rounded-lg border shadow-xs {{ $idx === 0 ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-amber-500 text-white border-amber-600' }}">
+                                <span class="w-2 h-2 rounded-full bg-white"></span>
+                                {{ $rSet['title'] }}
+                            </span>
+                            <span class="text-xs font-bold uppercase tracking-wider {{ $idx === 0 ? 'text-indigo-700 dark:text-indigo-400' : 'text-amber-700 dark:text-amber-400' }}">
+                                ({{ $idx === 0 ? 'Primary Period' : 'Compare Period' }})
+                            </span>
+                        </div>
                     </div>
                 @endif
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                {{-- ═══════════════════════════════════════════════════════ --}}
+                {{-- 1. FACEBOOK SECTION (Top) --}}
+                {{-- ═══════════════════════════════════════════════════════ --}}
+                <div class="mb-8">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Facebook Page Performance</h3>
+                        </div>
+                        <span class="text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            Facebook
                         </span>
-                        <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Followers</span>
-                            <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
-                                {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
+                    </div>
+
+                    {{-- Facebook KPI Cards --}}
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center shrink-0 text-blue-600">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Page Followers</span>
+                                <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
+                                    {{ number_format($reportDataScope['summary']['followers'] ?? 0) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center shrink-0 text-red-500">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Reach</span>
+                                <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                    {{ number_format($reportDataScope['summary']['reach'] ?? 0) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0 text-emerald-600">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
+                                <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                    {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0 text-indigo-600">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Engaged</span>
+                                <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                    {{ number_format($reportDataScope['summary']['engaged'] ?? 0) }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </span>
-                        <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Reach</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
-                                {{ number_format($reportDataScope['summary']['reach'] ?? 0) }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
-                        </span>
-                        <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
-                                {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                        </span>
-                        <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Engaged</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
-                                {{ number_format($reportDataScope['summary']['engaged'] ?? 0) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- FB Graph Area -->
                 <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-[18px] font-medium font-momo text-[#135266] dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
-                            <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Reach, Views & Engaged Over Time
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-600"></div> Facebook Reach, Views &amp; Engaged Over Time
                         </h3>
                     </div>
                     <div class="w-full" wire:ignore>
-                        <div class="h-64" wire:key="fb-chart-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" x-data="{
+                        <div class="h-64" wire:key="fb-chart-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" x-data="{
                             chart: null,
                             init() {
                                 if (!this.$refs.canvas) return;
@@ -520,7 +546,7 @@
                                     this.chart.destroy();
                                 }
                                 const ctx = this.$refs.canvas.getContext('2d');
-                                let dt = {{ json_encode($idx === 0 ? ($activeReportData['daily_traffic'] ?? []) : ($activeReportData['compare_data']['daily_traffic'] ?? [])) }};
+                                let dt = {{ json_encode($reportDataScope['daily_traffic'] ?? []) }};
                                 
                                 let labels = dt.map(d => {
                                     let dateStr = d.date;
@@ -670,6 +696,233 @@
                         </table>
                     </div>
                 </div>
+
+                {{-- ═══════════════════════════════════════════════════════ --}}
+                {{-- 2. INSTAGRAM SECTION (Below Facebook) --}}
+                {{-- ═══════════════════════════════════════════════════════ --}}
+                @if($igConnected)
+                <div class="mt-16 pt-10 border-t-2 border-dashed border-slate-200 dark:border-slate-800">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-pink-500"></span>
+                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Instagram Business Performance</h3>
+                        </div>
+                        <span class="text-xs font-semibold text-pink-600 bg-pink-50 dark:bg-pink-950/40 px-3 py-1 rounded-full flex items-center gap-1.5 border border-pink-200/50">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            Instagram
+                        </span>
+                    </div>
+
+                    {{-- Instagram KPI Cards --}}
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center shrink-0 text-pink-600">
+                                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">IG Followers</span>
+                                <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
+                                    {{ number_format($igSummary['followers'] ?? 0) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center shrink-0 text-red-500">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">IG Reach</span>
+                                <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                    {{ number_format($igSummary['reach'] ?? 0) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0 text-emerald-600">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">IG Impressions</span>
+                                <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                    {{ number_format($igSummary['views'] ?? 0) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
+                            <span class="w-11 h-11 rounded-full bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center shrink-0 text-purple-600">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">IG Engagements</span>
+                                <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                                    {{ number_format($igSummary['engaged'] ?? 0) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Instagram Graph Area --}}
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-[18px] font-medium font-momo text-[#135266] dark:text-slate-100 tracking-tight flex items-center gap-2" style="font-size: 18px !important; line-height: 1.3 !important;">
+                                <div class="w-1.5 h-1.5 rounded-full bg-pink-500"></div> Instagram Reach, Impressions &amp; Engagements Over Time
+                            </h3>
+                        </div>
+                        <div class="w-full" wire:ignore>
+                            <div class="h-64" wire:key="ig-chart-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" x-data="{
+                                chart: null,
+                                init() {
+                                    if (!this.$refs.canvas) return;
+                                    if (this.chart) {
+                                        this.chart.destroy();
+                                    }
+                                    const ctx = this.$refs.canvas.getContext('2d');
+                                    let dt = {{ json_encode($reportDataScope['daily_traffic'] ?? []) }};
+                                    
+                                    let labels = dt.map(d => {
+                                        let dateStr = d.date;
+                                        return dateStr.length === 8 && !dateStr.includes('-') 
+                                            ? dateStr.substring(4,6)+'/'+dateStr.substring(6,8) 
+                                            : (dateStr.includes('-') ? dateStr.split('-').slice(1).join('/') : dateStr);
+                                    });
+                                    let reach = dt.map(d => d.ig_reach !== undefined ? d.ig_reach : (d.reach || 0));
+                                    let views = dt.map(d => d.ig_views !== undefined ? d.ig_views : (d.views || 0));
+                                    let engaged = dt.map(d => d.ig_engaged !== undefined ? d.ig_engaged : (d.engaged || 0));
+
+                                    this.chart = new Chart(ctx, {
+                                        type: 'line',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [
+                                                {
+                                                    label: 'IG Reach',
+                                                    data: reach,
+                                                    borderColor: '#ec4899',
+                                                    backgroundColor: '#ec4899',
+                                                    borderWidth: 2,
+                                                    fill: false,
+                                                    tension: 0.4,
+                                                    pointRadius: 4,
+                                                    pointHoverRadius: 6,
+                                                    yAxisID: 'y'
+                                                },
+                                                {
+                                                    label: 'IG Impressions',
+                                                    data: views,
+                                                    borderColor: '#10b981',
+                                                    backgroundColor: '#10b981',
+                                                    borderWidth: 2,
+                                                    fill: false,
+                                                    tension: 0.4,
+                                                    pointRadius: 4,
+                                                    pointHoverRadius: 6,
+                                                    yAxisID: 'y'
+                                                },
+                                                {
+                                                    label: 'IG Engagements',
+                                                    data: engaged,
+                                                    borderColor: '#a855f7',
+                                                    backgroundColor: '#a855f7',
+                                                    borderWidth: 2,
+                                                    fill: false,
+                                                    tension: 0.4,
+                                                    pointRadius: 4,
+                                                    pointHoverRadius: 6,
+                                                    yAxisID: 'y'
+                                                }
+                                            ]
+                                        },
+                                        options: {
+                                            responsive: true, maintainAspectRatio: false,
+                                            interaction: { mode: 'index', intersect: false },
+                                            plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, usePointStyle: true } } },
+                                            scales: {
+                                                y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { color: document.documentElement.classList.contains('dark') ? '#1e293b' : '#f1f5f9' }, border: { dash: [4, 4] } },
+                                                x: { grid: { display: false } }
+                                            }
+                                        }
+                                    });
+                                }
+                            }"><canvas x-ref="canvas" id="ig-chart-{{ $idx }}"></canvas></div>
+                        </div>
+                    </div>
+                <div class="mt-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-pink-500"></div> 
+                            <h4 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight" style="color: #135266 !important; font-size: 18px !important; margin: 0 !important;">Top Instagram Media &amp; Reels</h4>
+                        </div>
+                        <span class="text-xs font-semibold text-pink-600 bg-pink-50 dark:bg-pink-950/40 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            Instagram
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-base whitespace-nowrap">
+                            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400">
+                                <tr>
+                                    <th class="py-3 px-5 font-bold">Media / Caption</th>
+                                    <th class="py-3 px-5 font-bold">Type</th>
+                                    <th class="py-3 px-5 font-bold">Published</th>
+                                    <th class="py-3 px-5 text-right font-bold">Reach</th>
+                                    <th class="py-3 px-5 text-right font-bold">Impressions</th>
+                                    <th class="py-3 px-5 text-right font-bold">Interactions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50 text-slate-700 dark:text-slate-300">
+                                @forelse($reportDataScope['instagram_posts'] ?? [] as $igPost)
+                                    <tr wire:key="ig-post-{{ $idx }}-{{ $loop->index }}" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td class="py-4 px-5">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-lg bg-pink-50 dark:bg-pink-950/40 shrink-0 overflow-hidden relative border border-slate-200 dark:border-slate-800">
+                                                    @if(!empty($igPost['picture']))
+                                                        <img src="{{ $igPost['picture'] }}" 
+                                                             referrerpolicy="no-referrer" 
+                                                             loading="lazy"
+                                                             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                                             class="w-full h-full object-cover">
+                                                        <div class="w-full h-full hidden items-center justify-center text-pink-400 bg-pink-50 dark:bg-pink-950/40">
+                                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16"></path></svg>
+                                                        </div>
+                                                    @else
+                                                        <div class="w-full h-full flex items-center justify-center text-pink-400 bg-pink-50 dark:bg-pink-950/40">
+                                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16"></path></svg>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div class="max-w-[250px] whitespace-normal">
+                                                    <a href="{{ $igPost['url'] ?? '#' }}" target="_blank" class="font-semibold text-slate-800 dark:text-slate-200 hover:text-pink-600 block line-clamp-2" title="{{ $igPost['message'] ?? 'Instagram Post' }}">
+                                                        {{ !empty($igPost['message']) ? $igPost['message'] : 'Instagram Post' }}
+                                                    </a>
+                                                    <span class="text-[11px] text-slate-400 flex items-center gap-1 mt-1">
+                                                        <svg class="w-3 h-3 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                                        Instagram Post
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-5 text-slate-500 text-xs font-semibold">
+                                            <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px] uppercase tracking-wider">
+                                                {{ $igPost['media_type'] ?? 'POST' }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-5 text-slate-500 text-xs">
+                                            {{ !empty($igPost['created_time']) ? \Carbon\Carbon::parse($igPost['created_time'])->format('M d, Y') : 'Unknown' }}
+                                        </td>
+                                        <td class="py-4 px-5 text-right font-medium text-red-500">{{ number_format($igPost['reach'] ?? 0) }}</td>
+                                        <td class="py-4 px-5 text-right font-medium text-emerald-600">{{ number_format($igPost['views'] ?? 0) }}</td>
+                                        <td class="py-4 px-5 text-right font-medium text-purple-600">{{ number_format($igPost['viewers'] ?? $igPost['engaged'] ?? 0) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr wire:key="ig-post-empty-{{ $idx }}">
+                                        <td colspan="6" class="py-8 text-center text-slate-500">No Instagram media found for this period.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @endif
 
             </div>
             @endforeach
