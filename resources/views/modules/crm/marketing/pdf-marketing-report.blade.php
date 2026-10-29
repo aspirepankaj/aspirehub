@@ -1951,11 +1951,15 @@
         @php
             $currentData = $fSet['data'];
             $fbSummary = $currentData['summary'] ?? [];
+            $igSummary = $currentData['instagram_summary'] ?? [];
+            $igPosts = array_slice($currentData['instagram_posts'] ?? [], 0, 7);
+            $hasIg = !empty($currentData['instagram_connected']) || !empty($igSummary['followers']) || !empty($igPosts);
             $topPosts = array_slice($currentData['top_posts'] ?? [], 0, 7);
             $fbBadgeFollowers = $renderKpiBadge(34, '#f1f5f9', '#e2e8f0', 18, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#475569" stroke-width="2"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>');
             $fbBadgeReach = $renderKpiBadge(34, '#fef2f2', '#fee2e2', 18, 24, '<circle cx="12" cy="12" r="2" fill="#ef4444"/><path fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>');
             $fbBadgeViews = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
             $fbBadgeEngaged = $renderKpiBadge(34, '#eff6ff', '#dbeafe', 18, 24, '<path fill="#2563eb" d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>');
+            $igBadgeFollowers = $renderKpiBadge(34, '#fdf2f8', '#fbcfe8', 18, 24, '<circle cx="12" cy="12" r="4" fill="none" stroke="#db2777" stroke-width="2"/><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="#db2777" stroke-width="2"/>');
         @endphp
 
     {{-- Header Banner --}}
@@ -1969,10 +1973,10 @@
                         <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
                     @endif
                     <div>
-                        <span class="header-title-white">FACEBOOK </span><span class="header-title-cyan">PAGE INSIGHTS</span>
+                        <span class="header-title-white">META SOCIAL </span><span class="header-title-cyan">(FACEBOOK &amp; INSTAGRAM)</span>
                     </div>
                     <div class="header-divider"></div>
-                    <div class="header-subtitle">Source: Facebook</div>
+                    <div class="header-subtitle">Source: Meta Graph API (Facebook &amp; Instagram)</div>
                 </td>
                 <td style="width: 40%; text-align: right; vertical-align: middle;">
                     <span class="filter-pill">{{ $fSet['title'] }}</span>
@@ -2111,6 +2115,49 @@
                 </tbody>
             </table>
         </div>
+
+        @if($hasIg)
+        {{-- Instagram Top Media / Reels Table --}}
+        <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; margin-top: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+            <div style="font-size: 16px; font-weight: 800; color: #be185d; margin-bottom: 8px;">
+                &#9679; Top Instagram Media &amp; Reels (Followers: {{ number_format($igSummary['followers'] ?? 0) }})
+            </div>
+            <table class="clean-report-table">
+                <thead>
+                    <tr>
+                        <th style="width: 45%;">Media Caption</th>
+                        <th style="width: 15%;">Type</th>
+                        <th style="width: 15%;">Published</th>
+                        <th style="text-align: right; width: 8%;">Reach</th>
+                        <th style="text-align: right; width: 8%;">Impressions</th>
+                        <th style="text-align: right; width: 9%;">Interactions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($igPosts as $igP)
+                        @php
+                            $igCaption = !empty($igP['message']) ? $igP['message'] : 'Instagram Post';
+                            $igPub = !empty($igP['created_time']) ? date('M j, Y', strtotime($igP['created_time'])) : '—';
+                        @endphp
+                        <tr>
+                            <td style="font-weight: 600; color: #1e293b; max-width: 250px; word-break: break-all;">
+                                {{ \Illuminate\Support\Str::limit($igCaption, 70) }}
+                            </td>
+                            <td style="color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase;">{{ $igP['media_type'] ?? 'POST' }}</td>
+                            <td style="color: #64748b;">{{ $igPub }}</td>
+                            <td style="text-align: right; font-weight: 800; color: #ef4444;">{{ number_format((int)($igP['reach'] ?? 0)) }}</td>
+                            <td style="text-align: right; font-weight: 800; color: #059669;">{{ number_format((int)($igP['views'] ?? 0)) }}</td>
+                            <td style="text-align: right; font-weight: 800; color: #a855f7;">{{ number_format((int)($igP['viewers'] ?? ($igP['engaged'] ?? 0))) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #94a3b8; padding: 12px;">No Instagram media recorded</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @endif
     </div>
 
     {{-- Footer --}}

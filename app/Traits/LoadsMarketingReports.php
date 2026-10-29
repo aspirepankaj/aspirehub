@@ -230,6 +230,19 @@ trait LoadsMarketingReports
                     }
                 }
             }
+
+            if (!empty($jsonData['instagram_posts'])) {
+                if (!isset($mergedIgPosts)) $mergedIgPosts = [];
+                foreach ($jsonData['instagram_posts'] as $post) {
+                    $rawDate = (string)($post['created_time'] ?? '');
+                    if ($rawDate) {
+                        $normDate = substr($rawDate, 0, 10);
+                        if ($normDate >= $startDate && $normDate <= $endDate) {
+                            $mergedIgPosts[$post['id']] = $post;
+                        }
+                    }
+                }
+            }
         }
 
         if (empty($allData)) {
@@ -242,6 +255,14 @@ trait LoadsMarketingReports
                 return ($b['views'] ?? 0) <=> ($a['views'] ?? 0);
             });
             $allData['top_posts'] = array_slice($allData['top_posts'], 0, 15);
+        }
+
+        if (isset($mergedIgPosts)) {
+            $allData['instagram_posts'] = array_values($mergedIgPosts);
+            usort($allData['instagram_posts'], function($a, $b) {
+                return ($b['views'] ?? 0) <=> ($a['views'] ?? 0);
+            });
+            $allData['instagram_posts'] = array_slice($allData['instagram_posts'], 0, 15);
         }
 
         // Fill in missing dates for the selected date range
@@ -477,16 +498,24 @@ trait LoadsMarketingReports
                     $allData['summary']['avg_view_duration'] = '0s';
                 }
             }
-            // Re-calculate Facebook summary
+            // Re-calculate Facebook / Meta summary
             elseif ($integrationType === 'facebook') {
                 $totalReach = 0;
                 $totalViews = 0;
                 $totalEngaged = 0;
                 
+                $igReach = 0;
+                $igViews = 0;
+                $igEngaged = 0;
+                
                 foreach ($mergedDaily as $d) {
                     $totalReach += (int)($d['reach'] ?? ($d['impressions'] ?? 0));
                     $totalViews += (int)($d['views'] ?? 0);
                     $totalEngaged += (int)($d['engaged'] ?? ($d['engagements'] ?? 0));
+                    
+                    if (isset($d['ig_reach'])) $igReach += (int)$d['ig_reach'];
+                    if (isset($d['ig_views'])) $igViews += (int)$d['ig_views'];
+                    if (isset($d['ig_engaged'])) $igEngaged += (int)$d['ig_engaged'];
                 }
                 
                 $allData['summary']['reach'] = $totalReach;
@@ -494,6 +523,16 @@ trait LoadsMarketingReports
                 $allData['summary']['engaged'] = $totalEngaged;
                 if (isset($allData['top_posts'])) {
                     $allData['summary']['posts'] = count($allData['top_posts']);
+                }
+                
+                // Instagram summary sync if available
+                if (isset($allData['instagram_summary'])) {
+                    $allData['instagram_summary']['reach'] = $igReach > 0 ? $igReach : ($allData['instagram_summary']['reach'] ?? 0);
+                    $allData['instagram_summary']['views'] = $igViews > 0 ? $igViews : ($allData['instagram_summary']['views'] ?? 0);
+                    $allData['instagram_summary']['engaged'] = $igEngaged > 0 ? $igEngaged : ($allData['instagram_summary']['engaged'] ?? 0);
+                    if (isset($allData['instagram_posts'])) {
+                        $allData['instagram_summary']['posts'] = count($allData['instagram_posts']);
+                    }
                 }
             }
             // Re-calculate LinkedIn summary
