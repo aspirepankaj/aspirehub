@@ -2679,14 +2679,42 @@ class ManageClients extends Component
                             $mReach = 0;
                             $mViews = 0;
                             $mEngaged = 0;
+                            $mIgReach = 0;
+                            $mIgViews = 0;
+                            $mIgEngaged = 0;
                             foreach ($rows as $r) {
                                 $mReach += $r['reach'] ?? ($r['impressions'] ?? 0);
                                 $mViews += $r['views'] ?? 0;
                                 $mEngaged += $r['engaged'] ?? ($r['engagements'] ?? 0);
+                                if (isset($r['ig_reach'])) $mIgReach += (int)$r['ig_reach'];
+                                if (isset($r['ig_views'])) $mIgViews += (int)$r['ig_views'];
+                                if (isset($r['ig_engaged'])) $mIgEngaged += (int)$r['ig_engaged'];
                             }
                             $mReportData['summary']['reach'] = $mReach;
                             $mReportData['summary']['views'] = $mViews;
                             $mReportData['summary']['engaged'] = $mEngaged;
+                            
+                            // Instagram month summary & month posts filter
+                            if ($integrationId === 'facebook' && isset($mReportData['instagram_summary'])) {
+                                $mReportData['instagram_summary']['reach'] = $mIgReach > 0 ? $mIgReach : ($mReportData['instagram_summary']['reach'] ?? 0);
+                                $mReportData['instagram_summary']['views'] = $mIgViews > 0 ? $mIgViews : ($mReportData['instagram_summary']['views'] ?? 0);
+                                $mReportData['instagram_summary']['engaged'] = $mIgEngaged > 0 ? $mIgEngaged : ($mReportData['instagram_summary']['engaged'] ?? 0);
+
+                                if (isset($mReportData['instagram_posts'])) {
+                                    $mIgPosts = [];
+                                    foreach ($mReportData['instagram_posts'] as $igP) {
+                                        $igDate = $igP['created_time'] ?? '';
+                                        if ($igDate) {
+                                            $igDateObj = \Carbon\Carbon::parse($igDate);
+                                            if ($igDateObj->format('Y') == $y && \Illuminate\Support\Str::lower($igDateObj->format('F')) == $m) {
+                                                $mIgPosts[] = $igP;
+                                            }
+                                        }
+                                    }
+                                    $mReportData['instagram_posts'] = $mIgPosts;
+                                    $mReportData['instagram_summary']['posts'] = count($mIgPosts);
+                                }
+                            }
                             
                             if (isset($mReportData['top_posts'])) {
                                 $mTopPosts = [];

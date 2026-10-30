@@ -380,26 +380,65 @@ In Aspire Hub, when setting the **Property ID** for a client's Google Ads integr
 </details>
 
 <details>
-<summary><b>9. 📘 Facebook Insights & Ads API</b> (Click to expand)</summary>
+<summary><b>9. 📘 Meta Social (Facebook Page & Instagram Business) Integration Guide</b> (Click to expand)</summary>
 
-1. Visit [Meta for Developers](https://developers.facebook.com/) and create a Business App.
-2. In **Meta Business Manager (Business Settings)**:
+Aspire Hub provides a unified **Meta Social Integration** that automatically synchronizes both **Facebook Page Analytics** and linked **Instagram Professional / Business Account** data in a single refresh workflow.
+
+### A. Meta for Developers & Business Manager Setup
+1. Visit [Meta for Developers](https://developers.facebook.com/) and create or select your **Business App** (e.g., `Aspire Hub App`).
+2. Ensure your **Instagram Professional / Business Account** is connected to your **Facebook Page**:
+   - Go to Facebook Page **Settings > Linked Accounts > Instagram**.
+   - Connect and verify your Instagram Professional account.
+3. In **Meta Business Manager (Business Settings)**:
    - Navigate to **Users > System Users** and click **Add** (Admin system user role).
-   - Under **Assigned Assets**, assign your **Facebook Page** with manage/view permissions and your **Ad Account** with analyze/read permissions.
-   - Click **Generate New Token**, select your App, set token expiration to **Never / 60 days**, and select permissions:
-     - `pages_show_list`
-     - `pages_read_engagement`
-     - `pages_read_user_content`
-     - `ads_read`
-     - `read_insights`
-3. Get your **Page ID**:
-   - Go to your Facebook Page > **About** / Settings to find your Page Numeric ID.
-4. Get your **Ad Account ID**:
-   - In Meta Ads Manager / Business Settings, copy your Account ID (format: `act_XXXXXXXXX` or number without `act_`).
-5. In Aspire Hub Admin / Staff Portal:
+   - Under **Assigned Assets**, assign:
+     - Your **Facebook Page** (Full control / manage/view content and insights).
+     - Your **Instagram Account** (insights & content).
+     - (Optional) Your **Ad Account** (analyze/read permissions).
+   - Click **Generate New Token**, select your App, set token expiration to **Never / 60 days**.
+
+### B. Required Permissions / Scopes
+Ensure you select the following permissions when generating the token (via System User or Graph API Explorer):
+
+#### 📘 Facebook Page Permissions:
+- `pages_show_list`
+- `pages_read_engagement`
+- `pages_read_user_content`
+- `read_insights`
+- `business_management`
+- (Optional for Ads) `ads_read`
+
+#### 📷 Instagram Business Permissions:
+- `instagram_basic`
+- `instagram_manage_insights`
+- `instagram_manage_comments`
+- `instagram_content_publish`
+
+> **Note**: A single User / System User Access Token covers both Facebook and Instagram automatically when the above permissions are selected.
+
+### C. Finding Identifiers
+1. **Facebook Page ID**:
+   - Go to your Facebook Page > **About** / Page Transparency to copy your Numeric Page ID (or get it from Meta Business Suite).
+2. **Ad Account ID** (Optional):
+   - In Meta Ads Manager, copy your Account ID (format: `act_XXXXXXXXX` or numeric digits).
+
+### D. Configuring in Aspire Hub
+1. In Aspire Hub Admin or Staff Portal:
    - Navigate to **Clients > [Select Client] > Integrations > Facebook**.
-   - Enter **System User Access Token**, **Page ID**, and **Ad Account ID**, then click **Save Configuration**.
-6. Real-time metrics will now populate in Client Marketing Reports and PDF downloads.
+2. Enter your credentials:
+   - **Access Token**: Enter the generated Long-lived / System User Token.
+   - **Page ID**: Enter the Facebook Numeric Page ID.
+   - **Ad Account ID**: (Optional) Enter the Meta Ad Account ID.
+3. Click **Save Configuration**.
+
+### E. Automatic Data Sync Workflow
+- Clicking **Refresh / Sync Facebook**:
+  - Automatically fetches the Page Token and discovers the connected **Instagram Business Account** (`id`, `username`, `followers`).
+  - Fetches last **90 days** of daily performance data:
+    - **Facebook**: Page Followers, Reach, Views, Engagements, and Top Organic Posts with images & metrics.
+    - **Instagram**: Professional Followers, Reach, Impressions, Engagements, and Top Reels / Media with metrics.
+  - Automatically distributes historical data across the corresponding monthly report files (`october.json`, `september.json`, `august.json`).
+  - Displays side-by-side / stacked sections with dedicated charts and feeds in both Client Web Reports and downloadable PDF Marketing Reports.
 </details>
 
 <details>
