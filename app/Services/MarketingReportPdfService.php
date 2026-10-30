@@ -270,6 +270,8 @@ class MarketingReportPdfService
         $fbReachMomSvg = '';
         $fbViewsMomSvg = '';
         $fbEngagedMomSvg = '';
+        $igTripleLineSvg = '';
+        $compareIgTripleLineSvg = '';
         if ($hasFacebook && !empty($facebookData)) {
             $dailyFb = $facebookData['daily_traffic'] ?? [];
             $compareDailyFb = $compareFacebook['daily_traffic'] ?? [];
@@ -277,8 +279,13 @@ class MarketingReportPdfService
             $fbReachMomSvg = $this->generateMetricTrendLineSvg($dailyFb, $compareDailyFb, 'reach', 680, 48, '#3b82f6');
             $fbViewsMomSvg = $this->generateMetricTrendLineSvg($dailyFb, $compareDailyFb, 'views', 680, 48, '#10b981');
             $fbEngagedMomSvg = $this->generateMetricTrendLineSvg($dailyFb, $compareDailyFb, 'engaged', 680, 48, '#f43f5e');
+            
+            // Instagram Triple Line Chart
+            $igTripleLineSvg = $this->generateIgTripleLineSvg($dailyFb, 900, 220);
+            
             if ($isExplicitCompare) {
                 $compareFbTripleLineSvg = $this->generateFbTripleLineSvg($compareDailyFb, 900, 220);
+                $compareIgTripleLineSvg = $this->generateIgTripleLineSvg($compareDailyFb, 900, 220);
             }
         }
 
@@ -412,6 +419,8 @@ class MarketingReportPdfService
             'yoyGsc' => $yoyGsc,
             'fbTripleLineSvg' => $fbTripleLineSvg,
             'compareFbTripleLineSvg' => $compareFbTripleLineSvg,
+            'igTripleLineSvg' => $igTripleLineSvg,
+            'compareIgTripleLineSvg' => $compareIgTripleLineSvg,
             'fbReachMomSvg' => $fbReachMomSvg,
             'fbViewsMomSvg' => $fbViewsMomSvg,
             'fbEngagedMomSvg' => $fbEngagedMomSvg,
@@ -1300,6 +1309,112 @@ class MarketingReportPdfService
             $svg .= "  <circle cx=\"{$xV}\" cy=\"{$yV}\" r=\"2.5\" fill=\"#059669\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
             [$xE, $yE] = explode(',', $pEng[$i]);
             $svg .= "  <circle cx=\"{$xE}\" cy=\"{$yE}\" r=\"2.5\" fill=\"#2563eb\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
+        }
+
+        $svg .= "</svg>";
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
+    /**
+     * Generate Instagram Triple Line SVG chart (IG Reach #ec4899, IG Impressions #059669, IG Engagements #a855f7).
+     */
+    public function generateIgTripleLineSvg(array $dailyTraffic, int $width = 900, int $height = 220): string
+    {
+        $padL = 36;
+        $padR = 20;
+        $padT = 20;
+        $padB = 30;
+
+        $plotW = $width - $padL - $padR;
+        $plotH = $height - $padT - $padB;
+
+        $dCount = count($dailyTraffic);
+        $xLabels = [];
+        $reach = [];
+        $views = [];
+        $engaged = [];
+
+        if ($dCount < 2) {
+            for ($day = 1; $day <= 28; $day++) {
+                $xLabels[] = "Day {$day}";
+                $reach[] = 0;
+                $views[] = 0;
+                $engaged[] = 0;
+            }
+            $dCount = 28;
+        } else {
+            foreach ($dailyTraffic as $d) {
+                $reach[] = (int)($d['ig_reach'] ?? 0);
+                $views[] = (int)($d['ig_views'] ?? 0);
+                $engaged[] = (int)($d['ig_engaged'] ?? 0);
+
+                $rawDate = (string)($d['date'] ?? '');
+                if (strlen($rawDate) === 8 && !str_contains($rawDate, '-')) {
+                    $monthNum = (int)substr($rawDate, 4, 2);
+                    $dayNum = (int)substr($rawDate, 6, 2);
+                    $monthName = date('M', mktime(0, 0, 0, $monthNum, 1));
+                    $xLabels[] = "{$monthName} {$dayNum}";
+                } elseif (strlen($rawDate) === 10) {
+                    $xLabels[] = date('M j', strtotime($rawDate));
+                } else {
+                    $xLabels[] = $rawDate;
+                }
+            }
+        }
+
+        $allVals = array_merge($reach, $views, $engaged);
+        $maxVal = max(!empty($allVals) ? max($allVals) : 10, 5);
+        $maxScale = $maxVal <= 10 ? 10 : ($maxVal <= 100 ? ceil($maxVal / 10) * 10 : ($maxVal <= 1000 ? ceil($maxVal / 100) * 100 : ceil($maxVal / 500) * 500));
+
+        $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\">\n";
+
+        // Grid lines (3 horizontal lines)
+        for ($i = 0; $i <= 3; $i++) {
+            $y = $padT + ($plotH / 3) * $i;
+            $val = round($maxScale - ($maxScale / 3) * $i);
+            $valStr = $val >= 1000 ? round($val / 1000, 1) . 'k' : (string)$val;
+
+            $svg .= "  <line x1=\"{$padL}\" y1=\"{$y}\" x2=\"" . ($width - $padR) . "\" y2=\"{$y}\" stroke=\"#fdf2f8\" stroke-width=\"1\" />\n";
+            $svg .= "  <text x=\"" . ($padL - 6) . "\" y=\"" . ($y + 3.5) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" fill=\"#64748b\" text-anchor=\"end\">{$valStr}</text>\n";
+        }
+
+        // X-axis date labels
+        $step = max(1, (int)floor($dCount / 7));
+        for ($j = 0; $j < $dCount; $j += $step) {
+            $x = $padL + ($j / max(1, $dCount - 1)) * $plotW;
+            $lbl = $xLabels[$j] ?? '';
+            $svg .= "  <text x=\"{$x}\" y=\"" . ($height - 8) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" fill=\"#94a3b8\" text-anchor=\"middle\">{$lbl}</text>\n";
+        }
+
+        // Coordinates
+        $pReach = [];
+        $pViews = [];
+        $pEng = [];
+        for ($i = 0; $i < $dCount; $i++) {
+            $x = $padL + ($i / max(1, $dCount - 1)) * $plotW;
+            $yR = $padT + $plotH - (($reach[$i] / max(1, $maxScale)) * $plotH);
+            $yV = $padT + $plotH - (($views[$i] / max(1, $maxScale)) * $plotH);
+            $yE = $padT + $plotH - (($engaged[$i] / max(1, $maxScale)) * $plotH);
+            $pReach[] = round($x, 1) . ',' . round($yR, 1);
+            $pViews[] = round($x, 1) . ',' . round($yV, 1);
+            $pEng[] = round($x, 1) . ',' . round($yE, 1);
+        }
+
+        // Polyline Reach (#ec4899)
+        $svg .= "  <polyline points=\"" . implode(' ', $pReach) . "\" fill=\"none\" stroke=\"#ec4899\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
+        // Polyline Views (#059669)
+        $svg .= "  <polyline points=\"" . implode(' ', $pViews) . "\" fill=\"none\" stroke=\"#059669\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
+        // Polyline Engaged (#a855f7)
+        $svg .= "  <polyline points=\"" . implode(' ', $pEng) . "\" fill=\"none\" stroke=\"#a855f7\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
+
+        // Dots
+        for ($i = 0; $i < $dCount; $i++) {
+            [$xR, $yR] = explode(',', $pReach[$i]);
+            $svg .= "  <circle cx=\"{$xR}\" cy=\"{$yR}\" r=\"2.5\" fill=\"#ec4899\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
+            [$xV, $yV] = explode(',', $pViews[$i]);
+            $svg .= "  <circle cx=\"{$xV}\" cy=\"{$yV}\" r=\"2.5\" fill=\"#059669\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
+            [$xE, $yE] = explode(',', $pEng[$i]);
+            $svg .= "  <circle cx=\"{$xE}\" cy=\"{$yE}\" r=\"2.5\" fill=\"#a855f7\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
         }
 
         $svg .= "</svg>";

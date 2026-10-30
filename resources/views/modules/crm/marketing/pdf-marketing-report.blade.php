@@ -1927,6 +1927,7 @@
         'data' => $facebookData,
         'prevData' => $compareFacebook,
         'lineChartSvg' => $fbTripleLineSvg,
+        'igLineChartSvg' => $igTripleLineSvg,
     ];
     if ($isExplicitCompare) {
         $fbSets[] = [
@@ -1934,6 +1935,7 @@
             'data' => $compareFacebook,
             'prevData' => [],
             'lineChartSvg' => $compareFbTripleLineSvg,
+            'igLineChartSvg' => $compareIgTripleLineSvg,
         ];
     }
 @endphp
@@ -1960,6 +1962,9 @@
             $fbBadgeViews = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
             $fbBadgeEngaged = $renderKpiBadge(34, '#eff6ff', '#dbeafe', 18, 24, '<path fill="#2563eb" d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>');
             $igBadgeFollowers = $renderKpiBadge(34, '#fdf2f8', '#fbcfe8', 18, 24, '<circle cx="12" cy="12" r="4" fill="none" stroke="#db2777" stroke-width="2"/><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="#db2777" stroke-width="2"/>');
+            $igBadgeReach = $renderKpiBadge(34, '#fef2f2', '#fee2e2', 18, 24, '<circle cx="12" cy="12" r="2" fill="#ec4899"/><path fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>');
+            $igBadgeViews = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
+            $igBadgeEngaged = $renderKpiBadge(34, '#faf5ff', '#f3e8ff', 18, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#a855f7" stroke-width="2"/><path d="m9 12 2 2 4-4" fill="none" stroke="#a855f7" stroke-width="2"/>');
         @endphp
 
     {{-- Header Banner --}}
@@ -1986,6 +1991,11 @@
     </div>
 
     <div class="content-body">
+        {{-- Section 1: Facebook Performance --}}
+        <div style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+            &#9679; Facebook Page Performance
+        </div>
+
         {{-- 4 Modern Summary Cards matching on-screen UI --}}
         <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 12px;">
             <tr>
@@ -2061,11 +2071,11 @@
 
         {{-- Reach, Views & Engaged Over Time Chart --}}
         <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div style="font-size: 11px; font-weight: 800; color: #ef4444; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
-                &#9679; Reach, Views &amp; Engaged Over Time
+            <div style="font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                &#9679; Facebook Reach, Views &amp; Engaged Over Time
             </div>
             @if(!empty($fSet['lineChartSvg']))
-                <img src="{{ $fSet['lineChartSvg'] }}" width="100%" height="200" alt="Facebook Graph" style="display: block;" />
+                <img src="{{ $fSet['lineChartSvg'] }}" width="100%" height="190" alt="Facebook Graph" style="display: block;" />
             @endif
             <div style="text-align: right; font-size: 9.5px; color: #64748b; margin-top: 4px;">
                 <span style="display: inline-block; width: 10px; height: 10px; background-color: #ef4444; border-radius: 2px; vertical-align: middle; margin-right: 3px;"></span> Reach
@@ -2075,8 +2085,8 @@
         </div>
 
         {{-- Top Posts (Organic) Table --}}
-        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
+        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 16px;">
+            <div style="font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
                 &#9679; Top Posts (Organic)
             </div>
             <table class="clean-report-table">
@@ -2096,7 +2106,7 @@
                             $published = !empty($post['created_time']) ? date('M j, Y', strtotime($post['created_time'])) : '—';
                             $pReach = (int)($post['reach'] ?? ($post['impressions'] ?? 0));
                             $pViews = (int)($post['views'] ?? 0);
-                            $pEng = (int)($post['engaged'] ?? ($post['engagements'] ?? 0));
+                            $pEng = (int)($post['engaged'] ?? ($post['viewers'] ?? ($post['engagements'] ?? 0)));
                         @endphp
                         <tr>
                             <td style="font-weight: 600; color: #1e293b; max-width: 280px; word-break: break-all;">
@@ -2117,6 +2127,99 @@
         </div>
 
         @if($hasIg)
+        {{-- Section 2: Instagram Performance --}}
+        <div style="font-size: 13px; font-weight: 800; color: #be185d; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 18px; margin-bottom: 8px;">
+            &#9679; Instagram Business Performance
+        </div>
+
+        {{-- Instagram KPI Cards --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 12px;">
+            <tr>
+                {{-- IG Followers --}}
+                <td style="width: 25%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 38px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeFollowers }}" width="34" height="34" style="display: block;" alt="Followers" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Followers</div>
+                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1.1;">{{ number_format($igSummary['followers'] ?? 0) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+
+                {{-- IG Reach --}}
+                <td style="width: 25%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 38px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeReach }}" width="34" height="34" style="display: block;" alt="Reach" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Reach</div>
+                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igSummary['reach'] ?? 0) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+
+                {{-- IG Impressions --}}
+                <td style="width: 25%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 38px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeViews }}" width="34" height="34" style="display: block;" alt="Impressions" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Impressions</div>
+                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igSummary['views'] ?? 0) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+
+                {{-- IG Engagements --}}
+                <td style="width: 25%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 38px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeEngaged }}" width="34" height="34" style="display: block;" alt="Engagements" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Engagements</div>
+                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igSummary['engaged'] ?? 0) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        {{-- Instagram Reach, Impressions & Engagements Over Time Chart --}}
+        <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+            <div style="font-size: 11px; font-weight: 800; color: #be185d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                &#9679; Instagram Reach, Impressions &amp; Engagements Over Time
+            </div>
+            @if(!empty($fSet['igLineChartSvg']))
+                <img src="{{ $fSet['igLineChartSvg'] }}" width="100%" height="190" alt="Instagram Graph" style="display: block;" />
+            @endif
+            <div style="text-align: right; font-size: 9.5px; color: #64748b; margin-top: 4px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background-color: #ec4899; border-radius: 2px; vertical-align: middle; margin-right: 3px;"></span> IG Reach
+                <span style="display: inline-block; width: 10px; height: 10px; background-color: #059669; border-radius: 2px; vertical-align: middle; margin-left: 12px; margin-right: 3px;"></span> IG Impressions
+                <span style="display: inline-block; width: 10px; height: 10px; background-color: #a855f7; border-radius: 2px; vertical-align: middle; margin-left: 12px; margin-right: 3px;"></span> IG Engagements
+            </div>
+        </div>
+
         {{-- Instagram Top Media / Reels Table --}}
         <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; margin-top: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
             <div style="font-size: 16px; font-weight: 800; color: #be185d; margin-bottom: 8px;">
