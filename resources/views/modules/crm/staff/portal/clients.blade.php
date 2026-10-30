@@ -389,7 +389,7 @@
                                                 {!! $cardTheme['svg'] !!}
                                             </div>
                                             <div>
-                                                <h4 class="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">
+                                                <h4 class="text-[18px] font-bold text-slate-900 dark:text-white leading-tight">
                                                     {{ $integration['name'] }}
                                                 </h4>
                                                 <div class="mt-1.5 flex flex-wrap items-center gap-2">

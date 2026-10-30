@@ -21,6 +21,17 @@ export default {
                 display: ['var(--font-heading)', 'sans-serif'],
                 momo: ['var(--font-heading)', 'sans-serif'],
             },
+            fontSize: {
+                'xs': ['14px', { lineHeight: '1.4' }],
+                'sm': ['14px', { lineHeight: '1.4' }],
+                'base': ['16px', { lineHeight: '1.5' }],
+                'md': ['16px', { lineHeight: '1.5' }],
+                'lg': ['18px', { lineHeight: '1.35' }],
+                'xl': ['18px', { lineHeight: '1.35' }],
+                '2xl': ['24px', { lineHeight: '1.25' }],
+                '3xl': ['28px', { lineHeight: '1.2' }],
+                '4xl': ['32px', { lineHeight: '1.1' }],
+            },
             colors: {
                 indigo: {
                     DEFAULT: '#135266',

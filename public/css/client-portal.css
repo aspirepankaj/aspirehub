@@ -62,17 +62,89 @@ textarea {
   font-family: var(--portal-font) !important;
 }
 
-h1,
-h2,
-h3,
-h4,
+h1:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
+h2:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
+h3:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
+h4:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
 h5,
-h6 {
+h6,
+.portal-heading,
+.card-title,
+.section-title,
+.table-title,
+.modal-title {
   font-family: var(--portal-heading-font) !important;
+  font-size: 18px !important;
+  line-height: 1.35 !important;
 }
 
 h1 {
-  letter-spacing: 2px !important;
+  letter-spacing: 1.5px !important;
+}
+
+/* ── 2. All Tables: th 16px (Headers 700), td 14px (Cells 400) ── */
+table thead th,
+table th,
+.table-head-th {
+  font-family: var(--portal-font) !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+table tbody td,
+table td,
+.table-cell-td {
+  font-family: var(--portal-font) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+/* ── Form Controls & Inputs: 16px ── */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  font-family: var(--portal-font);
+  font-size: 16px !important;
+}
+
+/* ── 3. Secondary & Subtext (14px) ── */
+.text-meta,
+.meta-text,
+.sub-title,
+.sub-text,
+.text-sub,
+.help-text,
+.form-hint,
+.badge,
+.tag,
+.date-label,
+.table-pagination,
+.quick-search input,
+small {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+/* Clamp arbitrary small text classes down to clean 14px */
+[class*="text-[10px]"],
+[class*="text-[11px]"],
+[class*="text-[12px]"],
+[class*="text-[13px]"] {
+  font-size: 14px !important;
+}
+
+/* Clamp 15px/16px arbitrary classes to clean 16px */
+[class*="text-[15px]"],
+[class*="text-[16px]"] {
+  font-size: 16px !important;
+}
+
+/* Clamp 17px/18px arbitrary classes to clean 18px */
+[class*="text-[17px]"],
+[class*="text-[18px]"] {
+  font-size: 18px !important;
 }
 
 /* ==========================================================================
@@ -93,6 +165,11 @@ h1 {
 .font-momo-trust {
   font-family: var(--portal-heading-font) !important;
 }
+
+/* Sizing utilities */
+.text-18, .fs-18, .font-size-18 { font-size: 18px !important; }
+.text-16, .fs-16, .font-size-16 { font-size: 16px !important; }
+.text-14, .fs-14, .font-size-14 { font-size: 14px !important; }
 
 * {
   box-sizing: border-box;
@@ -543,7 +620,7 @@ body:has(.is-marketing-report),
 }
 
 .welcome-desc {
-  font-size: 15px !important;
+  font-size: 16px !important;
   color: var(--portal-muted) !important;
   margin: 0 !important;
   font-weight: 500 !important;
@@ -2512,4 +2589,102 @@ body:has(.is-marketing-report),
 
 .dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br"] svg {
   stroke: #5eead4 !important;
+}
+
+/* ==========================================================================
+   FINAL AUTHORITATIVE TYPOGRAPHY STANDARDIZATION (18px, 16px, 14px)
+   Placed at the bottom to guarantee highest cascading precedence.
+   ========================================================================== */
+
+/* 18px: All Headings, Titles, Section Headers, Modal & Card Headers */
+h1:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h2:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h3:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h4:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h5, h6,
+.portal-heading,
+.card-title,
+.section-title,
+.table-title,
+.modal-title,
+.portal-card-title {
+  font-family: var(--portal-heading-font) !important;
+  font-size: 18px !important;
+  line-height: 1.35 !important;
+}
+
+/* Table Headers: strictly 16px Bold (700) */
+table thead th,
+table th,
+.table-head-th,
+.portal-table th,
+table thead th * {
+  font-family: var(--portal-font) !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+/* Table Cells: strictly 14px Regular (400) */
+table tbody td,
+table td,
+.table-cell-td,
+.portal-table td,
+table tbody td :not(.stat-val):not(.kpi-value):not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]) {
+  font-family: var(--portal-font) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+/* 16px: Form Controls & Inputs */
+input:not([type="checkbox"]):not([type="radio"]):not(.text-14):not(.quick-search input),
+select,
+textarea {
+  font-family: var(--portal-font) !important;
+  font-size: 16px !important;
+}
+
+/* 14px: Secondary Text, Navigation Items, Badges, Dates, Filters, Helper Text */
+.portal-nav-item,
+.portal-profile-name,
+.portal-profile-sub,
+.portal-btn-theme,
+.portal-btn-logout,
+.text-meta,
+.meta-text,
+.sub-title,
+.sub-text,
+.text-sub,
+.help-text,
+.form-hint,
+.badge,
+.tag,
+.date-label,
+.table-pagination,
+.quick-search,
+.quick-search input,
+small {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+/* Clamp arbitrary small text classes down to clean 14px */
+[class*="text-[10px]"],
+[class*="text-[11px]"],
+[class*="text-[12px]"],
+[class*="text-[13px]"] {
+  font-size: 14px !important;
+}
+
+/* Clamp 15px/16px arbitrary classes to clean 16px */
+[class*="text-[15px]"],
+[class*="text-[16px]"] {
+  font-size: 16px !important;
+}
+
+/* Clamp 17px/18px arbitrary classes to clean 18px */
+[class*="text-[17px]"],
+[class*="text-[18px]"] {
+  font-size: 18px !important;
 }

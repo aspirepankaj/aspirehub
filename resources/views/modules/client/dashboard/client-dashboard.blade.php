@@ -152,8 +152,8 @@
                 <div style="width: 48px; height: 48px; border-radius: 50%; background: #f8fafc; color: #64748b; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 1px solid #e2e8f0;">
                     <i data-lucide="chart-no-axes-column-increasing" style="width: 22px; height: 22px;"></i>
                 </div>
-                <div style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">No Connected Analytics Platforms</div>
-                <div style="font-size: 13px; color: #64748b; max-width: 440px; margin: 0 auto; line-height: 1.5;">
+                <div style="font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">No Connected Analytics Platforms</div>
+                <div style="font-size: 14px; color: #64748b; max-width: 440px; margin: 0 auto; line-height: 1.5;">
                     No marketing or analytics integrations are currently active for this account. Once your Google, Meta, or search platforms are connected, live performance cards will appear here.
                 </div>
             </div>

@@ -1,13 +1,18 @@
 /* ==========================================================================
-   CENTRAL FONT CONTROLLER (Single Source of Truth)
-   Puri website ki font family sirf yahan se control hogi.
-   Koi bhi font change karni ho, sirf ye do variables aur @import change karein:
+   CENTRAL TYPOGRAPHY & FONT SYSTEM (Single Source of Truth)
+   Puri website & portals (Admin, Client Portal, Staff Portal) ki styling:
+   1. 18px -> All Headings, Titles, Section Headers (Momo Trust Display)
+   2. 16px -> All Tables (th, td), Body Text, Inputs, Selects, Buttons (Plus Jakarta Sans)
+   3. 14px -> Secondary/Subtext, Badges, Dates, Filters, Helpers (Plus Jakarta Sans)
    ========================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --font-body: 'Plus Jakarta Sans', sans-serif;
   --font-heading: 'Momo Trust Display', sans-serif;
+  --fs-heading: 18px;
+  --fs-body: 16px;
+  --fs-sub: 14px;
 }
 
 @tailwind base;
@@ -17,35 +22,156 @@
 @layer base {
   html, body {
     font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  /* ── 1. Headings & Titles: 18px (Momo Trust Display) ── */
+  h1:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
+  h2:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
+  h3:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
+  h4:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number),
+  h5, h6 {
     font-family: var(--font-heading) !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
   }
 
-  button, a, input, select, textarea {
+  /* ── 2. All Tables: th 16px (Headers 700), td 14px (Cells 400) ── */
+  table {
     font-family: var(--font-body);
+    font-size: 14px;
+  }
+
+  table thead th,
+  table th {
+    font-family: var(--font-body) !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+  }
+
+  table tbody td,
+  table td {
+    font-family: var(--font-body) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+  }
+
+  /* ── Form Controls & Inputs: 16px ── */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-family: var(--font-body);
+    font-size: 16px !important;
   }
 }
 
-/* Global guarantee across all views, components, and overlays */
+/* ==========================================================================
+   GLOBAL OVERRIDES (Ensures 100% uniformity across all portals, views & Livewire)
+   ========================================================================== */
+
+/* Base font family guarantee */
 body, button, a, input, select, textarea, p, span, li, td, th {
   font-family: var(--font-body);
 }
 
-h1, h2, h3, h4, h5, h6, .heading-font {
+/* 1. All Headings, Titles & Section Headers strictly 18px */
+h1:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h2:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h3:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h4:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
+h5, h6,
+header h1, header h2, header h3,
+.heading-font,
+.font-heading,
+.portal-heading,
+.card-title,
+.section-title,
+.table-title,
+.modal-title,
+.portal-card-title {
   font-family: var(--font-heading) !important;
+  font-size: 18px !important;
+  line-height: 1.35 !important;
 }
 
 h1 {
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
+}
+
+/* 2. All Tables (Header 16px Bold, Rows 14px Regular) */
+table thead th,
+table th,
+.table-head-th,
+.portal-table th,
+table thead th * {
+  font-family: var(--font-body) !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+table tbody td,
+table td,
+.table-cell-td,
+.portal-table td,
+table tbody td :not(.stat-val):not(.kpi-value):not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]) {
+  font-family: var(--font-body) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+/* 3. Secondary & Subtext (14px) */
+.portal-nav-item,
+.portal-profile-name,
+.portal-profile-sub,
+.portal-btn-theme,
+.portal-btn-logout,
+.text-meta,
+.meta-text,
+.sub-title,
+.sub-text,
+.text-sub,
+.help-text,
+.form-hint,
+.badge,
+.tag,
+.date-label,
+.table-pagination,
+.quick-search,
+.quick-search input,
+small {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+/* Clamp arbitrary small text classes down to clean 14px */
+[class*="text-[10px]"],
+[class*="text-[11px]"],
+[class*="text-[12px]"],
+[class*="text-[13px]"] {
+  font-size: 14px !important;
+}
+
+/* Clamp 15px/16px arbitrary classes to clean 16px */
+[class*="text-[15px]"],
+[class*="text-[16px]"] {
+  font-size: 16px !important;
+}
+
+/* Clamp 17px/18px arbitrary classes to clean 18px */
+[class*="text-[17px]"],
+[class*="text-[18px]"] {
+  font-size: 18px !important;
 }
 
 /* ==========================================================================
-   FONT UTILITY CLASSES
-   Directly kisi bhi HTML element par class lagane ke liye:
-   - Body/Text:    class="font-body" ya class="font-jakarta"
-   - Headings:     class="font-heading" ya class="font-momo"
+   EXPLICIT FONT UTILITY CLASSES
    ========================================================================== */
 .font-body,
 .font-text,
@@ -60,3 +186,8 @@ h1 {
 .font-momo-trust {
   font-family: var(--font-heading) !important;
 }
+
+/* Strict Sizing Utilities */
+.text-18, .fs-18, .font-size-18 { font-size: 18px !important; }
+.text-16, .fs-16, .font-size-16 { font-size: 16px !important; }
+.text-14, .fs-14, .font-size-14 { font-size: 14px !important; }

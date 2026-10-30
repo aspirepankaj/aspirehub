@@ -1,31 +1,51 @@
 <div>
     <style>
-        /* Universal Marketing Report Font Standards: Headings 18px font-bold, Table/Content 16px font-normal */
+        /* Universal Marketing Report Font Standards: Headings 18px, Table Header (th) 16px, Table Cell (td) 14px */
+        .report-content-root h1,
         .report-content-root h2,
         .report-content-root h3,
         .report-content-root h4,
+        .report-content-root h5,
+        .report-content-root h6,
+        .client-integration-theme h1,
         .client-integration-theme h2,
         .client-integration-theme h3,
-        .client-integration-theme h4 {
+        .client-integration-theme h4,
+        .client-integration-theme h5,
+        .client-integration-theme h6 {
             font-size: 18px !important;
-            font-weight: 500 !important;
-            line-height: 1.3 !important;
+            font-weight: 600 !important;
+            line-height: 1.35 !important;
         }
 
-        /* All table contents inside reports */
+        /* All table headers: 16px font-bold */
+        .report-content-root table thead tr th,
+        .report-content-root table thead th,
+        .report-content-root table th,
+        .client-integration-theme table thead tr th,
+        .client-integration-theme table thead th,
+        .client-integration-theme table th {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            line-height: 1.4 !important;
+        }
+
+        /* All table data cells: 14px font-normal */
         .report-content-root table tbody tr td,
         .report-content-root table tbody td,
+        .report-content-root table td,
         .client-integration-theme table tbody tr td,
-        .client-integration-theme table tbody td {
-            font-size: 16px !important;
+        .client-integration-theme table tbody td,
+        .client-integration-theme table td {
+            font-size: 14px !important;
             font-weight: 400 !important;
-            line-height: 1.4 !important;
+            line-height: 1.45 !important;
         }
 
         /* Non-table list rows / text content inside report breakdown items */
         .report-content-root .event-breakdown-item,
         .client-integration-theme .event-breakdown-item {
-            font-size: 16px !important;
+            font-size: 14px !important;
         }
     </style>
     <div class="report-content-root">
@@ -332,7 +352,7 @@
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
                         <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Search Queries</h4>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
+                            <table class="w-full text-left text-[14px]">
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
                                         <th class="py-2.5 font-bold">Query</th>
@@ -343,9 +363,9 @@
                                 <tbody>
                                     @foreach (array_slice($reportDataScope['top_queries'] ?? [], 0, 10) as $query) 
                                         <tr wire:key="query-{{ $idx }}-{{ md5(json_encode($query)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                            <td class="py-2.5 font-normal truncate max-w-[150px]" style="font-weight: 400 !important; font-size: 16px !important;" title="{{ $query['query'] }}">{{ $query['query'] }}</td>
-                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($query['clicks'] ?? 0) }}</td>
-                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($query['impressions'] ?? 0) }}</td>
+                                            <td class="py-2.5 font-normal truncate max-w-[150px]" style="font-weight: 400 !important; font-size: 14px !important;" title="{{ $query['query'] }}">{{ $query['query'] }}</td>
+                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($query['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($query['impressions'] ?? 0) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -356,7 +376,7 @@
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
                         <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Ranking URLs</h4>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
+                            <table class="w-full text-left text-[14px]">
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
                                         <th class="py-2.5 font-bold">URL</th>
@@ -367,11 +387,11 @@
                                 <tbody>
                                     @foreach (array_slice($reportDataScope['top_pages'] ?? [], 0, 10) as $page) 
                                         <tr wire:key="page-{{ $idx }}-{{ md5(json_encode($page)) }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                            <td class="py-2.5 font-normal truncate max-w-[150px] text-indigo-600" style="font-weight: 400 !important; font-size: 16px !important;" title="{{ $page['page'] }}">
+                                            <td class="py-2.5 font-normal truncate max-w-[150px] text-indigo-600" style="font-weight: 400 !important; font-size: 14px !important;" title="{{ $page['page'] }}">
                                                 <a href="{{ $page['page'] }}" target="_blank" class="hover:underline">{{ str_replace('https://', '', $page['page']) }}</a>
                                             </td>
-                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($page['clicks'] ?? 0) }}</td>
-                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($page['impressions'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($page['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($page['impressions'] ?? 0) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -385,7 +405,7 @@
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
                         <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Device Breakdown</h4>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
+                            <table class="w-full text-left text-[14px]">
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
                                         <th class="py-2.5 font-bold">Device</th>
@@ -396,9 +416,9 @@
                                 <tbody>
                                     @foreach ($reportDataScope['devices'] ?? [] as $device)
                                         <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                            <td class="py-2.5 font-normal capitalize" style="font-weight: 400 !important; font-size: 16px !important;">{{ strtolower($device['device']) }}</td>
-                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($device['clicks'] ?? 0) }}</td>
-                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($device['impressions'] ?? 0) }}</td>
+                                            <td class="py-2.5 font-normal capitalize" style="font-weight: 400 !important; font-size: 14px !important;">{{ strtolower($device['device']) }}</td>
+                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($device['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($device['impressions'] ?? 0) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -409,7 +429,7 @@
                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
                         <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important; margin-bottom: 12px !important;">Top Countries</h4>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-[16px]" style="font-size: 16px !important;">
+                            <table class="w-full text-left text-[14px]">
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400">
                                         <th class="py-2.5 font-bold">Country</th>
@@ -420,9 +440,9 @@
                                 <tbody>
                                     @foreach (array_slice($reportDataScope['countries'] ?? [], 0, 10) as $country)
                                         <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                            <td class="py-2.5 font-normal capitalize" style="font-weight: 400 !important; font-size: 16px !important;">{{ strtolower(strlen($country['country']) === 3 ? $country['country'] : $country['country']) }}</td>
-                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($country['clicks'] ?? 0) }}</td>
-                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 16px !important;">{{ number_format($country['impressions'] ?? 0) }}</td>
+                                            <td class="py-2.5 font-normal capitalize" style="font-weight: 400 !important; font-size: 14px !important;">{{ strtolower(strlen($country['country']) === 3 ? $country['country'] : $country['country']) }}</td>
+                                            <td class="py-2.5 text-right font-normal" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($country['clicks'] ?? 0) }}</td>
+                                            <td class="py-2.5 text-right font-normal text-slate-400 dark:text-slate-500" style="font-weight: 400 !important; font-size: 14px !important;">{{ number_format($country['impressions'] ?? 0) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -1505,8 +1525,8 @@
                         <span class="text-[14px] font-semibold text-slate-400">{{ count($dailyList) }} Days</span>
                     </div>
                     <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
-                        <table class="w-full text-left text-[16px] whitespace-nowrap">
-                            <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[13px] border-b border-slate-100 dark:border-slate-800">
+                        <table class="w-full text-left text-[14px] whitespace-nowrap">
+                            <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[16px] border-b border-slate-100 dark:border-slate-800">
                                 <tr>
                                     <th class="py-3 px-4">Date</th>
                                     <th class="py-3 px-4 text-right">Views</th>
@@ -2136,7 +2156,7 @@
                                 <th class="pb-3 text-right">Eng. Rate</th>
                             </tr>
                         </thead>
-                        <tbody class="text-[16px] text-slate-700 dark:text-slate-300">
+                        <tbody class="text-[14px] text-slate-700 dark:text-slate-300">
                             @forelse ($reportDataScope['pages_report'] ?? [] as $i => $page) 
                                 @php
                                     $pageUsers = $page['users'] ?? 0;
@@ -2144,23 +2164,23 @@
                                     // Key Events: check direct value, fallback to proportional/mock calculation based on users/sessions
                                     $pageKeyEvents = $page['key_events'] ?? $page['conversions'] ?? ($page['event_count'] ?? (int)round($pageUsers * 0.08));
                                     $engRate = rand(55, 75) . '.' . rand(0, 9) . '%'; // Mock engagement rate as it is missing in typical JSON
-                                @endphp
+                                 @endphp
                                 <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors" x-show="showAll || <?php echo $i; ?> < 10" x-transition>
-                                    <td class="py-3.5 text-slate-400 font-normal text-[15px]">{{ $i + 1 }}</td>
-                                    <td class="py-3.5 font-normal text-slate-700 dark:text-slate-200 truncate max-w-[200px] md:max-w-none text-[16px]" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
-                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[16px]">{{ number_format($pageUsers) }}</td>
-                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[16px]">{{ number_format($pageSessions) }}</td>
-                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[16px]">{{ number_format($pageKeyEvents) }}</td>
-                                    <td class="py-3.5 text-right font-normal text-slate-600 dark:text-slate-300 text-[16px]">{{ $engRate }}</td>
+                                    <td class="py-3.5 text-slate-400 font-normal text-[14px]">{{ $i + 1 }}</td>
+                                    <td class="py-3.5 font-normal text-slate-700 dark:text-slate-200 truncate max-w-[200px] md:max-w-none text-[14px]" title="{{ $page['page_path'] }}">{{ $page['page_path'] }}</td>
+                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[14px]">{{ number_format($pageUsers) }}</td>
+                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[14px]">{{ number_format($pageSessions) }}</td>
+                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[14px]">{{ number_format($pageKeyEvents) }}</td>
+                                    <td class="py-3.5 text-right font-normal text-slate-600 dark:text-slate-300 text-[14px]">{{ $engRate }}</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="py-6 text-center text-slate-400 text-[16px]">No data</td></tr>
+                                <tr><td colspan="6" class="py-6 text-center text-slate-400 text-[14px]">No data</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
                 <div class="text-right mt-4">
-                    <button @click.prevent="showAll = !showAll" class="text-blue-600 hover:text-blue-700 text-[15px] font-bold inline-flex items-center gap-1.5 transition-colors">
+                    <button @click.prevent="showAll = !showAll" class="text-blue-600 hover:text-blue-700 text-[14px] font-bold inline-flex items-center gap-1.5 transition-colors">
                         <span x-text="showAll ? 'View Less' : 'View Full Report'"></span> 
                         <svg x-show="!showAll" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         <svg x-show="showAll" class="w-3.5 h-3.5" style="display:none;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
@@ -2176,7 +2196,7 @@
                 padding-bottom: 12px !important;
             }
             .top-landing-pages-card table td {
-                font-size: 16px !important;
+                font-size: 14px !important;
                 padding-top: 14px !important;
                 padding-bottom: 14px !important;
             }
@@ -2361,7 +2381,7 @@
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left table-fixed">
                         <thead>
-                            <tr class="text-[14px] font-semibold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
+                            <tr class="text-[16px] font-semibold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
                                 <th class="pb-3 w-10">#</th>
                                 <th class="pb-3 w-[22%]">Channel Group</th>
                                 <th class="pb-3 text-right w-[15%]">
@@ -2376,9 +2396,9 @@
                                 <th class="pb-3 text-right w-[15%]">Key Events</th>
                             </tr>
                             {{-- GA4 Summary Total Row --}}
-                            <tr class="border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 text-[15px] font-bold text-slate-800 dark:text-slate-100">
+                            <tr class="border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 text-[14px] font-bold text-slate-800 dark:text-slate-100">
                                 <td class="py-3 text-slate-400"></td>
-                                <td class="py-3 font-extrabold text-[16px] text-slate-900 dark:text-white">Total</td>
+                                <td class="py-3 font-extrabold text-[14px] text-slate-900 dark:text-white">Total</td>
                                 <td class="py-3 text-right">
                                     <div>{{ number_format($totalRowUsers) }}</div>
                                     <div class="text-[13px] font-normal text-slate-400">100% of total</div>
@@ -2401,35 +2421,35 @@
                                 </td>
                             </tr>
                         </thead>
-                        <tbody class="text-[16px] text-slate-700 dark:text-slate-300">
+                        <tbody class="text-[14px] text-slate-700 dark:text-slate-300">
                             @forelse ($tableRows as $i => $row) 
                                 <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors" x-show="showAllChannels || <?php echo $i; ?> < 10" x-transition>
-                                    <td class="py-3.5 text-slate-400 font-normal text-[15px]">{{ $i + 1 }}</td>
-                                    <td class="py-3.5 font-normal text-slate-800 dark:text-slate-100 text-[16px] truncate" title="{{ $row['channel'] }}">
+                                    <td class="py-3.5 text-slate-400 font-normal text-[14px]">{{ $i + 1 }}</td>
+                                    <td class="py-3.5 font-normal text-slate-800 dark:text-slate-100 text-[14px] truncate" title="{{ $row['channel'] }}">
                                         {{ $row['channel'] }}
                                     </td>
-                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[16px]">
+                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[14px]">
                                         <div>{{ number_format($row['users']) }}</div>
                                         <div class="text-slate-400 text-[13px] font-normal">({{ ($row['users_pct'] >= 0 ? '+' : '-') . abs($row['users_pct']) }}%)</div>
                                     </td>
-                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[16px]">
+                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[14px]">
                                         <div>{{ number_format($row['new_users']) }}</div>
                                         <div class="text-slate-400 text-[13px] font-normal">({{ ($row['new_users_pct'] >= 0 ? '+' : '-') . abs($row['new_users_pct']) }}%)</div>
                                     </td>
-                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[16px]">
+                                    <td class="py-3.5 text-right font-normal text-slate-700 dark:text-slate-200 text-[14px]">
                                         <div>{{ number_format($row['ret_users']) }}</div>
                                         <div class="text-slate-400 text-[13px] font-normal">({{ ($row['ret_users_pct'] >= 0 ? '+' : '-') . abs($row['ret_users_pct']) }}%)</div>
                                     </td>
-                                    <td class="py-3.5 text-right text-[16px] font-normal text-slate-600 dark:text-slate-300">
+                                    <td class="py-3.5 text-right text-[14px] font-normal text-slate-600 dark:text-slate-300">
                                         {{ $row['avg_time'] }}
                                     </td>
-                                    <td class="py-3.5 text-right font-normal text-[#135266] dark:text-[#5eead4] text-[16px]">
+                                    <td class="py-3.5 text-right font-normal text-[#135266] dark:text-[#5eead4] text-[14px]">
                                         <div>{{ number_format($row['key_events']) }}</div>
                                         <div class="text-slate-400 text-[13px] font-normal">({{ ($row['key_events_pct'] >= 0 ? '+' : '-') . abs($row['key_events_pct']) }}%)</div>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7" class="py-6 text-center text-slate-400 text-[16px]">No traffic sources recorded</td></tr>
+                                <tr><td colspan="7" class="py-6 text-center text-slate-400 text-[14px]">No traffic sources recorded</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -2577,7 +2597,7 @@
                     @endphp
                     <div class="event-breakdown-item bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between">
                         <!-- Top: Event Name -->
-                        <div class="font-bold text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="font-size: 15px !important; font-weight: 700 !important; line-height: 1.3 !important;" title="{{ $eventName }}">
+                        <div class="font-bold text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="font-size: 16px !important; font-weight: 700 !important; line-height: 1.3 !important;" title="{{ $eventName }}">
                             {{ $eventName }}
                         </div>
 
@@ -2945,9 +2965,9 @@
                         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Top Ad Campaigns
                     </h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-base text-left">
+                        <table class="w-full text-[14px] text-left">
                             <thead>
-                                <tr class="text-base capitalize tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
+                                <tr class="text-[16px] capitalize tracking-wider text-slate-400 dark:text-slate-500 border-b-2 border-slate-100 dark:border-slate-800/50">
                                     <th class="py-2">Campaign Name</th>
                                     <th class="py-2 text-right">Clicks</th>
                                     <th class="py-2 text-right">Imp.</th>
@@ -2955,7 +2975,7 @@
                                     <th class="py-2 text-right">Conv.</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-[16px] font-normal">
+                            <tbody class="text-[14px] font-normal">
                                 @forelse (array_slice($reportDataScope['top_campaigns'] ?? [], 0, 5) as $campaign)
                                     <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                         <td class="py-2.5 font-normal truncate max-w-[200px]" title="{{ $campaign['name'] ?? '' }}">{{ $campaign['name'] ?? '' }}</td>
@@ -2984,16 +3004,16 @@
                                     <h3 class="text-[18px] !font-normal text-[#135266] dark:text-slate-100 tracking-tight" style="font-size: 18px !important; line-height: 1.3 !important; margin: 0 !important;">Summary of how your keywords are performing</h3>
                                 </div>
                                 <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse text-[16px]">
+                                    <table class="w-full text-left border-collapse text-[14px]">
                                         <thead>
-                                            <tr class="bg-white text-base text-[#5f6368] border-b border-slate-200">
+                                            <tr class="bg-white text-[16px] text-[#5f6368] border-b border-slate-200">
                                                 <th class="px-5 py-3 font-medium w-1/2"></th>
                                                 <th class="px-5 py-3 font-medium text-right border-b-2 border-[#1a73e8]">Cost <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
                                                 <th class="px-5 py-3 font-medium text-right">Clicks <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
                                                 <th class="px-5 py-3 font-medium text-right">CTR <svg class="inline w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></th>
                                             </tr>
                                         </thead>
-                                        <tbody class="text-[16px] text-[#202124] font-normal">
+                                        <tbody class="text-[14px] text-[#202124] font-normal">
                                             @foreach($keywords as $kw)
                                                 <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
                                                     <td class="px-5 py-3 flex items-center gap-3 font-normal">
@@ -3319,15 +3339,15 @@
                 <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
                     <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Performing Videos</h4>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-[16px]">
+                        <table class="w-full text-left text-[14px]">
                             <thead>
-                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
+                                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[16px]">
                                     <th class="py-2 font-bold w-3/5">Video</th>
                                     <th class="py-2 text-right font-bold">Views</th>
                                     <th class="py-2 text-right font-bold">Watch Time</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-[16px] font-normal">
+                            <tbody class="text-[14px] font-normal">
                                 @forelse ($reportDataScope['top_videos'] ?? [] as $video) 
                                     <tr wire:key="vid-{{ $idx }}-{{ $loop->index }}" class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                         <td class="py-3 font-normal">
@@ -3755,7 +3775,7 @@
                         </div>
 
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-[15px]">
+                            <table class="w-full text-left text-[14px]">
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
                                         <th class="py-3 px-3 font-bold w-4/12 sm:w-4/12">Keyword</th>
@@ -3911,14 +3931,14 @@
             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
                 <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Tags</h4>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[16px]">
+                    <table class="w-full text-left text-[14px]">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[16px]">
                                 <th class="py-2 font-bold">Tag Name</th>
                                 <th class="py-2 text-right font-bold">Type</th>
                             </tr>
                         </thead>
-                        <tbody class="text-[16px] font-normal">
+                        <tbody class="text-[14px] font-normal">
                             @foreach ($activeReportData['tags_list'] as $tag)
                                 <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                     <td class="py-2.5 font-normal truncate" title="{{ $tag['name'] }}">{{ $tag['name'] }}</td>
@@ -3936,14 +3956,14 @@
             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
                 <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Triggers</h4>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[16px]">
+                    <table class="w-full text-left text-[14px]">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[16px]">
                                 <th class="py-2 font-bold">Trigger Name</th>
                                 <th class="py-2 text-right font-bold">Type</th>
                             </tr>
                         </thead>
-                        <tbody class="text-[16px] font-normal">
+                        <tbody class="text-[14px] font-normal">
                             @foreach ($activeReportData['triggers_list'] as $trigger)
                                 <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                     <td class="py-2.5 font-normal truncate" title="{{ $trigger['name'] ?? '' }}">{{ $trigger['name'] ?? 'Unknown' }}</td>
@@ -3960,14 +3980,14 @@
             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 mt-6">
                 <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">All Variables</h4>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[16px]">
+                    <table class="w-full text-left text-[14px]">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-base">
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[16px]">
                                 <th class="py-2 font-bold">Variable Name</th>
                                 <th class="py-2 text-right font-bold">Type</th>
                             </tr>
                         </thead>
-                        <tbody class="text-[16px] font-normal">
+                        <tbody class="text-[14px] font-normal">
                             @foreach ($activeReportData['variables_list'] as $variable)
                                 <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
                                     <td class="py-2.5 font-normal truncate" title="{{ $variable['name'] ?? '' }}">{{ $variable['name'] ?? 'Unknown' }}</td>
