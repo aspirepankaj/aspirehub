@@ -1776,11 +1776,21 @@ class StaffClients extends Component
                 }
                 // 2. Published Posts (Organic) for daily metrics and table
                 $postsResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}/published_posts", [
-                    'fields' => 'id,message,created_time,full_picture,permalink_url,likes.summary(true),comments.summary(true),shares,insights.metric(post_total_media_view_unique,post_media_view){name,values}',
+                    'fields' => 'id,message,created_time,full_picture,permalink_url,shares,insights.metric(post_total_media_view_unique,post_media_view){name,values}',
                     'limit' => 100,
                     'since' => $fbStartDate,
                     'access_token' => $pageAccessToken
                 ]);
+
+                // Fallback attempt without insights if strict permissions block
+                if (!$postsResponse->successful()) {
+                    $postsResponse = \Illuminate\Support\Facades\Http::get("https://graph.facebook.com/v18.0/{$propertyId}/published_posts", [
+                        'fields' => 'id,message,created_time,full_picture,permalink_url',
+                        'limit' => 100,
+                        'since' => $fbStartDate,
+                        'access_token' => $pageAccessToken
+                    ]);
+                }
 
                 if ($postsResponse->successful()) {
                     $postsData = $postsResponse->json('data') ?? [];
