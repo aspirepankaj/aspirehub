@@ -530,6 +530,30 @@
         @endif
     @endif
     @else
+        {{-- Skeleton Loader when selecting Client or Website before website reports load --}}
+        <div wire:loading wire:target="selectClient, selectWebsite, clientId, websiteId" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5 mb-6 relative">
+                @for($i = 0; $i < 5; $i++)
+                    <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm h-32 flex flex-col justify-center">
+                        <div class="flex items-start gap-4 mb-2">
+                            <div class="w-12 h-12 rounded-full bg-slate-200/60 dark:bg-slate-800/60 shrink-0"></div>
+                            <div class="flex-1 space-y-2 py-1">
+                                <div class="h-3 bg-slate-200/80 dark:bg-slate-700/80 rounded w-1/2"></div>
+                                <div class="h-8 bg-slate-200/80 dark:bg-slate-700/80 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                        <div class="mt-2 h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-2/3"></div>
+                    </div>
+                @endfor
+            </div>
+            <div class="bg-white/80 dark:bg-slate-900/80 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm h-64 flex flex-col justify-center items-center">
+                <div class="w-10 h-10 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin mb-3"></div>
+                <div class="h-3.5 bg-slate-200/80 dark:bg-slate-700/80 rounded w-48 mb-2"></div>
+                <div class="h-3 bg-slate-100 dark:bg-slate-800/60 rounded w-64"></div>
+            </div>
+        </div>
+
+        <div wire:loading.remove wire:target="selectClient, selectWebsite, clientId, websiteId">
         {{-- Standard Marketing Integration Tabs & Reports --}}
         @if($websiteId)
             @if($integrations->isEmpty())
@@ -615,7 +639,7 @@
                 {{-- Selected Integration Report / Overview Body --}}
                 <div class="relative min-h-[400px]">
                     {{-- Skeleton Loader --}}
-                    <div wire:loading wire:target="switchTab, resetSelection" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
+                    <div wire:loading wire:target="selectClient, selectWebsite, switchTab, resetSelection, clientId, websiteId" class="w-full font-sans pb-8 animate-pulse mt-2 relative">
                         <div class="w-full h-full p-6">
                             <!-- Skeleton cards -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-5 mb-6 relative" style="z-index: 10;">
@@ -635,7 +659,7 @@
                         </div>
                     </div>
 
-                    <div wire:loading.remove wire:target="switchTab, resetSelection" class="animate-fadeIn" wire:key="tab-container-{{ $activeTab }}">
+                    <div wire:loading.remove wire:target="selectClient, selectWebsite, switchTab, resetSelection, clientId, websiteId" class="animate-fadeIn" wire:key="tab-container-{{ $activeTab }}">
                         @if($activeTab === 'overview')
                             @php
                                 $connectedTypes = $integrations->pluck('integration_type')->toArray();
@@ -1483,6 +1507,7 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">Choose a client and website from the dropdown above to view its marketing reports.</p>
             </div>
         @endif
+        </div>
     @endif
 </div>
 

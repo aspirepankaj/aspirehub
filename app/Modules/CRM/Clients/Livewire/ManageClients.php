@@ -2125,6 +2125,73 @@ class ManageClients extends Component
                         }
                     }
 
+                    // Query Conversion Actions Breakdown (Calls from ads, Form submissions, etc.)
+                    $dailyConversions = [];
+                    $campaignConversions = [];
+                    try {
+                        $convQuery = "SELECT segments.date, campaign.name, segments.conversion_action_name, metrics.conversions FROM campaign WHERE segments.date >= '{$startDateStr}' AND segments.date <= '{$endDateStr}' AND campaign.status = 'ENABLED' AND metrics.conversions > 0";
+                        $convResponse = $http->post($url, ['query' => $convQuery]);
+                        if ($convResponse->successful()) {
+                            $convData = $convResponse->json();
+                            if (isset($convData['results'])) {
+                                foreach ($convData['results'] as $row) {
+                                    $cDate = $row['segments']['date'] ?? null;
+                                    $cName = $row['campaign']['name'] ?? 'Unknown Campaign';
+                                    $actionName = $row['segments']['conversionActionName'] ?? 'Conversion';
+                                    $convCount = (float)($row['metrics']['conversions'] ?? 0);
+                                    if ($convCount <= 0) continue;
+
+                                    $dailyConversions[] = [
+                                        'date' => $cDate,
+                                        'campaign_name' => $cName,
+                                        'action_name' => $actionName,
+                                        'conversions' => $convCount,
+                                    ];
+
+                                    if (!isset($campaignConversions[$cName][$actionName])) {
+                                        $campaignConversions[$cName][$actionName] = 0;
+                                    }
+                                    $campaignConversions[$cName][$actionName] += $convCount;
+                                }
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::warning("Google Ads Conversion Actions Breakdown Exception [{$customerId}]: " . $e->getMessage());
+                    }
+
+                    // Fetch Auction Insights data if available
+                    $auctionInsights = [];
+                    try {
+                        $auctionQuery = "SELECT segments.auction_insight_domain, metrics.auction_insight_search_impression_share, metrics.auction_insight_search_overlap_rate, metrics.auction_insight_search_position_above_rate, metrics.auction_insight_search_top_impression_percentage, metrics.auction_insight_search_absolute_top_impression_percentage, metrics.auction_insight_search_outranking_share FROM campaign WHERE segments.date >= '{$startDateStr}' AND segments.date <= '{$endDateStr}' AND campaign.status = 'ENABLED' LIMIT 50";
+                        $auctionResponse = $http->post($url, ['query' => $auctionQuery]);
+                        
+                        if ($auctionResponse->successful()) {
+                            $aucData = $auctionResponse->json();
+                            if (isset($aucData['results'])) {
+                                foreach ($aucData['results'] as $row) {
+                                    $domain = $row['segments']['auctionInsightDomain'] ?? null;
+                                    if (!$domain) continue;
+                                    $m = $row['metrics'] ?? [];
+                                    $auctionInsights[] = [
+                                        'domain' => $domain,
+                                        'display_domain' => $domain,
+                                        'is_you' => str_contains(strtolower($domain), 'you') || ($accountName && str_contains(strtolower($domain), strtolower($accountName))),
+                                        'impression_share' => isset($m['auctionInsightSearchImpressionShare']) ? round(((float)$m['auctionInsightSearchImpressionShare']) * 100, 1) : null,
+                                        'overlap_rate' => isset($m['auctionInsightSearchOverlapRate']) ? round(((float)$m['auctionInsightSearchOverlapRate']) * 100, 1) : null,
+                                        'position_above_rate' => isset($m['auctionInsightSearchPositionAboveRate']) ? round(((float)$m['auctionInsightSearchPositionAboveRate']) * 100, 1) : null,
+                                        'top_of_page_rate' => isset($m['auctionInsightSearchTopImpressionPercentage']) ? round(((float)$m['auctionInsightSearchTopImpressionPercentage']) * 100, 1) : null,
+                                        'abs_top_of_page_rate' => isset($m['auctionInsightSearchAbsoluteTopImpressionPercentage']) ? round(((float)$m['auctionInsightSearchAbsoluteTopImpressionPercentage']) * 100, 1) : null,
+                                        'outranking_share' => isset($m['auctionInsightSearchOutrankingShare']) ? round(((float)$m['auctionInsightSearchOutrankingShare']) * 100, 1) : null,
+                                    ];
+                                }
+                            }
+                        } else {
+                            \Illuminate\Support\Facades\Log::warning("Google Ads Auction Insights Livewire Response [{$customerId}] Status: " . $auctionResponse->status(), (array)($auctionResponse->json() ?? ['body' => $auctionResponse->body()]));
+                        }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("Google Ads Auction Insights Livewire Exception [{$customerId}]: " . $e->getMessage());
+                    }
+
                     $reportData = [
                         'account_name' => $accountName,
                         'summary' => [
@@ -2136,6 +2203,9 @@ class ManageClients extends Component
                         'daily_traffic' => array_values($dailyTraffic),
                         'daily_campaigns' => array_values($dailyCampaigns),
                         'daily_keywords' => $dailyKeywords,
+                        'daily_conversions' => $dailyConversions,
+                        'campaign_conversions' => $campaignConversions,
+                        'auction_insights' => $auctionInsights,
                         'raw' => $data
                     ];
                 } else {
@@ -2804,6 +2874,18 @@ class ManageClients extends Component
                                     }
                                 }));
                             }
+                            if (isset($reportData['daily_conversions'])) {
+                                $mReportData['daily_conversions'] = array_values(array_filter($reportData['daily_conversions'], function($dcv) use ($y, $m) {
+                                    $d = $dcv['date'] ?? '';
+                                    if (!$d) return false;
+                                    try {
+                                        $cDate = \Carbon\Carbon::parse($d);
+                                        return $cDate->format('Y') == $y && \Illuminate\Support\Str::lower($cDate->format('F')) == $m;
+                                    } catch (\Exception $e) {
+                                        return false;
+                                    }
+                                }));
+                            }
                         } elseif ($integrationId === 'gbp') {
                             $mViews = 0;
                             $mSearches = 0;
@@ -2950,7 +3032,7 @@ class ManageClients extends Component
                     'views' => 173,
                     'viewers' => 95,
                     'picture' => 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7251849102837190/",
                 ],
                 [
                     'id' => 'urn:li:share:7247492019482711',
@@ -2968,7 +3050,7 @@ class ManageClients extends Component
                     'views' => 216,
                     'viewers' => 107,
                     'picture' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7247492019482711/",
                 ],
                 [
                     'id' => 'urn:li:share:7242401827491029',
@@ -2986,7 +3068,7 @@ class ManageClients extends Component
                     'views' => 592,
                     'viewers' => 312,
                     'picture' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7242401827491029/",
                 ],
                 [
                     'id' => 'urn:li:share:7238719201847102',
@@ -3004,7 +3086,7 @@ class ManageClients extends Component
                     'views' => 178,
                     'viewers' => 101,
                     'picture' => 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7238719201847102/",
                 ],
                 [
                     'id' => 'urn:li:share:7228830192847103',
@@ -3022,7 +3104,7 @@ class ManageClients extends Component
                     'views' => 461,
                     'viewers' => 255,
                     'picture' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7228830192847103/",
                 ],
                 [
                     'id' => 'urn:li:share:7221948102938471',
@@ -3040,7 +3122,7 @@ class ManageClients extends Component
                     'views' => 270,
                     'viewers' => 126,
                     'picture' => 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7221948102938471/",
                 ],
                 [
                     'id' => 'urn:li:share:7221294810293842',
@@ -3058,7 +3140,7 @@ class ManageClients extends Component
                     'views' => 199,
                     'viewers' => 102,
                     'picture' => 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7221294810293842/",
                 ],
             ],
             'raw' => [

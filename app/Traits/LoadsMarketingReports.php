@@ -218,6 +218,17 @@ trait LoadsMarketingReports
                 }
             }
 
+            if (!empty($jsonData['daily_conversions'])) {
+                if (!isset($mergedDailyConversions)) $mergedDailyConversions = [];
+                foreach ($jsonData['daily_conversions'] as $item) {
+                    $rawDate = (string)($item['date'] ?? '');
+                    $normDate = strlen($rawDate) === 8 ? substr($rawDate, 0, 4) . '-' . substr($rawDate, 4, 2) . '-' . substr($rawDate, 6, 2) : $rawDate;
+                    if ($normDate >= $startDate && $normDate <= $endDate) {
+                        $mergedDailyConversions[] = $item;
+                    }
+                }
+            }
+
             if (!empty($jsonData['top_posts'])) {
                 if (!isset($mergedTopPosts)) $mergedTopPosts = [];
                 foreach ($jsonData['top_posts'] as $post) {
@@ -697,12 +708,86 @@ trait LoadsMarketingReports
                                 'clicks' => 0,
                                 'impressions' => 0,
                                 'cost' => 0,
-                                'conversions' => 0
+                                'conversions' => 0,
+                                'conversion_actions' => []
                             ];
                         }
                         $aggregatedCampaigns[$campName]['clicks'] += (int)($dc['clicks'] ?? 0);
                         $aggregatedCampaigns[$campName]['impressions'] += (int)($dc['impressions'] ?? 0);
                         $aggregatedCampaigns[$campName]['cost'] += (float)($dc['cost'] ?? 0);
+                        $aggregatedCampaigns[$campName]['conversions'] += (float)($dc['conversions'] ?? 0);
+                    }
+
+                    // Attach aggregated conversion actions breakdown to campaigns
+                    if (!empty($mergedDailyConversions)) {
+                        foreach ($mergedDailyConversions as $dcv) {
+                            $cName = $dcv['campaign_name'] ?? '';
+                            $actName = $dcv['action_name'] ?? '';
+                            $cnt = (float)($dcv['conversions'] ?? 0);
+                            if ($cName && $actName && $cnt > 0 && isset($aggregatedCampaigns[$cName])) {
+                                if (!isset($aggregatedCampaigns[$cName]['conversion_actions'][$actName])) {
+                                    $aggregatedCampaigns[$cName]['conversion_actions'][$actName] = 0;
+                                }
+                                $aggregatedCampaigns[$cName]['conversion_actions'][$actName] += $cnt;
+                            }
+                        }
+                    }
+
+                    $topCampList = array_values($aggregatedCampaigns);
+                    usort($topCampList, function($a, $b) {
+                        return $b['cost'] <=> $a['cost'];
+                    });
+
+                    $allData['top_campaigns'] = array_slice($topCampList, 0, 5);
+                }
+            }
+            // Re-calculate Meta Ads summary
+            elseif ($integrationType === 'meta_ads') {
+                $totalClicks = 0;
+                $totalImpressions = 0;
+                $totalCost = 0;
+                $totalConversions = 0;
+
+                foreach ($mergedDaily as $d) {
+                    $totalClicks += (int)($d['clicks'] ?? 0);
+                    $totalImpressions += (int)($d['impressions'] ?? 0);
+                    $totalCost += (float)($d['cost'] ?? ($d['spend'] ?? 0));
+                    $totalConversions += (float)($d['conversions'] ?? 0);
+                }
+
+                $allData['summary']['clicks'] = $totalClicks;
+                $allData['summary']['impressions'] = $totalImpressions;
+                $allData['summary']['cost'] = round($totalCost, 2);
+                $allData['summary']['spend'] = round($totalCost, 2);
+                $allData['summary']['conversions'] = round($totalConversions, 2);
+                $allData['summary']['cpc'] = $totalClicks > 0 ? round($totalCost / $totalClicks, 2) : 0;
+                $allData['summary']['average_cpc'] = $allData['summary']['cpc'];
+                $allData['summary']['ctr'] = $totalImpressions > 0 ? round(($totalClicks / $totalImpressions) * 100, 2) : 0;
+
+                if (!empty($mergedDailyCampaigns)) {
+                    $aggregatedCampaigns = [];
+                    $uniqueDailyCamp = [];
+                    foreach ($mergedDailyCampaigns as $dc) {
+                        $date = $dc['date'] ?? '';
+                        $campName = $dc['name'] ?? 'Unknown';
+                        $uniqueKey = $date . '_' . $campName;
+                        $uniqueDailyCamp[$uniqueKey] = $dc;
+                    }
+
+                    foreach ($uniqueDailyCamp as $dc) {
+                        $campName = $dc['name'] ?? 'Unknown';
+                        if (!isset($aggregatedCampaigns[$campName])) {
+                            $aggregatedCampaigns[$campName] = [
+                                'name' => $campName,
+                                'clicks' => 0,
+                                'impressions' => 0,
+                                'cost' => 0,
+                                'conversions' => 0
+                            ];
+                        }
+                        $aggregatedCampaigns[$campName]['clicks'] += (int)($dc['clicks'] ?? 0);
+                        $aggregatedCampaigns[$campName]['impressions'] += (int)($dc['impressions'] ?? 0);
+                        $aggregatedCampaigns[$campName]['cost'] += (float)($dc['cost'] ?? ($dc['spend'] ?? 0));
                         $aggregatedCampaigns[$campName]['conversions'] += (float)($dc['conversions'] ?? 0);
                     }
 
@@ -921,6 +1006,22 @@ trait LoadsMarketingReports
                 $summary['impressions'] = $totalImpressions;
                 $summary['cost'] = round($totalCost, 2);
                 $summary['conversions'] = round($totalConversions, 2);
+            } elseif ($integrationType === 'meta_ads') {
+                $totalClicks = 0; $totalImpressions = 0; $totalCost = 0; $totalConversions = 0;
+                foreach ($mergedDaily as $d) {
+                    $totalClicks += (int)($d['clicks'] ?? 0);
+                    $totalImpressions += (int)($d['impressions'] ?? 0);
+                    $totalCost += (float)($d['cost'] ?? ($d['spend'] ?? 0));
+                    $totalConversions += (float)($d['conversions'] ?? 0);
+                }
+                $summary['clicks'] = $totalClicks;
+                $summary['impressions'] = $totalImpressions;
+                $summary['cost'] = round($totalCost, 2);
+                $summary['spend'] = round($totalCost, 2);
+                $summary['conversions'] = round($totalConversions, 2);
+                $summary['cpc'] = $totalClicks > 0 ? round($totalCost / $totalClicks, 2) : 0;
+                $summary['average_cpc'] = $summary['cpc'];
+                $summary['ctr'] = $totalImpressions > 0 ? round(($totalClicks / $totalImpressions) * 100, 2) : 0;
             } elseif ($integrationType === 'youtube') {
                 $totalViews = 0; $totalWatch = 0; $totalSubs = 0;
                 foreach ($mergedDaily as $d) {

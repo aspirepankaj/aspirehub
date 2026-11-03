@@ -283,6 +283,7 @@
         $isGadsConnected = isset($integrations['gads']);
         $isGtmConnected = isset($integrations['gtm']);
         $isFacebookConnected = isset($integrations['facebook']);
+        $isMetaAdsConnected = isset($integrations['meta_ads']);
         $isLinkedinConnected = isset($integrations['linkedin']);
 
         $hasGa4 = !empty($ga4Data) && !isset($ga4Data['error']);
@@ -293,256 +294,271 @@
         $hasGbp = !empty($gbpData) && !isset($gbpData['error']);
         $hasGads = !empty($gadsData) && !isset($gadsData['error']);
         $hasFacebook = !empty($facebookData) && !isset($facebookData['error']);
+        $metaAdsData = $metaAdsData ?? [];
+        $hasMetaAds = !empty($metaAdsData) && !isset($metaAdsData['error']);
         $linkedinData = $linkedinData ?? [];
         $hasLinkedin = !empty($linkedinData) && !isset($linkedinData['error']);
     @endphp
 
-    @if($activeReportIntegrationId === 'overview')
-        <!-- Heading Row (Overview Mode) -->
-        <section class="heading-row">
-            <div>
-                <h1>
-                    <span class="heading-icon font-momo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 sm:w-10 sm:h-10 text-primary">
-                            <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
-                        </svg>
-                    </span>
-                    <span class="font-momo">Marketing Performance Overview</span>
-                </h1>
-                <p>Comprehensive multi-channel performance overview across all connected integrations.</p>
-            </div>
-        </section>
+    <!-- Platform Navigation Tabs Bar (Visible across all screens) -->
+    @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected)
+        @php
+            $tabList = [
+                'gads' => [
+                    'connected' => $isGadsConnected, 
+                    'label' => 'Google Ads',
+                    'color' => '#4285F4'
+                ],
+                'ga4' => [
+                    'connected' => $isGa4Connected, 
+                    'label' => 'Google Analytics 4',
+                    'color' => '#E37400'
+                ],
+                'gbp' => [
+                    'connected' => $isGbpConnected, 
+                    'label' => 'Google Business Profile',
+                    'color' => '#1A73E8'
+                ],
+                'keyword' => [
+                    'connected' => $isKeywordConnected, 
+                    'label' => 'Keyword.com',
+                    'color' => '#10B981'
+                ],
+                'linkedin' => [
+                    'connected' => $isLinkedinConnected, 
+                    'label' => 'LinkedIn',
+                    'color' => '#0A66C2'
+                ],
+                'facebook' => [
+                    'connected' => $isFacebookConnected, 
+                    'label' => 'Meta',
+                    'color' => '#0081FB'
+                ],
+                'meta_ads' => [
+                    'connected' => $isMetaAdsConnected, 
+                    'label' => 'Meta Ads',
+                    'color' => '#0081FB'
+                ],
+                'gsc' => [
+                    'connected' => $isGscConnected, 
+                    'label' => 'Search Console',
+                    'color' => '#458CF5'
+                ],
+                'gtm' => [
+                    'connected' => $isGtmConnected, 
+                    'label' => 'Tag Manager',
+                    'color' => '#246FDB'
+                ],
+                'youtube' => [
+                    'connected' => $isYoutubeConnected, 
+                    'label' => 'YouTube',
+                    'color' => '#FF0000'
+                ],
+            ];
+        @endphp
 
-        <!-- Integration Tabs Bar + Select Website Row (Only on Overview Page) -->
-        <section class="action-row flex flex-wrap items-center justify-between gap-3" style="margin-bottom: 16px;">
-            @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isLinkedinConnected)
-                <nav class="report-tabs flex items-center" aria-label="Integrations">
-                    {{-- 1. Overview Tab --}}
-                    <button type="button" 
-                            @if($activeReportIntegrationId === 'overview') disabled @else wire:click="selectIntegration('overview')" @endif
-                            class="inline-flex items-center gap-1.5 transition-all {{ $activeReportIntegrationId === 'overview' ? 'active cursor-default pointer-events-none' : 'cursor-pointer' }}">
-                        <svg wire:loading wire:target="selectIntegration('overview')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Overview</span>
-                    </button>
-
-                    @php
-                        $tabList = [
-                            'gbp' => ['connected' => $isGbpConnected, 'label' => 'Business Profile'],
-                            'facebook' => ['connected' => $isFacebookConnected, 'label' => 'Facebook'],
-                            'gads' => ['connected' => $isGadsConnected, 'label' => 'Google Ads'],
-                            'ga4' => ['connected' => $isGa4Connected, 'label' => 'Google Analytics 4'],
-                            'keyword' => ['connected' => $isKeywordConnected, 'label' => 'Keyword.com'],
-                            'linkedin' => ['connected' => $isLinkedinConnected, 'label' => 'LinkedIn'],
-                            'gsc' => ['connected' => $isGscConnected, 'label' => 'Search Console'],
-                            'gtm' => ['connected' => $isGtmConnected, 'label' => 'Tag Manager'],
-                            'youtube' => ['connected' => $isYoutubeConnected, 'label' => 'YouTube'],
-                        ];
-                    @endphp
-
+        <section class="platform-nav-wrapper mb-4">
+            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-2.5 shadow-sm">
+                <!-- Navigation Tabs with Brand Logos -->
+                <nav class="platform-tabs flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1" aria-label="Marketing Platforms">
                     @foreach($tabList as $tKey => $tItem)
                         @if($tItem['connected'])
+                            @php $isActive = ($activeReportIntegrationId === $tKey); @endphp
                             <button type="button" 
-                                    @if($activeReportIntegrationId === $tKey) disabled @else wire:click="selectIntegration('{{ $tKey }}')" @endif
-                                    class="inline-flex items-center gap-1.5 transition-all {{ $activeReportIntegrationId === $tKey ? 'active cursor-default pointer-events-none' : 'cursor-pointer' }}">
-                                <svg wire:loading wire:target="selectIntegration('{{ $tKey }}')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                    @if($isActive) disabled @else wire:click="selectIntegration('{{ $tKey }}')" @endif
+                                    wire:loading.attr="disabled"
+                                    class="group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold text-sm tracking-tight transition-all duration-200 shrink-0 whitespace-nowrap border {{ $isActive ? 'bg-[#135266] text-white border-[#135266] shadow-sm font-extrabold cursor-default pointer-events-none' : 'bg-slate-50/90 hover:bg-slate-100/90 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700/70 hover:border-slate-300 cursor-pointer' }}">
+                                
+                                {{-- Loading Spinner when switching --}}
+                                <svg wire:loading wire:target="selectIntegration('{{ $tKey }}')" class="animate-spin w-5 h-5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span>{{ $tItem['label'] }}</span>
+
+                                {{-- Brand Logo / Icon --}}
+                                <span wire:loading.remove wire:target="selectIntegration('{{ $tKey }}')" class="inline-flex items-center justify-center shrink-0">
+                                    @if($tKey === 'facebook')
+                                        {{-- Meta Official Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#0081FB]' }}" viewBox="0 0 24 24">
+                                            <path d="m7.70344 7c-1.23357 0-2.34615.74172-2.8206 1.8804-.4329 1.03896-1.01718 3.6147-1.28132 4.8445-.07314.3406-.10356.6331-.08009.8958.07865.8799.35137 1.3002.60615 1.5162.26749.2268.67379.3631 1.26738.3631.65348 0 1.26086-.3366 1.60721-.8908l1.64468-2.6315 2.18665-3.6444-.5099-.84981c0-.00001 0-.00001 0-.00002-.55223-.92034-1.54684-1.48347-2.62016-1.48347zm4.29626.39072c-.921-1.48497-2.54534-2.39072-4.29626-2.39072-2.04097 0-3.88177 1.2272-4.66676 3.11117-.52019 1.24848-1.14231 4.03793-1.39056 5.19383-.09571.4456-.16486.9554-.11675 1.4937.11079 1.2396.53906 2.2145 1.30481 2.8637.75304.6385 1.68679.8376 2.56078.8376 1.34306 0 2.59138-.6919 3.3032-1.8308l1.64954-2.6392.0095-.0155 1.6425-2.7375 1.6425 2.7375.0095.0155 1.6495 2.6392c.7118 1.1389 1.9601 1.8308 3.3032 1.8308.9828 0 2.0043-.2803 2.7714-1.0857.7607-.7988 1.1239-1.9601 1.1239-3.4143 0-.9227-.3499-2.2661-.6743-3.3415-.3381-1.1208-.7029-2.11985-.815-2.4217-.0261-.07037-.0574-.15077-.0953-.23604-.81-1.82143-2.6184-3.00076-4.6192-3.00076-1.7509 0-3.3752.90576-4.2962 2.39072zm1.1662 1.94259 2.1866 3.64439 1.6447 2.6315c.3463.5542.9537.8908 1.6072.8908.6162 0 1.0423-.1702 1.3231-.465.2872-.3015.5722-.8902.5722-2.035 0-.5842-.2546-1.6551-.5891-2.7639-.3207-1.0633-.6693-2.0183-.775-2.30278-.0186-.05014-.0336-.08768-.0479-.11987-.4895-1.10065-1.5825-1.81345-2.7918-1.81345-1.0733 0-2.0679.56315-2.6201 1.48352z" />
+                                        </svg>
+                                    @elseif($tKey === 'meta_ads')
+                                        {{-- Meta Ads Logo (Megaphone & Chart Badge) --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#0081FB]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                                        </svg>
+                                    @elseif($tKey === 'gads')
+                                        {{-- Google Ads Logo --}}
+                                        <svg class="w-5 h-5" viewBox="0 0 48 48">
+                                            <path d="M46.79,32.49c-11.62-20.12-17-30.28-18.1-29.18A9,9,0,0,0,16.11,6.69c-1.52,2.6,5.46-9.48-14.82,25.66A8.94,8.94,0,0,0,0,37c0,9.19,12.22,12.42,16.79,4.5C17.5,40.26,14.23,45.94,24,29L31.2,41.5a9,9,0,1,0,15.59-9ZM9,44A7,7,0,0,1,2.93,33.5h0A1.31,1.31,0,0,0,3,33.37c4.21-6.95,15.15-2.22,12.64,5.74A7,7,0,0,1,9,44Zm8.89-8.4a9,9,0,0,0-12.12-7l9.34-16.18c.37,2.34,1.07,3.06,7.73,14.61ZM39,44a7,7,0,0,1-6.06-3.5C16.38,11.82,17,13.52,17,11A7,7,0,0,1,27.39,4.88C29.51,5.82,29.19,6,45,33.37A7,7,0,0,1,39,44Z" fill="{{ $isActive ? '#ffffff' : '#FBBC04' }}"/>
+                                        </svg>
+                                    @elseif($tKey === 'ga4')
+                                        {{-- Google Analytics 4 Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#E37400]' }}" viewBox="0 0 24 24">
+                                            <path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                        </svg>
+                                    @elseif($tKey === 'keyword')
+                                        {{-- Keyword.com Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#10B981]' }}" viewBox="0 0 53 44">
+                                            <rect x="2" y="8" width="10" height="34" rx="4" />
+                                            <path d="m29 2-16 20 16 20h13L26 22 42 2Z" />
+                                        </svg>
+                                    @elseif($tKey === 'linkedin')
+                                        {{-- LinkedIn Official Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#0A66C2]' }}" viewBox="0 0 24 24">
+                                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                                        </svg>
+                                    @elseif($tKey === 'gsc')
+                                        {{-- Search Console Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#458CF5]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                                        </svg>
+                                    @elseif($tKey === 'gbp')
+                                        {{-- Google Business Profile Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#1A73E8]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    @elseif($tKey === 'gtm')
+                                        {{-- Google Tag Manager Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#246FDB]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                        </svg>
+                                    @elseif($tKey === 'youtube')
+                                        {{-- YouTube Official Logo --}}
+                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#FF0000]' }}" viewBox="0 0 24 24">
+                                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                        </svg>
+                                    @endif
+                                </span>
+
+                                <span class="text-sm font-semibold">{{ $tItem['label'] }}</span>
                             </button>
                         @endif
                     @endforeach
                 </nav>
-            @else
-                <div></div>
-            @endif
-
-            <!-- Select Website Panel (Placed in the same row with integration tabs) -->
-            <section class="panel select-panel shrink-0" style="margin-bottom: 0;">
-                <label>
-                    <span>Select Website</span>
-                    @if(count($websites) > 0)
-                        <select wire:model.live="selectedWebsiteId" aria-label="Select website">
-                            @foreach($websites as $site)
-                                <option value="{{ $site->id }}">
-                                    {{ $site->site_name }}
-                                    @if(!empty($site->site_url))
-                                        ({{ rtrim(str_replace(['https://', 'http://'], '', $site->site_url), '/') }})
-                                    @endif
-                                </option>
-                            @endforeach
-                        </select>
-                    @else
-                        <span style="font-size: 11px; color: var(--muted-foreground);">No registered websites found</span>
-                    @endif
-                </label>
-            </section>
+            </div>
         </section>
     @endif
 
     <!-- Dedicated Single Integration Header (Matching Zip Design) -->
-    @if($activeReportIntegrationId !== 'overview')
-        <div class="mb-4">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div>
-                    <h1 class="flex items-center gap-3 text-2xl font-extrabold text-[#135266] dark:text-slate-100">
-                        {{-- Platform Specific Dynamic Icon with Consistent Brand Theme Color --}}
-                        <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
-                            @if($activeReportIntegrationId === 'ga4')
-                             <svg class="w-7 h-7" fill="#135266" stroke="#135266" stroke-width="1.6" version="1.1" id="fi_900772" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 480 480" style="enable-background:new 0 0 480 480;" xml:space="preserve">
+    <div class="mb-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+                <h1 class="flex items-center gap-3 text-2xl font-extrabold text-[#135266] dark:text-slate-100">
+                    {{-- Platform Specific Dynamic Icon with Consistent Brand Theme Color --}}
+                    <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
+                        @if($activeReportIntegrationId === 'ga4')
+                         <svg class="w-7 h-7" fill="#135266" stroke="#135266" stroke-width="1.6" version="1.1" id="fi_900772" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 480 480" style="enable-background:new 0 0 480 480;" xml:space="preserve">
+                            <g>
                                 <g>
                                     <g>
-                                        <g>
-                                            <rect y="464" width="480" height="16"></rect>
-                                            <path d="M32,448h80c4.418,0,8-3.582,8-8V296c0-4.418-3.582-8-8-8H32c-4.418,0-8,3.582-8,8v144C24,444.418,27.582,448,32,448z
-                                                M40,304h64v128H40V304z"></path>
-                                            <path d="M256,448h80c4.418,0,8-3.582,8-8V200c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v240C248,444.418,251.582,448,256,448
-                                                z M264,208h64v224h-64V208z"></path>
-                                            <path d="M144,448h80c4.418,0,8-3.582,8-8V104c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v336C136,444.418,139.582,448,144,448
-                                                z M152,112h64v320h-64V112z"></path>
-                                            <path d="M368,448h80c4.418,0,8-3.582,8-8V8c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v432C360,444.418,363.582,448,368,448z
-                                                M376,16h64v416h-64V16z"></path>
-                                        </g>
+                                        <rect y="464" width="480" height="16"></rect>
+                                        <path d="M32,448h80c4.418,0,8-3.582,8-8V296c0-4.418-3.582-8-8-8H32c-4.418,0-8,3.582-8,8v144C24,444.418,27.582,448,32,448z
+                                            M40,304h64v128H40V304z"></path>
+                                        <path d="M256,448h80c4.418,0,8-3.582,8-8V200c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v240C248,444.418,251.582,448,256,448
+                                            z M264,208h64v224h-64V208z"></path>
+                                        <path d="M144,448h80c4.418,0,8-3.582,8-8V104c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v336C136,444.418,139.582,448,144,448
+                                            z M152,112h64v320h-64V112z"></path>
+                                        <path d="M368,448h80c4.418,0,8-3.582,8-8V8c0-4.418-3.582-8-8-8h-80c-4.418,0-8,3.582-8,8v432C360,444.418,363.582,448,368,448z
+                                            M376,16h64v416h-64V16z"></path>
                                     </g>
                                 </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                <g>
-                                </g>
-                                </svg>    
-                            <!-- <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg> -->
-                            @elseif($activeReportIntegrationId === 'gsc')
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                            @elseif($activeReportIntegrationId === 'gads')
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            @elseif($activeReportIntegrationId === 'facebook')
-                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
-                            @elseif($activeReportIntegrationId === 'gbp')
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            @elseif($activeReportIntegrationId === 'keyword')
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-                            @elseif($activeReportIntegrationId === 'youtube')
-                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                            @elseif($activeReportIntegrationId === 'linkedin')
-                                <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-                            @elseif($activeReportIntegrationId === 'gtm')
-                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                            @else
-                                <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7">
-                                    <rect x="3" y="15" width="4.5" height="10" rx="1" />
-                                    <rect x="11.5" y="9" width="4.5" height="16" rx="1" />
-                                    <rect x="20" y="3" width="4.5" height="22" rx="1" />
-                                </svg>
-                            @endif
-                        </span>
-                        <span>
-                            @if($activeReportIntegrationId === 'ga4') Google Analytics Website Traffic
-                            @elseif($activeReportIntegrationId === 'gsc') Google Search Console Performance
-                            @elseif($activeReportIntegrationId === 'youtube') YouTube Performance
-                            @elseif($activeReportIntegrationId === 'keyword') Keyword Ranking Tracker
-                            @elseif($activeReportIntegrationId === 'gtm') Google Tag Manager
-                            @elseif($activeReportIntegrationId === 'gbp') Google Business Profile
-                            @elseif($activeReportIntegrationId === 'gads') Google Ads Campaigns
-                            @elseif($activeReportIntegrationId === 'facebook') Facebook Reach & Engagement
-                            @elseif($activeReportIntegrationId === 'linkedin') LinkedIn Performance
-                            @else Marketing Reports
-                            @endif
-                        </span>
-                    </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        @if($activeReportIntegrationId === 'ga4') Track website traffic, behavior, and key events across your website.
-                        @elseif($activeReportIntegrationId === 'gads') Monitor ad spend, clicks, conversions, and campaign performance.
-                        @elseif($activeReportIntegrationId === 'gsc') Track search queries, organic impressions, clicks, and page rankings.
-                        @elseif($activeReportIntegrationId === 'gbp') Track search and map interactions, calls, and customer engagement.
-                        @elseif($activeReportIntegrationId === 'facebook') Track reach, impressions, post interactions, and page followers.
-                        @elseif($activeReportIntegrationId === 'linkedin') Track company updates, impressions, engagement, and demographics.
-                        @elseif($activeReportIntegrationId === 'youtube') Track video views, watch time, subscribers, and top videos.
-                        @elseif($activeReportIntegrationId === 'keyword') Monitor tracked keyword positions, search volumes, and ranking shifts.
-                        @else Performance analytics and reports across connected integrations.
+                            </g>
+                         </svg>    
+                        @elseif($activeReportIntegrationId === 'gsc')
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                        @elseif($activeReportIntegrationId === 'gads')
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        @elseif($activeReportIntegrationId === 'facebook')
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="m7.70344 7c-1.23357 0-2.34615.74172-2.8206 1.8804-.4329 1.03896-1.01718 3.6147-1.28132 4.8445-.07314.3406-.10356.6331-.08009.8958.07865.8799.35137 1.3002.60615 1.5162.26749.2268.67379.3631 1.26738.3631.65348 0 1.26086-.3366 1.60721-.8908l1.64468-2.6315 2.18665-3.6444-.5099-.84981c0-.00001 0-.00001 0-.00002-.55223-.92034-1.54684-1.48347-2.62016-1.48347zm4.29626.39072c-.921-1.48497-2.54534-2.39072-4.29626-2.39072-2.04097 0-3.88177 1.2272-4.66676 3.11117-.52019 1.24848-1.14231 4.03793-1.39056 5.19383-.09571.4456-.16486.9554-.11675 1.4937.11079 1.2396.53906 2.2145 1.30481 2.8637.75304.6385 1.68679.8376 2.56078.8376 1.34306 0 2.59138-.6919 3.3032-1.8308l1.64954-2.6392.0095-.0155 1.6425-2.7375 1.6425 2.7375.0095.0155 1.6495 2.6392c.7118 1.1389 1.9601 1.8308 3.3032 1.8308.9828 0 2.0043-.2803 2.7714-1.0857.7607-.7988 1.1239-1.9601 1.1239-3.4143 0-.9227-.3499-2.2661-.6743-3.3415-.3381-1.1208-.7029-2.11985-.815-2.4217-.0261-.07037-.0574-.15077-.0953-.23604-.81-1.82143-2.6184-3.00076-4.6192-3.00076-1.7509 0-3.3752.90576-4.2962 2.39072zm1.1662 1.94259 2.1866 3.64439 1.6447 2.6315c.3463.5542.9537.8908 1.6072.8908.6162 0 1.0423-.1702 1.3231-.465.2872-.3015.5722-.8902.5722-2.035 0-.5842-.2546-1.6551-.5891-2.7639-.3207-1.0633-.6693-2.0183-.775-2.30278-.0186-.05014-.0336-.08768-.0479-.11987-.4895-1.10065-1.5825-1.81345-2.7918-1.81345-1.0733 0-2.0679.56315-2.6201 1.48352z"/></svg>
+                        @elseif($activeReportIntegrationId === 'meta_ads')
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                        @elseif($activeReportIntegrationId === 'gbp')
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        @elseif($activeReportIntegrationId === 'keyword')
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                        @elseif($activeReportIntegrationId === 'youtube')
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        @elseif($activeReportIntegrationId === 'linkedin')
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                        @elseif($activeReportIntegrationId === 'gtm')
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        @else
+                            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7">
+                                <rect x="3" y="15" width="4.5" height="10" rx="1" />
+                                <rect x="11.5" y="9" width="4.5" height="16" rx="1" />
+                                <rect x="20" y="3" width="4.5" height="22" rx="1" />
+                            </svg>
                         @endif
-                    </p>
+                    </span>
+                    <span>
+                        @if($activeReportIntegrationId === 'ga4') Google Analytics Website Traffic
+                        @elseif($activeReportIntegrationId === 'gads') Google Ads Campaigns
+                        @elseif($activeReportIntegrationId === 'facebook') Meta Performance (Facebook & Instagram)
+                        @elseif($activeReportIntegrationId === 'meta_ads') Meta Ads Campaigns
+                        @elseif($activeReportIntegrationId === 'linkedin') LinkedIn Performance
+                        @elseif($activeReportIntegrationId === 'gsc') Google Search Console Performance
+                        @elseif($activeReportIntegrationId === 'keyword') Keyword Ranking Tracker
+                        @elseif($activeReportIntegrationId === 'gbp') Google Business Profile
+                        @elseif($activeReportIntegrationId === 'youtube') YouTube Performance
+                        @elseif($activeReportIntegrationId === 'gtm') Google Tag Manager
+                        @else Marketing Reports
+                        @endif
+                    </span>
+                </h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    @if($activeReportIntegrationId === 'ga4') Track website traffic, behavior, and key events across your website.
+                    @elseif($activeReportIntegrationId === 'gads') Monitor ad spend, clicks, conversions, and campaign performance.
+                    @elseif($activeReportIntegrationId === 'facebook') Track Meta reach, impressions, post interactions, followers, and Instagram activity.
+                    @elseif($activeReportIntegrationId === 'meta_ads') Track ad spend, impressions, clicks, conversions, and campaign performance across Facebook & Instagram.
+                    @elseif($activeReportIntegrationId === 'linkedin') Track company updates, impressions, engagement, and demographics.
+                    @elseif($activeReportIntegrationId === 'gsc') Track search queries, organic impressions, clicks, and page rankings.
+                    @elseif($activeReportIntegrationId === 'keyword') Monitor tracked keyword positions, search volumes, and ranking shifts.
+                    @elseif($activeReportIntegrationId === 'gbp') Track search and map interactions, calls, and customer engagement.
+                    @elseif($activeReportIntegrationId === 'youtube') Track video views, watch time, subscribers, and top videos.
+                    @else Performance analytics and reports across connected integrations.
+                    @endif
+                </p>
+            </div>
+
+            <!-- Right Side: Date Picker (Left) & Website Filter (Right) -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Date Range Picker (Calendar) -->
+                <div class="shrink-0" wire:key="dp-top-box-{{ $activeReportIntegrationId }}-{{ $selectedWebsiteId }}">
+                    @php
+                        $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                        $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+                    @endphp
+                    @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
                 </div>
 
-                <!-- Right Side: Back to Overview Button + Website Filter + Date Picker -->
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <!-- Back to Overview Button -->
-                    <button type="button" 
-                            @if($activeReportIntegrationId === 'overview') disabled @else wire:click="selectIntegration('overview')" @endif
-                            wire:loading.attr="disabled"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all shadow-xs disabled:opacity-60 disabled:cursor-not-allowed">
-                        <svg wire:loading wire:target="selectIntegration('overview')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <svg wire:loading.remove wire:target="selectIntegration('overview')" class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        <span>Back to Overview</span>
-                    </button>
-
-                    <!-- Website Filter Dropdown (Custom Pill Styled) -->
-                    <div class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl px-3 py-1.5 shadow-xs">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Website</span>
-                        @if(count($websites) > 0)
-                            <div class="relative inline-flex items-center">
-                                <select wire:model.live="selectedWebsiteId" aria-label="Select website" 
-                                        class="appearance-none bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-[#0b495b] dark:text-[#5eead4] pl-2.5 pr-7 py-1 rounded-lg border-0 focus:ring-1 focus:ring-[#0b495b] cursor-pointer transition-colors">
-                                    @foreach($websites as $site)
-                                        <option value="{{ $site->id }}">
-                                            {{ $site->site_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <!-- <svg class="w-3 h-3 text-slate-400 pointer-events-none absolute right-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg> -->
-                            </div>
-                        @else
-                            <span class="text-xs text-slate-400 font-medium">No websites</span>
-                        @endif
-                    </div>
-
-                    <!-- Date Range Picker -->
-                    <div class="shrink-0" wire:key="dp-top-box-{{ $activeReportIntegrationId }}-{{ $selectedWebsiteId }}">
-                        @php
-                            $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
-                            $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
-                        @endphp
-                        @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
-                    </div>
+                <!-- Website Filter -->
+                <div class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl px-3 py-2 shadow-xs shrink-0">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Website</span>
+                    @if(count($websites) > 0)
+                        <div class="relative inline-flex items-center">
+                            <select wire:model.live="selectedWebsiteId" aria-label="Select website" 
+                                    class="appearance-none bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-[#0b495b] dark:text-[#5eead4] pl-2 pr-6 py-0.5 rounded-lg border-0 focus:ring-1 focus:ring-[#0b495b] cursor-pointer transition-colors">
+                                @foreach($websites as $site)
+                                    <option value="{{ $site->id }}">
+                                        {{ $site->site_name }}
+                                        @if(!empty($site->site_url))
+                                            ({{ rtrim(str_replace(['https://', 'http://'], '', $site->site_url), '/') }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            <svg class="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    @else
+                        <span class="text-xs text-slate-400 font-medium">No websites</span>
+                    @endif
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 
     <!-- Content Views Area -->
     <div class="relative min-h-[400px] w-full mt-2">
@@ -964,7 +980,7 @@
                                         </div>
                                     </div>
                                     <button type="button" 
-                                        @if($activeReportIntegrationId === 'gads') disabled @else wire:click="selectIntegration('gads')" @endif
+                                        @if($activeReportIntegrationId === 'gads' || $activeReportIntegrationId === 'meta_ads') disabled @else wire:click="selectIntegration('gads')" @endif
                                         wire:loading.attr="disabled"
                                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
                                         <svg wire:loading wire:target="selectIntegration('gads')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
@@ -1803,10 +1819,10 @@
             {{-- Single Integration View --}}
             <div wire:key="integration-view-single-{{ $activeReportIntegrationId }}-{{ $selectedWebsiteId }}" class="client-integration-theme">
                 {{-- Skeleton Loader for Single Integration matching actual data layout --}}
-                <div wire:loading wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('linkedin'), applyDateFilter, selectedWebsiteId" class="w-full font-sans pb-8 animate-pulse relative">
+                <div wire:loading wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('meta_ads'), selectIntegration('linkedin'), applyDateFilter, selectedWebsiteId" class="w-full font-sans pb-8 animate-pulse relative">
                     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm p-6 space-y-6">
                         
-                        @if($activeReportIntegrationId === 'gads')
+                        @if($activeReportIntegrationId === 'gads' || $activeReportIntegrationId === 'meta_ads')
                             {{-- Google Ads Exact Replica Skeleton --}}
                             <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900">
                                 <!-- Top Metric Tabs Skeleton (5 equal columns) -->
@@ -1962,7 +1978,7 @@
                 </div>
 
                 {{-- Real Single Integration Report --}}
-                <div wire:loading.remove wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('linkedin'), applyDateFilter, selectedWebsiteId">
+                <div wire:loading.remove wire:target="selectIntegration('ga4'), selectIntegration('gsc'), selectIntegration('youtube'), selectIntegration('keyword'), selectIntegration('gtm'), selectIntegration('gbp'), selectIntegration('gads'), selectIntegration('facebook'), selectIntegration('meta_ads'), selectIntegration('linkedin'), applyDateFilter, selectedWebsiteId">
                     @include('modules.crm.clients.client-report', [
                         'hideHeader' => true, 
                         'hideToolbar' => true,

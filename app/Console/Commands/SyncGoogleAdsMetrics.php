@@ -119,7 +119,7 @@ class SyncGoogleAdsMetrics extends Command
 
         $url = "https://googleads.googleapis.com/v25/customers/{$customerId}/googleAds:search";
         
-        $query = "SELECT customer.descriptive_name, campaign.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions, segments.date, segments.device FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}' AND campaign.status = 'ENABLED'";
+        $query = "SELECT customer.descriptive_name, campaign.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions, metrics.search_impression_share, metrics.search_budget_lost_impression_share, metrics.search_rank_lost_impression_share, metrics.search_top_impression_share, metrics.search_absolute_top_impression_share, segments.date, segments.device FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}' AND campaign.status = 'ENABLED'";
 
         $http = Http::withToken($token);
         if (app()->environment('local')) {
@@ -260,6 +260,47 @@ class SyncGoogleAdsMetrics extends Command
                 }
             }
 
+            // Fetch Auction Insights data if available
+            $auctionInsights = [];
+            try {
+                $auctionQuery = "SELECT segments.auction_insight_domain, metrics.auction_insight_search_impression_share, metrics.auction_insight_search_overlap_rate, metrics.auction_insight_search_position_above_rate, metrics.auction_insight_search_top_impression_percentage, metrics.auction_insight_search_absolute_top_impression_percentage, metrics.auction_insight_search_outranking_share FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}' AND campaign.status = 'ENABLED' LIMIT 50";
+                
+                $auctionResponse = $http
+                    ->withHeaders([
+                        'developer-token' => $developerToken,
+                        'login-customer-id' => $loginCustomerId
+                    ])
+                    ->post($url, [
+                        'query' => $auctionQuery
+                    ]);
+
+                if ($auctionResponse->successful()) {
+                    $aucData = $auctionResponse->json();
+                    if (isset($aucData['results'])) {
+                        foreach ($aucData['results'] as $row) {
+                            $domain = $row['segments']['auctionInsightDomain'] ?? null;
+                            if (!$domain) continue;
+                            $m = $row['metrics'] ?? [];
+                            $auctionInsights[] = [
+                                'domain' => $domain,
+                                'display_domain' => $domain,
+                                'is_you' => str_contains(strtolower($domain), 'you') || ($accountName && str_contains(strtolower($domain), strtolower($accountName))),
+                                'impression_share' => isset($m['auctionInsightSearchImpressionShare']) ? round(((float)$m['auctionInsightSearchImpressionShare']) * 100, 1) : null,
+                                'overlap_rate' => isset($m['auctionInsightSearchOverlapRate']) ? round(((float)$m['auctionInsightSearchOverlapRate']) * 100, 1) : null,
+                                'position_above_rate' => isset($m['auctionInsightSearchPositionAboveRate']) ? round(((float)$m['auctionInsightSearchPositionAboveRate']) * 100, 1) : null,
+                                'top_of_page_rate' => isset($m['auctionInsightSearchTopImpressionPercentage']) ? round(((float)$m['auctionInsightSearchTopImpressionPercentage']) * 100, 1) : null,
+                                'abs_top_of_page_rate' => isset($m['auctionInsightSearchAbsoluteTopImpressionPercentage']) ? round(((float)$m['auctionInsightSearchAbsoluteTopImpressionPercentage']) * 100, 1) : null,
+                                'outranking_share' => isset($m['auctionInsightSearchOutrankingShare']) ? round(((float)$m['auctionInsightSearchOutrankingShare']) * 100, 1) : null,
+                            ];
+                        }
+                    }
+                } else {
+                    Log::warning("Google Ads Auction Insights API Response [{$customerId}] Status: " . $auctionResponse->status(), (array)($auctionResponse->json() ?? ['body' => $auctionResponse->body()]));
+                }
+            } catch (\Exception $e) {
+                Log::error("Google Ads Auction Insights Exception [{$customerId}]: " . $e->getMessage());
+            }
+
             return [
                 'account_name' => $accountName,
                 'summary' => [
@@ -272,6 +313,7 @@ class SyncGoogleAdsMetrics extends Command
                 'top_campaigns' => array_slice($campaigns, 0, 5),
                 'daily_campaigns' => array_values($dailyCampaigns),
                 'daily_keywords' => $dailyKeywords,
+                'auction_insights' => $auctionInsights,
                 'raw' => $data
             ];
         }

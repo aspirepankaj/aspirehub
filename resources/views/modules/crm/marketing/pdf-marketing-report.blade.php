@@ -2911,6 +2911,86 @@
                 </td>
             </tr>
         </table>
+
+        {{-- Auction Insights (Google Ads Competitive Intelligence) --}}
+        @php
+            $pdfAuctionInsights = $gSet['data']['auction_insights'] ?? [];
+        @endphp
+
+        @if(!empty($pdfAuctionInsights))
+        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-top: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+                <tr>
+                    <td style="font-size: 15px; font-weight: 800; color: #1e293b;">
+                        Auction insights
+                    </td>
+                    <td style="text-align: right; font-size: 9.5px; font-weight: 700; color: #1a73e8; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Competitive Performance
+                    </td>
+                </tr>
+            </table>
+            <table class="clean-report-table" style="font-size: 9.5px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #1a73e8;">
+                        <th style="width: 30%;">Display URL domain</th>
+                        <th style="text-align: right; width: 12%;">Impr. share</th>
+                        <th style="text-align: right; width: 11%;">Overlap rate</th>
+                        <th style="text-align: right; width: 12%;">Position above</th>
+                        <th style="text-align: right; width: 11%;">Top of page</th>
+                        <th style="text-align: right; width: 12%;">Abs. Top page</th>
+                        <th style="text-align: right; width: 12%;">Outranking</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($pdfAuctionInsights as $row)
+                        <tr @if(!empty($row['is_you'])) style="background-color: #f0f7ff; font-weight: 700;" @endif>
+                            <td style="color: {{ !empty($row['is_you']) ? '#1a73e8' : '#334155' }};">
+                                @if(!empty($row['is_you']))
+                                    <span style="background-color: #1a73e8; color: #ffffff; font-size: 7.5px; padding: 1px 4px; border-radius: 3px; font-weight: 800; margin-right: 4px;">YOU</span>
+                                @endif
+                                {{ $row['display_domain'] ?? $row['domain'] ?? '' }}
+                            </td>
+                            <td style="text-align: right; color: #1a73e8; font-weight: 700;">{{ $row['impression_share'] }}</td>
+                            <td style="text-align: right;">{{ $row['overlap_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['position_above_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['top_of_page_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['abs_top_of_page_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['outranking_share'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+                        <th style="width: 30%;">Display URL domain</th>
+                        <th style="text-align: right; width: 12%;">Impr. share</th>
+                        <th style="text-align: right; width: 11%;">Overlap rate</th>
+                        <th style="text-align: right; width: 12%;">Position above</th>
+                        <th style="text-align: right; width: 11%;">Top of page</th>
+                        <th style="text-align: right; width: 12%;">Abs. Top page</th>
+                        <th style="text-align: right; width: 12%;">Outranking</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($pdfAuctionInsights as $row)
+                        <tr @if(!empty($row['is_you'])) style="background-color: #f0f7ff; font-weight: 700;" @endif>
+                            <td style="color: {{ !empty($row['is_you']) ? '#1a73e8' : '#334155' }};">
+                                @if(!empty($row['is_you']))
+                                    <span style="background-color: #1a73e8; color: #ffffff; font-size: 7.5px; padding: 1px 4px; border-radius: 3px; font-weight: 800; margin-right: 4px;">YOU</span>
+                                @endif
+                                {{ $row['display_domain'] }}
+                            </td>
+                            <td style="text-align: right; color: #1a73e8; font-weight: 700;">{{ $row['impression_share'] }}</td>
+                            <td style="text-align: right;">{{ $row['overlap_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['position_above_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['top_of_page_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['abs_top_of_page_rate'] }}</td>
+                            <td style="text-align: right;">{{ $row['outranking_share'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 
     {{-- Footer --}}

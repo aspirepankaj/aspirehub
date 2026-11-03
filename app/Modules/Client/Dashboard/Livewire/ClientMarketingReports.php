@@ -22,7 +22,7 @@ class ClientMarketingReports extends Component
     public ?int $selectedWebsiteId = null;
     public ?int $websiteId = null;
 
-    public string $activeReportIntegrationId = 'overview';
+    public ?string $activeReportIntegrationId = 'ga4';
     public ?string $activeReportPropertyId = null;
     
     // Loaded reports (protected so Livewire does NOT serialize 500KB+ JSON state across requests)
@@ -35,6 +35,7 @@ class ClientMarketingReports extends Component
     protected array $gbpData = [];
     protected array $gadsData = [];
     protected array $facebookData = [];
+    protected array $metaAdsData = [];
     protected array $linkedinData = [];
     
     // Comparison reports
@@ -45,6 +46,7 @@ class ClientMarketingReports extends Component
     protected array $compareGbpData = [];
     protected array $compareGadsData = [];
     protected array $compareFacebookData = [];
+    protected array $compareMetaAdsData = [];
     
     // Dropdown list holders (protected to avoid bloating Livewire snapshot state)
     protected $websites = [];
@@ -111,10 +113,10 @@ class ClientMarketingReports extends Component
             
             $tab = request()->query('tab');
             // When embedded in admin/staff detail page, '?tab=marketing' is the parent page tab, not the integration report tab!
-            if ($tab && $tab !== 'marketing') {
+            if ($tab && $tab !== 'marketing' && $tab !== 'overview') {
                 $this->activeReportIntegrationId = $tab;
             } else {
-                $this->activeReportIntegrationId = 'overview';
+                $this->activeReportIntegrationId = null; // Will pick the first alphabetical connected integration
             }
 
             $this->loadIntegrationsAndMonths();
@@ -174,7 +176,7 @@ class ClientMarketingReports extends Component
             return;
         }
 
-        $this->integrations = WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
+        $integrationsCollection = WebsiteIntegration::where('website_id', $this->selectedWebsiteId)
             ->where('status', 'connected')
             ->get()
             ->filter(function ($item) {
@@ -191,15 +193,61 @@ class ClientMarketingReports extends Component
             ->keyBy('integration_type')
             ->toArray();
 
+        // If Facebook/Meta is connected, automatically make Meta Ads available
+        if (isset($integrationsCollection['facebook'])) {
+            $fbInt = $integrationsCollection['facebook'];
+            $integrationsCollection['meta_ads'] = [
+                'id' => $fbInt['id'] ?? null,
+                'website_id' => $this->selectedWebsiteId,
+                'integration_type' => 'meta_ads',
+                'status' => 'connected',
+                'api_credentials' => $fbInt['api_credentials'] ?? [],
+                'auth_credentials' => $fbInt['auth_credentials'] ?? [],
+                'account_identifier' => 'Meta Marketing API',
+            ];
+        }
+
+        $this->integrations = $integrationsCollection;
+
+        // Custom Alphabetical Order by visible Label (A to Z):
+        // 1. Google Ads (G)
+        // 2. Google Analytics 4 (G)
+        // 3. Google Business Profile (G)
+        // 4. Keyword.com (K)
+        // 5. LinkedIn (L)
+        // 6. Meta (M)
+        // 7. Meta Ads (M)
+        // 8. Search Console (S)
+        // 9. Tag Manager (T)
+        // 10. YouTube (Y)
+        $alphabeticalOrder = ['gads', 'ga4', 'gbp', 'keyword', 'linkedin', 'facebook', 'meta_ads', 'gsc', 'gtm', 'youtube'];
+        
+        $orderedIntegrations = [];
+        foreach ($alphabeticalOrder as $key) {
+            if (isset($this->integrations[$key])) {
+                $orderedIntegrations[$key] = $this->integrations[$key];
+            }
+        }
+        // Include any remaining integrations that weren't in the list
+        foreach ($this->integrations as $key => $val) {
+            if (!isset($orderedIntegrations[$key])) {
+                $orderedIntegrations[$key] = $val;
+            }
+        }
+        $this->integrations = $orderedIntegrations;
+
         $requestedTab = request()->query('tab');
-        if ($requestedTab === 'marketing') {
+        if ($requestedTab === 'marketing' || $requestedTab === 'overview') {
             $requestedTab = null;
         }
         $requestedTab = $requestedTab ?: $this->activeReportIntegrationId;
-        if ($requestedTab && ($requestedTab === 'overview' || isset($this->integrations[$requestedTab]) || in_array($requestedTab, ['ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'linkedin', 'gtm']))) {
+        if ($requestedTab && isset($this->integrations[$requestedTab])) {
             $this->activeReportIntegrationId = $requestedTab;
+        } elseif (!empty($this->integrations)) {
+            // Default to first connected integration in alphabetical order
+            $this->activeReportIntegrationId = array_key_first($this->integrations);
         } else {
-            $this->activeReportIntegrationId = 'overview';
+            $this->activeReportIntegrationId = 'ga4';
         }
 
         $this->updateActivePropertyId();
@@ -217,6 +265,7 @@ class ClientMarketingReports extends Component
         $this->gbpData = [];
         $this->gadsData = [];
         $this->facebookData = [];
+        $this->metaAdsData = [];
         $this->linkedinData = [];
 
         if (!$this->selectedWebsiteId) {
@@ -272,6 +321,9 @@ class ClientMarketingReports extends Component
                 if (in_array('facebook', $connected)) {
                     $this->facebookData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
                 }
+                if (in_array('meta_ads', $connected)) {
+                    $this->metaAdsData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'meta_ads', $this->dateFrom, $this->dateTo);
+                }
                 if (in_array('linkedin', $connected)) {
                     $this->linkedinData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'linkedin', $this->dateFrom, $this->dateTo);
                 }
@@ -290,6 +342,7 @@ class ClientMarketingReports extends Component
                 $this->gbpData = [];
                 $this->gadsData = [];
                 $this->facebookData = [];
+                $this->metaAdsData = [];
                 $this->linkedinData = [];
                 $this->gtmData = [];
 
@@ -310,6 +363,7 @@ class ClientMarketingReports extends Component
                 elseif ($tab === 'gbp') $this->gbpData = $activeData;
                 elseif ($tab === 'gads') $this->gadsData = $activeData;
                 elseif ($tab === 'facebook') $this->facebookData = $activeData;
+                elseif ($tab === 'meta_ads') $this->metaAdsData = $activeData;
                 elseif ($tab === 'linkedin') $this->linkedinData = $activeData;
                 elseif ($tab === 'gtm') $this->gtmData = $activeData;
             }
@@ -478,7 +532,7 @@ class ClientMarketingReports extends Component
         }
 
         // If data hasn't been loaded in this request lifecycle, load it
-        if (empty($this->activeReportData) && empty($this->ga4Data) && empty($this->facebookData) && empty($this->linkedinData) && empty($this->gscData) && empty($this->youtubeData) && empty($this->keywordData) && empty($this->gbpData) && empty($this->gadsData)) {
+        if (empty($this->activeReportData) && empty($this->ga4Data) && empty($this->facebookData) && empty($this->metaAdsData) && empty($this->linkedinData) && empty($this->gscData) && empty($this->youtubeData) && empty($this->keywordData) && empty($this->gbpData) && empty($this->gadsData)) {
             $this->loadReportData();
         }
 
@@ -510,6 +564,7 @@ class ClientMarketingReports extends Component
             'gbpData' => $this->gbpData,
             'gadsData' => $this->gadsData,
             'facebookData' => $this->facebookData,
+            'metaAdsData' => $this->metaAdsData,
             'linkedinData' => $this->linkedinData,
         ])->layoutData(['title' => 'Marketing Reports']);
     }

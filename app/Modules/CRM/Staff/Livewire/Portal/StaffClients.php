@@ -2509,7 +2509,7 @@ class StaffClients extends Component
                     'views' => 173,
                     'viewers' => 95,
                     'picture' => 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7251849102837190/",
                 ],
                 [
                     'id' => 'urn:li:share:7247492019482711',
@@ -2527,7 +2527,7 @@ class StaffClients extends Component
                     'views' => 216,
                     'viewers' => 107,
                     'picture' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7247492019482711/",
                 ],
                 [
                     'id' => 'urn:li:share:7242401827491029',
@@ -2545,7 +2545,7 @@ class StaffClients extends Component
                     'views' => 592,
                     'viewers' => 312,
                     'picture' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7242401827491029/",
                 ],
                 [
                     'id' => 'urn:li:share:7238719201847102',
@@ -2563,7 +2563,7 @@ class StaffClients extends Component
                     'views' => 178,
                     'viewers' => 101,
                     'picture' => 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7238719201847102/",
                 ],
                 [
                     'id' => 'urn:li:share:7228830192847103',
@@ -2581,7 +2581,7 @@ class StaffClients extends Component
                     'views' => 461,
                     'viewers' => 255,
                     'picture' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7228830192847103/",
                 ],
                 [
                     'id' => 'urn:li:share:7221948102938471',
@@ -2599,7 +2599,7 @@ class StaffClients extends Component
                     'views' => 270,
                     'viewers' => 126,
                     'picture' => 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7221948102938471/",
                 ],
                 [
                     'id' => 'urn:li:share:7221294810293842',
@@ -2617,7 +2617,7 @@ class StaffClients extends Component
                     'views' => 199,
                     'viewers' => 102,
                     'picture' => 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=300&auto=format&fit=crop&q=60',
-                    'url' => "https://www.linkedin.com/company/{$orgId}/posts",
+                    'url' => "https://www.linkedin.com/feed/update/urn:li:share:7221294810293842/",
                 ],
             ],
             'raw' => [
