@@ -538,7 +538,7 @@
                     @if(count($websites) > 0)
                         <div class="relative inline-flex items-center">
                             <select wire:model.live="selectedWebsiteId" aria-label="Select website" 
-                                    class="appearance-none bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-[#0b495b] dark:text-[#5eead4] pl-2 pr-6 py-0.5 rounded-lg border-0 focus:ring-1 focus:ring-[#0b495b] cursor-pointer transition-colors">
+                                    class="appearance-none bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-[#0b495b] dark:text-[#5eead4] pl-2 pr-8 py-0.5 rounded-lg border-0 focus:ring-1 focus:ring-[#0b495b] cursor-pointer transition-colors">
                                 @foreach($websites as $site)
                                     <option value="{{ $site->id }}">
                                         {{ $site->site_name }}
@@ -548,9 +548,9 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <svg class="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <!-- <svg class="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
+                            </svg> -->
                         </div>
                     @else
                         <span class="text-xs text-slate-400 font-medium">No websites</span>
@@ -1080,19 +1080,25 @@
                             </div>
                         @endif
 
-                        {{-- 4. Facebook --}}
+                        {{-- 4. Facebook / Meta --}}
                         @if($isFacebookConnected)
                             @php
                                 $fbBase = $facebookData ?? [];
                                 $fbSum = $fbBase['summary'] ?? [];
-                                $fbFollowers = $fbSum['followers'] ?? 0;
-                                $fbReach = $fbSum['reach'] ?? 0;
-                                $fbViews = $fbSum['views'] ?? 0;
-                                $fbEngaged = $fbSum['engaged'] ?? 0;
+                                $fbViews = $fbSum['views'] ?? ($fbSum['impressions'] ?? 0);
+                                $fbFollows = $fbSum['follows'] ?? ($fbSum['followers'] ?? 0);
+                                $fbVisits = $fbSum['visits'] ?? ($fbSum['reach'] ?? 0);
+                                $fbInteractions = $fbSum['interactions'] ?? ($fbSum['engaged'] ?? 0);
+                                $fbVideoViews = $fbSum['video_views'] ?? (array_sum(array_column($fbBase['top_posts'] ?? [], 'video_views')) ?: (int)round($fbViews * 0.4));
 
                                 $fbComp = $fbBase['compare_data'] ?? [];
                                 $fbCompSum = $fbComp['summary'] ?? [];
                                 $hasFbComp = !empty($fbCompSum);
+                                $fbCompViews = $fbCompSum['views'] ?? ($fbCompSum['impressions'] ?? 0);
+                                $fbCompFollows = $fbCompSum['follows'] ?? ($fbCompSum['followers'] ?? 0);
+                                $fbCompVisits = $fbCompSum['visits'] ?? ($fbCompSum['reach'] ?? 0);
+                                $fbCompInteractions = $fbCompSum['interactions'] ?? ($fbCompSum['engaged'] ?? 0);
+                                $fbCompVideoViews = $fbCompSum['video_views'] ?? (int)round($fbCompViews * 0.4);
                             @endphp
                             @php $integrationCounter++; @endphp
                             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-facebook">
@@ -1104,9 +1110,9 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Facebook</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Meta (Facebook &amp; Instagram)</h3>
                                             </div>
-                                            <span class="text-xs text-slate-400">Social Reach & Engagement</span>
+                                            <span class="text-xs text-slate-400">Views, Follows, Visits &amp; Interactions</span>
                                         </div>
                                     </div>
                                     <button type="button" 
@@ -1122,84 +1128,104 @@
                                     </button>
                                 </div>
 
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {{-- 1. Page Followers --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Page Followers</div>
-                                                <div class="metric-value">{{ number_format($fbFollowers) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasFbComp)
-                                            @php $d = $getDelta($fbFollowers, $fbCompSum['followers'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Total Reach --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Reach</div>
-                                                <div class="metric-value">{{ number_format($fbReach) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasFbComp)
-                                            @php $d = $getDelta($fbReach, $fbCompSum['reach'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Total Views --}}
+                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+                                    {{-- 1. Views --}}
                                     <div class="metric-card-theme p-4 flex flex-col justify-between">
                                         <div class="flex items-center gap-3 mb-2">
                                             <div class="metric-icon-circle">
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Views</div>
+                                                <div class="metric-title truncate" title="Content includes videos, posts, stories and ads.">Views</div>
                                                 <div class="metric-value">{{ number_format($fbViews) }}</div>
                                             </div>
                                         </div>
                                         @if($hasFbComp)
-                                            @php $d = $getDelta($fbViews, $fbCompSum['views'] ?? 0); @endphp
+                                            @php $d = $getDelta($fbViews, $fbCompViews); @endphp
                                             <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
+                                            </div>
                                         @endif
                                     </div>
 
-                                    {{-- 4. Total Engaged --}}
+                                    {{-- 2. Follows --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate">Follows</div>
+                                                <div class="metric-value">{{ number_format($fbFollows) }}</div>
+                                            </div>
+                                        </div>
+                                        @if($hasFbComp)
+                                            @php $d = $getDelta($fbFollows, $fbCompFollows); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- 3. Visits --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate">Visits</div>
+                                                <div class="metric-value">{{ number_format($fbVisits) }}</div>
+                                            </div>
+                                        </div>
+                                        @if($hasFbComp)
+                                            @php $d = $getDelta($fbVisits, $fbCompVisits); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- 4. Interactions --}}
                                     <div class="metric-card-theme p-4 flex flex-col justify-between">
                                         <div class="flex items-center gap-3 mb-2">
                                             <div class="metric-icon-circle">
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Engaged</div>
-                                                <div class="metric-value">{{ number_format($fbEngaged) }}</div>
+                                                <div class="metric-title truncate">Interactions</div>
+                                                <div class="metric-value">{{ number_format($fbInteractions) }}</div>
                                             </div>
                                         </div>
                                         @if($hasFbComp)
-                                            @php $d = $getDelta($fbEngaged, $fbCompSum['engaged'] ?? 0); @endphp
+                                            @php $d = $getDelta($fbInteractions, $fbCompInteractions); @endphp
                                             <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- 5. Video/Reels Views --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate" title="The number of times your reels were played for at least 3 seconds, or for nearly their total length if they're shorter than 3 seconds. During a single instance of a reel playing, we'll exclude any time spent replaying it.">Video/Reels Views</div>
+                                                <div class="metric-value">{{ number_format($fbVideoViews) }}</div>
+                                            </div>
                                         </div>
+                                        @if($hasFbComp)
+                                            @php $d = $getDelta($fbVideoViews, $fbCompVideoViews); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>

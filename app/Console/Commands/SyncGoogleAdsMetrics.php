@@ -301,6 +301,124 @@ class SyncGoogleAdsMetrics extends Command
                 Log::error("Google Ads Auction Insights Exception [{$customerId}]: " . $e->getMessage());
             }
 
+            // Fetch Conversion Actions (All enabled goals & performance)
+            $conversionActions = [];
+            $dailyConversions = [];
+            $campaignConversions = [];
+            try {
+                $conversionActionsQuery = "SELECT conversion_action.id, conversion_action.name, conversion_action.type, conversion_action.category, conversion_action.status, conversion_action.primary_for_goal, conversion_action.include_in_conversions_metric, conversion_action.click_through_lookback_window_days, conversion_action.counting_type, metrics.all_conversions, metrics.all_conversions_value FROM conversion_action WHERE conversion_action.status = 'ENABLED'";
+
+                $convResponse = $http
+                    ->withHeaders([
+                        'developer-token' => $developerToken,
+                        'login-customer-id' => $loginCustomerId
+                    ])
+                    ->post($url, [
+                        'query' => $conversionActionsQuery
+                    ]);
+
+                if ($convResponse->successful()) {
+                    $cData = $convResponse->json();
+                    if (isset($cData['results'])) {
+                        foreach ($cData['results'] as $row) {
+                            $ca = $row['conversionAction'] ?? [];
+                            $m = $row['metrics'] ?? [];
+                            $actName = $ca['name'] ?? 'Unknown Action';
+                            $actType = $ca['type'] ?? 'WEBPAGE';
+                            $actCat = $ca['category'] ?? 'DEFAULT';
+                            $lookback = (int)($ca['clickThroughLookbackWindowDays'] ?? 90);
+                            $isPrimary = !empty($ca['primaryForGoal']);
+                            $included = !empty($ca['includeInConversionsMetric']);
+                            $countingType = ($ca['countingType'] ?? '') === 'ONE_PER_CLICK' ? 'One' : 'Every';
+
+                            $source = 'Website';
+                            if (str_contains($actType, 'CALL') || str_contains($actType, 'CLICK_TO_CALL')) {
+                                $source = 'Call from Ads';
+                            } elseif (str_contains($actType, 'GOOGLE_ANALYTICS') || str_contains($actType, 'ANALYTICS')) {
+                                $source = 'Website (Google Analytics (GA4))';
+                            } elseif (str_contains($actType, 'APP') || str_contains($actType, 'PLAY')) {
+                                $source = 'Mobile App (Google Play)';
+                            }
+
+                            $catNameFormatted = ucwords(strtolower(str_replace('_', ' ', $actCat))) . ' (Account-default goal)';
+                            if ($actCat === 'PURCHASE') $catNameFormatted = 'Purchases (Account-default goal)';
+                            elseif ($actCat === 'ADD_TO_CART') $catNameFormatted = 'Add to cart (Account-default goal)';
+                            elseif ($actCat === 'SUBMIT_LEAD_FORM') $catNameFormatted = 'Submit lead forms (Account-default goal)';
+                            elseif ($actCat === 'PHONE_CALL_LEAD') $catNameFormatted = 'Phone call leads (Account-default goal)';
+                            elseif ($actCat === 'CONTACT') $catNameFormatted = 'Contacts (Account-default goal)';
+                            elseif ($actCat === 'PAGE_VIEW') $catNameFormatted = 'Page views (Account-default goal)';
+                            elseif ($actCat === 'DOWNLOAD') $catNameFormatted = 'Downloads (Account-default goal)';
+
+                            $allConv = (float)($m['allConversions'] ?? 0);
+                            $allConvVal = (float)($m['allConversionsValue'] ?? 0);
+
+                            $trackingStatus = $allConv > 0 ? 'Active' : 'Awaiting conversions';
+                            $trackingIcon = $allConv > 0 ? 'check' : 'hourglass';
+                            if (str_contains(strtolower($actName), 'cart') || str_contains(strtolower($actName), 'submission')) {
+                                if ($allConv == 0) {
+                                    $trackingStatus = 'Misconfigured';
+                                    $trackingIcon = 'alert';
+                                }
+                            }
+
+                            $conversionActions[$catNameFormatted][] = [
+                                'id' => $ca['id'] ?? null,
+                                'name' => $actName,
+                                'source' => $source,
+                                'tracking_status' => $trackingStatus,
+                                'tracking_icon' => $trackingIcon,
+                                'optimization' => $isPrimary ? 'Primary' : 'Secondary',
+                                'count' => $countingType,
+                                'window' => "{$lookback} days",
+                                'included' => $included ? 'Yes' : 'No',
+                                'all_conv' => $allConv,
+                                'conv_val' => $allConvVal
+                            ];
+                        }
+                    }
+                }
+
+                // Also query daily conversions segmented by conversion action & campaign
+                $dailyConvQuery = "SELECT segments.date, campaign.name, segments.conversion_action_name, metrics.conversions FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}' AND metrics.conversions > 0";
+                $dConvResponse = $http
+                    ->withHeaders([
+                        'developer-token' => $developerToken,
+                        'login-customer-id' => $loginCustomerId
+                    ])
+                    ->post($url, [
+                        'query' => $dailyConvQuery
+                    ]);
+
+                if ($dConvResponse->successful()) {
+                    $dcJson = $dConvResponse->json();
+                    if (isset($dcJson['results'])) {
+                        foreach ($dcJson['results'] as $row) {
+                            $d = $row['segments']['date'] ?? null;
+                            $cName = $row['campaign']['name'] ?? 'Unknown';
+                            $act = $row['segments']['conversionActionName'] ?? 'Conversion';
+                            $cnt = (float)($row['metrics']['conversions'] ?? 0);
+                            if ($d && $cnt > 0) {
+                                $dailyConversions[] = [
+                                    'date' => $d,
+                                    'campaign_name' => $cName,
+                                    'action_name' => $act,
+                                    'conversions' => $cnt
+                                ];
+                                if (!isset($campaignConversions[$cName])) {
+                                    $campaignConversions[$cName] = [];
+                                }
+                                if (!isset($campaignConversions[$cName][$act])) {
+                                    $campaignConversions[$cName][$act] = 0;
+                                }
+                                $campaignConversions[$cName][$act] += $cnt;
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Google Ads Conversion Actions Exception [{$customerId}]: " . $e->getMessage());
+            }
+
             return [
                 'account_name' => $accountName,
                 'summary' => [
@@ -314,6 +432,9 @@ class SyncGoogleAdsMetrics extends Command
                 'daily_campaigns' => array_values($dailyCampaigns),
                 'daily_keywords' => $dailyKeywords,
                 'auction_insights' => $auctionInsights,
+                'conversion_actions' => $conversionActions,
+                'daily_conversions' => $dailyConversions,
+                'campaign_conversions' => $campaignConversions,
                 'raw' => $data
             ];
         }
@@ -418,6 +539,27 @@ class SyncGoogleAdsMetrics extends Command
                         return false;
                     }
                 }));
+            }
+
+            if (isset($metrics['daily_conversions'])) {
+                $mReportData['daily_conversions'] = array_values(array_filter($metrics['daily_conversions'], function($dcv) use ($y, $m) {
+                    $d = $dcv['date'] ?? '';
+                    if (!$d) return false;
+                    try {
+                        $cDate = \Carbon\Carbon::parse($d);
+                        return $cDate->format('Y') == $y && Str::lower($cDate->format('F')) == $m;
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                }));
+            }
+
+            if (isset($metrics['conversion_actions'])) {
+                $mReportData['conversion_actions'] = $metrics['conversion_actions'];
+            }
+
+            if (isset($metrics['campaign_conversions'])) {
+                $mReportData['campaign_conversions'] = $metrics['campaign_conversions'];
             }
 
             file_put_contents($filePath, json_encode($mReportData, JSON_PRETTY_PRINT));

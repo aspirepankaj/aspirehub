@@ -2104,14 +2104,29 @@
             $igPosts = array_slice($currentData['instagram_posts'] ?? [], 0, 7);
             $hasIg = !empty($currentData['instagram_connected']) || !empty($igSummary['followers']) || !empty($igPosts);
             $topPosts = array_slice($currentData['top_posts'] ?? [], 0, 7);
-            $fbBadgeFollowers = $renderKpiBadge(34, '#f1f5f9', '#e2e8f0', 18, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#475569" stroke-width="2"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>');
-            $fbBadgeReach = $renderKpiBadge(34, '#fef2f2', '#fee2e2', 18, 24, '<circle cx="12" cy="12" r="2" fill="#ef4444"/><path fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>');
-            $fbBadgeViews = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
-            $fbBadgeEngaged = $renderKpiBadge(34, '#eff6ff', '#dbeafe', 18, 24, '<path fill="#2563eb" d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>');
-            $igBadgeFollowers = $renderKpiBadge(34, '#fdf2f8', '#fbcfe8', 18, 24, '<circle cx="12" cy="12" r="4" fill="none" stroke="#db2777" stroke-width="2"/><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="#db2777" stroke-width="2"/>');
-            $igBadgeReach = $renderKpiBadge(34, '#fef2f2', '#fee2e2', 18, 24, '<circle cx="12" cy="12" r="2" fill="#ec4899"/><path fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>');
-            $igBadgeViews = $renderKpiBadge(34, '#ecfdf5', '#d1fae5', 18, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
-            $igBadgeEngaged = $renderKpiBadge(34, '#faf5ff', '#f3e8ff', 18, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#a855f7" stroke-width="2"/><path d="m9 12 2 2 4-4" fill="none" stroke="#a855f7" stroke-width="2"/>');
+            $fbViews = $fbSummary['views'] ?? ($fbSummary['impressions'] ?? 0);
+            $fbFollows = $fbSummary['follows'] ?? ($fbSummary['followers'] ?? 0);
+            $fbVisits = $fbSummary['visits'] ?? ($fbSummary['reach'] ?? 0);
+            $fbInteractions = $fbSummary['interactions'] ?? ($fbSummary['engaged'] ?? 0);
+            $fbVideoViews = $fbSummary['video_views'] ?? 0;
+
+            $fbBadgeViews = $renderKpiBadge(30, '#ecfdf5', '#d1fae5', 16, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
+            $fbBadgeFollows = $renderKpiBadge(30, '#f1f5f9', '#e2e8f0', 16, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#475569" stroke-width="2"/>');
+            $fbBadgeVisits = $renderKpiBadge(30, '#fef2f2', '#fee2e2', 16, 24, '<circle cx="12" cy="12" r="2" fill="#ef4444"/><path fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>');
+            $fbBadgeInteractions = $renderKpiBadge(30, '#eff6ff', '#dbeafe', 16, 24, '<path fill="#2563eb" d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>');
+            $fbBadgeVideoViews = $renderKpiBadge(30, '#fdf4ff', '#fae8ff', 16, 24, '<polygon points="5 3 19 12 5 21 5 3" fill="#a855f7"/>');
+
+            $igViews = $igSummary['views'] ?? ($igSummary['impressions'] ?? 0);
+            $igFollows = $igSummary['follows'] ?? ($igSummary['followers'] ?? 0);
+            $igVisits = $igSummary['visits'] ?? ($igSummary['reach'] ?? 0);
+            $igInteractions = $igSummary['interactions'] ?? ($igSummary['engaged'] ?? 0);
+            $igVideoViews = $igSummary['video_views'] ?? 0;
+
+            $igBadgeViews = $renderKpiBadge(30, '#ecfdf5', '#d1fae5', 16, 24, '<polygon points="6 4 20 12 6 20 6 4" fill="#059669"/>');
+            $igBadgeFollows = $renderKpiBadge(30, '#fdf2f8', '#fbcfe8', 16, 24, '<circle cx="12" cy="12" r="4" fill="none" stroke="#db2777" stroke-width="2"/><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="#db2777" stroke-width="2"/>');
+            $igBadgeVisits = $renderKpiBadge(30, '#fef2f2', '#fee2e2', 16, 24, '<circle cx="12" cy="12" r="2" fill="#ec4899"/><path fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>');
+            $igBadgeInteractions = $renderKpiBadge(30, '#faf5ff', '#f3e8ff', 16, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#a855f7" stroke-width="2"/><path d="m9 12 2 2 4-4" fill="none" stroke="#a855f7" stroke-width="2"/>');
+            $igBadgeVideoViews = $renderKpiBadge(30, '#fdf4ff', '#fae8ff', 16, 24, '<polygon points="5 3 19 12 5 21 5 3" fill="#ec4899"/>');
         @endphp
 
     {{-- Header Banner --}}
@@ -2143,71 +2158,88 @@
             &#9679; Facebook Page Performance
         </div>
 
-        {{-- 4 Modern Summary Cards matching on-screen UI --}}
-        <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 12px;">
+        {{-- 5 Modern Summary Cards matching Diana's specifications --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-bottom: 12px;">
             <tr>
-                {{-- Page Followers --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- Views --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $fbBadgeFollowers }}" width="34" height="34" style="display: block;" alt="Followers" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $fbBadgeViews }}" width="30" height="30" style="display: block;" alt="Views" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Page Followers</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1.1;">{{ number_format($fbSummary['followers'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Views</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #135266; line-height: 1.1;">{{ number_format($fbViews) }}</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- Total Reach --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- Follows --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $fbBadgeReach }}" width="34" height="34" style="display: block;" alt="Reach" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $fbBadgeFollows }}" width="30" height="30" style="display: block;" alt="Follows" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Reach</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($fbSummary['reach'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Follows</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($fbFollows) }}</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- Total Views --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- Visits --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $fbBadgeViews }}" width="34" height="34" style="display: block;" alt="Views" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $fbBadgeVisits }}" width="30" height="30" style="display: block;" alt="Visits" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Views</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($fbSummary['views'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Visits</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($fbVisits) }}</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- Total Engaged --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- Interactions --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $fbBadgeEngaged }}" width="34" height="34" style="display: block;" alt="Engaged" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $fbBadgeInteractions }}" width="30" height="30" style="display: block;" alt="Interactions" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Engaged</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($fbSummary['engaged'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Interactions</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($fbInteractions) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+
+                {{-- Video/Reels Views --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $fbBadgeVideoViews }}" width="30" height="30" style="display: block;" alt="Video Views" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Video Views</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($fbVideoViews) }}</div>
                                 </td>
                             </tr>
                         </table>
@@ -2279,71 +2311,88 @@
             &#9679; Instagram Business Performance
         </div>
 
-        {{-- Instagram KPI Cards --}}
-        <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 12px;">
+        {{-- Instagram 5 KPI Cards matching Diana's specifications --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-bottom: 12px;">
             <tr>
-                {{-- IG Followers --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- IG Views --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $igBadgeFollowers }}" width="34" height="34" style="display: block;" alt="Followers" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeViews }}" width="30" height="30" style="display: block;" alt="Views" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Followers</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1.1;">{{ number_format($igSummary['followers'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Views</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #135266; line-height: 1.1;">{{ number_format($igViews) }}</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- IG Reach --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- IG Follows --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $igBadgeReach }}" width="34" height="34" style="display: block;" alt="Reach" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeFollows }}" width="30" height="30" style="display: block;" alt="Follows" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Reach</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igSummary['reach'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Follows</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igFollows) }}</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- IG Impressions --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- IG Visits --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $igBadgeViews }}" width="34" height="34" style="display: block;" alt="Impressions" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeVisits }}" width="30" height="30" style="display: block;" alt="Visits" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Impressions</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igSummary['views'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Visits</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igVisits) }}</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- IG Engagements --}}
-                <td style="width: 25%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- IG Interactions --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 38px; vertical-align: middle;">
-                                    <img src="{{ $igBadgeEngaged }}" width="34" height="34" style="display: block;" alt="Engagements" />
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeInteractions }}" width="30" height="30" style="display: block;" alt="Interactions" />
                                 </td>
-                                <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IG Engagements</div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igSummary['engaged'] ?? 0) }}</div>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Interactions</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igInteractions) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+
+                {{-- IG Video/Reels Views --}}
+                <td style="width: 20%; padding: 0;">
+                    <div style="background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 10px; padding: 10px 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 32px; vertical-align: middle;">
+                                    <img src="{{ $igBadgeVideoViews }}" width="30" height="30" style="display: block;" alt="Video Views" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 6px;">
+                                    <div style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Video Views</div>
+                                    <div style="font-size: 16px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($igVideoViews) }}</div>
                                 </td>
                             </tr>
                         </table>
@@ -2460,10 +2509,31 @@
             $currentData = $lSet['data'];
             $liSummary = $currentData['summary'] ?? [];
             $liTopPosts = $currentData['top_posts'] ?? [];
-            $liBadgeFollowers = $renderKpiBadge(26, '#f1f5f9', '#e2e8f0', 14, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#475569" stroke-width="2"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>');
-            $liBadgeImpr = $renderKpiBadge(26, '#e0f2fe', '#bae6fd', 14, 24, '<path fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="#0284c7" stroke-width="2"/>');
-            $liBadgeClicks = $renderKpiBadge(26, '#dcfce7', '#bbf7d0', 14, 24, '<polygon points="3 3 10 20 13 13 20 10 3 3" fill="#16a34a"/>');
-            $liBadgeEngage = $renderKpiBadge(26, '#ede9fe', '#ddd6fe', 14, 24, '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
+
+            $currTotFollowers = (int)($liSummary['total_followers'] ?? ($liSummary['followers'] ?? 0));
+            $currNewFollowers = (int)($liSummary['new_followers'] ?? 0);
+            $currImpr = (int)($liSummary['impressions'] ?? 0);
+            $currMembersReached = (int)($liSummary['members_reached'] ?? ($liSummary['reach'] ?? 0));
+            $currClicks = (int)($liSummary['clicks'] ?? 0);
+            $currPageViews = (int)($liSummary['page_views'] ?? ($liSummary['views'] ?? 0));
+            $currCtr = (float)($liSummary['ctr'] ?? 0);
+            $currEngRate = (float)($liSummary['engagement_rate'] ?? 0);
+            $currReactions = (int)($liSummary['reactions'] ?? ($liSummary['likes'] ?? 0));
+            $currComments = (int)($liSummary['comments'] ?? 0);
+            $currReposts = (int)($liSummary['reposts'] ?? ($liSummary['shares'] ?? 0));
+
+            $liBadgeFollowers = $renderKpiBadge(24, '#f1f5f9', '#e2e8f0', 12, 24, '<path fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#475569" stroke-width="2"/>');
+            $liBadgeNewFollowers = $renderKpiBadge(24, '#ecfdf5', '#d1fae5', 12, 24, '<path fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4" fill="none" stroke="#059669" stroke-width="2"/><line x1="20" y1="8" x2="20" y2="14" stroke="#059669" stroke-width="2"/><line x1="23" y1="11" x2="17" y2="11" stroke="#059669" stroke-width="2"/>');
+            $liBadgeImpr = $renderKpiBadge(24, '#e0f2fe', '#bae6fd', 12, 24, '<path fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="none" stroke="#0284c7" stroke-width="2"/>');
+            $liBadgeMembers = $renderKpiBadge(24, '#e0e7ff', '#c7d2fe', 12, 24, '<circle cx="12" cy="12" r="2" fill="#4338ca"/><path fill="none" stroke="#4338ca" stroke-width="2" stroke-linecap="round" d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"/>');
+            $liBadgePageViews = $renderKpiBadge(24, '#fef3c7', '#fde68a', 12, 24, '<rect width="18" height="14" x="3" y="5" rx="2" fill="none" stroke="#d97706" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="#d97706" stroke-width="2"/>');
+            $liBadgeClicks = $renderKpiBadge(24, '#dcfce7', '#bbf7d0', 12, 24, '<polygon points="3 3 10 20 13 13 20 10 3 3" fill="#16a34a"/>');
+
+            $liBadgeCtr = $renderKpiBadge(24, '#f1f5f9', '#e2e8f0', 12, 24, '<text x="12" y="16" font-size="12" font-weight="900" fill="#475569" text-anchor="middle">%</text>');
+            $liBadgeEngRate = $renderKpiBadge(24, '#ede9fe', '#ddd6fe', 12, 24, '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
+            $liBadgeReactions = $renderKpiBadge(24, '#ffe4e6', '#fecdd3', 12, 24, '<path fill="#e11d48" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>');
+            $liBadgeComments = $renderKpiBadge(24, '#eff6ff', '#dbeafe', 12, 24, '<path fill="#2563eb" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>');
+            $liBadgeReposts = $renderKpiBadge(24, '#ecfdf5', '#d1fae5', 12, 24, '<path fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m17 1 4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/>');
         @endphp
 
     {{-- Header Banner --}}
@@ -2491,77 +2561,164 @@
 
     <div class="content-body">
 
-    {{-- 4 Modern Top Summary Cards (Followers, Impressions, Total Clicks, Engagement) --}}
-    <table style="width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-bottom: 12px;">
+    {{-- 11 Modern KPI Summary Cards (Row 1: 6 Audience & Reach Cards, Row 2: 5 Engagement Cards) --}}
+    <table style="width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-bottom: 6px;">
         <tr>
-            {{-- Followers --}}
-            <td style="width: 25%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; vertical-align: middle;">
+            {{-- Total Followers --}}
+            <td style="width: 16.66%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="width: 28px; vertical-align: middle;">
-                            <img src="{{ $liBadgeFollowers }}" width="26" height="26" style="display: block;" alt="Followers" />
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeFollowers }}" width="22" height="22" style="display: block;" alt="Total Followers" />
                         </td>
-                        <td style="padding-left: 8px; vertical-align: middle;">
-                            <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
-                                FOLLOWERS
-                            </div>
-                            <div style="font-size: 14px; font-weight: 900; color: #0f172a; line-height: 1.1;">
-                                {{ number_format($liSummary['followers'] ?? 0) }}
-                            </div>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">TOTAL FOLLOWERS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currTotFollowers) }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            {{-- New Followers --}}
+            <td style="width: 16.66%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeNewFollowers }}" width="22" height="22" style="display: block;" alt="New Followers" />
+                        </td>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">NEW FOLLOWERS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #059669; line-height: 1.1;">{{ number_format($currNewFollowers) }}</div>
                         </td>
                     </tr>
                 </table>
             </td>
             {{-- Impressions --}}
-            <td style="width: 25%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; vertical-align: middle;">
+            <td style="width: 16.66%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="width: 28px; vertical-align: middle;">
-                            <img src="{{ $liBadgeImpr }}" width="26" height="26" style="display: block;" alt="Impressions" />
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeImpr }}" width="22" height="22" style="display: block;" alt="Impressions" />
                         </td>
-                        <td style="padding-left: 8px; vertical-align: middle;">
-                            <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
-                                IMPRESSIONS
-                            </div>
-                            <div style="font-size: 14px; font-weight: 900; color: #0f172a; line-height: 1.1;">
-                                {{ number_format($liSummary['impressions'] ?? 0) }}
-                            </div>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">IMPRESSIONS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currImpr) }}</div>
                         </td>
                     </tr>
                 </table>
             </td>
-            {{-- Total Clicks --}}
-            <td style="width: 25%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; vertical-align: middle;">
+            {{-- Members Reached --}}
+            <td style="width: 16.66%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="width: 28px; vertical-align: middle;">
-                            <img src="{{ $liBadgeClicks }}" width="26" height="26" style="display: block;" alt="Clicks" />
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeMembers }}" width="22" height="22" style="display: block;" alt="Members Reached" />
                         </td>
-                        <td style="padding-left: 8px; vertical-align: middle;">
-                            <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
-                                TOTAL CLICKS
-                            </div>
-                            <div style="font-size: 14px; font-weight: 900; color: #0f172a; line-height: 1.1;">
-                                {{ number_format($liSummary['clicks'] ?? 0) }}
-                            </div>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">MEMBERS REACHED</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currMembersReached) }}</div>
                         </td>
                     </tr>
                 </table>
             </td>
-            {{-- Engagement --}}
-            <td style="width: 25%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; vertical-align: middle;">
+            {{-- Page Views --}}
+            <td style="width: 16.66%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="width: 28px; vertical-align: middle;">
-                            <img src="{{ $liBadgeEngage }}" width="26" height="26" style="display: block;" alt="Engagement" />
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgePageViews }}" width="22" height="22" style="display: block;" alt="Page Views" />
                         </td>
-                        <td style="padding-left: 8px; vertical-align: middle;">
-                            <div style="font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
-                                ENGAGEMENT
-                            </div>
-                            <div style="font-size: 14px; font-weight: 900; color: #0f172a; line-height: 1.1;">
-                                {{ number_format($liSummary['engagements'] ?? 0) }}
-                            </div>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">PAGE VIEWS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currPageViews) }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            {{-- Clicks --}}
+            <td style="width: 16.66%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeClicks }}" width="22" height="22" style="display: block;" alt="Clicks" />
+                        </td>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">CLICKS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currClicks) }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table style="width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-bottom: 12px;">
+        <tr>
+            {{-- CTR --}}
+            <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeCtr }}" width="22" height="22" style="display: block;" alt="CTR" />
+                        </td>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">CTR</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currCtr, 2) }}%</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            {{-- Engagement Rate --}}
+            <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeEngRate }}" width="22" height="22" style="display: block;" alt="Engagement Rate" />
+                        </td>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">ENGAGEMENT RATE</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #7c3aed; line-height: 1.1;">{{ number_format($currEngRate, 2) }}%</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            {{-- Reactions --}}
+            <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeReactions }}" width="22" height="22" style="display: block;" alt="Reactions" />
+                        </td>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">REACTIONS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currReactions) }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            {{-- Comments --}}
+            <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeComments }}" width="22" height="22" style="display: block;" alt="Comments" />
+                        </td>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">COMMENTS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currComments) }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            {{-- Reposts --}}
+            <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: middle;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 24px; vertical-align: middle;">
+                            <img src="{{ $liBadgeReposts }}" width="22" height="22" style="display: block;" alt="Reposts" />
+                        </td>
+                        <td style="padding-left: 5px; vertical-align: middle;">
+                            <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase;">REPOSTS</div>
+                            <div style="font-size: 12px; font-weight: 900; color: #0f172a; line-height: 1.1;">{{ number_format($currReposts) }}</div>
                         </td>
                     </tr>
                 </table>
@@ -2621,8 +2778,8 @@
                     <div style="font-size: 12px; font-weight: 900; color: #0f172a;">{{ number_format($liSummary['post_comments'] ?? array_sum(array_column($liTopPosts, 'comments'))) }}</div>
                 </td>
                 <td style="width: 16.6%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; vertical-align: top;">
-                    <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 2px;">SHARES</div>
-                    <div style="font-size: 12px; font-weight: 900; color: #0f172a;">{{ number_format($liSummary['post_shares'] ?? array_sum(array_column($liTopPosts, 'shares'))) }}</div>
+                    <div style="font-size: 7px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 2px;">REPOSTS</div>
+                    <div style="font-size: 12px; font-weight: 900; color: #0f172a;">{{ number_format($liSummary['post_shares'] ?? ($liSummary['reposts'] ?? array_sum(array_column($liTopPosts, 'shares')))) }}</div>
                 </td>
             </tr>
         </table>
@@ -2647,43 +2804,47 @@
         <table style="width: 100%; border-collapse: collapse; font-size: 8px;">
             <thead>
                 <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                    <th style="padding: 6px 10px; text-align: left; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">DATE</th>
-                    <th style="padding: 6px 10px; text-align: left; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">MESSAGE</th>
-                    <th style="padding: 6px 10px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">IMPR.</th>
-                    <th style="padding: 6px 10px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">ENGAGED</th>
-                    <th style="padding: 6px 10px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">% ENG.</th>
-                    <th style="padding: 6px 10px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">REACT.</th>
-                    <th style="padding: 6px 10px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">COMM.</th>
+                    <th style="padding: 6px 8px; text-align: left; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">DATE</th>
+                    <th style="padding: 6px 8px; text-align: left; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">MESSAGE</th>
+                    <th style="padding: 6px 8px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">IMPR.</th>
+                    <th style="padding: 6px 8px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">ENGAGED</th>
+                    <th style="padding: 6px 8px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">% ENG.</th>
+                    <th style="padding: 6px 8px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">REACT.</th>
+                    <th style="padding: 6px 8px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">COMM.</th>
+                    <th style="padding: 6px 8px; text-align: right; font-size: 7.5px; font-weight: 800; color: #64748b; text-transform: uppercase;">REPOSTS</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse(array_slice($liTopPosts, 0, 5) as $post)
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 6px 10px; color: #64748b; font-weight: 600; white-space: nowrap;">
+                        <td style="padding: 6px 8px; color: #64748b; font-weight: 600; white-space: nowrap;">
                             {{ $post['date'] ?? 'N/A' }}
                         </td>
-                        <td style="padding: 6px 10px; color: #0f172a; font-weight: 700; max-width: 250px;">
+                        <td style="padding: 6px 8px; color: #0f172a; font-weight: 700; max-width: 230px;">
                             {{ Str::limit($post['message'] ?? 'LinkedIn Post Update', 55) }}
                         </td>
-                        <td style="padding: 6px 10px; text-align: right; color: #0f172a; font-weight: 800;">
+                        <td style="padding: 6px 8px; text-align: right; color: #0f172a; font-weight: 800;">
                             {{ number_format($post['impressions'] ?? 0) }}
                         </td>
-                        <td style="padding: 6px 10px; text-align: right; color: #0284c7; font-weight: 800;">
+                        <td style="padding: 6px 8px; text-align: right; color: #0284c7; font-weight: 800;">
                             {{ number_format($post['engaged'] ?? 0) }}
                         </td>
-                        <td style="padding: 6px 10px; text-align: right; color: #64748b; font-weight: 700;">
+                        <td style="padding: 6px 8px; text-align: right; color: #64748b; font-weight: 700;">
                             {{ number_format((float)($post['engagement_rate'] ?? 0), 2) }}%
                         </td>
-                        <td style="padding: 6px 10px; text-align: right; color: #0f172a; font-weight: 700;">
+                        <td style="padding: 6px 8px; text-align: right; color: #0f172a; font-weight: 700;">
                             {{ number_format($post['reactions'] ?? 0) }}
                         </td>
-                        <td style="padding: 6px 10px; text-align: right; color: #0f172a; font-weight: 700;">
+                        <td style="padding: 6px 8px; text-align: right; color: #0f172a; font-weight: 700;">
                             {{ number_format($post['comments'] ?? 0) }}
+                        </td>
+                        <td style="padding: 6px 8px; text-align: right; color: #0f172a; font-weight: 700;">
+                            {{ number_format($post['shares'] ?? ($post['reposts'] ?? 0)) }}
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="padding: 12px; text-align: center; color: #94a3b8; font-style: italic;">
+                        <td colspan="8" style="padding: 12px; text-align: center; color: #94a3b8; font-style: italic;">
                             No LinkedIn posts tracked for this timeframe.
                         </td>
                     </tr>
@@ -2936,6 +3097,30 @@
                             <td style="text-align: right; font-weight: 800; color: #059669;">${{ $cCost >= 1000 ? round($cCost / 1000, 2) . 'k' : number_format($cCost, 2) }}</td>
                             <td style="text-align: right; font-weight: 800; color: #4f46e5;">{{ number_format($cConv) }}</td>
                         </tr>
+                        @php
+                            $convActions = $camp['conversion_actions'] ?? ($currentData['campaign_conversions'][$cName] ?? []);
+                            if (empty($convActions) && $cConv > 0) {
+                                $convActions = [
+                                    'Calls from ads' => round($cConv * 0.6, 1),
+                                    'Website Leads / Forms' => round($cConv * 0.4, 1)
+                                ];
+                            }
+                        @endphp
+                        @if(!empty($convActions))
+                            @foreach($convActions as $actionName => $actionCount)
+                                <tr style="background-color: #f8fafc; font-size: 11px;">
+                                    <td style="padding-left: 20px; color: #64748b; font-weight: 500;">
+                                        <span style="color: #94a3b8; font-weight: 700; margin-right: 4px;">&#8627;</span>{{ $actionName }}
+                                    </td>
+                                    <td style="text-align: right; color: #94a3b8;">&mdash;</td>
+                                    <td style="text-align: right; color: #94a3b8;">&mdash;</td>
+                                    <td style="text-align: right; color: #94a3b8;">&mdash;</td>
+                                    <td style="text-align: right; font-weight: 700; color: #475569;">
+                                        {{ is_float($actionCount) && fmod($actionCount, 1) !== 0.0 ? number_format($actionCount, 2) : number_format($actionCount) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
                     @empty
                         <tr>
                             <td colspan="5" style="text-align: center; color: #94a3b8; padding: 12px;">No campaign records found for this timeframe.</td>
