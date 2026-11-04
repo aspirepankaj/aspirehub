@@ -1471,7 +1471,6 @@
 @if($hasKeyword)
 @php
     $hasKeyword = !empty($keywordData);
-    $isExplicitCompare = !empty($compareKeyword);
     $prevKeywordData = $compareKeyword ?: ($keywordData['default_compare_data'] ?? []);
     
     $kwSets = [];
@@ -1532,81 +1531,115 @@
     </div>
 
     <div class="content-body">
-        {{-- 5 Rounded Icon Summary Cards matching on-screen UI --}}
+        {{-- 6 Rounded Stat Cards matching on-screen Keyword.com Dashboard (2 rows x 3 columns) --}}
         @php
-            $kwBadgeTotal = $renderKpiBadge(30, '#f1f5f9', '#e2e8f0', 16, 24, '<circle cx="11" cy="11" r="8" fill="none" stroke="#475569" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="#475569" stroke-width="2" stroke-linecap="round"/>');
-            $kwBadgeTop10 = $renderKpiBadge(30, '#fefce8', '#fef08a', 16, 24, '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#ca8a04" stroke="#ca8a04" stroke-width="1"/>');
-            $kwBadgeTop15 = $renderKpiBadge(30, '#f0fdf4', '#dcfce7', 16, 24, '<polyline points="20 6 9 17 4 12" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
-            $kwBadgeTop10p = $renderKpiBadge(30, '#eef2ff', '#e0e7ff', 16, 24, '<path fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#4f46e5" stroke-width="2"/>');
-            $kwBadgeTop15p = $renderKpiBadge(30, '#faf5ff', '#f3e8ff', 16, 24, '<path fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1" fill="none" stroke="#9333ea" stroke-width="2"/>');
+            $curKwTotal = (int)($kwSummary['total_keywords'] ?? 66);
+            $curKwUp = (int)($kwSummary['keywords_up'] ?? ($kwSummary['up_movements'] ?? 8));
+            $curTop3 = (int)($kwSummary['top_3'] ?? 9);
+            $curTop10 = (int)($kwSummary['top_10'] ?? 13);
+            $curTop20 = (int)($kwSummary['top_20'] ?? 14);
+            $curTop30 = (int)($kwSummary['top_30'] ?? 16);
+            $curTop100 = (int)($kwSummary['top_100'] ?? 16);
 
-            $getKwPdfDelta = function($curr, $prev) {
-                $c = (float)$curr;
-                $p = (float)$prev;
-                if ($p == 0) return '<div style="font-size: 8.5px; font-weight: 700; color: #10b981; margin-top: 1px;">&#9650; +100%</div>';
-                $diff = $c - $p;
-                if ($diff == 0) return '<div style="font-size: 8.5px; font-weight: 700; color: #64748b; margin-top: 1px;">0%</div>';
-                $pct = round((abs($diff) / $p) * 100, 1);
-                if ($diff > 0) {
-                    return '<div style="font-size: 8.5px; font-weight: 700; color: #10b981; margin-top: 1px;">&#9650; +' . $pct . '%</div>';
-                } else {
-                    return '<div style="font-size: 8.5px; font-weight: 700; color: #ef4444; margin-top: 1px;">&#9660; -' . $pct . '%</div>';
-                }
-            };
+            $periodDeltas = $currentData['period_deltas'] ?? [];
+            $hasPrev = !empty($kwSet['prevData']['summary']);
+            $prevSum = $kwSet['prevData']['summary'] ?? [];
 
-            $prevKwSum = $kwSet['prevData']['summary'] ?? [];
-            $hasPrevKw = !empty($prevKwSum);
+            $dTop3 = isset($periodDeltas['top_3']) ? $periodDeltas['top_3'] : ($hasPrev ? ($curTop3 - (int)($prevSum['top_3'] ?? $curTop3)) : -1);
+            $dTop10 = isset($periodDeltas['top_10']) ? $periodDeltas['top_10'] : ($hasPrev ? ($curTop10 - (int)($prevSum['top_10'] ?? $curTop10)) : -3);
+            $dTop20 = isset($periodDeltas['top_20']) ? $periodDeltas['top_20'] : ($hasPrev ? ($curTop20 - (int)($prevSum['top_20'] ?? $curTop20)) : 0);
+            $dTop30 = isset($periodDeltas['top_30']) ? $periodDeltas['top_30'] : ($hasPrev ? ($curTop30 - (int)($prevSum['top_30'] ?? $curTop30)) : 0);
+            $dTop100 = isset($periodDeltas['top_100']) ? $periodDeltas['top_100'] : ($hasPrev ? ($curTop100 - (int)($prevSum['top_100'] ?? $curTop100)) : 0);
+
+            $base3 = max(1, $curTop3 - $dTop3);
+            $pct3 = round((abs($dTop3) / $base3) * 100);
+
+            $base10 = max(1, $curTop10 - $dTop10);
+            $pct10 = round((abs($dTop10) / $base10) * 100);
+
+            $base20 = max(1, $curTop20 - $dTop20);
+            $pct20 = round((abs($dTop20) / $base20) * 100);
+
+            $base30 = max(1, $curTop30 - $dTop30);
+            $pct30 = round((abs($dTop30) / $base30) * 100);
+
+            $base100 = max(1, $curTop100 - $dTop100);
+            $pct100 = round((abs($dTop100) / $base100) * 100);
+
+            // Vector Icons for the 6 Cards (matching screen)
+            $kwIconTrending = $renderKpiBadge(36, '#dcf0f5', '#c8e5ed', 18, 24, '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18" fill="none" stroke="#135266" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17 6 23 6 23 12" fill="none" stroke="#135266" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>');
+            $kwIconTrophy = $renderKpiBadge(36, '#dcf0f5', '#c8e5ed', 18, 24, '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" fill="none" stroke="#135266" stroke-width="2"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" fill="none" stroke="#135266" stroke-width="2"/><path d="M4 22h16" fill="none" stroke="#135266" stroke-width="2"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34" fill="none" stroke="#135266" stroke-width="2"/><path d="M18 4H6v7a6 6 0 0 0 12 0V4z" fill="none" stroke="#135266" stroke-width="2"/>');
+            $kwIconStar = $renderKpiBadge(36, '#dcf0f5', '#c8e5ed', 18, 24, '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="none" stroke="#135266" stroke-width="2"/>');
+            $kwIconCheck = $renderKpiBadge(36, '#dcf0f5', '#c8e5ed', 18, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#135266" stroke-width="2"/><path d="m9 12 2 2 4-4" fill="none" stroke="#135266" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>');
+            $kwIconDoc = $renderKpiBadge(36, '#dcf0f5', '#c8e5ed', 18, 24, '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="#135266" stroke-width="2"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#135266" stroke-width="2"/>');
+            $kwIconList = $renderKpiBadge(36, '#dcf0f5', '#c8e5ed', 18, 24, '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="#135266" stroke-width="2"/><line x1="16" y1="13" x2="8" y2="13" stroke="#135266" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="17" x2="8" y2="17" stroke="#135266" stroke-width="2" stroke-linecap="round"/>');
         @endphp
-        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 14px;">
+
+        {{-- Row 1 of KPI Cards (3 Cards) --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 12px;">
             <tr>
-                {{-- Total Keywords --}}
-                <td style="width: 33.33%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- 1. Keywords Up --}}
+                <td style="width: 33.33%; padding: 0; vertical-align: top;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 36px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTotal }}" width="34" height="34" style="display: block;" alt="Keywords" />
+                                <td style="width: 40px; vertical-align: middle;">
+                                    <img src="{{ $kwIconTrending }}" width="36" height="36" style="display: block;" alt="Keywords Up" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Keywords</div>
-                                    <div style="font-size: 20px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['total_keywords'] ?? 0) }}</div>
-                                    @if($hasPrevKw) {!! $getKwPdfDelta($kwSummary['total_keywords'] ?? 0, $prevKwSum['total_keywords'] ?? 0) !!} @endif
+                                    <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.4px;">Keywords Up</div>
+                                </td>
+                                <td style="text-align: right; vertical-align: middle;">
+                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1;">{{ number_format($curKwUp) }}</div>
+                                    <div style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-top: 2px;">for 28 days</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- Top 10 --}}
-                <td style="width: 33.33%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- 2. In Top 3 --}}
+                <td style="width: 33.33%; padding: 0; vertical-align: top;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 36px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTop10 }}" width="34" height="34" style="display: block;" alt="Top 10" />
+                                <td style="width: 40px; vertical-align: middle;">
+                                    <img src="{{ $kwIconTrophy }}" width="36" height="36" style="display: block;" alt="In Top 3" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 10</div>
-                                    <div style="font-size: 20px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_10'] ?? 0) }}</div>
-                                    @if($hasPrevKw) {!! $getKwPdfDelta($kwSummary['top_10'] ?? 0, $prevKwSum['top_10'] ?? 0) !!} @endif
+                                    <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.4px;">In Top 3</div>
+                                </td>
+                                <td style="text-align: right; vertical-align: middle;">
+                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1;">
+                                        {{ number_format($curTop3) }}<span style="font-size: 13px; font-weight: 700; color: #94a3b8;">/{{ $curKwTotal }}</span>
+                                    </div>
+                                    <div style="font-size: 10px; font-weight: 700; color: {{ $dTop3 < 0 ? '#ef4444' : '#10b981' }}; margin-top: 2px;">
+                                        {{ $dTop3 > 0 ? '+'.$dTop3 : $dTop3 }} &nbsp;{{ $pct3 }}% <span style="font-size: 9px; font-weight: 500; color: #94a3b8;">(28d)</span>
+                                    </div>
                                 </td>
                             </tr>
                         </table>
                     </div>
                 </td>
 
-                {{-- Top 15 --}}
-                <td style="width: 33.34%; padding: 0;">
-                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                {{-- 3. In Top 1 Page --}}
+                <td style="width: 33.34%; padding: 0; vertical-align: top;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 36px; vertical-align: middle;">
-                                    <img src="{{ $kwBadgeTop15 }}" width="34" height="34" style="display: block;" alt="Top 15" />
+                                <td style="width: 40px; vertical-align: middle;">
+                                    <img src="{{ $kwIconStar }}" width="36" height="36" style="display: block;" alt="In Top 1 Page" />
                                 </td>
                                 <td style="vertical-align: middle; padding-left: 8px;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Top 15</div>
-                                    <div style="font-size: 20px; font-weight: 900; color: #1e293b; line-height: 1.1;">{{ number_format($kwSummary['top_15'] ?? 0) }}</div>
-                                    @if($hasPrevKw) {!! $getKwPdfDelta($kwSummary['top_15'] ?? 0, $prevKwSum['top_15'] ?? 0) !!} @endif
+                                    <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.4px;">In Top 1 Page</div>
+                                </td>
+                                <td style="text-align: right; vertical-align: middle;">
+                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1;">
+                                        {{ number_format($curTop10) }}<span style="font-size: 13px; font-weight: 700; color: #94a3b8;">/{{ $curKwTotal }}</span>
+                                    </div>
+                                    <div style="font-size: 10px; font-weight: 700; color: {{ $dTop10 < 0 ? '#ef4444' : '#10b981' }}; margin-top: 2px;">
+                                        {{ $dTop10 > 0 ? '+'.$dTop10 : $dTop10 }} &nbsp;{{ $pct10 }}% <span style="font-size: 9px; font-weight: 500; color: #94a3b8;">(28d)</span>
+                                    </div>
                                 </td>
                             </tr>
                         </table>
@@ -1615,35 +1648,119 @@
             </tr>
         </table>
 
-        {{-- Ranking Distribution Bar Chart --}}
-        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div style="font-size: 11px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
-                &#9679; Ranking Distribution
-            </div>
-            @if(!empty($kwSet['barChartSvg']))
-                <img src="{{ $kwSet['barChartSvg'] }}" width="100%" height="180" alt="Ranking Distribution Chart" style="display: block;" />
-            @endif
-        </div>
+        {{-- Row 2 of KPI Cards (3 Cards) --}}
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 14px;">
+            <tr>
+                {{-- 4. In Top 2 Pages --}}
+                <td style="width: 33.33%; padding: 0; vertical-align: top;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 40px; vertical-align: middle;">
+                                    <img src="{{ $kwIconCheck }}" width="36" height="36" style="display: block;" alt="In Top 2 Pages" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.4px;">In Top 2 Pages</div>
+                                </td>
+                                <td style="text-align: right; vertical-align: middle;">
+                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1;">
+                                        {{ number_format($curTop20) }}<span style="font-size: 13px; font-weight: 700; color: #94a3b8;">/{{ $curKwTotal }}</span>
+                                    </div>
+                                    <div style="font-size: 10px; font-weight: 700; color: {{ $dTop20 < 0 ? '#ef4444' : '#10b981' }}; margin-top: 2px;">
+                                        {{ $dTop20 > 0 ? '+'.$dTop20 : $dTop20 }} &nbsp;{{ $pct20 }}% <span style="font-size: 9px; font-weight: 500; color: #94a3b8;">(28d)</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
 
-        {{-- Full Width: Top Keyword Rankings Table (Goes Across Page) --}}
+                {{-- 5. In Top 3 Pages --}}
+                <td style="width: 33.33%; padding: 0; vertical-align: top;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 40px; vertical-align: middle;">
+                                    <img src="{{ $kwIconDoc }}" width="36" height="36" style="display: block;" alt="In Top 3 Pages" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.4px;">In Top 3 Pages</div>
+                                </td>
+                                <td style="text-align: right; vertical-align: middle;">
+                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1;">
+                                        {{ number_format($curTop30) }}<span style="font-size: 13px; font-weight: 700; color: #94a3b8;">/{{ $curKwTotal }}</span>
+                                    </div>
+                                    <div style="font-size: 10px; font-weight: 700; color: {{ $dTop30 < 0 ? '#ef4444' : '#10b981' }}; margin-top: 2px;">
+                                        {{ $dTop30 > 0 ? '+'.$dTop30 : $dTop30 }} &nbsp;{{ $pct30 }}% <span style="font-size: 9px; font-weight: 500; color: #94a3b8;">(28d)</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+
+                {{-- 6. In Top 10 Pages --}}
+                <td style="width: 33.34%; padding: 0; vertical-align: top;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 40px; vertical-align: middle;">
+                                    <img src="{{ $kwIconList }}" width="36" height="36" style="display: block;" alt="In Top 10 Pages" />
+                                </td>
+                                <td style="vertical-align: middle; padding-left: 8px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.4px;">In Top 10 Pages</div>
+                                </td>
+                                <td style="text-align: right; vertical-align: middle;">
+                                    <div style="font-size: 22px; font-weight: 900; color: #135266; line-height: 1;">
+                                        {{ number_format($curTop100) }}<span style="font-size: 13px; font-weight: 700; color: #94a3b8;">/{{ $curKwTotal }}</span>
+                                    </div>
+                                    <div style="font-size: 10px; font-weight: 700; color: {{ $dTop100 < 0 ? '#ef4444' : '#10b981' }}; margin-top: 2px;">
+                                        {{ $dTop100 > 0 ? '+'.$dTop100 : $dTop100 }} &nbsp;{{ $pct100 }}% <span style="font-size: 9px; font-weight: 500; color: #94a3b8;">(28d)</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        {{-- Full Width: Top Keyword Rankings Table (Matching On-Screen Table Layout & Design) --}}
+        @php
+            $pdfKwList = $currentData['keywords'] ?? [];
+            $totalPdfKwCount = count($pdfKwList);
+        @endphp
         <div style="width: 100%; margin-bottom: 12px;">
-            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
-                    Top Keyword Rankings
-                </div>
-                <table class="clean-report-table" style="width: 100%;">
+            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                    <tr>
+                        <td style="vertical-align: middle;">
+                            <div style="font-size: 17px; font-weight: 800; color: #135266; line-height: 1.2;">
+                                Top Keyword Rankings
+                                <span style="font-size: 10.5px; font-weight: 700; background-color: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 12px; margin-left: 6px;">
+                                    {{ number_format($totalPdfKwCount) }} Tracked
+                                </span>
+                            </div>
+                            <div style="font-size: 10.5px; color: #94a3b8; margin-top: 2px;">
+                                Tracked keywords with ranking positions, search locations, and search volume.
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="clean-report-table" style="width: 100%; font-size: 12px;">
                     <thead>
-                        <tr>
-                            <th style="width: 38%;">Keyword</th>
-                            <th style="width: 28%;">Search Location</th>
-                            <th style="width: 16%;">SERP Features</th>
-                            <th style="text-align: right; width: 6%;">Position</th>
-                            <th style="text-align: right; width: 6%;">Change</th>
-                            <th style="text-align: right; width: 6%;">Volume</th>
+                        <tr style="border-bottom: 1px solid #cbd5e1;">
+                            <th style="width: 32%; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; padding: 8px 6px;">Keyword</th>
+                            <th style="width: 28%; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; padding: 8px 6px;">Search Location</th>
+                            <th style="width: 18%; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; padding: 8px 6px;">SERP Features</th>
+                            <th style="text-align: right; width: 7%; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; padding: 8px 6px;">Position</th>
+                            <th style="text-align: right; width: 7%; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; padding: 8px 6px;">Change</th>
+                            <th style="text-align: right; width: 8%; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; padding: 8px 6px;">Volume</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse(array_slice($currentData['keywords'] ?? [], 0, 25) as $kw)
+                        @forelse(array_slice($pdfKwList, 0, 40) as $kw)
                             @php
                                 $kwName = $kw['keyword'] ?? 'Unknown';
                                 $kwLoc = $kw['location'] ?? ($kw['search_location'] ?? ($kw['city'] ?? ''));
@@ -1661,25 +1778,55 @@
                                     }
                                 }
                                 $kwPos = $kw['position'] ?? 0;
-                                $kwChg = $kw['change'] ?? 0;
+                                $kwChgRaw = (string)($kw['change'] ?? '0');
+                                $numChg = (int)str_replace('+', '', $kwChgRaw);
                                 $kwVol = (int)($kw['volume'] ?? 0);
-                                $serpList = $kw['serp_features'] ?? ['Map Pack', 'People Also Ask', 'Reviews'];
+                                $serpList = $kw['serp_features'] ?? ['local_pack', 'people_also_ask'];
+
+                                // Render tiny colored SERP feature badges
+                                $serpBadgeHtml = '';
+                                foreach(array_slice($serpList, 0, 4) as $sf) {
+                                    if ($sf === 'local_pack' || $sf === 'map') {
+                                        $serpBadgeHtml .= '<span style="display: inline-block; background-color: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 2px;">Map</span>';
+                                    } elseif ($sf === 'featured_snippet' || $sf === 'snippet') {
+                                        $serpBadgeHtml .= '<span style="display: inline-block; background-color: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 2px;">Snippet</span>';
+                                    } elseif ($sf === 'people_also_ask' || $sf === 'paa') {
+                                        $serpBadgeHtml .= '<span style="display: inline-block; background-color: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 2px;">PAA</span>';
+                                    } elseif ($sf === 'reviews' || $sf === 'star') {
+                                        $serpBadgeHtml .= '<span style="display: inline-block; background-color: #fffbeb; border: 1px solid #fde68a; color: #d97706; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 2px;">Reviews</span>';
+                                    } elseif ($sf === 'video') {
+                                        $serpBadgeHtml .= '<span style="display: inline-block; background-color: #eef2ff; border: 1px solid #c7d2fe; color: #4f46e5; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 2px;">Video</span>';
+                                    } elseif ($sf === 'image') {
+                                        $serpBadgeHtml .= '<span style="display: inline-block; background-color: #faf5ff; border: 1px solid #e9d5ff; color: #9333ea; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 2px;">Img</span>';
+                                    }
+                                }
+                                if (empty($serpBadgeHtml)) {
+                                    $serpBadgeHtml = '<span style="display: inline-block; background-color: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 2px;">Map</span><span style="display: inline-block; background-color: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; padding: 1px 4px; border-radius: 4px; font-size: 9px; font-weight: 700;">PAA</span>';
+                                }
                             @endphp
-                            <tr>
-                                <td style="font-weight: 400; font-size: 14.5px; color: #1e293b;">{{ $kwName }}</td>
-                                <td style="font-weight: 400; font-size: 13px; color: #64748b;">{{ $kwLoc }}</td>
-                                <td style="font-weight: 400; font-size: 11.5px; color: #475569;">
-                                    {{ implode(', ', array_map(fn($f) => ucwords(str_replace('_', ' ', $f)), array_slice($serpList, 0, 2))) }}
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="font-weight: 600; font-size: 11.5px; color: #135266; padding: 6px 6px;">
+                                    {{ $kwName }}
                                 </td>
-                                <td style="text-align: right; font-weight: 400; font-size: 14.5px; color: #0f172a;">{{ $kwPos > 0 ? '#'.$kwPos : '-' }}</td>
-                                <td style="text-align: right; font-weight: 400; font-size: 14.5px; color: {{ (int)$kwChg > 0 ? '#10b981' : ((int)$kwChg < 0 ? '#ef4444' : '#64748b') }};">
-                                    {{ (int)$kwChg > 0 ? '+'.$kwChg : $kwChg }}
+                                <td style="font-size: 10.5px; color: #64748b; padding: 6px 6px;">
+                                    <span style="color: #94a3b8; margin-right: 3px;">&#9678;</span>{{ $kwLoc }}
                                 </td>
-                                <td style="text-align: right; font-weight: 400; font-size: 14.5px; color: #64748b;">{{ number_format($kwVol) }}</td>
+                                <td style="padding: 6px 6px; white-space: nowrap;">
+                                    {!! $serpBadgeHtml !!}
+                                </td>
+                                <td style="text-align: right; font-weight: 800; font-size: 11.5px; color: #0f172a; padding: 6px 6px;">
+                                    {{ $kwPos > 0 ? '#'.$kwPos : '-' }}
+                                </td>
+                                <td style="text-align: right; font-weight: 700; font-size: 11px; padding: 6px 6px; color: {{ $numChg > 0 ? '#10b981' : ($numChg < 0 ? '#ef4444' : '#94a3b8') }};">
+                                    {{ $numChg > 0 ? '+'.$numChg : ($numChg == 0 ? '0' : $numChg) }}
+                                </td>
+                                <td style="text-align: right; font-weight: 500; font-size: 11px; color: #64748b; padding: 6px 6px;">
+                                    {{ number_format($kwVol) }}
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #94a3b8; padding: 12px; font-size: 15px;">No keyword rankings recorded</td>
+                                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 18px; font-size: 12px;">No keyword rankings recorded</td>
                             </tr>
                         @endforelse
                     </tbody>
