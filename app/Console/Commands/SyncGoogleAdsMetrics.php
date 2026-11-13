@@ -260,46 +260,8 @@ class SyncGoogleAdsMetrics extends Command
                 }
             }
 
-            // Fetch Auction Insights data if available
+            // Auction Insights query removed as Google Ads API metric access is not granted (403 METRIC_ACCESS_DENIED)
             $auctionInsights = [];
-            try {
-                $auctionQuery = "SELECT segments.auction_insight_domain, metrics.auction_insight_search_impression_share, metrics.auction_insight_search_overlap_rate, metrics.auction_insight_search_position_above_rate, metrics.auction_insight_search_top_impression_percentage, metrics.auction_insight_search_absolute_top_impression_percentage, metrics.auction_insight_search_outranking_share FROM campaign WHERE segments.date >= '{$startDate}' AND segments.date <= '{$endDate}' AND campaign.status = 'ENABLED' LIMIT 50";
-                
-                $auctionResponse = $http
-                    ->withHeaders([
-                        'developer-token' => $developerToken,
-                        'login-customer-id' => $loginCustomerId
-                    ])
-                    ->post($url, [
-                        'query' => $auctionQuery
-                    ]);
-
-                if ($auctionResponse->successful()) {
-                    $aucData = $auctionResponse->json();
-                    if (isset($aucData['results'])) {
-                        foreach ($aucData['results'] as $row) {
-                            $domain = $row['segments']['auctionInsightDomain'] ?? null;
-                            if (!$domain) continue;
-                            $m = $row['metrics'] ?? [];
-                            $auctionInsights[] = [
-                                'domain' => $domain,
-                                'display_domain' => $domain,
-                                'is_you' => str_contains(strtolower($domain), 'you') || ($accountName && str_contains(strtolower($domain), strtolower($accountName))),
-                                'impression_share' => isset($m['auctionInsightSearchImpressionShare']) ? round(((float)$m['auctionInsightSearchImpressionShare']) * 100, 1) : null,
-                                'overlap_rate' => isset($m['auctionInsightSearchOverlapRate']) ? round(((float)$m['auctionInsightSearchOverlapRate']) * 100, 1) : null,
-                                'position_above_rate' => isset($m['auctionInsightSearchPositionAboveRate']) ? round(((float)$m['auctionInsightSearchPositionAboveRate']) * 100, 1) : null,
-                                'top_of_page_rate' => isset($m['auctionInsightSearchTopImpressionPercentage']) ? round(((float)$m['auctionInsightSearchTopImpressionPercentage']) * 100, 1) : null,
-                                'abs_top_of_page_rate' => isset($m['auctionInsightSearchAbsoluteTopImpressionPercentage']) ? round(((float)$m['auctionInsightSearchAbsoluteTopImpressionPercentage']) * 100, 1) : null,
-                                'outranking_share' => isset($m['auctionInsightSearchOutrankingShare']) ? round(((float)$m['auctionInsightSearchOutrankingShare']) * 100, 1) : null,
-                            ];
-                        }
-                    }
-                } else {
-                    Log::warning("Google Ads Auction Insights API Response [{$customerId}] Status: " . $auctionResponse->status(), (array)($auctionResponse->json() ?? ['body' => $auctionResponse->body()]));
-                }
-            } catch (\Exception $e) {
-                Log::error("Google Ads Auction Insights Exception [{$customerId}]: " . $e->getMessage());
-            }
 
             // Fetch Conversion Actions (All enabled goals & performance)
             $conversionActions = [];

@@ -56,6 +56,7 @@
                 $isGadsConnected = in_array('gads', $connectedTypes);
                 $isGtmConnected = in_array('gtm', $connectedTypes);
                 $isFacebookConnected = in_array('facebook', $connectedTypes);
+                $isMetaAdsConnected = in_array('meta_ads', $connectedTypes);
                 $isLinkedinConnected = in_array('linkedin', $connectedTypes);
             @endphp
 
@@ -87,7 +88,10 @@
                                 <span>Google Ads</span>
                             @elseif($intgId === 'facebook')
                                 <svg class="w-4 h-4 text-blue-600 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
-                                <span>Facebook</span>
+                                <span>Meta</span>
+                            @elseif($intgId === 'meta_ads')
+                                <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                                <span>Meta Ads</span>
                             @elseif($intgId === 'linkedin')
                                 <svg class="w-4 h-4 text-sky-600 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
                                 <span>LinkedIn</span>
@@ -488,7 +492,7 @@
                                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
                                             </div>
                                             <div>
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Facebook</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Meta</h3>
                                                 <span class="text-xs text-slate-400">Social Reach & Engagement</span>
                                             </div>
                                         </div>
@@ -541,6 +545,94 @@
                                             <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($fbEngaged) }}</div>
                                             @if($hasFbComp)
                                                 @php $d = $getDelta($fbEngaged, $fbCompSum['engaged'] ?? 0); @endphp
+                                                <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
+                                                    <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                    <span class="text-slate-400 font-normal">vs. prev</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- 4b. Meta Ads --}}
+                            @if($isMetaAdsConnected)
+                                @php
+                                    $mBase = $metaAdsData ?? [];
+                                    $mSum = $mBase['summary'] ?? [];
+                                    $mSpend = $mSum['spend'] ?? $mSum['cost'] ?? 0;
+                                    $mClicks = $mSum['clicks'] ?? 0;
+                                    $mImpr = $mSum['impressions'] ?? 0;
+                                    $mConv = $mSum['conversions'] ?? 0;
+
+                                    $mComp = $mBase['compare_data'] ?? [];
+                                    $mCompSum = $mComp['summary'] ?? [];
+                                    $hasMComp = !empty($mCompSum);
+                                    $compMSpend = $mCompSum['spend'] ?? $mCompSum['cost'] ?? 0;
+                                    $compMClicks = $mCompSum['clicks'] ?? 0;
+                                    $compMImpr = $mCompSum['impressions'] ?? 0;
+                                    $compMConv = $mCompSum['conversions'] ?? 0;
+                                @endphp
+                                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-meta-ads">
+                                    <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-500 flex items-center justify-center">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Meta Ads</h3>
+                                                <span class="text-xs text-slate-400">Paid Campaigns Performance</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" wire:click="switchTab('meta_ads')" 
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                            <span>View Details</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Amount Spent</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">${{ number_format($mSpend, 2) }}</div>
+                                            @if($hasMComp)
+                                                @php $d = $getDelta($mSpend, $compMSpend); @endphp
+                                                <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
+                                                    <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                    <span class="text-slate-400 font-normal">vs. prev</span>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Link Clicks</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($mClicks) }}</div>
+                                            @if($hasMComp)
+                                                @php $d = $getDelta($mClicks, $compMClicks); @endphp
+                                                <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
+                                                    <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                    <span class="text-slate-400 font-normal">vs. prev</span>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Impressions</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($mImpr) }}</div>
+                                            @if($hasMComp)
+                                                @php $d = $getDelta($mImpr, $compMImpr); @endphp
+                                                <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
+                                                    <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                    <span class="text-slate-400 font-normal">vs. prev</span>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Conversions</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($mConv) }}</div>
+                                            @if($hasMComp)
+                                                @php $d = $getDelta($mConv, $compMConv); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
                                                     <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
                                                     <span class="text-slate-400 font-normal">vs. prev</span>

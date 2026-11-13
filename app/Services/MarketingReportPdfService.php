@@ -82,6 +82,9 @@ class MarketingReportPdfService
         if (!empty($targetIntegration) && !in_array(strtolower($targetIntegration), ['overview', 'all'])) {
             $normalizedTarget = strtolower($targetIntegration);
             $integrations = $integrations->filter(function ($item, $key) use ($normalizedTarget) {
+                if ($normalizedTarget === 'meta_ads') {
+                    return strtolower($key) === 'meta_ads' || strtolower($key) === 'facebook';
+                }
                 return strtolower($key) === $normalizedTarget;
             });
 
@@ -93,23 +96,28 @@ class MarketingReportPdfService
                 'gbp' => 'Google Business Profile',
                 'gads' => 'Google Ads',
                 'facebook' => 'Facebook',
+                'meta_ads' => 'Meta Ads',
                 'linkedin' => 'LinkedIn',
                 'gtm' => 'Google Tag Manager',
             ];
             $singlePlatformTitle = $platformNames[$normalizedTarget] ?? ucwords(str_replace(['_', '-'], ' ', $normalizedTarget));
         }
 
-        $hasGa4 = $integrations->has('ga4');
-        $hasGsc = $integrations->has('gsc');
-        $hasKeyword = $integrations->has('keyword');
-        $hasYoutube = $integrations->has('youtube');
-        $hasGbp = $integrations->has('gbp');
-        $hasGads = $integrations->has('gads');
-        $hasFacebook = $integrations->has('facebook');
-        $hasLinkedin = $integrations->has('linkedin');
+        $isSingleTarget = !empty($targetIntegration) && !in_array(strtolower($targetIntegration), ['overview', 'all']);
+        $normTarget = $isSingleTarget ? strtolower($targetIntegration) : null;
+
+        $hasGa4 = $integrations->has('ga4') && (!$isSingleTarget || $normTarget === 'ga4');
+        $hasGsc = $integrations->has('gsc') && (!$isSingleTarget || $normTarget === 'gsc');
+        $hasKeyword = $integrations->has('keyword') && (!$isSingleTarget || $normTarget === 'keyword');
+        $hasYoutube = $integrations->has('youtube') && (!$isSingleTarget || $normTarget === 'youtube');
+        $hasGbp = $integrations->has('gbp') && (!$isSingleTarget || $normTarget === 'gbp');
+        $hasGads = $integrations->has('gads') && (!$isSingleTarget || $normTarget === 'gads');
+        $hasFacebook = $integrations->has('facebook') && (!$isSingleTarget || $normTarget === 'facebook');
+        $hasMetaAds = ($integrations->has('meta_ads') || $integrations->has('facebook')) && (!$isSingleTarget || $normTarget === 'meta_ads');
+        $hasLinkedin = $integrations->has('linkedin') && (!$isSingleTarget || $normTarget === 'linkedin');
 
         // Dynamically load data for connected integrations
-        $knownTypes = ['ga4', 'gsc', 'keyword', 'youtube', 'gbp', 'gads', 'facebook', 'linkedin'];
+        $knownTypes = ['ga4', 'gsc', 'keyword', 'youtube', 'gbp', 'gads', 'facebook', 'meta_ads', 'linkedin'];
         $dynamicIntegrations = [];
 
         // Load standard known integrations
@@ -120,6 +128,7 @@ class MarketingReportPdfService
         $gbpData = $hasGbp ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $dateFrom, $dateTo) : [];
         $gadsData = $hasGads ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $dateFrom, $dateTo) : [];
         $facebookData = $hasFacebook ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $dateFrom, $dateTo) : [];
+        $metaAdsData = $hasMetaAds ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'meta_ads', $dateFrom, $dateTo) : [];
         $linkedinData = $hasLinkedin ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $dateFrom, $dateTo) : [];
 
         // Comparison Data (MoM / previous period)
@@ -130,6 +139,7 @@ class MarketingReportPdfService
         $compareGbp = [];
         $compareGads = [];
         $compareFacebook = [];
+        $compareMetaAds = [];
         $compareLinkedin = [];
 
         $isExplicitCompare = !empty($this->compareDateFrom) && !empty($this->compareDateTo);
@@ -159,6 +169,7 @@ class MarketingReportPdfService
         $compareGbp = ($hasGbp && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gbp', $activeCompareFrom, $activeCompareTo) : [];
         $compareGads = ($hasGads && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'gads', $activeCompareFrom, $activeCompareTo) : [];
         $compareFacebook = ($hasFacebook && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'facebook', $activeCompareFrom, $activeCompareTo) : [];
+        $compareMetaAds = ($hasMetaAds && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'meta_ads', $activeCompareFrom, $activeCompareTo) : [];
         $compareLinkedin = ($hasLinkedin && $activeCompareFrom) ? $this->loadIntegrationJsonData($clientFolder, $websiteFolder, 'linkedin', $activeCompareFrom, $activeCompareTo) : [];
 
         // DYNAMIC HANDLER: Automatically load ANY integration not explicitly hardcoded above (e.g. TikTok, Pinterest, Instagram, Twitter, etc.)
@@ -307,6 +318,24 @@ class MarketingReportPdfService
             }
         }
 
+        // Meta Ads Chart
+        $metaAdsAreaChartSvg = '';
+        $compareMetaAdsAreaChartSvg = '';
+        $metaAdsImpressionsMomSvg = '';
+        $metaAdsClicksMomSvg = '';
+        $metaAdsConversionsMomSvg = '';
+        if ($hasMetaAds && !empty($metaAdsData)) {
+            $dailyMeta = $metaAdsData['daily_traffic'] ?? [];
+            $compareDailyMeta = $compareMetaAds['daily_traffic'] ?? [];
+            $metaAdsAreaChartSvg = $this->generateMetaAdsTrendChartSvg($dailyMeta, 900, 240);
+            $metaAdsImpressionsMomSvg = $this->generateMetricTrendLineSvg($dailyMeta, $compareDailyMeta, 'impressions', 680, 48, '#ef4444');
+            $metaAdsClicksMomSvg = $this->generateMetricTrendLineSvg($dailyMeta, $compareDailyMeta, 'clicks', 680, 48, '#2563eb');
+            $metaAdsConversionsMomSvg = $this->generateMetricTrendLineSvg($dailyMeta, $compareDailyMeta, 'conversions', 680, 48, '#4f46e5');
+            if ($isExplicitCompare) {
+                $compareMetaAdsAreaChartSvg = $this->generateMetaAdsTrendChartSvg($compareDailyMeta, 900, 240);
+            }
+        }
+
         // GSC Modern Dual Line Chart (Clicks + Impressions)
         $gscDualLineSvg = '';
         $compareGscDualLineSvg = '';
@@ -398,6 +427,7 @@ class MarketingReportPdfService
             'hasGbp' => $hasGbp,
             'hasGads' => $hasGads,
             'hasFacebook' => $hasFacebook,
+            'hasMetaAds' => $hasMetaAds,
             'hasLinkedin' => $hasLinkedin,
             'ga4Data' => $ga4Data,
             'gscData' => $gscData,
@@ -406,6 +436,7 @@ class MarketingReportPdfService
             'gbpData' => $gbpData,
             'gadsData' => $gadsData,
             'facebookData' => $facebookData,
+            'metaAdsData' => $metaAdsData,
             'linkedinData' => $linkedinData,
             'compareGa4' => $compareGa4,
             'compareGsc' => $compareGsc,
@@ -414,6 +445,7 @@ class MarketingReportPdfService
             'compareGbp' => $compareGbp,
             'compareGads' => $compareGads,
             'compareFacebook' => $compareFacebook,
+            'compareMetaAds' => $compareMetaAds,
             'compareLinkedin' => $compareLinkedin,
             'yoyGa4' => $yoyGa4,
             'yoyGsc' => $yoyGsc,
@@ -429,6 +461,11 @@ class MarketingReportPdfService
             'gadsConversionsMomSvg' => $gadsConversionsMomSvg,
             'gadsAreaChartSvg' => $gadsAreaChartSvg,
             'compareGadsAreaChartSvg' => $compareGadsAreaChartSvg,
+            'metaAdsImpressionsMomSvg' => $metaAdsImpressionsMomSvg,
+            'metaAdsClicksMomSvg' => $metaAdsClicksMomSvg,
+            'metaAdsConversionsMomSvg' => $metaAdsConversionsMomSvg,
+            'metaAdsAreaChartSvg' => $metaAdsAreaChartSvg,
+            'compareMetaAdsAreaChartSvg' => $compareMetaAdsAreaChartSvg,
             'gscDualLineSvg' => $gscDualLineSvg,
             'compareGscDualLineSvg' => $compareGscDualLineSvg,
             'keywordBarSvg' => $keywordBarSvg,
@@ -667,8 +704,8 @@ class MarketingReportPdfService
         $dCount = count($dailyTraffic);
         if ($dCount < 2) {
             for ($day = 1; $day <= 30; $day++) {
-                $xLabels[] = "Aug {$day}";
-                $dailyTraffic[] = ['date' => "202608" . sprintf('%02d', $day), 'sessions' => rand(30, 60)];
+                $xLabels[] = "Day {$day}";
+                $dailyTraffic[] = ['date' => date('Ym') . sprintf('%02d', $day), 'sessions' => 0];
             }
             $dCount = 30;
         } else {
@@ -875,9 +912,8 @@ class MarketingReportPdfService
         if ($dCount < 2) {
             for ($day = 1; $day <= 28; $day++) {
                 $xLabels[] = "Day {$day}";
-                $u = rand(35, 75);
-                $d1[] = $u;
-                $d2[] = max(5, round($u * 0.72));
+                $d1[] = 0;
+                $d2[] = 0;
             }
             $dCount = 28;
         } else {
@@ -975,6 +1011,132 @@ class MarketingReportPdfService
     }
 
     /**
+     * Generate Meta Ads 3-metric smooth line SVG chart:
+     * Clicks (Blue #2563eb), Impressions (Red/Pink #e11d48), Spend (Green #059669)
+     */
+    public function generateMetaAdsTrendChartSvg(array $dailyTraffic, int $width = 900, int $height = 240): string
+    {
+        $padL = 40;
+        $padR = 50;
+        $padT = 24;
+        $padB = 34;
+
+        $plotW = $width - $padL - $padR;
+        $plotH = $height - $padT - $padB;
+
+        $dCount = count($dailyTraffic);
+        $xLabels = [];
+        $clicks = [];
+        $impressions = [];
+        $spend = [];
+
+        if ($dCount < 2) {
+            for ($day = 1; $day <= 28; $day++) {
+                $xLabels[] = "Day {$day}";
+                $clicks[] = 0;
+                $impressions[] = 0;
+                $spend[] = 0;
+            }
+            $dCount = 28;
+        } else {
+            foreach ($dailyTraffic as $d) {
+                $clicks[] = (int)($d['clicks'] ?? 0);
+                $impressions[] = (int)($d['impressions'] ?? 0);
+                $spend[] = (float)($d['cost'] ?? ($d['spend'] ?? 0));
+
+                $rawDate = (string)($d['date'] ?? '');
+                if (strlen($rawDate) === 8 && !str_contains($rawDate, '-')) {
+                    $monthNum = (int)substr($rawDate, 4, 2);
+                    $dayNum = (int)substr($rawDate, 6, 2);
+                    $xLabels[] = sprintf('%02d/%02d', $monthNum, $dayNum);
+                } elseif (str_contains($rawDate, '-')) {
+                    $parts = explode('-', $rawDate);
+                    $xLabels[] = ($parts[1] ?? '') . '/' . ($parts[2] ?? '');
+                } else {
+                    $xLabels[] = $rawDate;
+                }
+            }
+        }
+
+        $maxClicksOrSpend = max(!empty($clicks) ? max($clicks) : 10, !empty($spend) ? max($spend) : 10, 10);
+        $maxClicksScale = ceil($maxClicksOrSpend / 10) * 10;
+
+        $maxImp = max(!empty($impressions) ? max($impressions) : 100, 50);
+        $maxImpScale = $maxImp <= 100 ? 100 : ($maxImp <= 1000 ? ceil($maxImp / 100) * 100 : ceil($maxImp / 500) * 500);
+
+        $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$width}\" height=\"{$height}\" viewBox=\"0 0 {$width} {$height}\">\n";
+
+        // Legend at top right
+        $svg .= "  <g transform=\"translate(" . ($width - 240) . ", 12)\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"10\">\n";
+        $svg .= "    <circle cx=\"0\" cy=\"0\" r=\"4\" fill=\"#2563eb\" />\n";
+        $svg .= "    <text x=\"8\" y=\"3\" fill=\"#475569\">Clicks</text>\n";
+        $svg .= "    <circle cx=\"60\" cy=\"0\" r=\"4\" fill=\"#e11d48\" />\n";
+        $svg .= "    <text x=\"68\" y=\"3\" fill=\"#475569\">Impressions</text>\n";
+        $svg .= "    <circle cx=\"150\" cy=\"0\" r=\"4\" fill=\"#059669\" />\n";
+        $svg .= "    <text x=\"158\" y=\"3\" fill=\"#475569\">Spend ($)</text>\n";
+        $svg .= "  </g>\n";
+
+        // Horizontal grid lines (4 lines)
+        for ($i = 0; $i <= 3; $i++) {
+            $y = $padT + ($plotH / 3) * $i;
+            $valLeft = round($maxClicksScale - ($maxClicksScale / 3) * $i);
+            $valImp = round($maxImpScale - ($maxImpScale / 3) * $i);
+            $impStr = $valImp >= 1000 ? number_format($valImp) : (string)$valImp;
+
+            $svg .= "  <line x1=\"{$padL}\" y1=\"{$y}\" x2=\"" . ($width - $padR) . "\" y2=\"{$y}\" stroke=\"#f1f5f9\" stroke-dasharray=\"3,3\" stroke-width=\"1\" />\n";
+            $svg .= "  <text x=\"" . ($padL - 6) . "\" y=\"" . ($y + 3.5) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" fill=\"#64748b\" text-anchor=\"end\">{$valLeft}</text>\n";
+            $svg .= "  <text x=\"" . ($width - $padR + 6) . "\" y=\"" . ($y + 3.5) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" fill=\"#64748b\" text-anchor=\"start\">{$impStr}</text>\n";
+        }
+
+        // X-axis date labels
+        $step = max(1, (int)floor($dCount / 8));
+        for ($j = 0; $j < $dCount; $j += $step) {
+            $x = $padL + ($j / max(1, $dCount - 1)) * $plotW;
+            $lbl = $xLabels[$j] ?? '';
+            $svg .= "  <text x=\"{$x}\" y=\"" . ($height - 10) . "\" font-family=\"DejaVu Sans, sans-serif\" font-size=\"9\" fill=\"#94a3b8\" text-anchor=\"middle\">{$lbl}</text>\n";
+        }
+
+        // Coordinates
+        $pClicks = [];
+        $pImp = [];
+        $pSpend = [];
+        for ($i = 0; $i < $dCount; $i++) {
+            $x = $padL + ($i / max(1, $dCount - 1)) * $plotW;
+            $yC = $padT + $plotH - (($clicks[$i] / max(1, $maxClicksScale)) * $plotH);
+            $yI = $padT + $plotH - (($impressions[$i] / max(1, $maxImpScale)) * $plotH);
+            $yS = $padT + $plotH - (($spend[$i] / max(1, $maxClicksScale)) * $plotH);
+
+            $pClicks[] = round($x, 1) . ',' . round($yC, 1);
+            $pImp[] = round($x, 1) . ',' . round($yI, 1);
+            $pSpend[] = round($x, 1) . ',' . round($yS, 1);
+        }
+
+        // 1. Spend line (#059669)
+        $svg .= "  <polyline points=\"" . implode(' ', $pSpend) . "\" fill=\"none\" stroke=\"#059669\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
+
+        // 2. Impressions line (#e11d48)
+        $svg .= "  <polyline points=\"" . implode(' ', $pImp) . "\" fill=\"none\" stroke=\"#e11d48\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
+
+        // 3. Clicks line (#2563eb)
+        $svg .= "  <polyline points=\"" . implode(' ', $pClicks) . "\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n";
+
+        // Dots
+        for ($i = 0; $i < $dCount; $i++) {
+            [$xS, $yS] = explode(',', $pSpend[$i]);
+            $svg .= "  <circle cx=\"{$xS}\" cy=\"{$yS}\" r=\"3\" fill=\"#059669\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
+
+            [$xI, $yI] = explode(',', $pImp[$i]);
+            $svg .= "  <circle cx=\"{$xI}\" cy=\"{$yI}\" r=\"3\" fill=\"#e11d48\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
+
+            [$xC, $yC] = explode(',', $pClicks[$i]);
+            $svg .= "  <circle cx=\"{$xC}\" cy=\"{$yC}\" r=\"3\" fill=\"#2563eb\" stroke=\"#ffffff\" stroke-width=\"1\" />\n";
+        }
+
+        $svg .= "</svg>";
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
+    /**
      * Generate Google Ads replica dual wave/area SVG chart (Clicks in Blue #1a73e8 and Impressions in Red #d93025).
      */
     public function generateGadsAreaChartSvg(array $dailyTraffic, int $width = 900, int $height = 240): string
@@ -995,10 +1157,8 @@ class MarketingReportPdfService
         if ($dCount < 2) {
             for ($day = 1; $day <= 28; $day++) {
                 $xLabels[] = "Day {$day}";
-                $c = rand(15, 35);
-                $imp = $c * rand(12, 18);
-                $clicks[] = $c;
-                $impressions[] = $imp;
+                $clicks[] = 0;
+                $impressions[] = 0;
             }
             $dCount = 28;
         } else {
@@ -1113,10 +1273,8 @@ class MarketingReportPdfService
         if ($dCount < 2) {
             for ($day = 1; $day <= 28; $day++) {
                 $xLabels[] = "Day {$day}";
-                $c = rand(10, 30);
-                $imp = $c * rand(15, 25);
-                $clicks[] = $c;
-                $impressions[] = $imp;
+                $clicks[] = 0;
+                $impressions[] = 0;
             }
             $dCount = 28;
         } else {
@@ -1230,10 +1388,9 @@ class MarketingReportPdfService
         if ($dCount < 2) {
             for ($day = 1; $day <= 28; $day++) {
                 $xLabels[] = "Day {$day}";
-                $r = rand(100, 300);
-                $reach[] = $r;
-                $views[] = round($r * 0.7);
-                $engaged[] = round($r * 0.25);
+                $reach[] = 0;
+                $views[] = 0;
+                $engaged[] = 0;
             }
             $dCount = 28;
         } else {
@@ -1441,7 +1598,7 @@ class MarketingReportPdfService
         if ($dCount < 2) {
             for ($day = 1; $day <= 28; $day++) {
                 $xLabels[] = "Day {$day}";
-                $views[] = rand(5, 50);
+                $views[] = 0;
             }
             $dCount = 28;
         } else {
@@ -1527,9 +1684,8 @@ class MarketingReportPdfService
         if ($dCount < 2) {
             for ($day = 1; $day <= 28; $day++) {
                 $xLabels[] = "Day {$day}";
-                $imp = rand(20, 150);
-                $impressions[] = $imp;
-                $engagements[] = round($imp * 0.12);
+                $impressions[] = 0;
+                $engagements[] = 0;
             }
             $dCount = 28;
         } else {

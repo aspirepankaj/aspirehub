@@ -300,7 +300,7 @@
         $hasLinkedin = !empty($linkedinData) && !isset($linkedinData['error']);
     @endphp
 
-    <!-- Platform Navigation Tabs Bar (Visible across all screens) -->
+    <!-- Platform Navigation Tabs Bar (Always Visible) -->
     @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected)
         @php
             $tabList = [
@@ -492,7 +492,8 @@
                         @endif
                     </span>
                     <span>
-                        @if($activeReportIntegrationId === 'ga4') Google Analytics Website Traffic
+                        @if($activeReportIntegrationId === 'overview') Marketing Dashboard
+                        @elseif($activeReportIntegrationId === 'ga4') Google Analytics Website Traffic
                         @elseif($activeReportIntegrationId === 'gads') Google Ads Campaigns
                         @elseif($activeReportIntegrationId === 'facebook') Meta Performance (Facebook & Instagram)
                         @elseif($activeReportIntegrationId === 'meta_ads') Meta Ads Campaigns
@@ -507,7 +508,8 @@
                     </span>
                 </h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    @if($activeReportIntegrationId === 'ga4') Track website traffic, behavior, and key events across your website.
+                    @if($activeReportIntegrationId === 'overview') Multi-channel marketing and traffic performance across connected platforms.
+                    @elseif($activeReportIntegrationId === 'ga4') Track website traffic, behavior, and key events across your website.
                     @elseif($activeReportIntegrationId === 'gads') Monitor ad spend, clicks, conversions, and campaign performance.
                     @elseif($activeReportIntegrationId === 'facebook') Track Meta reach, impressions, post interactions, followers, and Instagram activity.
                     @elseif($activeReportIntegrationId === 'meta_ads') Track ad spend, impressions, clicks, conversions, and campaign performance across Facebook & Instagram.
@@ -523,14 +525,16 @@
 
             <!-- Right Side: Date Picker (Left) & Website Filter (Right) -->
             <div class="flex flex-wrap items-center gap-2.5">
-                <!-- Date Range Picker (Calendar) -->
-                <div class="shrink-0" wire:key="dp-top-box-{{ $activeReportIntegrationId }}-{{ $selectedWebsiteId }}">
-                    @php
-                        $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
-                        $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
-                    @endphp
-                    @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
-                </div>
+                @if($activeReportIntegrationId !== 'overview')
+                    <!-- Date Range Picker (Calendar) -->
+                    <div class="shrink-0" wire:key="dp-top-box-{{ $activeReportIntegrationId }}-{{ $selectedWebsiteId }}">
+                        @php
+                            $minDateBound = \Carbon\Carbon::now()->subDays(90)->format('Y-m-d');
+                            $maxDateBound = \Carbon\Carbon::now()->format('Y-m-d');
+                        @endphp
+                        @include('partials.ga4-date-picker', ['minDateBound' => $minDateBound, 'maxDateBound' => $maxDateBound])
+                    </div>
+                @endif
 
                 <!-- Website Filter -->
                 <div class="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl px-3 py-2 shadow-xs shrink-0">

@@ -45,7 +45,7 @@ return [
         'client_id' => env('LINKEDIN_CLIENT_ID'),
         'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
         'redirect' => env('LINKEDIN_REDIRECT_URI', '/admin/integrations/linkedin/callback'),
-        'scopes' => env('LINKEDIN_SCOPES', 'openid profile email'),
+        'scopes' => env('LINKEDIN_SCOPES', 'r_basicprofile r_organization_social rw_organization_admin r_organization_followers'),
     ],
 
     'openai' => [

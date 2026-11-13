@@ -22,7 +22,7 @@ class ClientMarketingReports extends Component
     public ?int $selectedWebsiteId = null;
     public ?int $websiteId = null;
 
-    public ?string $activeReportIntegrationId = 'ga4';
+    public ?string $activeReportIntegrationId = 'overview';
     public ?string $activeReportPropertyId = null;
     
     // Loaded reports (protected so Livewire does NOT serialize 500KB+ JSON state across requests)
@@ -113,10 +113,10 @@ class ClientMarketingReports extends Component
             
             $tab = request()->query('tab');
             // When embedded in admin/staff detail page, '?tab=marketing' is the parent page tab, not the integration report tab!
-            if ($tab && $tab !== 'marketing' && $tab !== 'overview') {
+            if ($tab && $tab !== 'marketing') {
                 $this->activeReportIntegrationId = $tab;
             } else {
-                $this->activeReportIntegrationId = null; // Will pick the first alphabetical connected integration
+                $this->activeReportIntegrationId = 'overview'; // Default to overview dashboard
             }
 
             $this->loadIntegrationsAndMonths();
@@ -237,17 +237,19 @@ class ClientMarketingReports extends Component
         $this->integrations = $orderedIntegrations;
 
         $requestedTab = request()->query('tab');
-        if ($requestedTab === 'marketing' || $requestedTab === 'overview') {
+        if ($requestedTab === 'marketing') {
             $requestedTab = null;
         }
         $requestedTab = $requestedTab ?: $this->activeReportIntegrationId;
-        if ($requestedTab && isset($this->integrations[$requestedTab])) {
+        if ($requestedTab === 'overview') {
+            $this->activeReportIntegrationId = 'overview';
+        } elseif ($requestedTab && isset($this->integrations[$requestedTab])) {
             $this->activeReportIntegrationId = $requestedTab;
         } elseif (!empty($this->integrations)) {
-            // Default to first connected integration in alphabetical order
-            $this->activeReportIntegrationId = array_key_first($this->integrations);
+            // Default to overview dashboard when no specific valid integration is selected
+            $this->activeReportIntegrationId = 'overview';
         } else {
-            $this->activeReportIntegrationId = 'ga4';
+            $this->activeReportIntegrationId = 'overview';
         }
 
         $this->updateActivePropertyId();

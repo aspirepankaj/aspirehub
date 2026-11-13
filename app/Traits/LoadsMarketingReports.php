@@ -286,7 +286,12 @@ trait LoadsMarketingReports
         if (isset($mergedTopPosts)) {
             $allData['top_posts'] = array_values($mergedTopPosts);
             usort($allData['top_posts'], function($a, $b) {
-                return ($b['views'] ?? 0) <=> ($a['views'] ?? 0);
+                $timeA = !empty($a['created_time']) ? strtotime($a['created_time']) : (!empty($a['date']) ? strtotime($a['date']) : 0);
+                $timeB = !empty($b['created_time']) ? strtotime($b['created_time']) : (!empty($b['date']) ? strtotime($b['date']) : 0);
+                if ($timeA === $timeB) {
+                    return ($b['views'] ?? 0) <=> ($a['views'] ?? 0);
+                }
+                return $timeB <=> $timeA;
             });
             $allData['top_posts'] = array_slice($allData['top_posts'], 0, 15);
         }
@@ -294,7 +299,12 @@ trait LoadsMarketingReports
         if (isset($mergedIgPosts)) {
             $allData['instagram_posts'] = array_values($mergedIgPosts);
             usort($allData['instagram_posts'], function($a, $b) {
-                return ($b['views'] ?? 0) <=> ($a['views'] ?? 0);
+                $timeA = !empty($a['created_time']) ? strtotime($a['created_time']) : (!empty($a['date']) ? strtotime($a['date']) : 0);
+                $timeB = !empty($b['created_time']) ? strtotime($b['created_time']) : (!empty($b['date']) ? strtotime($b['date']) : 0);
+                if ($timeA === $timeB) {
+                    return ($b['views'] ?? 0) <=> ($a['views'] ?? 0);
+                }
+                return $timeB <=> $timeA;
             });
             $allData['instagram_posts'] = array_slice($allData['instagram_posts'], 0, 15);
         }
@@ -653,7 +663,7 @@ trait LoadsMarketingReports
                     $allData['summary']['followers'] = 1195;
                 }
                 $allData['summary']['total_followers'] = $allData['summary']['followers'];
-                $allData['summary']['new_followers'] = $allData['summary']['new_followers'] ?? max(18, $totalNewFollowers);
+                $allData['summary']['new_followers'] = $totalNewFollowers;
 
                 // Aggregate LinkedIn Post Engagement Metrics
                 $postsList = $allData['top_posts'] ?? [];
@@ -848,99 +858,58 @@ trait LoadsMarketingReports
                         }
                     }
 
-                    // Generate structured conversion actions list dynamically from JSON data
-                    $structuredConversionActions = [];
-                    foreach ($allExtractedActions as $actName => $actCount) {
-                        $source = 'Website';
-                        $category = 'Submit lead forms (Account-default goal)';
-                        $opt = 'Primary';
-                        $window = '90 days';
-                        $included = 'Yes';
-                        $status = $actCount > 0 ? 'Active' : 'Awaiting conversions';
-                        $statusIcon = $actCount > 0 ? 'check' : 'hourglass';
+                    // Set conversion_actions and conversion_goals directly from synced JSON
+                    $structuredConversionActions = $allData['conversion_actions'] ?? [];
 
-                        $lower = strtolower($actName);
-                        if (str_contains($lower, 'call') || str_contains($lower, 'phone')) {
-                            $category = 'Phone call leads (Account-default goal)';
-                            $source = str_contains($lower, 'track') || str_contains($lower, 'ads') ? 'Call from Ads' : 'Website (Google Analytics (GA4))';
-                            $window = str_contains($lower, 'track') ? '30 days' : '90 days';
-                        } elseif (str_contains($lower, 'purchase') || str_contains($lower, 'order')) {
-                            $category = 'Purchases (Account-default goal)';
-                            $source = 'Website (Google Analytics (GA4))';
-                        } elseif (str_contains($lower, 'cart')) {
-                            $category = 'Add to cart (Account-default goal)';
+                    // If existing synced JSON did not yet store conversion_actions catalog, dynamically synthesize enabled goals from synced daily_conversions and campaign_conversions
+                    if (empty($structuredConversionActions) && !empty($allExtractedActions)) {
+                        foreach ($allExtractedActions as $actName => $cntVal) {
                             $source = 'Website';
-                            $window = '30 days';
-                        } elseif (str_contains($lower, 'email') || str_contains($lower, 'contact')) {
-                            $category = 'Contacts (Account-default goal)';
-                            $source = 'Website (Google Analytics (GA4))';
-                        } elseif (str_contains($lower, 'form') || str_contains($lower, 'submit') || str_contains($lower, 'lead')) {
                             $category = 'Submit lead forms (Account-default goal)';
-                            $source = 'Website';
-                            $opt = 'Secondary';
-                            $included = 'No';
-                        }
+                            $lower = strtolower($actName);
+                            if (str_contains($lower, 'call') || str_contains($lower, 'phone')) {
+                                $category = 'Phone call leads (Account-default goal)';
+                                $source = (str_contains($lower, 'track') || str_contains($lower, 'ads')) ? 'Call from Ads' : 'Website (Google Analytics (GA4))';
+                            } elseif (str_contains($lower, 'purchase') || str_contains($lower, 'order')) {
+                                $category = 'Purchases (Account-default goal)';
+                                $source = 'Website (Google Analytics (GA4))';
+                            } elseif (str_contains($lower, 'cart')) {
+                                $category = 'Add to cart (Account-default goal)';
+                                $source = 'Website';
+                            } elseif (str_contains($lower, 'email') || str_contains($lower, 'contact')) {
+                                $category = 'Contacts (Account-default goal)';
+                                $source = 'Website (Google Analytics (GA4))';
+                            } elseif (str_contains($lower, 'thank') || str_contains($lower, 'view')) {
+                                $category = 'Page views (Account-default goal)';
+                                $source = 'Website (Google Analytics (GA4))';
+                            } elseif (str_contains($lower, 'app') || str_contains($lower, 'install')) {
+                                $category = 'Downloads (Account-default goal)';
+                                $source = 'Mobile App (Google Play)';
+                            } elseif (str_contains($lower, 'form') || str_contains($lower, 'submit') || str_contains($lower, 'lead')) {
+                                $category = 'Submit lead forms (Account-default goal)';
+                                $source = str_contains($lower, 'ga4') ? 'Website (Google Analytics (GA4))' : 'Website';
+                            } else {
+                                $category = 'Default (Account-default goal)';
+                                $source = str_contains($lower, 'ga4') ? 'Website (Google Analytics (GA4))' : 'Website';
+                            }
 
-                        $structuredConversionActions[$category][] = [
-                            'name' => $actName,
-                            'source' => $source,
-                            'tracking_status' => $status,
-                            'tracking_icon' => $statusIcon,
-                            'optimization' => $opt,
-                            'count' => str_contains($lower, 'form') || str_contains($lower, 'track') ? 'One' : 'Every',
-                            'window' => $window,
-                            'included' => $included,
-                            'all_conv' => round($actCount, 2),
-                            'conv_val' => 0.00
-                        ];
-                    }
-
-                    // Also check for known default account goals if empty or partial
-                    $knownGoals = [
-                        'Purchases (Account-default goal)' => [
-                            'name' => 'Aspire Down Under - GA4 (web) purchase',
-                            'source' => 'Website (Google Analytics (GA4))',
-                            'tracking_status' => 'Awaiting conversions',
-                            'tracking_icon' => 'hourglass',
-                            'optimization' => 'Primary',
-                            'count' => 'Every',
-                            'window' => '90 days',
-                            'included' => 'Yes',
-                            'all_conv' => 0.00,
-                            'conv_val' => 0.00
-                        ],
-                        'Add to cart (Account-default goal)' => [
-                            'name' => 'Add to cart',
-                            'source' => 'Website',
-                            'tracking_status' => 'Misconfigured',
-                            'tracking_icon' => 'alert',
-                            'optimization' => 'Primary',
-                            'count' => 'Every',
-                            'window' => '30 days',
-                            'included' => 'Yes',
-                            'all_conv' => 0.00,
-                            'conv_val' => 0.00
-                        ],
-                        'Contacts (Account-default goal)' => [
-                            'name' => 'Aspire Down Under - GA4 (web) email_click',
-                            'source' => 'Website (Google Analytics (GA4))',
-                            'tracking_status' => 'Awaiting conversions',
-                            'tracking_icon' => 'hourglass',
-                            'optimization' => 'Primary',
-                            'count' => 'Every',
-                            'window' => '90 days',
-                            'included' => 'Yes',
-                            'all_conv' => 0.00,
-                            'conv_val' => 0.00
-                        ]
-                    ];
-                    foreach ($knownGoals as $cat => $goalRow) {
-                        if (!isset($structuredConversionActions[$cat])) {
-                            $structuredConversionActions[$cat][] = $goalRow;
+                            $structuredConversionActions[$category][] = [
+                                'name' => $actName,
+                                'source' => $source,
+                                'tracking_status' => $cntVal > 0 ? 'Active' : 'Awaiting conversions',
+                                'tracking_icon' => $cntVal > 0 ? 'check' : 'hourglass',
+                                'optimization' => 'Primary',
+                                'count' => str_contains($lower, 'track') ? 'One' : 'Every',
+                                'window' => str_contains($lower, 'track') ? '30 days' : '90 days',
+                                'included' => 'Yes',
+                                'all_conv' => round($cntVal, 2),
+                                'conv_val' => 0.00,
+                            ];
                         }
                     }
 
                     $allData['conversion_goals'] = $structuredConversionActions;
+                    $allData['conversion_actions'] = $structuredConversionActions;
 
                     $topCampList = array_values($aggregatedCampaigns);
                     usort($topCampList, function($a, $b) {

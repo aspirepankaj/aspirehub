@@ -34,6 +34,7 @@ class ManageMarketingReports extends Component
     protected array $gbpData = [];
     protected array $gadsData = [];
     protected array $facebookData = [];
+    protected array $metaAdsData = [];
     protected array $linkedinData = [];
 
     // AI Marketing Report State (hidden by default as requested, can be toggled without removing any code)
@@ -60,7 +61,7 @@ class ManageMarketingReports extends Component
         }
 
         $tab = request()->query('tab');
-        if ($tab && in_array($tab, ['overview', 'ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'linkedin', 'gtm'])) {
+        if ($tab && in_array($tab, ['overview', 'ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'meta_ads', 'linkedin', 'gtm'])) {
             $this->activeTab = $tab;
         } elseif ($this->websiteId && empty($this->activeTab)) {
             $this->activeTab = 'overview';
@@ -71,7 +72,8 @@ class ManageMarketingReports extends Component
     {
         $names = [
             'gbp' => 'Business Profile',
-            'facebook' => 'Facebook',
+            'facebook' => 'Meta',
+            'meta_ads' => 'Meta Ads',
             'gads' => 'Google Ads',
             'ga4' => 'Google Analytics 4',
             'keyword' => 'Keyword.com',
@@ -81,7 +83,7 @@ class ManageMarketingReports extends Component
             'youtube' => 'YouTube'
         ];
 
-        return $website->integrations
+        $results = $website->integrations
             ->filter(function ($item) {
                 if ($item->status !== 'connected') {
                     return false;
@@ -96,10 +98,25 @@ class ManageMarketingReports extends Component
                     }
                 }
                 return true;
-            })
-            ->sortBy(function($intg) use ($names) {
-                return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
             });
+
+        // Automatically add Meta Ads if Facebook is connected
+        $fbItem = $results->firstWhere('integration_type', 'facebook');
+        if ($fbItem && !$results->contains('integration_type', 'meta_ads')) {
+            $metaAdsItem = new \App\Modules\CRM\Websites\Models\WebsiteIntegration([
+                'website_id' => $website->id,
+                'integration_type' => 'meta_ads',
+                'status' => 'connected',
+                'api_credentials' => $fbItem->api_credentials ?? [],
+                'auth_credentials' => $fbItem->auth_credentials ?? [],
+                'account_identifier' => 'Meta Marketing API',
+            ]);
+            $results->push($metaAdsItem);
+        }
+
+        return $results->sortBy(function($intg) use ($names) {
+            return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
+        });
     }
 
     public function selectClient($id)
@@ -545,6 +562,9 @@ class ManageMarketingReports extends Component
                         if (in_array('facebook', $connectedTypes)) {
                             $this->facebookData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
                         }
+                        if (in_array('meta_ads', $connectedTypes)) {
+                            $this->metaAdsData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'meta_ads', $this->dateFrom, $this->dateTo);
+                        }
                         if (in_array('linkedin', $connectedTypes)) {
                             $this->linkedinData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'linkedin', $this->dateFrom, $this->dateTo);
                         }
@@ -574,6 +594,7 @@ class ManageMarketingReports extends Component
             'gbpData'              => $this->gbpData,
             'gadsData'             => $this->gadsData,
             'facebookData'         => $this->facebookData,
+            'metaAdsData'          => $this->metaAdsData,
             'linkedinData'         => $this->linkedinData,
             'showAiMarketingReport'=> $this->showAiMarketingReport,
             'aiReport'             => $this->aiReport,

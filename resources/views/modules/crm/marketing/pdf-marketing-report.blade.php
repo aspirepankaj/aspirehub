@@ -426,7 +426,7 @@
 
     // Dynamically count total report pages based ONLY on connected integrations
     $dynamicCount = !empty($dynamicIntegrations) ? count($dynamicIntegrations) : 0;
-    $totalPages = ($hasGa4 ? 1 : 0) + ($hasGsc ? 1 : 0) + ($hasKeyword ? 1 : 0) + ($hasGbp ? 1 : 0) + ($hasGads ? 1 : 0) + ($hasFacebook ? 1 : 0) + ($hasLinkedin ? 1 : 0) + ($hasYoutube ? 1 : 0) + $dynamicCount;
+    $totalPages = ($hasGa4 ? 1 : 0) + ($hasGsc ? 1 : 0) + ($hasKeyword ? 1 : 0) + ($hasGbp ? 1 : 0) + ($hasGads ? 1 : 0) + ($hasFacebook ? 1 : 0) + ($hasMetaAds ? 1 : 0) + ($hasLinkedin ? 1 : 0) + ($hasYoutube ? 1 : 0) + $dynamicCount;
     if ($totalPages === 0) $totalPages = 1;
     $currentPageNum = 1;
 @endphp
@@ -2859,6 +2859,264 @@
         <span class="page-footer-left">{{ $website->site_name }} &bull; Aspire Digital Solutions</span>
         <span class="page-footer-right">Monthly SEO &amp; Marketing Report &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}</span>
     </div>
+
+        @if($isExplicitCompare)
+        </td>
+        @endif
+    @endforeach
+
+    @if($isExplicitCompare)
+    </tr></table>
+    @endif
+</div>
+@endif
+
+{{-- ========================================================================= --}}
+{{-- PAGE: META ADS (PAID ADVERTISING)                                         --}}
+{{-- ========================================================================= --}}
+@if($hasMetaAds)
+@php
+    $metaAdsSets = [];
+    $metaAdsSets[] = [
+        'title' => $formattedDateRange,
+        'data' => $metaAdsData,
+        'prevData' => $compareMetaAds,
+        'areaChartSvg' => $metaAdsAreaChartSvg ?? '',
+    ];
+    if ($isExplicitCompare) {
+        $metaAdsSets[] = [
+            'title' => $formattedCompareRange,
+            'data' => $compareMetaAds,
+            'prevData' => [],
+            'areaChartSvg' => $compareMetaAdsAreaChartSvg ?? '',
+        ];
+    }
+@endphp
+
+<div class="page">
+    @if($isExplicitCompare)
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;"><tr>
+    @endif
+
+    @foreach($metaAdsSets as $sIdx => $gSet)
+        @if($isExplicitCompare)
+        <td style="width: 50%; vertical-align: top; padding: 0 10px; border-right: {{ $sIdx === 0 ? '2px dashed #cbd5e1' : 'none' }};">
+        @endif
+
+        @php
+            $currentData = $gSet['data'];
+            $metaSummary = $currentData['summary'] ?? [];
+            $mClicks = (int)($metaSummary['clicks'] ?? 0);
+            $mImpr = (int)($metaSummary['impressions'] ?? 0);
+            $mCost = (float)($metaSummary['cost'] ?? ($metaSummary['spend'] ?? 0));
+            $mConv = (int)($metaSummary['conversions'] ?? 0);
+            $mAvgCpc = $mClicks > 0 ? ($mCost / $mClicks) : 0;
+            $mCtr = $mImpr > 0 ? round(($mClicks / $mImpr) * 100, 2) : 0;
+
+            if ($mClicks === 0 && $mImpr === 0 && !empty($currentData['daily_traffic'])) {
+                foreach ($currentData['daily_traffic'] as $d) {
+                    $mClicks += (int)($d['clicks'] ?? 0);
+                    $mImpr += (int)($d['impressions'] ?? 0);
+                    $mCost += (float)($d['cost'] ?? 0);
+                    $mConv += (int)($d['conversions'] ?? 0);
+                }
+                $mAvgCpc = $mClicks > 0 ? ($mCost / $mClicks) : 0;
+                $mCtr = $mImpr > 0 ? round(($mClicks / $mImpr) * 100, 2) : 0;
+            }
+
+            $prevData = $gSet['prevData'];
+            $prevMetaSum = $prevData['summary'] ?? [];
+            $prevMClicks = (int)($prevMetaSum['clicks'] ?? 0);
+            $prevMImpr = (int)($prevMetaSum['impressions'] ?? 0);
+            $prevMCost = (float)($prevMetaSum['cost'] ?? ($prevMetaSum['spend'] ?? 0));
+            $prevMConv = (int)($prevMetaSum['conversions'] ?? 0);
+            $prevMAvgCpc = $prevMClicks > 0 ? ($prevMCost / $prevMClicks) : 0;
+
+            $metaBadgeClicks = $renderKpiBadge(30, '#eff6ff', '#dbeafe', 16, 24, '<path fill="#2563eb" d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>');
+            $metaBadgeImpr = $renderKpiBadge(30, '#fef2f2', '#fee2e2', 16, 24, '<path fill="#ef4444" d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3" fill="#ffffff"/>');
+            $metaBadgeCpc = $renderKpiBadge(30, '#ecfdf5', '#d1fae5', 16, 24, '<circle cx="11" cy="11" r="8" fill="none" stroke="#059669" stroke-width="2"/><path d="m21 21-4.3-4.3" stroke="#059669" stroke-width="2"/>');
+            $metaBadgeCost = $renderKpiBadge(30, '#f0fdfa', '#ccfbf1', 16, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#0d9488" stroke-width="2"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" stroke="#0d9488" stroke-width="2"/>');
+            $metaBadgeConv = $renderKpiBadge(30, '#eef2ff', '#e0e7ff', 16, 24, '<circle cx="12" cy="12" r="10" fill="none" stroke="#4f46e5" stroke-width="2"/><path d="m9 12 2 2 4-4" fill="none" stroke="#4f46e5" stroke-width="2"/>');
+        @endphp
+
+    {{-- Header Banner --}}
+    <div class="header-banner">
+        <table class="header-table">
+            <tr>
+                <td style="width: 60%;">
+                    @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" class="logo-img" alt="Aspire" />
+                    @else
+                        <div style="font-size: 18px; font-weight: 900; color: #ffffff;">ASPIRE DIGITAL</div>
+                    @endif
+                    <div>
+                        <span class="header-title-white">META ADS </span><span class="header-title-cyan">(PAID ADVERTISING)</span>
+                    </div>
+                    <div class="header-divider"></div>
+                    <div class="header-subtitle">Source: Meta Marketing API (Facebook &amp; Instagram Ads)</div>
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: middle;">
+                    <span class="filter-pill">{{ $gSet['title'] }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="content-body">
+
+            {{-- 5 KPI CARDS --}}
+            <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 20px;">
+                <tr>
+                    {{-- 1. Clicks --}}
+                    <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); vertical-align: top;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 32px;"><img src="{{ $metaBadgeClicks }}" width="28" height="28" style="display: block;" /></td>
+                                <td style="padding-left: 6px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">CLICKS</div>
+                                    <div style="font-size: 19px; font-weight: 800; color: #135266;">{{ number_format($mClicks) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                        @if($prevMClicks > 0)
+                            <div style="margin-top: 6px; font-size: 10px;">{!! $renderDeltaBadge($mClicks, $prevMClicks) !!} <span style="color: #94a3b8;">vs prev</span></div>
+                        @endif
+                    </td>
+
+                    {{-- 2. Impressions --}}
+                    <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); vertical-align: top;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 32px;"><img src="{{ $metaBadgeImpr }}" width="28" height="28" style="display: block;" /></td>
+                                <td style="padding-left: 6px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">IMPRESSIONS</div>
+                                    <div style="font-size: 19px; font-weight: 800; color: #135266;">{{ $mImpr >= 1000 ? round($mImpr / 1000, 2) . 'K' : number_format($mImpr) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                        @if($prevMImpr > 0)
+                            <div style="margin-top: 6px; font-size: 10px;">{!! $renderDeltaBadge($mImpr, $prevMImpr) !!} <span style="color: #94a3b8;">vs prev</span></div>
+                        @endif
+                    </td>
+
+                    {{-- 3. Avg. CPC --}}
+                    <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); vertical-align: top;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 32px;"><img src="{{ $metaBadgeCpc }}" width="28" height="28" style="display: block;" /></td>
+                                <td style="padding-left: 6px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">AVG. CPC</div>
+                                    <div style="font-size: 19px; font-weight: 800; color: #135266;">${{ number_format($mAvgCpc, 2) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                        @if($prevMAvgCpc > 0)
+                            <div style="margin-top: 6px; font-size: 10px;">{!! $renderDeltaBadge($mAvgCpc, $prevMAvgCpc) !!} <span style="color: #94a3b8;">vs prev</span></div>
+                        @endif
+                    </td>
+
+                    {{-- 4. Cost --}}
+                    <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); vertical-align: top;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 32px;"><img src="{{ $metaBadgeCost }}" width="28" height="28" style="display: block;" /></td>
+                                <td style="padding-left: 6px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">SPEND / COST</div>
+                                    <div style="font-size: 19px; font-weight: 800; color: #135266;">${{ number_format($mCost) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                        @if($prevMCost > 0)
+                            <div style="margin-top: 6px; font-size: 10px;">{!! $renderDeltaBadge($mCost, $prevMCost) !!} <span style="color: #94a3b8;">vs prev</span></div>
+                        @endif
+                    </td>
+
+                    {{-- 5. Conversions --}}
+                    <td style="width: 20%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); vertical-align: top;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 32px;"><img src="{{ $metaBadgeConv }}" width="28" height="28" style="display: block;" /></td>
+                                <td style="padding-left: 6px;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">CONVERSIONS</div>
+                                    <div style="font-size: 19px; font-weight: 800; color: #135266;">{{ number_format($mConv) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                        @if($prevMConv > 0)
+                            <div style="margin-top: 6px; font-size: 10px;">{!! $renderDeltaBadge($mConv, $prevMConv) !!} <span style="color: #94a3b8;">vs prev</span></div>
+                        @endif
+                    </td>
+                </tr>
+            </table>
+
+            {{-- Trend Chart SVG --}}
+            @if(!empty($gSet['areaChartSvg']))
+            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 14px; font-weight: 800; color: #135266; margin-bottom: 12px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #0081FB; margin-right: 6px; vertical-align: middle;"></span>
+                    Meta Ads Spend, Clicks &amp; Impressions Over Time
+                </div>
+                <div style="text-align: center;">
+                    <img src="{{ $gSet['areaChartSvg'] }}" width="100%" height="220" style="display: block;" alt="Meta Ads Performance Graph" />
+                </div>
+            </div>
+            @endif
+
+            {{-- Top Meta Ad Campaigns Table --}}
+            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 14px; font-weight: 800; color: #135266; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #0081FB; margin-right: 6px;"></span>
+                    <span>Top Meta Ad Campaigns</span>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                            <th style="text-align: left; padding: 8px 6px;">Campaign Name</th>
+                            <th style="text-align: right; padding: 8px 6px;">Clicks</th>
+                            <th style="text-align: right; padding: 8px 6px;">Imp.</th>
+                            <th style="text-align: right; padding: 8px 6px;">Cost</th>
+                            <th style="text-align: right; padding: 8px 6px;">CTR</th>
+                            <th style="text-align: right; padding: 8px 6px;">Avg. CPC</th>
+                            <th style="text-align: right; padding: 8px 6px;">Conv.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($currentData['top_campaigns'] ?? [] as $camp)
+                            @php
+                                $cClicks = (int)($camp['clicks'] ?? 0);
+                                $cImpr = (int)($camp['impressions'] ?? 0);
+                                $cCost = (float)($camp['cost'] ?? ($camp['spend'] ?? 0));
+                                $cConv = (int)($camp['conversions'] ?? 0);
+                                $cCTR = $cImpr > 0 ? round(($cClicks / $cImpr) * 100, 2) : 0;
+                                $cCPC = $cClicks > 0 ? round($cCost / $cClicks, 2) : 0;
+                            @endphp
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 8px 6px; font-weight: 700; color: #0f172a;">
+                                    <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; margin-right: 6px;"></span>
+                                    {{ Str::limit($camp['name'] ?? 'Unnamed Campaign', 45) }}
+                                </td>
+                                <td style="text-align: right; padding: 8px 6px; font-weight: 800; color: #2563eb;">{{ number_format($cClicks) }}</td>
+                                <td style="text-align: right; padding: 8px 6px; color: #64748b;">{{ $cImpr >= 1000 ? round($cImpr / 1000, 2) . 'k' : number_format($cImpr) }}</td>
+                                <td style="text-align: right; padding: 8px 6px; font-weight: 800; color: #059669;">${{ $cCost >= 1000 ? round($cCost / 1000, 2) . 'k' : number_format($cCost, 2) }}</td>
+                                <td style="text-align: right; padding: 8px 6px; color: #64748b;">{{ $cCTR }}%</td>
+                                <td style="text-align: right; padding: 8px 6px; color: #64748b;">${{ number_format($cCPC, 2) }}</td>
+                                <td style="text-align: right; padding: 8px 6px; font-weight: 800; color: #4f46e5;">{{ number_format($cConv) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: #94a3b8; padding: 12px;">No Meta Ad campaign records found for this timeframe.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Footer --}}
+        <div class="page-footer">
+            <span class="page-footer-left">{{ $website->site_name }} &bull; Aspire Digital Solutions</span>
+            <span class="page-footer-right">Monthly SEO &amp; Marketing Report &bull; Page {{ $currentPageNum++ }} of {{ $totalPages }}</span>
+        </div>
 
         @if($isExplicitCompare)
         </td>

@@ -28,6 +28,7 @@ class AdminClientMarketingTab extends Component
     protected array $gbpData = [];
     protected array $gadsData = [];
     protected array $facebookData = [];
+    protected array $metaAdsData = [];
     protected array $linkedinData = [];
 
     public function mount(int $clientId): void
@@ -50,7 +51,7 @@ class AdminClientMarketingTab extends Component
         }
 
         $tab = request()->query('tab');
-        if ($tab && $tab !== 'marketing' && in_array($tab, ['overview', 'ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'linkedin', 'gtm'])) {
+        if ($tab && $tab !== 'marketing' && in_array($tab, ['overview', 'ga4', 'gsc', 'youtube', 'keyword', 'gbp', 'gads', 'facebook', 'meta_ads', 'linkedin', 'gtm'])) {
             $this->activeTab = $tab;
         } else {
             $this->activeTab = 'overview';
@@ -109,7 +110,8 @@ class AdminClientMarketingTab extends Component
     {
         $names = [
             'gbp' => 'Business Profile',
-            'facebook' => 'Facebook',
+            'facebook' => 'Meta',
+            'meta_ads' => 'Meta Ads',
             'gads' => 'Google Ads',
             'ga4' => 'Google Analytics 4',
             'keyword' => 'Keyword.com',
@@ -119,7 +121,7 @@ class AdminClientMarketingTab extends Component
             'youtube' => 'YouTube'
         ];
 
-        return WebsiteIntegration::where('website_id', $website->id)
+        $results = WebsiteIntegration::where('website_id', $website->id)
             ->where('status', 'connected')
             ->get()
             ->filter(function ($item) {
@@ -133,10 +135,25 @@ class AdminClientMarketingTab extends Component
                     }
                 }
                 return true;
-            })
-            ->sortBy(function($intg) use ($names) {
-                return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
             });
+
+        // Automatically add Meta Ads if Facebook is connected
+        $fbItem = $results->firstWhere('integration_type', 'facebook');
+        if ($fbItem && !$results->contains('integration_type', 'meta_ads')) {
+            $metaAdsItem = new WebsiteIntegration([
+                'website_id' => $website->id,
+                'integration_type' => 'meta_ads',
+                'status' => 'connected',
+                'api_credentials' => $fbItem->api_credentials ?? [],
+                'auth_credentials' => $fbItem->auth_credentials ?? [],
+                'account_identifier' => 'Meta Marketing API',
+            ]);
+            $results->push($metaAdsItem);
+        }
+
+        return $results->sortBy(function($intg) use ($names) {
+            return $names[$intg->integration_type] ?? ucfirst($intg->integration_type);
+        });
     }
 
     public function render()
@@ -192,6 +209,9 @@ class AdminClientMarketingTab extends Component
                 if (in_array('facebook', $connectedTypes)) {
                     $this->facebookData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
                 }
+                if (in_array('meta_ads', $connectedTypes)) {
+                    $this->metaAdsData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'meta_ads', $this->dateFrom, $this->dateTo);
+                }
                 if (in_array('linkedin', $connectedTypes)) {
                     $this->linkedinData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'linkedin', $this->dateFrom, $this->dateTo);
                 }
@@ -215,6 +235,7 @@ class AdminClientMarketingTab extends Component
             'gbpData' => $this->gbpData,
             'gadsData' => $this->gadsData,
             'facebookData' => $this->facebookData,
+            'metaAdsData' => $this->metaAdsData,
             'linkedinData' => $this->linkedinData,
         ]);
     }

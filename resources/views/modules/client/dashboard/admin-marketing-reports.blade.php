@@ -263,6 +263,7 @@
         $isGadsConnected = isset($integrations['gads']);
         $isGtmConnected = isset($integrations['gtm']);
         $isFacebookConnected = isset($integrations['facebook']);
+        $isMetaAdsConnected = isset($integrations['meta_ads']);
         $isLinkedinConnected = isset($integrations['linkedin']);
 
         $hasGa4 = !empty($ga4Data) && !isset($ga4Data['error']);
@@ -273,6 +274,8 @@
         $hasGbp = !empty($gbpData) && !isset($gbpData['error']);
         $hasGads = !empty($gadsData) && !isset($gadsData['error']);
         $hasFacebook = !empty($facebookData) && !isset($facebookData['error']);
+        $metaAdsData = $metaAdsData ?? [];
+        $hasMetaAds = !empty($metaAdsData) && !isset($metaAdsData['error']);
         $linkedinData = $linkedinData ?? [];
         $hasLinkedin = !empty($linkedinData) && !isset($linkedinData['error']);
     @endphp
@@ -317,7 +320,7 @@
     <!-- Integration Selector Tabs / Date Filter Header -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <!-- Integration Tabs (Scrollable cleanly without heavy native scrollbar) -->
-        @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isLinkedinConnected)
+        @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected)
             <div class="flex-1 min-w-0 overflow-x-auto no-scrollbar scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
                 <div class="flex items-center p-1.5 bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur border border-slate-200/40 dark:border-slate-700/40 rounded-2xl min-w-max space-x-1">
                     <button type="button" wire:click="selectIntegration('overview')" 
@@ -336,7 +339,14 @@
                         <button type="button" wire:click="selectIntegration('facebook')" 
                             class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'facebook' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-500 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
                             <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
-                            <span>Facebook</span>
+                            <span>Meta</span>
+                        </button>
+                    @endif
+                    @if($isMetaAdsConnected)
+                        <button type="button" wire:click="selectIntegration('meta_ads')" 
+                            class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 whitespace-nowrap {{ $activeReportIntegrationId === 'meta_ads' ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-500 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200' }}">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                            <span>Meta Ads</span>
                         </button>
                     @endif
                     @if($isGadsConnected)
@@ -449,7 +459,7 @@
         </div>
 
         <div wire:loading.remove wire:target="selectIntegration" class="animate-fadeIn w-full">
-            @if(!($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isGtmConnected || $isFacebookConnected || $isLinkedinConnected))
+            @if(!($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isGtmConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected))
                 {{-- Data not found / No Integrations --}}
                 <div class="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
                     <div class="w-20 h-20 mb-4 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
@@ -936,7 +946,7 @@
                                             </div>
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Facebook</h3>
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Meta</h3>
                                             </div>
                                             <span class="text-xs text-slate-400">Social Reach & Engagement</span>
                                         </div>
@@ -1026,6 +1036,130 @@
                                             <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
                                             <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
                                         </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- 4b. Meta Ads --}}
+                        @if($isMetaAdsConnected)
+                            @php
+                                $mBase = $metaAdsData ?? [];
+                                $mSum = $mBase['summary'] ?? [];
+                                $mCost = (float)($mSum['cost'] ?? $mSum['spend'] ?? 0);
+                                $mClicks = (int)($mSum['clicks'] ?? 0);
+                                $mImpr = (int)($mSum['impressions'] ?? 0);
+                                $mConv = (int)($mSum['conversions'] ?? 0);
+
+                                $mComp = $mBase['compare_data'] ?? [];
+                                $mCompSum = $mComp['summary'] ?? [];
+                                $hasMComp = !empty($mCompSum);
+                                $compMCost = (float)($mCompSum['cost'] ?? $mCompSum['spend'] ?? 0);
+                                $compMClicks = (int)($mCompSum['clicks'] ?? 0);
+                                $compMImpr = (int)($mCompSum['impressions'] ?? 0);
+                                $compMConv = (int)($mCompSum['conversions'] ?? 0);
+                            @endphp
+                            @php $integrationCounter++; @endphp
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-meta-ads">
+                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
+                                    <div class="flex items-center gap-3">
+                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
+                                        <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-500 flex items-center justify-center border border-blue-100 dark:border-blue-900/50 shadow-xs">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Meta Ads</h3>
+                                            </div>
+                                            <span class="text-xs text-slate-400">Paid Campaigns, Reach &amp; Conversions</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" wire:click="selectIntegration('meta_ads')" 
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm">
+                                        <span>View Details</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {{-- 1. Spend --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate">Spend</div>
+                                                <div class="metric-value">${{ number_format($mCost, 2) }}</div>
+                                            </div>
+                                        </div>
+                                        @if($hasMComp)
+                                            @php $d = $getDelta($mCost, $compMCost); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- 2. Clicks --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate">Clicks</div>
+                                                <div class="metric-value">{{ number_format($mClicks) }}</div>
+                                            </div>
+                                        </div>
+                                        @if($hasMComp)
+                                            @php $d = $getDelta($mClicks, $compMClicks); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- 3. Impressions --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate">Impressions</div>
+                                                <div class="metric-value">{{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($mImpr) : number_format($mImpr) }}</div>
+                                            </div>
+                                        </div>
+                                        @if($hasMComp)
+                                            @php $d = $getDelta($mImpr, $compMImpr); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- 4. Conversions --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate">Conversions</div>
+                                                <div class="metric-value">{{ number_format($mConv) }}</div>
+                                            </div>
+                                        </div>
+                                        @if($hasMComp)
+                                            @php $d = $getDelta($mConv, $compMConv); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
