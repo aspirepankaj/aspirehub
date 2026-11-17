@@ -105,29 +105,42 @@
             $sRawTraffic = $sData['traffic_sources'] ?? [];
             $sDonutItems = [];
             if (!empty($sRawTraffic)) {
-                foreach (array_slice($sRawTraffic, 0, 7) as $st) {
+                $channelAgg = [];
+                foreach ($sRawTraffic as $st) {
+                    $sm = strtolower($st['source_medium'] ?? '');
+                    if (str_contains($sm, 'direct') || str_contains($sm, 'none')) {
+                        $chName = 'Direct';
+                    } elseif (str_contains($sm, 'organic') && !str_contains($sm, 'social')) {
+                        $chName = 'Organic Search';
+                    } elseif (str_contains($sm, 'cpc') || str_contains($sm, 'paid') || str_contains($sm, 'ppc')) {
+                        $chName = 'Paid Search';
+                    } elseif (str_contains($sm, 'social') || str_contains($sm, 'facebook') || str_contains($sm, 'instagram') || str_contains($sm, 'linkedin') || str_contains($sm, 'twitter') || str_contains($sm, 't.co')) {
+                        $chName = 'Organic Social';
+                    } elseif (str_contains($sm, 'email')) {
+                        $chName = 'Email';
+                    } elseif (str_contains($sm, 'chatgpt') || str_contains($sm, 'ai') || str_contains($sm, 'claude') || str_contains($sm, 'perplexity')) {
+                        $chName = 'AI Assistant';
+                    } else {
+                        $chName = 'Referral';
+                    }
+                    $channelAgg[$chName] = ($channelAgg[$chName] ?? 0) + (int)($st['sessions'] ?? 0);
+                }
+                arsort($channelAgg);
+                foreach (array_slice($channelAgg, 0, 7, true) as $chLabel => $chVal) {
                     $sDonutItems[] = [
-                        'label' => $st['source_medium'] ?? '(direct) / (none)',
-                        'sessions' => (int)($st['sessions'] ?? 0)
+                        'label' => $chLabel,
+                        'sessions' => $chVal
                     ];
                 }
             } else {
                 $sDonutItems = $idx === 0 ? [
-                    ['label' => '(direct) / (none)', 'sessions' => 511],
-                    ['label' => 'Google / Organic', 'sessions' => 300],
-                    ['label' => 'Bing / Organic', 'sessions' => 87],
-                    ['label' => 'App.clickup.com', 'sessions' => 38],
-                    ['label' => 'Clutch.co', 'sessions' => 26],
-                    ['label' => 'Google / (not set)', 'sessions' => 25],
-                    ['label' => 'Themanifest.com', 'sessions' => 14],
+                    ['label' => 'Direct', 'sessions' => 511],
+                    ['label' => 'Organic Search', 'sessions' => 387],
+                    ['label' => 'Referral', 'sessions' => 103],
                 ] : [
-                    ['label' => '(direct) / (none)', 'sessions' => 432],
-                    ['label' => 'Google / Organic', 'sessions' => 245],
-                    ['label' => 'Bing / Organic', 'sessions' => 65],
-                    ['label' => 'App.clickup.com', 'sessions' => 31],
-                    ['label' => 'Clutch.co', 'sessions' => 22],
-                    ['label' => 'Google / (not set)', 'sessions' => 19],
-                    ['label' => 'Themanifest.com', 'sessions' => 11],
+                    ['label' => 'Direct', 'sessions' => 432],
+                    ['label' => 'Organic Search', 'sessions' => 310],
+                    ['label' => 'Referral', 'sessions' => 84],
                 ];
             }
             $sTotalTraffic = array_sum(array_column($sDonutItems, 'sessions')) ?: 1;
@@ -437,7 +450,7 @@
                         <div class="donut large-donut" style="background: conic-gradient({{ $sDonutGradient }});">
                             <div class="donut-center">
                                 <strong>{{ number_format($sTotalTraffic) }}</strong>
-                                <small>Total Users</small>
+                                <small>Total Sessions</small>
                             </div>
                         </div>
                         <div class="channel-list">

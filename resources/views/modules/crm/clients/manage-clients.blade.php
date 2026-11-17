@@ -1735,10 +1735,59 @@
                                         </div>
 
                                         <!-- 2. Top Queries Table (GSC) -->
-                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Search Queries</h4>
-                                                <div class="overflow-x-auto">
+                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" x-data="{
+                                            activeUrl: '',
+                                            querySearch: '',
+                                            urlSearch: '',
+                                            allQueries: {{ json_encode($activeReportData['top_queries'] ?? []) }},
+                                            allPages: {{ json_encode($activeReportData['top_pages'] ?? []) }},
+                                            get displayedPages() {
+                                                let pages = this.allPages;
+                                                if (this.activeUrl) {
+                                                    pages = pages.filter(p => p.page === this.activeUrl);
+                                                }
+                                                if (this.urlSearch && this.urlSearch.trim() !== '') {
+                                                    let term = this.urlSearch.trim().toLowerCase();
+                                                    pages = pages.filter(p => (p.page || '').toLowerCase().includes(term));
+                                                }
+                                                return pages.slice(0, 10);
+                                            },
+                                            get displayedQueries() {
+                                                let queries = this.allQueries;
+                                                if (this.activeUrl) {
+                                                    let clean = this.activeUrl.replace('https://', '').replace('http://', '').toLowerCase();
+                                                    let parts = clean.split('/').filter(p => p.length > 2);
+                                                    let matched = queries.filter(q => {
+                                                        let qText = (q.query || '').toLowerCase();
+                                                        return parts.some(part => qText.includes(part) || part.includes(qText));
+                                                    });
+                                                    queries = matched.length ? matched : queries;
+                                                }
+                                                if (this.querySearch && this.querySearch.trim() !== '') {
+                                                    let term = this.querySearch.trim().toLowerCase();
+                                                    queries = queries.filter(q => (q.query || '').toLowerCase().includes(term));
+                                                }
+                                                return queries.slice(0, 10);
+                                            },
+                                            filterByPage(url) {
+                                                this.activeUrl = (this.activeUrl === url) ? '' : url;
+                                            }
+                                        }">
+                                            <!-- Top Search Queries -->
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col">
+                                                <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                                                    <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight" style="font-size: 18px !important; margin: 0 !important;">Top Search Queries</h4>
+                                                    <div class="flex items-center gap-2">
+                                                        <template x-if="activeUrl">
+                                                            <span class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-full">Filtered by page</span>
+                                                        </template>
+                                                        <div class="relative">
+                                                            <input type="text" x-model="querySearch" placeholder="Query contains..." class="h-8 py-1 px-2.5 pl-7 text-[12px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-xs w-36 sm:w-44">
+                                                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="overflow-x-auto flex-1">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[13px]">
@@ -1748,21 +1797,36 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody class="text-[16px] font-normal">
-                                                            @foreach ($activeReportData['top_queries'] ?? [] as $query)
+                                                            <template x-for="(query, qIdx) in displayedQueries" :key="qIdx">
                                                                 <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-normal truncate max-w-[200px]" title="{{ $query['query'] }}">{{ $query['query'] }}</td>
-                                                                    <td class="py-2.5 text-right font-normal">{{ number_format($query['clicks'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 font-normal">{{ number_format($query['impressions'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 font-normal truncate max-w-[200px]" :title="query.query" x-text="query.query"></td>
+                                                                    <td class="py-2.5 text-right font-normal" x-text="Number(query.clicks || 0).toLocaleString()"></td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 font-normal" x-text="Number(query.impressions || 0).toLocaleString()"></td>
                                                                 </tr>
-                                                            @endforeach
+                                                            </template>
                                                         </tbody>
                                                     </table>
                                                 </div>
                                             </div>
 
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Ranking URLs</h4>
-                                                <div class="overflow-x-auto">
+                                            <!-- Top Ranking URLs -->
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col">
+                                                <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                                                    <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight" style="font-size: 18px !important; margin: 0 !important;">Top Ranking URLs</h4>
+                                                    <div class="flex items-center gap-2">
+                                                        <template x-if="activeUrl">
+                                                            <button type="button" @click="activeUrl = ''" class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 px-2 py-0.5 rounded-full hover:bg-rose-100 transition" title="Clear page filter">
+                                                                <span>Reset Filter</span>
+                                                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </template>
+                                                        <div class="relative">
+                                                            <input type="text" x-model="urlSearch" placeholder="URL contains... (/blog/)" class="h-8 py-1 px-2.5 pl-7 text-[12px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-xs w-36 sm:w-44">
+                                                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="overflow-x-auto flex-1">
                                                     <table class="w-full text-left text-[16px]">
                                                         <thead>
                                                             <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[13px]">
@@ -1772,15 +1836,22 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody class="text-[16px] font-normal">
-                                                            @foreach ($activeReportData['top_pages'] ?? [] as $page)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-normal truncate max-w-[200px] text-indigo-600" title="{{ $page['page'] }}">
-                                                                        <a href="{{ $page['page'] }}" target="_blank" class="hover:underline font-normal">{{ str_replace('https://', '', $page['page']) }}</a>
+                                                            <template x-for="(page, pIdx) in displayedPages" :key="pIdx">
+                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350 hover:bg-indigo-50/40 dark:hover:bg-slate-800/40 transition cursor-pointer"
+                                                                    :class="{'bg-indigo-50/70 dark:bg-indigo-950/40 font-semibold': activeUrl === page.page}"
+                                                                    @click="filterByPage(page.page)">
+                                                                    <td class="py-2.5 font-normal truncate max-w-[200px] text-slate-700 dark:text-slate-300" :title="'Click to filter for: ' + page.page">
+                                                                        <a href="javascript:void(0)" class="text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1.5 max-w-full truncate">
+                                                                            <span class="truncate" x-text="(page.page || '').replace('https://', '').replace('http://', '')"></span>
+                                                                            <template x-if="activeUrl === page.page">
+                                                                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0"></span>
+                                                                            </template>
+                                                                        </a>
                                                                     </td>
-                                                                    <td class="py-2.5 text-right font-normal">{{ number_format($page['clicks'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 font-normal">{{ number_format($page['impressions'] ?? 0) }}</td>
+                                                                    <td class="py-2.5 text-right font-normal" x-text="Number(page.clicks || 0).toLocaleString()"></td>
+                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 font-normal" x-text="Number(page.impressions || 0).toLocaleString()"></td>
                                                                 </tr>
-                                                            @endforeach
+                                                            </template>
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -1806,30 +1877,6 @@
                                                                     <td class="py-2.5 font-normal capitalize">{{ strtolower($device['device']) }}</td>
                                                                     <td class="py-2.5 text-right font-normal">{{ number_format($device['clicks'] ?? 0) }}</td>
                                                                     <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 font-normal">{{ number_format($device['impressions'] ?? 0) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50">
-                                                <h4 class="text-[18px] font-medium text-[#135266] dark:text-white tracking-tight mb-3" style="font-size: 18px !important;">Top Countries</h4>
-                                                <div class="overflow-x-auto">
-                                                    <table class="w-full text-left text-[16px]">
-                                                        <thead>
-                                                            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[13px]">
-                                                                <th class="py-2 font-bold">Country</th>
-                                                                <th class="py-2 text-right font-bold">Clicks</th>
-                                                                <th class="py-2 text-right font-bold">Imp.</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody class="text-[16px] font-normal">
-                                                            @foreach ($activeReportData['countries'] ?? [] as $country)
-                                                                <tr class="border-b border-slate-100 dark:border-slate-800/40 text-slate-750 dark:text-slate-350">
-                                                                    <td class="py-2.5 font-normal capitalize">{{ strtolower(strlen($country['country']) === 3 ? $country['country'] : $country['country']) }}</td>
-                                                                    <td class="py-2.5 text-right font-normal">{{ number_format($country['clicks'] ?? 0) }}</td>
-                                                                    <td class="py-2.5 text-right text-slate-400 dark:text-slate-500 font-normal">{{ number_format($country['impressions'] ?? 0) }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>

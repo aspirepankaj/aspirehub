@@ -1170,16 +1170,16 @@ class ManageClients extends Component
                             'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['date'], 'rowLimit' => 25000, 'dataState' => 'all'
                         ]),
                         $makeReq('queries')->post($endpoint, [
-                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 10, 'dataState' => 'all'
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 100, 'dataState' => 'all'
                         ]),
                         $makeReq('pages')->post($endpoint, [
-                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 10, 'dataState' => 'all'
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 100, 'dataState' => 'all'
                         ]),
                         $makeReq('devices')->post($endpoint, [
-                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 10, 'dataState' => 'all'
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 25, 'dataState' => 'all'
                         ]),
                         $makeReq('countries')->post($endpoint, [
-                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 10, 'dataState' => 'all'
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['country'], 'rowLimit' => 25, 'dataState' => 'all'
                         ]),
                     ];
                 });

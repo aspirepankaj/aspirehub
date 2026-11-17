@@ -18,7 +18,7 @@
     tempCompareStart: '',
     tempCompareEnd: '',
     includeToday: false,
-    comparePreset: 'custom',
+    comparePreset: 'last_period',
     format: 'percentage',
     
     activeTarget: 'range',
@@ -47,19 +47,11 @@
         this.$watch('tempEnd', value => this.calculateCompareDates());
         this.$watch('comparePreset', value => this.calculateCompareDates());
         this.$watch('enableCompare', value => {
-            if (value && (!this.tempCompareStart || !this.tempCompareEnd)) {
-                this.comparePreset = 'custom';
-                if (this.tempStart && this.tempEnd) {
-                    const dStart = new Date(this.tempStart);
-                    const dEnd = new Date(this.tempEnd);
-                    const diffDays = Math.round((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
-                    const cEnd = new Date(dStart);
-                    cEnd.setDate(cEnd.getDate() - 1);
-                    const cStart = new Date(cEnd);
-                    cStart.setDate(cStart.getDate() - (diffDays - 1));
-                    this.tempCompareStart = this.formatDateObj(cStart);
-                    this.tempCompareEnd = this.formatDateObj(cEnd);
+            if (value) {
+                if (this.comparePreset === 'custom' && (!this.tempCompareStart || !this.tempCompareEnd)) {
+                    this.comparePreset = 'last_period';
                 }
+                this.calculateCompareDates();
             }
         });
         this.$watch('includeToday', value => {
@@ -146,6 +138,7 @@
         if (iso < this.minDate || iso > this.maxDate) return;
 
         if (this.activeTarget === 'compare') {
+            this.comparePreset = 'custom';
             if (this.selectingStep === 0) {
                 this.tempCompareStart = iso;
                 this.tempCompareEnd = iso;
@@ -469,6 +462,8 @@
                     <div x-show="enableCompare" class="mt-2 space-y-2">
                         <select x-model="comparePreset" @change="calculateCompareDates()"
                                 class="w-full text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded px-2 py-1.5 text-slate-800 dark:text-slate-200 outline-none">
+                            <option value="last_period">Previous period</option>
+                            <option value="previous_year">Previous year</option>
                             <option value="custom">Custom</option>
                         </select>
                         <div class="flex items-center gap-2">

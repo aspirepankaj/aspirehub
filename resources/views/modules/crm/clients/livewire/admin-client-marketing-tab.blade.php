@@ -733,6 +733,7 @@
                                     $kwBase = $keywordData ?? [];
                                     $kwSum = $kwBase['summary'] ?? [];
                                     $kwTotal = $kwSum['total_keywords'] ?? 0;
+                                    $kwTop3 = $kwSum['top_3'] ?? 0;
                                     $kwTop10 = $kwSum['top_10'] ?? 0;
                                     $kwTop15 = $kwSum['top_15'] ?? 0;
                                     $kwPages = $kwSum['top_10_pages'] ?? 0;
@@ -759,12 +760,24 @@
                                         </button>
                                     </div>
 
-                                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                                         <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                                             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Total Keywords</div>
                                             <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($kwTotal) }}</div>
                                             @if($hasKwComp)
                                                 @php $d = $getDelta($kwTotal, $kwCompSum['total_keywords'] ?? 0); @endphp
+                                                <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
+                                                    <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                                    <span class="text-slate-400 font-normal">vs. prev</span>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Top 3 Keywords</div>
+                                            <div class="text-2xl font-momo font-medium text-[#135266] dark:text-white tracking-tight">{{ number_format($kwTop3) }}</div>
+                                            @if($hasKwComp)
+                                                @php $d = $getDelta($kwTop3, $kwCompSum['top_3'] ?? 0); @endphp
                                                 <div class="mt-2 text-[11px] font-bold flex items-center gap-1 {{ $d['trend'] === 'up' ? 'text-emerald-600 dark:text-emerald-400' : ($d['trend'] === 'down' ? 'text-rose-500' : 'text-slate-400') }}">
                                                     <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
                                                     <span class="text-slate-400 font-normal">vs. prev</span>

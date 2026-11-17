@@ -519,30 +519,39 @@ class MarketingReportPdfService
         $slices = [];
         $idx = 0;
 
-        foreach (array_slice($channels, 0, 8) as $ch) {
+        $channelAgg = [];
+        foreach ($channels as $ch) {
             $sCount = (int)($ch['sessions'] ?? 0);
             if ($sCount <= 0) continue;
             $rawName = $ch['source_medium'] ?? ($ch['channel'] ?? ($ch['name'] ?? 'Other'));
-            
-            // Format clean label matching single view
             $low = strtolower($rawName);
-            if (str_contains($low, '(direct)')) $name = '(Direct) / (None)';
-            elseif (str_contains($low, 'google / organic')) $name = 'Google / Organic';
-            elseif (str_contains($low, 'trafficheap.cc')) $name = 'Trafficheap.Cc / Referral';
-            elseif (str_contains($low, 'bing / organic')) $name = 'Bing / Organic';
-            elseif (str_contains($low, 'app.clickup.com')) $name = 'App.Clickup.Com / Referral';
-            elseif (str_contains($low, 'clutch.co')) $name = 'Clutch.Co / Referral_profile';
-            elseif (str_contains($low, 'google / (not set)')) $name = 'Google / (Not Set)';
-            elseif (str_contains($low, 'themanifest.com')) $name = 'Themanifest.Com / Referral';
-            else $name = ucwords(str_replace(['_', '-'], [' ', ' '], $rawName));
 
+            if (str_contains($low, 'direct') || str_contains($low, 'none')) {
+                $name = 'Direct';
+            } elseif (str_contains($low, 'organic') && !str_contains($low, 'social')) {
+                $name = 'Organic Search';
+            } elseif (str_contains($low, 'cpc') || str_contains($low, 'paid') || str_contains($low, 'ppc')) {
+                $name = 'Paid Search';
+            } elseif (str_contains($low, 'social') || str_contains($low, 'facebook') || str_contains($low, 'instagram') || str_contains($low, 'linkedin') || str_contains($low, 'twitter') || str_contains($low, 't.co')) {
+                $name = 'Organic Social';
+            } elseif (str_contains($low, 'email')) {
+                $name = 'Email';
+            } elseif (str_contains($low, 'chatgpt') || str_contains($low, 'ai') || str_contains($low, 'claude') || str_contains($low, 'perplexity')) {
+                $name = 'AI Assistant';
+            } else {
+                $name = 'Referral';
+            }
+            $channelAgg[$name] = ($channelAgg[$name] ?? 0) + $sCount;
+        }
+        arsort($channelAgg);
+
+        foreach (array_slice($channelAgg, 0, 8, true) as $chName => $chVal) {
             $slices[] = [
-                'name' => $name,
-                'value' => $sCount,
+                'name' => $chName,
+                'value' => $chVal,
                 'color' => $palette[$idx % count($palette)],
             ];
             $idx++;
-            if (count($slices) >= 8) break;
         }
 
         $total = array_sum(array_column($slices, 'value')) ?: 1;

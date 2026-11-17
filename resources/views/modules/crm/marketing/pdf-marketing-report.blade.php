@@ -3552,35 +3552,6 @@
             </table>
         </div>
         @endif
-                        <th style="width: 30%;">Display URL domain</th>
-                        <th style="text-align: right; width: 12%;">Impr. share</th>
-                        <th style="text-align: right; width: 11%;">Overlap rate</th>
-                        <th style="text-align: right; width: 12%;">Position above</th>
-                        <th style="text-align: right; width: 11%;">Top of page</th>
-                        <th style="text-align: right; width: 12%;">Abs. Top page</th>
-                        <th style="text-align: right; width: 12%;">Outranking</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($pdfAuctionInsights as $row)
-                        <tr @if(!empty($row['is_you'])) style="background-color: #f0f7ff; font-weight: 700;" @endif>
-                            <td style="color: {{ !empty($row['is_you']) ? '#1a73e8' : '#334155' }};">
-                                @if(!empty($row['is_you']))
-                                    <span style="background-color: #1a73e8; color: #ffffff; font-size: 7.5px; padding: 1px 4px; border-radius: 3px; font-weight: 800; margin-right: 4px;">YOU</span>
-                                @endif
-                                {{ $row['display_domain'] }}
-                            </td>
-                            <td style="text-align: right; color: #1a73e8; font-weight: 700;">{{ $row['impression_share'] }}</td>
-                            <td style="text-align: right;">{{ $row['overlap_rate'] }}</td>
-                            <td style="text-align: right;">{{ $row['position_above_rate'] }}</td>
-                            <td style="text-align: right;">{{ $row['top_of_page_rate'] }}</td>
-                            <td style="text-align: right;">{{ $row['abs_top_of_page_rate'] }}</td>
-                            <td style="text-align: right;">{{ $row['outranking_share'] }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
     </div>
 
     {{-- Footer --}}

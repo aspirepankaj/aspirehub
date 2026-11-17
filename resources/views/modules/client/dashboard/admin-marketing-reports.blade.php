@@ -1292,6 +1292,7 @@
                                 $kwBase = $keywordData ?? [];
                                 $kwSum = $kwBase['summary'] ?? [];
                                 $kwTotal = $kwSum['total_keywords'] ?? 0;
+                                $kwTop3 = $kwSum['top_3'] ?? 0;
                                 $kwTop10 = $kwSum['top_10'] ?? 0;
                                 $kwTop15 = $kwSum['top_15'] ?? 0;
                                 $kwPages = $kwSum['top_10_pages'] ?? 0;
@@ -1322,7 +1323,7 @@
                                     </button>
                                 </div>
 
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                                     {{-- 1. Total Keywords --}}
                                     <div class="metric-card-theme p-4 flex flex-col justify-between">
                                         <div class="flex items-center gap-3 mb-2">
@@ -1343,7 +1344,27 @@
                                         @endif
                                     </div>
 
-                                    {{-- 2. Top 10 Keywords --}}
+                                    {{-- 2. Top 3 Keywords --}}
+                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <div class="metric-icon-circle">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="metric-title truncate">Top 3 Keywords</div>
+                                                <div class="metric-value">{{ number_format($kwTop3) }}</div>
+                                            </div>
+                                        </div>
+                                        @if($hasKwComp)
+                                            @php $d = $getDelta($kwTop3, $kwCompSum['top_3'] ?? 0); @endphp
+                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
+                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
+                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
+                                        </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- 3. Top 10 Keywords --}}
                                     <div class="metric-card-theme p-4 flex flex-col justify-between">
                                         <div class="flex items-center gap-3 mb-2">
                                             <div class="metric-icon-circle">
@@ -1513,9 +1534,6 @@
                                                 <div class="metric-title truncate">Avg Duration</div>
                                                 <div class="metric-value">{{ $ytAvgDuration }}</div>
                                             </div>
-                                        </div>
-                                        <div class="metric-trend-row text-slate-400 dark:text-slate-500 font-medium text-xs">
-                                            Per view length
                                         </div>
                                     </div>
                                 </div>
