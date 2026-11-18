@@ -151,10 +151,10 @@ small {
 }
 
 /* Clamp arbitrary small text classes down to clean 14px */
-[class*="text-[10px]"],
-[class*="text-[11px]"],
-[class*="text-[12px]"],
-[class*="text-[13px]"] {
+[class*="text-[10px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]),
+[class*="text-[11px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]),
+[class*="text-[12px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]),
+[class*="text-[13px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]) {
   font-size: 14px !important;
 }
 

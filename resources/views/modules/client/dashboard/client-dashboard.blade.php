@@ -21,6 +21,40 @@
         </div>
     </section>
 
+    <style>
+        .stats-grid-4 .stat-box {
+            padding: 16px 14px !important;
+            gap: 12px !important;
+        }
+        .stats-grid-4 .stat-circle-icon {
+            width: 46px !important;
+            height: 46px !important;
+        }
+        .stats-grid-4 .stat-circle-icon svg,
+        .stats-grid-4 .stat-circle-icon i {
+            width: 22px !important;
+            height: 22px !important;
+        }
+        .stats-grid-4 .stat-title {
+            font-size: 15px !important;
+            margin-bottom: 8px !important;
+            white-space: nowrap !important;
+        }
+        .stats-grid-4 .stat-number.report-month {
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            white-space: nowrap !important;
+            padding: 6px 0 3px !important;
+        }
+        .stats-grid-4 .stat-foot {
+            white-space: nowrap !important;
+            gap: 4px !important;
+        }
+        .stats-grid-4 .stat-foot span {
+            white-space: nowrap !important;
+        }
+    </style>
+
     <!-- Stats Grid (4 Cards) -->
     <section class="stats-grid-4">
         <!-- Connected Websites -->
