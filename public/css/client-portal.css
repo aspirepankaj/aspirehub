@@ -1226,6 +1226,7 @@ body:has(.is-marketing-report),
 }
 
 @media (max-width: 600px) {
+
   .stats-grid-4,
   .stats-grid-3 {
     grid-template-columns: 1fr;
@@ -2259,7 +2260,9 @@ body:has(.is-marketing-report),
   letter-spacing: 0.01em !important;
   margin-bottom: 2px !important;
   display: block !important;
-  white-space: nowrap !important;
+  white-space: normal !important;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 /* Stat card values */
@@ -2278,6 +2281,7 @@ body:has(.is-marketing-report),
   letter-spacing: -0.02em !important;
   color: var(--portal-primary) !important;
   display: block !important;
+  overflow-wrap: anywhere;
 }
 
 /* Keyword.com 3-column prominent stat cards - Full override */
@@ -2411,6 +2415,7 @@ body:has(.is-marketing-report),
   border: 1px solid var(--border) !important;
   border-radius: 10px !important;
   box-shadow: none !important;
+  overflow: hidden;
 }
 
 /* Panel headers */
@@ -2549,13 +2554,15 @@ body:has(.is-marketing-report),
   border-color: #bab6b7 !important;
   border-width: 1px !important;
   box-shadow: 0 2px 8px rgba(11, 73, 91, 0.08) !important;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b>div span.text-\[13px\] {
   font-size: 12px !important;
   font-weight: 600 !important;
   color: var(--muted-foreground) !important;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .client-integration-theme [wire\:key*="gads-replica"] .grid.border-b>div div[class*="text-[26px]"] {

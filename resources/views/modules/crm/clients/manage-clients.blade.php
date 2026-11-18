@@ -1821,7 +1821,7 @@
                                                             </button>
                                                         </template>
                                                         <div class="relative">
-                                                            <input type="text" x-model="urlSearch" placeholder="URL contains... (/blog/)" class="h-8 py-1 px-2.5 pl-7 text-[12px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-xs w-36 sm:w-44">
+                                                            <input type="text" x-model="urlSearch" placeholder="URL contains..." class="h-8 py-1 px-2.5 pl-7 text-[12px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-xs w-36 sm:w-44">
                                                             <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
                                                         </div>
                                                     </div>
