@@ -9,6 +9,7 @@ use App\Modules\CRM\Clients\Models\Client;
 use App\Modules\CRM\Websites\Models\Website;
 use App\Modules\CRM\Websites\Models\WebsiteIntegration;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -538,6 +539,113 @@ class ClientMarketingReports extends Component
             $this->loadReportData();
         }
 
+        // Compute overview top statistics matching Client Dashboard
+        $stats = [
+            'websites' => 0,
+            'linked_analytics' => 0,
+            'active_services' => 0,
+            'last_report_month' => 'No Report',
+        ];
+
+        // Determine current effective clientId (from property or authenticated user)
+        $effectiveClientId = $this->clientId;
+        if (!$effectiveClientId && Auth::check()) {
+            $effectiveClientId = DB::table('adspv_clients')
+                ->where('user_id', Auth::id())
+                ->value('id');
+        }
+
+        // If still no clientId, fallback to the owner of the selected website
+        if (!$effectiveClientId && $this->selectedWebsiteId) {
+            $effectiveClientId = DB::table('adspv_websites')
+                ->where('id', $this->selectedWebsiteId)
+                ->value('client_id');
+        }
+
+        if ($effectiveClientId) {
+            // Count ONLY active websites (excluding inactive or deleted)
+            $websiteCount = DB::table('adspv_websites')
+                ->where('client_id', $effectiveClientId)
+                ->where('status', 'active')
+                ->count();
+
+            $activeServices = DB::table('adspv_client_plan')
+                ->where('client_id', $effectiveClientId)
+                ->count();
+
+            // Active websites belonging to this client
+            $websiteIds = DB::table('adspv_websites')
+                ->where('client_id', $effectiveClientId)
+                ->where('status', 'active')
+                ->pluck('id');
+
+            // Integrations connected to the selected website, or across active websites
+            $connectedQuery = DB::table('adspv_website_integrations')
+                ->where('status', 'connected');
+
+            if ($this->selectedWebsiteId) {
+                $connectedQuery->where('website_id', $this->selectedWebsiteId);
+            } else {
+                $connectedQuery->whereIn('website_id', $websiteIds);
+            }
+
+            $connectedTypes = $connectedQuery->pluck('integration_type')
+                ->unique()
+                ->toArray();
+
+            // If Facebook is connected, Meta Ads is also automatically active/available
+            if (in_array('facebook', $connectedTypes) && !in_array('meta_ads', $connectedTypes)) {
+                $connectedTypes[] = 'meta_ads';
+            }
+
+            $lastReport = DB::table('adspv_maintenance_reports')
+                ->where(function ($q) use ($effectiveClientId, $websiteIds) {
+                    $q->where('client_id', $effectiveClientId);
+                    if ($websiteIds->isNotEmpty()) {
+                        $q->orWhereIn('website_id', $websiteIds);
+                    }
+                })
+                ->where('status', 'completed')
+                ->orderByDesc('maintenance_date')
+                ->orderByDesc('id')
+                ->first();
+
+            if (!$lastReport) {
+                $lastReport = DB::table('adspv_maintenance_reports')
+                    ->where(function ($q) use ($effectiveClientId, $websiteIds) {
+                        $q->where('client_id', $effectiveClientId);
+                        if ($websiteIds->isNotEmpty()) {
+                            $q->orWhereIn('website_id', $websiteIds);
+                        }
+                    })
+                    ->orderByDesc('maintenance_date')
+                    ->orderByDesc('id')
+                    ->first();
+            }
+
+            $lastReportMonth = 'No Report';
+            if ($lastReport) {
+                if (!empty($lastReport->maintenance_month)) {
+                    try {
+                        $lastReportMonth = \Carbon\Carbon::parse($lastReport->maintenance_month)->format('F Y');
+                    } catch (\Throwable $e) {
+                        $lastReportMonth = $lastReport->maintenance_month;
+                    }
+                } elseif (!empty($lastReport->maintenance_date)) {
+                    $lastReportMonth = \Carbon\Carbon::parse($lastReport->maintenance_date)->format('F Y');
+                } elseif (!empty($lastReport->created_at)) {
+                    $lastReportMonth = \Carbon\Carbon::parse($lastReport->created_at)->format('F Y');
+                }
+            }
+
+            $stats = [
+                'websites'          => $websiteCount,
+                'active_services'   => $activeServices,
+                'linked_analytics'  => count($connectedTypes),
+                'last_report_month' => $lastReportMonth,
+            ];
+        }
+
         // Use separate view for Admin & Staff portal so client design is never mixed/messed up
         $user = Auth::user();
         $isAdminOrStaff = $this->isEmbedded || ($user && ($user->admin || $user->staff));
@@ -549,6 +657,7 @@ class ClientMarketingReports extends Component
             'isEmbedded' => $this->isEmbedded,
             'clientId' => $this->clientId,
             'websites' => $this->websites,
+            'stats' => $stats,
             'integrations' => $this->integrations,
             'activeReportIntegrationId' => $this->activeReportIntegrationId,
             'activeReportPropertyId' => $this->activeReportPropertyId,

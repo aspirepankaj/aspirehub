@@ -28,6 +28,7 @@ class ClientDashboard extends Component
 
         $websiteCount = DB::table('adspv_websites')
             ->where('client_id', $clientId)
+            ->where('status', 'active')
             ->count();
 
         $activeServices = DB::table('adspv_client_plan')
@@ -36,6 +37,7 @@ class ClientDashboard extends Component
 
         $websiteIds = DB::table('adspv_websites')
             ->where('client_id', $clientId)
+            ->where('status', 'active')
             ->pluck('id');
 
         // Fetch all connected integrations
@@ -45,6 +47,11 @@ class ClientDashboard extends Component
             ->get();
 
         $connectedTypes = $connectedRecords->pluck('integration_type')->unique()->toArray();
+
+        // If Facebook is connected, automatically make Meta Ads active/available too
+        if (in_array('facebook', $connectedTypes) && !in_array('meta_ads', $connectedTypes)) {
+            $connectedTypes[] = 'meta_ads';
+        }
         $linkedAnalyticsCount = count($connectedTypes);
 
         // Platform catalog with exact labels, descriptions, and tab parameters
@@ -89,6 +96,13 @@ class ClientDashboard extends Component
                 'name'        => 'Meta',
                 'description' => 'Social insights',
                 'tab'         => 'facebook',
+                'wave_color'  => '#e0f2fe',
+            ],
+            'meta_ads' => [
+                'key'         => 'meta_ads',
+                'name'        => 'Meta Ads',
+                'description' => 'Campaigns & ROI',
+                'tab'         => 'meta_ads',
                 'wave_color'  => '#e0f2fe',
             ],
             'keyword' => [

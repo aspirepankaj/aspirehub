@@ -708,6 +708,13 @@ body:has(.is-marketing-report),
   margin-bottom: 32px;
 }
 
+.stats-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 32px;
+}
+
 .stat-box {
   background: var(--portal-card);
   border: 1px solid #c8ccce;
@@ -1126,7 +1133,8 @@ body:has(.is-marketing-report),
     font-size: 34px !important;
   }
 
-  .stats-grid-4 {
+  .stats-grid-4,
+  .stats-grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1180,7 +1188,8 @@ body:has(.is-marketing-report),
     width: 100%;
   }
 
-  .stats-grid-4 {
+  .stats-grid-4,
+  .stats-grid-3 {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -1208,7 +1217,8 @@ body:has(.is-marketing-report),
 }
 
 @media (max-width: 600px) {
-  .stats-grid-4 {
+  .stats-grid-4,
+  .stats-grid-3 {
     grid-template-columns: 1fr;
   }
 

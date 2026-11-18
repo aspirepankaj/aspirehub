@@ -300,8 +300,8 @@
         $hasLinkedin = !empty($linkedinData) && !isset($linkedinData['error']);
     @endphp
 
-    <!-- Platform Navigation Tabs Bar (Always Visible) -->
-    @if($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected)
+    <!-- Platform Navigation Tabs Bar (Visible only when inside a single integration report) -->
+    @if($activeReportIntegrationId !== 'overview' && ($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected))
         @php
             $tabList = [
                 'gads' => [
@@ -440,7 +440,7 @@
         </section>
     @endif
 
-    <!-- Dedicated Single Integration Header (Matching Zip Design) -->
+    <!-- Header Section (Title & Filters) -->
     <div class="mb-4">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
@@ -492,7 +492,7 @@
                         @endif
                     </span>
                     <span>
-                        @if($activeReportIntegrationId === 'overview') Marketing Dashboard
+                        @if($activeReportIntegrationId === 'overview') Marketing Reports
                         @elseif($activeReportIntegrationId === 'ga4') Google Analytics Website Traffic
                         @elseif($activeReportIntegrationId === 'gads') Google Ads Campaigns
                         @elseif($activeReportIntegrationId === 'facebook') Meta Performance (Facebook & Instagram)
@@ -508,7 +508,7 @@
                     </span>
                 </h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    @if($activeReportIntegrationId === 'overview') Multi-channel marketing and traffic performance across connected platforms.
+                    @if($activeReportIntegrationId === 'overview') Here's a quick look at your digital performance and connected platforms.
                     @elseif($activeReportIntegrationId === 'ga4') Track website traffic, behavior, and key events across your website.
                     @elseif($activeReportIntegrationId === 'gads') Monitor ad spend, clicks, conversions, and campaign performance.
                     @elseif($activeReportIntegrationId === 'facebook') Track Meta reach, impressions, post interactions, followers, and Instagram activity.
@@ -564,6 +564,56 @@
         </div>
     </div>
 
+    @if($activeReportIntegrationId === 'overview' && isset($stats))
+        <!-- Stats Grid (3 Cards) matching Client Dashboard -->
+        <section class="stats-grid-3 mb-6">
+            <!-- Connected Websites -->
+            <a href="{{ route('client.websites') }}" class="stat-box">
+                <div class="stat-circle-icon blue">
+                    <i data-lucide="globe"></i>
+                </div>
+                <div class="stat-body">
+                    <div class="stat-title">Connected Websites</div>
+                    <div class="stat-number">{{ $stats['websites'] }}</div>
+                    <div class="stat-foot">
+                        <span>All operational</span>
+                        <i data-lucide="chevron-right" class="stat-foot-arrow" style="width:14px;height:14px;"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Reports Analytics -->
+            <a href="javascript:void(0)" class="stat-box">
+                <div class="stat-circle-icon mint">
+                    <i data-lucide="chart-no-axes-column-increasing"></i>
+                </div>
+                <div class="stat-body">
+                    <div class="stat-title">Reports Analytics</div>
+                    <div class="stat-number">{{ $stats['linked_analytics'] }}</div>
+                    <div class="stat-foot">
+                        <span>Platforms connected</span>
+                        <i data-lucide="chevron-right" class="stat-foot-arrow" style="width:14px;height:14px;"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Latest Report -->
+            <a href="{{ route('client.maintenance') }}" class="stat-box">
+                <div class="stat-circle-icon orange">
+                    <i data-lucide="file-text"></i>
+                </div>
+                <div class="stat-body">
+                    <div class="stat-title">Latest Report</div>
+                    <div class="stat-number report-month">{{ $stats['last_report_month'] }}</div>
+                    <div class="stat-foot">
+                        <span>Generated reports</span>
+                        <i data-lucide="chevron-right" class="stat-foot-arrow" style="width:14px;height:14px;"></i>
+                    </div>
+                </div>
+            </a>
+        </section>
+    @endif
+
     <!-- Content Views Area -->
     <div class="relative min-h-[400px] w-full mt-2">
         @if($activeReportIntegrationId === 'overview')
@@ -617,1249 +667,145 @@
                 </div>
             @else
                 @if($activeReportIntegrationId === 'overview')
-                    <div class="space-y-6" wire:key="integration-view-overview">
+                                        <div class="platforms-row" wire:key="integration-view-overview-grid">
                         @php
-                            $daysDiff = 30;
-                            if (!empty($dateFrom) && !empty($dateTo)) {
-                                try {
-                                    $d1 = \Carbon\Carbon::parse($dateFrom);
-                                    $d2 = \Carbon\Carbon::parse($dateTo);
-                                    $daysDiff = $d1->diffInDays($d2) + 1;
-                                } catch (\Exception $e) {}
+                            $connectedTypesList = [];
+                            if ($isGa4Connected) $connectedTypesList[] = 'ga4';
+                            if ($isGscConnected) $connectedTypesList[] = 'gsc';
+                            if ($isGadsConnected) $connectedTypesList[] = 'gads';
+                            if ($isFacebookConnected) $connectedTypesList[] = 'facebook';
+                            if ($isMetaAdsConnected) $connectedTypesList[] = 'meta_ads';
+                            if ($isLinkedinConnected) $connectedTypesList[] = 'linkedin';
+                            if ($isKeywordConnected) $connectedTypesList[] = 'keyword';
+                            if ($isGbpConnected) $connectedTypesList[] = 'gbp';
+                            if ($isYoutubeConnected) $connectedTypesList[] = 'youtube';
+                            if ($isGtmConnected) $connectedTypesList[] = 'gtm';
+
+                            $catalogList = [
+                                'ga4' => [
+                                    'key'         => 'ga4',
+                                    'name'        => 'Google Analytics',
+                                    'description' => 'Traffic & engagement',
+                                    'tab'         => 'ga4',
+                                ],
+                                'gsc' => [
+                                    'key'         => 'gsc',
+                                    'name'        => 'Search Console',
+                                    'description' => 'Search visibility',
+                                    'tab'         => 'gsc',
+                                ],
+                                'gads' => [
+                                    'key'         => 'gads',
+                                    'name'        => 'Google Ads',
+                                    'description' => 'Campaigns & ROI',
+                                    'tab'         => 'gads',
+                                ],
+                                'facebook' => [
+                                    'key'         => 'facebook',
+                                    'name'        => 'Meta',
+                                    'description' => 'Social insights',
+                                    'tab'         => 'facebook',
+                                ],
+                                'meta_ads' => [
+                                    'key'         => 'meta_ads',
+                                    'name'        => 'Meta Ads',
+                                    'description' => 'Campaigns & ROI',
+                                    'tab'         => 'meta_ads',
+                                ],
+                                'keyword' => [
+                                    'key'         => 'keyword',
+                                    'name'        => 'Keywords.com',
+                                    'description' => 'Keyword rankings',
+                                    'tab'         => 'keyword',
+                                ],
+                                'linkedin' => [
+                                    'key'         => 'linkedin',
+                                    'name'        => 'LinkedIn',
+                                    'description' => 'Professional network',
+                                    'tab'         => 'linkedin',
+                                ],
+                                'youtube' => [
+                                    'key'         => 'youtube',
+                                    'name'        => 'YouTube',
+                                    'description' => 'Video performance',
+                                    'tab'         => 'youtube',
+                                ],
+                                'gbp' => [
+                                    'key'         => 'gbp',
+                                    'name'        => 'Google Business',
+                                    'description' => 'Local reviews & search',
+                                    'tab'         => 'gbp',
+                                ],
+                                'gtm' => [
+                                    'key'         => 'gtm',
+                                    'name'        => 'Tag Manager',
+                                    'description' => 'Container & Tags',
+                                    'tab'         => 'gtm',
+                                ],
+                            ];
+
+                            $gridPlatforms = [];
+                            foreach ($connectedTypesList as $t) {
+                                if (isset($catalogList[$t])) {
+                                    $gridPlatforms[] = $catalogList[$t];
+                                }
                             }
-
-                            $getDelta = function($curr, $prev) {
-                                $c = (float)$curr;
-                                $p = (float)$prev;
-                                if ($p == 0) return ['val' => ($c > 0 ? '100%' : '0%'), 'trend' => ($c > 0 ? 'up' : 'flat')];
-                                $diff = $c - $p;
-                                if ($diff == 0) return ['val' => '0%', 'trend' => 'flat'];
-                                $trend = $diff > 0 ? 'up' : 'down';
-                                $pct = round((abs($diff) / $p) * 100);
-                                return ['val' => $pct . '%', 'trend' => $trend];
-                            };
-
-                            $integrationCounter = 0;
                         @endphp
 
-                        {{-- 1. Google Analytics 4 --}}
-                        @if($isGa4Connected)
-                            @php
-                                $ga4Base = $ga4Data ?? [];
-                                $ga4Summary = $ga4Base['overall_summary'] ?? [];
-                                $ga4ActiveUsers = $ga4Summary['active_users'] ?? 0;
-                                $ga4NewUsers = $ga4Summary['new_users'] ?? round($ga4ActiveUsers * 0.71);
-                                $ga4ReturningUsers = $ga4Summary['returning_users'] ?? ($ga4ActiveUsers - $ga4NewUsers);
-                                $ga4AvgDuration = $ga4Summary['avg_session_duration'] ?? '0m 0s';
-                                
-                                $ga4EventsCount = 0;
-                                if (!empty($ga4Base['events_report'])) {
-                                    foreach ($ga4Base['events_report'] as $eventName => $channels) {
-                                        $ga4EventsCount += array_sum(array_column($channels, 'count'));
-                                    }
-                                } elseif (!empty($ga4Base['key_events'])) {
-                                    $ga4EventsCount = array_sum(array_column($ga4Base['key_events'], 'event_count'));
-                                }
-
-                                $ga4Comp = $ga4Base['compare_data'] ?? $ga4Base['default_compare_data'] ?? [];
-                                $ga4CompSummary = $ga4Comp['overall_summary'] ?? [];
-                                $hasGa4Comp = !empty($ga4CompSummary);
-                                $compGa4Users = $ga4CompSummary['active_users'] ?? 0;
-                                $compGa4New = $ga4CompSummary['new_users'] ?? round($compGa4Users * 0.71);
-                                $compGa4Ret = $compGa4Users - $compGa4New;
-                                
-                                $durParts = explode('m', str_replace('s', '', $ga4AvgDuration));
-                                $currDurSecs = (isset($durParts[1])) ? ((int)$durParts[0]*60 + (int)trim($durParts[1])) : 0;
-                                $compDurParts = explode('m', str_replace('s', '', $ga4CompSummary['avg_session_duration'] ?? '0m 0s'));
-                                $compDurSecs = (isset($compDurParts[1])) ? ((int)$compDurParts[0]*60 + (int)trim($compDurParts[1])) : 0;
-
-                                $compGa4Events = 0;
-                                if (!empty($ga4Comp['events_report'])) {
-                                    foreach ($ga4Comp['events_report'] as $eventName => $channels) {
-                                        $compGa4Events += array_sum(array_column($channels, 'count'));
-                                    }
-                                }
-                            @endphp
-                            @php $integrationCounter++; @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-ga4">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-100 dark:border-amber-900/50 shadow-xs">
-                                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Google Analytics 4</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Website Traffic & Engagement</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'ga4') disabled @else wire:click="selectIntegration('ga4')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('ga4')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        @foreach($gridPlatforms as $platform)
+                            <a href="javascript:void(0)" wire:click="selectIntegration('{{ $platform['tab'] }}')" class="platform-card-box cursor-pointer">
+                                <div class="platform-logo-wrap">
+                                    @if($platform['key'] === 'ga4')
+                                        <svg class="google-logo" id="fi_17361020" width="50" height="50" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="m10.274 21.137h-4.967a.9.9 0 0 0 -.9.9v17.011a.9.9 0 0 0 .9.9h4.967a.9.9 0 0 0 .9-.9v-17.007a.9.9 0 0 0 -.9-.904zm-.9 17.008h-3.163v-15.2h3.16z"></path><path d="m20.207 15.987h-4.967a.9.9 0 0 0 -.9.9v22.161a.9.9 0 0 0 .9.9h4.967a.9.9 0 0 0 .9-.9v-22.158a.9.9 0 0 0 -.9-.903zm-.9 22.158h-3.163v-20.352h3.156z"></path><path d="m6.454 17.114a.9.9 0 0 0 .52-.165l12.446-8.791 8.421 4a.9.9 0 0 0 .819-.022l8.707-4.736c-.236.647-.3 1.4.5 1.64a.9.9 0 0 0 1.101-.64l.69-2.575a.9.9 0 0 0 -.639-1.106l-2.575-.69a.9.9 0 0 0 -1.106.638c-.179.722.4 1.117 1.039 1.213l-8.177 4.447-8.483-4.027a.908.908 0 0 0 -.909.078l-12.876 9.1a.909.909 0 0 0 .522 1.636z"></path><path d="m35.734 26.7a9.442 9.442 0 0 0 -9.434 9.427c.508 12.511 18.359 12.507 18.866 0a9.444 9.444 0 0 0 -9.432-9.427zm0 17.059a7.634 7.634 0 0 1 -7.625-7.627c.358-10.094 14.895-10.09 15.252 0a7.635 7.635 0 0 1 -7.627 7.622z"></path><path d="m58.443 53.277-11.212-11.222c3.526-6.387.3-15.055-6.256-17.754v-9.984a.9.9 0 0 0 -.9-.9h-4.975a.9.9 0 0 0 -.9.9v8.965a12.8 12.8 0 0 0 -3.151.791v-4.608a.9.9 0 0 0 -.9-.9h-4.979a.9.9 0 0 0 -.9.9v10.679a12.852 12.852 0 0 0 -1.477 5.983c-.175 9.51 10.549 16.018 18.868 11.5l11.217 11.209a3.892 3.892 0 0 0 2.783 1.164 3.957 3.957 0 0 0 2.782-6.723zm-22.434-38.057h3.159v8.439a12.862 12.862 0 0 0 -3.159-.463zm-9.936 5.148h3.171v4.577a13 13 0 0 0 -3.171 2.6zm9.661 26.9a11.139 11.139 0 0 1 0-22.278c14.778.61 14.773 21.667 0 22.276zm7.507-.611a13.055 13.055 0 0 0 3.018-3.017l2.9 2.9-3.014 3.015zm13.922 10.907a2.155 2.155 0 0 1 -3.006 0l-6.738-6.732 3.013-3.014 6.739 6.745a2.115 2.115 0 0 1 -.008 3.001z"></path><path d="m35.734 33.016a1.106 1.106 0 0 1 1.1 1.1.9.9 0 0 0 1.807 0 2.905 2.905 0 0 0 -2.007-2.752.932.932 0 1 0 -1.807 0 2.905 2.905 0 0 0 -2.007 2.752 2.755 2.755 0 0 0 1.887 2.618l1.476.492c1.109.366.652 2.062-.453 2.009a1.105 1.105 0 0 1 -1.1-1.1.9.9 0 1 0 -1.807 0 2.905 2.905 0 0 0 2.007 2.752v.257a.9.9 0 0 0 .9.9.96.96 0 0 0 .9-1.16c2.514-.736 2.714-4.556.12-5.37l-1.475-.493c-1.102-.362-.646-2.058.459-2.005z"></path></svg>
+                                    @elseif($platform['key'] === 'gsc')
+                                        <svg class="console-logo" id="fi_17361020" width="50" height="50" id="fi_11125057" enable-background="new 0 0 500 500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g fill="rgb(0,0,0)"><path d="m73.2578 315.9771 16.585-2.9316c3.5342-.625 5.8936-3.9971 5.2686-7.5322-.624-3.5356-3.999-5.8892-7.5322-5.2695l-16.585 2.9316c-3.5342.625-5.8936 3.9971-5.2686 7.5322.5566 3.1528 3.2988 5.3696 6.3926 5.3696.3759-.0001.7568-.0328 1.1396-.1001z"></path><path d="m91.1533 320.4634-16.585 2.9316c-3.5342.625-5.8936 3.9971-5.2686 7.5322.5566 3.1528 3.2988 5.3696 6.3926 5.3696.376 0 .7568-.0327 1.1396-.1001l16.585-2.9316c3.5342-.625 5.8936-3.9971 5.2686-7.5322-.624-3.5356-3.996-5.8901-7.5322-5.2695z"></path><path d="m453.1045 27.9614h-348.4902c-16.6445 0-30.1865 13.5415-30.1865 30.1865v194.8281c0 3.5898 2.9102 6.5 6.5 6.5s6.5-2.9102 6.5-6.5v-142.8476h382.8632v220.5977c0 9.4766-7.71 17.1865-17.1865 17.1865h-159.6899c2.479-18.241 1.832-39.3657-1.9819-60.938-4.7881-27.0874-14.0127-51.8208-25.9746-69.645-12.9902-19.3569-28.0068-28.6279-42.2783-26.104-8.9995 1.5911-16.6665 7.6915-22.5005 17.6536-10.7354 13.668-42.6309 49.5706-90.3862 62.8146l-52.7842 9.3312c-3.0957.5469-5.8252 2.3857-7.4902 5.0459-1.5171 2.4249-2.8101 4.9646-3.9033 7.5826-1.2671.0652-2.5352.1827-3.7852.4037-16.8906 2.9863-28.1621 19.396-25.125 36.5806 2.7148 15.3599 15.957 26.2188 30.8027 26.2188 1.7627 0 3.5488-.1533 5.3418-.4702.8789-.1554 1.751-.3507 2.6118-.5811 2.3003 2.6959 4.8657 5.1707 7.686 7.3677.7876.6138 1.6499 1.1064 2.5566 1.4834l10.6709 28.5542c.9727 2.6016 3.4434 4.2261 6.0879 4.2261.6069 0 1.2231-.0938 1.832-.2731l21.0605 64.4381c1.3848 4.2363 4.5459 7.6309 8.6729 9.3135 1.8398.7495 3.7793 1.1221 5.7158 1.1221 2.4072 0 4.8066-.5762 6.998-1.7188l24.3076-12.6816c4.3457-2.2671 7.335-6.52 7.9961-11.3765.6611-4.8574-1.082-9.7549-4.6641-13.1011l-12.6104-11.7812-11.7246-38.5789c2.793-1.1588 4.4443-4.121 3.9014-7.1482l-3.6973-20.6163 4.2168-.7455c.4316-.0763.8408-.2087 1.2388-.365 39.0327-4.5946 77.2964 21.6517 92.6465 33.7975 2.6069 2.5808 5.2588 4.7819 7.9375 6.6075.0557.0364.1099.075.1665.1095 6.1182 4.1327 12.3721 6.288 18.5459 6.288 1.5527 0 3.1006-.1348 4.6396-.4067 14.2734-2.5234 25.1992-16.3794 30.7666-39.0161.0317-.1283.0576-.2625.0889-.3911h162.1064c16.6445 0 30.1865-13.5415 30.1865-30.1865v-272.5784c.0002-16.645-13.5418-30.1865-30.1863-30.1865zm-232.0132 239.9217c1.3984.3955 3.7544 2.0894 6.3989 5.9812 3.833 5.6411 6.9355 13.9907 8.5117 22.9092 3.1338 17.7263-.748 29.2229-3.7495 31.9744l-23.9214-9.7054c-1.4033-5.4276-2.6299-11.0157-3.6406-16.7343-1.3516-7.645-2.2407-15.0193-2.7476-22.0758zm-191.0854 60.4914c-1.6489-9.3315 3.7881-18.2448 12.3462-20.9482-1.7671 12.3052.3052 25.2418 5.7925 36.4076-8.7091.0675-16.5284-6.351-18.1387-15.4594zm30.5986-34.6953 48.9531-8.6538c-6.8555 19.4404-2.7246 42.8076 10.3789 58.7192l-48.9512 8.6533c-16.4843-13.4379-21.2587-40.4433-10.3808-58.7187zm85.4023 148.979c.7021.6562.7139 1.4395.6582 1.8481s-.2764 1.1602-1.1279 1.6045l-24.3076 12.6816c-.7646.3979-1.4521.2241-1.7939.084-.3418-.1392-.9561-.4951-1.2227-1.313l-21.0088-64.2814 20.9463-6.5676 12.1904 40.1128c.332 1.0933.9463 2.0796 1.7812 2.8594zm-25.3652-70.3491-33.7451 10.5811-7.0469-18.8574 38.1001-6.7354zm14.8135-31.3631c-17.0571-13.9579-21.5361-42.697-8.9375-60.8489 27.4458-10.1438 49.0137-26.4846 64.043-40.7739-3.2173 19.1809-2.7891 41.9541 1.3291 65.2476 3.5342 19.9949 9.4917 38.6971 17.1777 54.2947-.6465-.3584-1.2983-.7158-1.958-1.0715-25.0435-13.504-49.5425-19.2211-71.6543-16.848zm122.4238 46.5721c-4.1777.7371-8.7798-.5962-13.5117-3.7482-.9263-.8461-3.3491-3.0092-7.0361-5.9559-2.9175-2.9915-5.8306-6.6073-8.6729-10.8423-5.9785-8.9081-11.2178-19.7877-15.4805-31.9344l16.6689 6.7631c.0444.0181.0898.0303.1348.0472.061.0233.123.0433.1851.0649.3135.109.6294.1979.9478.2567.0303.0056.0615.0082.0928.0134.3604.0613.7217.0967 1.0811.0967.3574 0 .7109-.0366 1.0601-.0946.0249-.004.0488-.0021.0737-.0065 4.1289-.73 11.5732-4.0122 15.0449-17.79 2.1289-8.4512 2.248-19.062.3359-29.8779-1.9111-10.8164-5.6611-20.7432-10.5586-27.9517-7.9531-11.7053-16.0352-12.2759-20.1812-11.562-.2319.0389-.4619.0902-.6904.1549-.0596.0168-.1162.0398-.1748.0582-.1431.0449-.2866.0891-.4272.1445-.1611.063-.3159.1357-.4697.2104-.0361.0178-.0737.0315-.1099.0499-.2109.1075-.415.226-.6108.3546l-14.1377 9.1177c.1816-21.3011 4.2002-38.5164 10.313-49.2104 2.2261-2.9154 3.4878-4.7825 3.7446-5.1685.1626-.2445.2998-.4979.4258-.7546 2.9121-3.2793 6.125-5.3263 9.5176-5.926.7588-.1343 1.5312-.2007 2.3164-.2007 8.2871 0 17.9492 7.4038 26.9043 20.7471 10.9756 16.3545 19.4873 39.3193 23.9678 64.6636 9.5575 54.0669-3.2658 95.1895-20.7531 98.2808zm-170.4512-290.3897v-38.9805c0-9.4766 7.71-17.1865 17.1865-17.1865h348.4902c9.4766 0 17.1865 7.71 17.1865 17.1865v38.9805z"></path><path d="m121.5498 62.6953h-2.6621c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5h2.6621c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5z"></path><path d="m178.7715 62.6953h-2.6611c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5h2.6611c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5z"></path><path d="m150.1611 62.6953h-2.6621c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5h2.6621c3.5898 0 6.5-2.9102 6.5-6.5s-2.9101-6.5-6.5-6.5z"></path><path d="m335.6602 185.1597h-29.7637c-3.5898 0-6.5 2.9102-6.5 6.5v35.3096c0 3.5898 2.9102 6.5 6.5 6.5h29.7637c3.5898 0 6.5-2.9102 6.5-6.5v-35.3096c0-3.5899-2.9102-6.5-6.5-6.5zm-6.5 35.3095h-16.7637v-22.3096h16.7637z"></path><path d="m388.6396 233.4692c3.5898 0 6.5-2.9102 6.5-6.5v-59.1318c0-3.5898-2.9102-6.5-6.5-6.5h-29.7636c-3.5898 0-6.5 2.9102-6.5 6.5v59.1318c0 3.5898 2.9102 6.5 6.5 6.5zm-23.2636-59.1318h16.7637v46.1318h-16.7637z"></path><path d="m441.0244 233.4692c3.5898 0 6.5-2.9102 6.5-6.5v-83.8721c0-3.5898-2.9102-6.5-6.5-6.5h-29.7637c-3.5898 0-6.5 2.9102-6.5 6.5v83.8721c0 3.5898 2.9102 6.5 6.5 6.5zm-23.2637-83.872h16.7637v70.8721h-16.7637z"></path><path d="m334.6865 261.3838c0 3.5898 2.9102 6.5 6.5 6.5h99.8379c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-99.8379c-3.5898 0-6.5 2.9101-6.5 6.5z"></path><path d="m341.1865 297.6987h9.832c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-9.832c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5z"></path><path d="m441.0244 284.6987h-65.8994c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5h65.8994c3.5898 0 6.5-2.9102 6.5-6.5s-2.9101-6.5-6.5-6.5z"></path><path d="m341.1865 327.5137h99.8379c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-99.8379c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5z"></path><path d="m114.3613 153.4033h16.3008c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-16.3008c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5z"></path><path d="m114.3613 182.584h16.3008c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-16.3008c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5z"></path><path d="m155.3809 153.4033h16.3018c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-16.3018c-3.5898 0-6.5 2.9102-6.5 6.5s2.9101 6.5 6.5 6.5z"></path><path d="m155.3809 182.584h16.3018c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-16.3018c-3.5898 0-6.5 2.9102-6.5 6.5s2.9101 6.5 6.5 6.5z"></path><path d="m114.3613 211.7646h16.3008c3.5898 0 6.5-2.9102 6.5-6.5s-2.9102-6.5-6.5-6.5h-16.3008c-3.5898 0-6.5 2.9102-6.5 6.5s2.9102 6.5 6.5 6.5z"></path></g></svg>
+                                    @elseif($platform['key'] === 'youtube')
+                                        <svg class="youtube-logo" width="50" height="50" id="fi_2111839" enable-background="new 0 0 24 24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9.939 7.856c-.497-.297-1.134.062-1.134.644v7c0 .585.638.939 1.134.645l5.869-3.495c.488-.291.487-.997.001-1.289zm.366 6.325v-4.36l3.655 2.183z"></path><path d="m19.904 3.271c-4.653-.691-11.153-.691-15.808 0-1.862.276-3.329 1.738-3.649 3.636-.596 3.523-.596 6.664 0 10.186.32 1.899 1.787 3.36 3.649 3.636 2.332.346 5.124.519 7.915.519 2.786 0 5.571-.172 7.894-.518 1.86-.276 3.326-1.737 3.648-3.636.596-3.523.596-6.665 0-10.188-.32-1.897-1.787-3.359-3.649-3.635zm2.17 13.573c-.213 1.256-1.173 2.222-2.39 2.402-4.518.671-10.838.671-15.368-.001-1.218-.181-2.179-1.146-2.391-2.402-.574-3.394-.574-6.291 0-9.687.213-1.256 1.173-2.22 2.392-2.402 2.262-.335 4.973-.503 7.682-.503 2.711 0 5.422.168 7.684.503 1.218.181 2.179 1.146 2.391 2.402.574 3.396.574 6.293 0 9.688z"></path></svg>
+                                    @elseif($platform['key'] === 'gads')
+                                        <svg class="gads-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="50" height="50" id="fi_3162148"><g id="_18._google_ads_logo" data-name="18. google ads logo"><path d="M46.79,32.49c-11.62-20.12-17-30.28-18.1-29.18A9,9,0,0,0,16.11,6.69c-1.52,2.6,5.46-9.48-14.82,25.66A8.94,8.94,0,0,0,0,37c0,9.19,12.22,12.42,16.79,4.5C17.5,40.26,14.23,45.94,24,29L31.2,41.5a9,9,0,1,0,15.59-9ZM9,44A7,7,0,0,1,2.93,33.5h0A1.31,1.31,0,0,0,3,33.37c4.21-6.95,15.15-2.22,12.64,5.74A7,7,0,0,1,9,44Zm8.89-8.4a9,9,0,0,0-12.12-7l9.34-16.18c.37,2.34,1.07,3.06,7.73,14.61ZM39,44a7,7,0,0,1-6.06-3.5C16.38,11.82,17,13.52,17,11A7,7,0,0,1,27.39,4.88C29.51,5.82,29.19,6,45,33.37A7,7,0,0,1,39,44Z"></path></g></svg>
+                                    @elseif($platform['key'] === 'linkedin')
+                                        <svg class="linkedin-logo" width="50" height="50" id="fi_3128219" enable-background="new 0 0 100 100"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g id="_x31_0.Linkedin"><path d="m90 90v-29.3c0-14.4-3.1-25.4-19.9-25.4-8.1 0-13.5 4.4-15.7 8.6h-.2v-7.3h-15.9v53.4h16.6v-26.5c0-7 1.3-13.7 9.9-13.7 8.5 0 8.6 7.9 8.6 14.1v26h16.6z"></path><path d="m11.3 36.6h16.6v53.4h-16.6z"></path><path d="m19.6 10c-5.3 0-9.6 4.3-9.6 9.6s4.3 9.7 9.6 9.7 9.6-4.4 9.6-9.7-4.3-9.6-9.6-9.6z"></path></g></svg>
+                                    @elseif($platform['key'] === 'facebook')
+                                        <svg class="meta-logo" fill="none" height="65" viewBox="0 0 24 24" width="65" xmlns="http://www.w3.org/2000/svg" id="fi_15071740">
+                                            <path clip-rule="evenodd" d="m7.70344 7c-1.23357 0-2.34615.74172-2.8206 1.8804-.4329 1.03896-1.01718 3.6147-1.28132 4.8445-.07314.3406-.10356.6331-.08009.8958.07865.8799.35137 1.3002.60615 1.5162.26749.2268.67379.3631 1.26738.3631.65348 0 1.26086-.3366 1.60721-.8908l1.64468-2.6315 2.18665-3.6444-.5099-.84981c0-.00001 0-.00001 0-.00002-.55223-.92034-1.54684-1.48347-2.62016-1.48347zm4.29626.39072c-.921-1.48497-2.54534-2.39072-4.29626-2.39072-2.04097 0-3.88177 1.2272-4.66676 3.11117-.52019 1.24848-1.14231 4.03793-1.39056 5.19383-.09571.4456-.16486.9554-.11675 1.4937.11079 1.2396.53906 2.2145 1.30481 2.8637.75304.6385 1.68679.8376 2.56078.8376 1.34306 0 2.59138-.6919 3.3032-1.8308l1.64954-2.6392.0095-.0155 1.6425-2.7375 1.6425 2.7375.0095.0155 1.6495 2.6392c.7118 1.1389 1.9601 1.8308 3.3032 1.8308.9828 0 2.0043-.2803 2.7714-1.0857.7607-.7988 1.1239-1.9601 1.1239-3.4143 0-.9227-.3499-2.2661-.6743-3.3415-.3381-1.1208-.7029-2.11985-.815-2.4217-.0261-.07037-.0574-.15077-.0953-.23604-.81-1.82143-2.6184-3.00076-4.6192-3.00076-1.7509 0-3.3752.90576-4.2962 2.39072zm1.1662 1.94259 2.1866 3.64439 1.6447 2.6315c.3463.5542.9537.8908 1.6072.8908.6162 0 1.0423-.1702 1.3231-.465.2872-.3015.5722-.8902.5722-2.035 0-.5842-.2546-1.6551-.5891-2.7639-.3207-1.0633-.6693-2.0183-.775-2.30278-.0186-.05014-.0336-.08768-.0479-.11987-.4895-1.10065-1.5825-1.81345-2.7918-1.81345-1.0733 0-2.0679.56315-2.6201 1.48352z" fill="#fff" fill-rule="evenodd"></path>
                                         </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('ga4')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                                    {{-- 1. Total Users --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Users</div>
-                                                <div class="metric-value">{{ number_format($ga4ActiveUsers) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGa4Comp)
-                                            @php $d = $getDelta($ga4ActiveUsers, $compGa4Users); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. New Users --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">New Users</div>
-                                                <div class="metric-value">{{ number_format($ga4NewUsers) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGa4Comp)
-                                            @php $d = $getDelta($ga4NewUsers, $compGa4New); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Returning Users --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Returning Users</div>
-                                                <div class="metric-value">{{ number_format($ga4ReturningUsers) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGa4Comp)
-                                            @php $d = $getDelta($ga4ReturningUsers, $compGa4Ret); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Engagement Time --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Engagement Time</div>
-                                                <div class="metric-value">{{ $ga4AvgDuration }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGa4Comp)
-                                            @php $d = $getDelta($currDurSecs, $compDurSecs); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 5. Key Events --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Key Events</div>
-                                                <div class="metric-value">{{ number_format($ga4EventsCount) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGa4Comp)
-                                            @php $d = $getDelta($ga4EventsCount, $compGa4Events); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 2. Google Search Console --}}
-                        @if($isGscConnected)
-                            @php
-                                $gscBase = $gscData ?? [];
-                                $gscSum = $gscBase['summary'] ?? [];
-                                $gscClicks = $gscSum['clicks'] ?? 0;
-                                $gscImpr = $gscSum['impressions'] ?? 0;
-                                $gscCtr = $gscSum['ctr'] ?? 0;
-                                $gscPos = $gscSum['position'] ?? 0;
-
-                                $gscComp = $gscBase['compare_data'] ?? [];
-                                $gscCompSum = $gscComp['summary'] ?? [];
-                                $hasGscComp = !empty($gscCompSum);
-                            @endphp
-                            @php $integrationCounter++; @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-gsc">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900/50 shadow-xs">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Search Console</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Organic Search Performance</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'gsc') disabled @else wire:click="selectIntegration('gsc')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('gsc')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    @elseif($platform['key'] === 'meta_ads')
+                                        <svg class="meta-ads-logo" fill="none" height="50" viewBox="0 0 24 24" width="50" stroke="#ffffff" stroke-width="2.3" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                                         </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('gsc')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {{-- 1. Clicks --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Clicks</div>
-                                                <div class="metric-value">{{ number_format($gscClicks) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGscComp)
-                                            @php $d = $getDelta($gscClicks, $gscCompSum['clicks'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Impressions --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Impressions</div>
-                                                <div class="metric-value">{{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($gscImpr) : number_format($gscImpr) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGscComp)
-                                            @php $d = $getDelta($gscImpr, $gscCompSum['impressions'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Avg CTR --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Avg. CTR</div>
-                                                <div class="metric-value">{{ $gscCtr }}%</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGscComp)
-                                            @php $d = $getDelta($gscCtr, $gscCompSum['ctr'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Avg Position --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Avg. Position</div>
-                                                <div class="metric-value">{{ $gscPos }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGscComp)
-                                            @php 
-                                                // For position, lower is better
-                                                $pDiff = (float)$gscPos - (float)($gscCompSum['position'] ?? 0);
-                                                $pTrend = $pDiff < 0 ? 'up' : ($pDiff > 0 ? 'down' : 'flat');
-                                                $pPct = ($gscCompSum['position'] ?? 0) > 0 ? round((abs($pDiff) / $gscCompSum['position']) * 100) : 0;
-                                            @endphp
-                                            <div class="metric-trend-row {{ $pTrend === 'up' ? 'metric-trend-up' : ($pTrend === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $pTrend === 'up' ? '↑' : ($pTrend === 'down' ? '↓' : '•') }} {{ $pPct }}%</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 3. Google Ads --}}
-                        @if($isGadsConnected)
-                            @php
-                                $gadsBase = $gadsData ?? [];
-                                $gadsTraffic = $gadsBase['daily_traffic'] ?? [];
-                                $gadsClicks = 0; $gadsImpr = 0; $gadsCost = 0; $gadsConv = 0;
-                                foreach ($gadsTraffic as $gd) {
-                                    $gadsClicks += (int)($gd['clicks'] ?? 0);
-                                    $gadsImpr += (int)($gd['impressions'] ?? 0);
-                                    $gadsCost += (float)($gd['cost'] ?? 0);
-                                    $gadsConv += (float)($gd['conversions'] ?? 0);
-                                }
-                                $costPerConv = ($gadsConv > 0) ? ($gadsCost / $gadsConv) : 0;
-
-                                $gadsComp = $gadsBase['compare_data'] ?? [];
-                                $gadsCompTraffic = $gadsComp['daily_traffic'] ?? [];
-                                $hasGadsComp = !empty($gadsCompTraffic);
-                                $compGadsCost = 0; $compGadsClicks = 0; $compGadsConv = 0;
-                                foreach ($gadsCompTraffic as $gcd) {
-                                    $compGadsClicks += (int)($gcd['clicks'] ?? 0);
-                                    $compGadsCost += (float)($gcd['cost'] ?? 0);
-                                    $compGadsConv += (float)($gcd['conversions'] ?? 0);
-                                }
-                                $compCostPerConv = ($compGadsConv > 0) ? ($compGadsCost / $compGadsConv) : 0;
-                            @endphp
-                            @php $integrationCounter++; @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-gads">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center border border-teal-100 dark:border-teal-900/50 shadow-xs">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Google Ads</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Paid Campaigns & ROI</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'gads' || $activeReportIntegrationId === 'meta_ads') disabled @else wire:click="selectIntegration('gads')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('gads')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    @elseif($platform['key'] === 'keyword')
+                                        <svg class="keywords-logo" viewBox="0 0 53 44" style="width:48px;height:40px;">
+                                            <rect x="2" y="8" width="10" height="50" rx="5" fill="#ffffff"/>
+                                            <path d="m29 2-16 20 16 20h13L26 22 42 2Z" fill="#ffffff"/>
                                         </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('gads')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
+                                    @elseif($platform['key'] === 'gtm')
+                                        <svg width="45" height="45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" class="text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                    @elseif($platform['key'] === 'gbp')
+                                        <svg width="45" height="45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" class="text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    @else
+                                        <i data-lucide="globe" style="width:36px;height:36px;color:#ffffff;"></i>
+                                    @endif
                                 </div>
 
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {{-- 1. Spend --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Spend</div>
-                                                <div class="metric-value">${{ number_format($gadsCost) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGadsComp)
-                                            @php $d = $getDelta($gadsCost, $compGadsCost); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Clicks --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Clicks</div>
-                                                <div class="metric-value">{{ number_format($gadsClicks) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGadsComp)
-                                            @php $d = $getDelta($gadsClicks, $compGadsClicks); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Conversions --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Conversions</div>
-                                                <div class="metric-value">{{ number_format($gadsConv) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGadsComp)
-                                            @php $d = $getDelta($gadsConv, $compGadsConv); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Cost per conv. --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Cost per conv.</div>
-                                                <div class="metric-value">${{ number_format($costPerConv, 2) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGadsComp)
-                                            @php 
-                                                $cpcDiff = $costPerConv - $compCostPerConv;
-                                                $cpcTrend = $cpcDiff < 0 ? 'up' : ($cpcDiff > 0 ? 'down' : 'flat');
-                                                $cpcPct = $compCostPerConv > 0 ? round((abs($cpcDiff) / $compCostPerConv) * 100) : 0;
-                                            @endphp
-                                            <div class="metric-trend-row {{ $cpcTrend === 'up' ? 'metric-trend-up' : ($cpcTrend === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $cpcTrend === 'up' ? '↑' : ($cpcTrend === 'down' ? '↓' : '•') }} {{ $cpcPct }}%</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 4. Facebook / Meta --}}
-                        @if($isFacebookConnected)
-                            @php
-                                $fbBase = $facebookData ?? [];
-                                $fbSum = $fbBase['summary'] ?? [];
-                                $fbViews = $fbSum['views'] ?? ($fbSum['impressions'] ?? 0);
-                                $fbFollows = $fbSum['follows'] ?? ($fbSum['followers'] ?? 0);
-                                $fbVisits = $fbSum['visits'] ?? ($fbSum['reach'] ?? 0);
-                                $fbInteractions = $fbSum['interactions'] ?? ($fbSum['engaged'] ?? 0);
-                                $fbVideoViews = $fbSum['video_views'] ?? (array_sum(array_column($fbBase['top_posts'] ?? [], 'video_views')) ?: (int)round($fbViews * 0.4));
-
-                                $fbComp = $fbBase['compare_data'] ?? [];
-                                $fbCompSum = $fbComp['summary'] ?? [];
-                                $hasFbComp = !empty($fbCompSum);
-                                $fbCompViews = $fbCompSum['views'] ?? ($fbCompSum['impressions'] ?? 0);
-                                $fbCompFollows = $fbCompSum['follows'] ?? ($fbCompSum['followers'] ?? 0);
-                                $fbCompVisits = $fbCompSum['visits'] ?? ($fbCompSum['reach'] ?? 0);
-                                $fbCompInteractions = $fbCompSum['interactions'] ?? ($fbCompSum['engaged'] ?? 0);
-                                $fbCompVideoViews = $fbCompSum['video_views'] ?? (int)round($fbCompViews * 0.4);
-                            @endphp
-                            @php $integrationCounter++; @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-facebook">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-500 flex items-center justify-center border border-blue-100 dark:border-blue-900/50 shadow-xs">
-                                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Meta (Facebook &amp; Instagram)</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Views, Follows, Visits &amp; Interactions</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'facebook') disabled @else wire:click="selectIntegration('facebook')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('facebook')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('facebook')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-                                    {{-- 1. Views --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate" title="Content includes videos, posts, stories and ads.">Views</div>
-                                                <div class="metric-value">{{ number_format($fbViews) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasFbComp)
-                                            @php $d = $getDelta($fbViews, $fbCompViews); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Follows --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Follows</div>
-                                                <div class="metric-value">{{ number_format($fbFollows) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasFbComp)
-                                            @php $d = $getDelta($fbFollows, $fbCompFollows); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Visits --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Visits</div>
-                                                <div class="metric-value">{{ number_format($fbVisits) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasFbComp)
-                                            @php $d = $getDelta($fbVisits, $fbCompVisits); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Interactions --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Interactions</div>
-                                                <div class="metric-value">{{ number_format($fbInteractions) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasFbComp)
-                                            @php $d = $getDelta($fbInteractions, $fbCompInteractions); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 5. Video/Reels Views --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate" title="The number of times your reels were played for at least 3 seconds, or for nearly their total length if they're shorter than 3 seconds. During a single instance of a reel playing, we'll exclude any time spent replaying it.">Video/Reels Views</div>
-                                                <div class="metric-value">{{ number_format($fbVideoViews) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasFbComp)
-                                            @php $d = $getDelta($fbVideoViews, $fbCompVideoViews); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                                <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                                <span class="metric-trend-sub">vs. prev {{ $daysDiff ?? 28 }}d</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 5. Google Business Profile --}}
-                        @if($isGbpConnected)
-                            @php
-                                $gbpBase = $gbpData ?? [];
-                                $gbpSum = $gbpBase['summary'] ?? [];
-                                $gbpViews = $gbpSum['views'] ?? 0;
-                                $gbpSearches = $gbpSum['searches'] ?? 0;
-                                $gbpInteractions = $gbpSum['interactions'] ?? 0;
-                                $gbpCalls = $gbpSum['calls'] ?? 0;
-
-                                $gbpComp = $gbpBase['compare_data'] ?? [];
-                                $gbpCompSum = $gbpComp['summary'] ?? [];
-                                $hasGbpComp = !empty($gbpCompSum);
-                            @endphp
-                            @php $integrationCounter++; @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-gbp">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900/50 shadow-xs">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Google Business Profile</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Local Listing & Customer Actions</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'gbp') disabled @else wire:click="selectIntegration('gbp')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('gbp')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('gbp')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {{-- 1. Total Views --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Views</div>
-                                                <div class="metric-value">{{ number_format($gbpViews) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGbpComp)
-                                            @php $d = $getDelta($gbpViews, $gbpCompSum['views'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Total Searches --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Searches</div>
-                                                <div class="metric-value">{{ number_format($gbpSearches) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGbpComp)
-                                            @php $d = $getDelta($gbpSearches, $gbpCompSum['searches'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Interactions --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Interactions</div>
-                                                <div class="metric-value">{{ number_format($gbpInteractions) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGbpComp)
-                                            @php $d = $getDelta($gbpInteractions, $gbpCompSum['interactions'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Calls --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Calls</div>
-                                                <div class="metric-value">{{ number_format($gbpCalls) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasGbpComp)
-                                            @php $d = $getDelta($gbpCalls, $gbpCompSum['calls'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 6. Keyword.com --}}
-                        @if($isKeywordConnected)
-                            @php
-                                $kwBase = $keywordData ?? [];
-                                $kwSum = $kwBase['summary'] ?? [];
-                                $kwTotal = $kwSum['total_keywords'] ?? 0;
-                                $kwTop3 = $kwSum['top_3'] ?? 0;
-                                $kwTop10 = $kwSum['top_10'] ?? 0;
-                                $kwTop15 = $kwSum['top_15'] ?? 0;
-                                $kwPages = $kwSum['top_10_pages'] ?? 0;
-
-                                $kwComp = $kwBase['compare_data'] ?? [];
-                                $kwCompSum = $kwComp['summary'] ?? [];
-                                $hasKwComp = !empty($kwCompSum);
-                                $integrationCounter++;
-                            @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-keyword">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-xs">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Keyword.com</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">SEO Keyword Rank Tracking</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'keyword') disabled @else wire:click="selectIntegration('keyword')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('keyword')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('keyword')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                                    {{-- 1. Total Keywords --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Keywords</div>
-                                                <div class="metric-value">{{ number_format($kwTotal) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasKwComp)
-                                            @php $d = $getDelta($kwTotal, $kwCompSum['total_keywords'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Top 3 Keywords --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Top 3 Keywords</div>
-                                                <div class="metric-value">{{ number_format($kwTop3) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasKwComp)
-                                            @php $d = $getDelta($kwTop3, $kwCompSum['top_3'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Top 10 Keywords --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Top 10 Keywords</div>
-                                                <div class="metric-value">{{ number_format($kwTop10) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasKwComp)
-                                            @php $d = $getDelta($kwTop10, $kwCompSum['top_10'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Top 15 Keywords --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Top 15 Keywords</div>
-                                                <div class="metric-value">{{ number_format($kwTop15) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasKwComp)
-                                            @php $d = $getDelta($kwTop15, $kwCompSum['top_15'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Top 10 Pages --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Top 10 Pages</div>
-                                                <div class="metric-value">{{ number_format($kwPages) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasKwComp)
-                                            @php $d = $getDelta($kwPages, $kwCompSum['top_10_pages'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 7. YouTube --}}
-                        @if($isYoutubeConnected)
-                            @php
-                                $ytBase = $youtubeData ?? [];
-                                $ytSum = $ytBase['summary'] ?? [];
-                                $ytViews = $ytSum['views'] ?? 0;
-                                $ytWatchTime = $ytSum['watch_time'] ?? 0;
-                                $ytSubs = $ytSum['subscribers'] ?? 0;
-                                $ytAvgDuration = $ytSum['avg_view_duration'] ?? '0s';
-
-                                $ytComp = $ytBase['compare_data'] ?? [];
-                                $ytCompSum = $ytComp['summary'] ?? [];
-                                $hasYtComp = !empty($ytCompSum);
-                                $integrationCounter++;
-                            @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-youtube">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center shadow-xs">
-                                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">YouTube</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Video Views & Channel Growth</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'youtube') disabled @else wire:click="selectIntegration('youtube')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('youtube')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('youtube')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {{-- 1. Total Views --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Views</div>
-                                                <div class="metric-value">{{ number_format($ytViews) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasYtComp)
-                                            @php $d = $getDelta($ytViews, $ytCompSum['views'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Watch Time --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Watch Time (hrs)</div>
-                                                <div class="metric-value">{{ number_format($ytWatchTime, 1) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasYtComp)
-                                            @php $d = $getDelta($ytWatchTime, $ytCompSum['watch_time'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Subscribers --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Subscribers</div>
-                                                <div class="metric-value">{{ number_format($ytSubs) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasYtComp)
-                                            @php $d = $getDelta($ytSubs, $ytCompSum['subscribers'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Avg Duration --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Avg Duration</div>
-                                                <div class="metric-value">{{ $ytAvgDuration }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 8. LinkedIn --}}
-                        @if($isLinkedinConnected)
-                            @php
-                                $liBase = $linkedinData ?? [];
-                                $liSum = $liBase['summary'] ?? [];
-                                $liFollowers = $liSum['followers'] ?? 0;
-                                $liImpr = $liSum['impressions'] ?? 0;
-                                $liClicks = $liSum['clicks'] ?? 0;
-                                $liEngagements = $liSum['engagements'] ?? 0;
-
-                                $liComp = $liBase['compare_data'] ?? [];
-                                $liCompSum = $liComp['summary'] ?? [];
-                                $hasLiComp = !empty($liCompSum);
-                                $integrationCounter++;
-                            @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-linkedin">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-500 flex items-center justify-center shadow-xs">
-                                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">LinkedIn</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Professional Network Engagement</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'linkedin') disabled @else wire:click="selectIntegration('linkedin')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('linkedin')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('linkedin')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {{-- 1. Followers --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Followers</div>
-                                                <div class="metric-value">{{ number_format($liFollowers) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasLiComp)
-                                            @php $d = $getDelta($liFollowers, $liCompSum['followers'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 2. Impressions --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Impressions</div>
-                                                <div class="metric-value">{{ number_format($liImpr) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasLiComp)
-                                            @php $d = $getDelta($liImpr, $liCompSum['impressions'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 3. Total Clicks --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Clicks</div>
-                                                <div class="metric-value">{{ number_format($liClicks) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasLiComp)
-                                            @php $d = $getDelta($liClicks, $liCompSum['clicks'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- 4. Engagements --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Engagements</div>
-                                                <div class="metric-value">{{ number_format($liEngagements) }}</div>
-                                            </div>
-                                        </div>
-                                        @if($hasLiComp)
-                                            @php $d = $getDelta($liEngagements, $liCompSum['engagements'] ?? 0); @endphp
-                                            <div class="metric-trend-row {{ $d['trend'] === 'up' ? 'metric-trend-up' : ($d['trend'] === 'down' ? 'metric-trend-down' : 'metric-trend-neutral') }}">
-                                            <span>{{ $d['trend'] === 'up' ? '↑' : ($d['trend'] === 'down' ? '↓' : '•') }} {{ $d['val'] }}</span>
-                                            <span class="metric-trend-sub">vs. previous {{ $daysDiff ?? 28 }} days</span>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- 9. Google Tag Manager --}}
-                        @if($isGtmConnected)
-                            @php
-                                $gtmBase = $gtmData ?? [];
-                                $gtmSum = $gtmBase['summary'] ?? [];
-                                $gtmTags = $gtmSum['tags_count'] ?? 0;
-                                $gtmTriggers = $gtmSum['triggers_count'] ?? 0;
-                                $gtmVariables = $gtmSum['variables_count'] ?? 0;
-                                $gtmFolders = $gtmSum['folders_count'] ?? 0;
-                                $integrationCounter++;
-                            @endphp
-                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200" wire:key="overview-card-gtm">
-                                <div class="flex items-center justify-between pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
-                                    <div class="flex items-center gap-3">
-                                        <span class="integration-corner-num">#{{ $integrationCounter }}.</span>
-                                        <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-xs">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                                            </div>
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <h3 class="text-base font-medium text-[#135266] dark:text-white">Tag Manager</h3>
-                                            </div>
-                                            <span class="text-xs text-slate-400">Container Overview & Assets</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                        @if($activeReportIntegrationId === 'gtm') disabled @else wire:click="selectIntegration('gtm')" @endif
-                                        wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <svg wire:loading wire:target="selectIntegration('gtm')" class="animate-spin w-3.5 h-3.5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>View Details</span>
-                                        <svg wire:loading.remove wire:target="selectIntegration('gtm')" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                    </button>
-                                </div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {{-- 1. Total Tags --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Tags</div>
-                                                <div class="metric-value">{{ number_format($gtmTags) }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-trend-row text-slate-400 dark:text-slate-500 font-medium text-xs">
-                                            Active tags
-                                        </div>
-                                    </div>
-
-                                    {{-- 2. Total Triggers --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Triggers</div>
-                                                <div class="metric-value">{{ number_format($gtmTriggers) }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-trend-row text-slate-400 dark:text-slate-500 font-medium text-xs">
-                                            Firing rules
-                                        </div>
-                                    </div>
-
-                                    {{-- 3. Total Variables --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Variables</div>
-                                                <div class="metric-value">{{ number_format($gtmVariables) }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-trend-row text-slate-400 dark:text-slate-500 font-medium text-xs">
-                                            User-defined vars
-                                        </div>
-                                    </div>
-
-                                    {{-- 4. Total Folders --}}
-                                    <div class="metric-card-theme p-4 flex flex-col justify-between">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="metric-icon-circle">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="metric-title truncate">Total Folders</div>
-                                                <div class="metric-value">{{ number_format($gtmFolders) }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="metric-trend-row text-slate-400 dark:text-slate-500 font-medium text-xs">
-                                            Organized sets
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
+                                <h3 class="platform-card-title">{{ $platform['name'] }}</h3>
+                                <p class="platform-card-desc">{{ $platform['description'] }}</p>
+                            </a>
+                        @endforeach
                     </div>
+
+                    <!-- Encouragement Banner (Matching Dashboard) -->
+                    <section class="encouragement-banner mt-6">
+                        <div class="encouragement-text">
+                            <div class="encouragement-eyebrow">LET’S GROW TOGETHER</div>
+                            <h2 class="encouragement-heading">Insights today. <span>A stronger tomorrow.</span></h2>
+                            <p class="encouragement-sub">Your online presence is working for you. Keep going!</p>
+                        </div>
+                        
+                        <div class="quote-box text-right z-10 hidden md:block">
+                            <p class="text-xs italic text-slate-500 dark:text-slate-400 m-0">"Consistent progress<br>leads to extraordinary results."</p>
+                            <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 block mt-1">— The Aspire Hub Team</span>
+                        </div>
+                    </section>
                 @endif
             @endif
             </div> {{-- closes wire:loading.remove wire:target="selectIntegration('overview')" --}}
