@@ -36,6 +36,7 @@ class ManageClients extends Component
     public string $notes = '';
     public array $plan_ids = [];
     public ?int $assigned_staff_id = null;
+    public array $assigned_staff_ids = [];
     public string $address = '';
     public string $landmark = '';
     public string $state = '';
@@ -76,6 +77,14 @@ class ManageClients extends Component
     // Bulk selection
     public array $selectedClients = [];
     public bool $selectAll = false;
+    public bool $selectAllAcrossPages = false;
+
+    // Bulk staff assignment modal state
+    public bool $showBulkAssignModal = false;
+    public array $bulk_staff_ids = [];
+    public string $bulk_assign_scope = 'selected'; // 'selected' | 'all'
+    public string $bulk_assign_mode = 'append'; // 'append' | 'replace'
+    public string $bulkStaffSearch = '';
 
     // Edit state tracking
     public ?int $editingClientId = null;
@@ -168,6 +177,7 @@ class ManageClients extends Component
     {
         $this->selectedClients = [];
         $this->selectAll = false;
+        $this->selectAllAcrossPages = false;
         $this->resetPage();
     }
 
@@ -175,6 +185,7 @@ class ManageClients extends Component
     {
         $this->selectedClients = [];
         $this->selectAll = false;
+        $this->selectAllAcrossPages = false;
         $this->resetPage();
     }
 
@@ -182,6 +193,7 @@ class ManageClients extends Component
     {
         $this->selectedClients = [];
         $this->selectAll = false;
+        $this->selectAllAcrossPages = false;
         $this->resetPage();
     }
 
@@ -192,22 +204,62 @@ class ManageClients extends Component
         $this->planFilter = '';
         $this->selectedClients = [];
         $this->selectAll = false;
+        $this->selectAllAcrossPages = false;
         $this->resetPage();
+    }
+
+    public function getClientsBaseQuery()
+    {
+        return Client::query()
+            ->where(function ($query) {
+                $query->where('company_name', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('user', function ($uQuery) {
+                        $uQuery->where('name', 'like', '%' . $this->search . '%')
+                            ->orWhere('email', 'like', '%' . $this->search . '%');
+                    });
+            })
+            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)));
     }
 
     public function toggleSelectAll(array $pageIds): void
     {
         if ($this->selectAll) {
-            $this->selectedClients = $pageIds;
+            $this->selectedClients = array_map('strval', $pageIds);
         } else {
             $this->selectedClients = [];
+            $this->selectAllAcrossPages = false;
         }
+    }
+
+    public function toggleSelectAllOnPage(array $pageIds): void
+    {
+        $stringPageIds = array_map('strval', $pageIds);
+        $currentSelected = array_map('strval', $this->selectedClients);
+        $allPageSelected = !empty($stringPageIds) && count(array_intersect($stringPageIds, $currentSelected)) === count($stringPageIds);
+
+        if ($allPageSelected) {
+            $this->selectedClients = array_values(array_diff($currentSelected, $stringPageIds));
+            $this->selectAll = false;
+            $this->selectAllAcrossPages = false;
+        } else {
+            $this->selectedClients = array_values(array_unique(array_merge($currentSelected, $stringPageIds)));
+            $this->selectAll = true;
+        }
+    }
+
+    public function selectAllClientsAcrossPages(): void
+    {
+        $this->selectedClients = $this->getClientsBaseQuery()->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        $this->selectAllAcrossPages = true;
+        $this->selectAll = true;
     }
 
     public function clearSelection(): void
     {
         $this->selectedClients = [];
         $this->selectAll = false;
+        $this->selectAllAcrossPages = false;
     }
 
     public function toggleClientStatus(int $id, string $status): void
@@ -225,6 +277,7 @@ class ManageClients extends Component
         $count = count($this->selectedClients);
         $this->selectedClients = [];
         $this->selectAll = false;
+        $this->selectAllAcrossPages = false;
         session()->flash('success', "{$count} client(s) activated successfully.");
     }
 
@@ -236,15 +289,124 @@ class ManageClients extends Component
         $count = count($this->selectedClients);
         $this->selectedClients = [];
         $this->selectAll = false;
+        $this->selectAllAcrossPages = false;
         session()->flash('success', "{$count} client(s) deactivated successfully.");
+    }
+
+    public function openBulkAssignStaffModal(): void
+    {
+        $this->resetErrorBag();
+        $this->bulk_staff_ids = [];
+        $this->bulkStaffSearch = '';
+        $this->bulk_assign_mode = 'append';
+
+        if (empty($this->selectedClients)) {
+            $this->bulk_assign_scope = 'all';
+        } else {
+            $this->bulk_assign_scope = 'selected';
+        }
+
+        $this->dispatch('open-modal', name: 'bulk-assign-staff-modal');
+    }
+
+    public function selectAllBulkStaff(): void
+    {
+        $this->bulk_staff_ids = \App\Modules\CRM\Staff\Models\Staff::where('status', 'active')
+            ->pluck('id')
+            ->map(fn($id) => (string)$id)
+            ->toArray();
+    }
+
+    public function deselectAllBulkStaff(): void
+    {
+        $this->bulk_staff_ids = [];
+    }
+
+    public function applyBulkAssignStaff(): void
+    {
+        if (empty($this->bulk_staff_ids)) {
+            $this->addError('bulk_staff_ids', 'Please select at least one staff member to assign.');
+            return;
+        }
+
+        $staffIds = array_map('intval', $this->bulk_staff_ids);
+
+        if ($this->bulk_assign_scope === 'all') {
+            $targetClientIds = $this->getClientsBaseQuery()->pluck('id')->map(fn($id) => (int)$id)->toArray();
+        } else {
+            $targetClientIds = array_map('intval', $this->selectedClients);
+        }
+
+        if (empty($targetClientIds)) {
+            $this->addError('bulk_staff_ids', 'No clients selected to assign staff to.');
+            return;
+        }
+
+        DB::transaction(function () use ($targetClientIds, $staffIds) {
+            $now = now();
+            if ($this->bulk_assign_mode === 'replace') {
+                DB::table('adspv_client_staff')->whereIn('client_id', $targetClientIds)->delete();
+
+                $records = [];
+                foreach ($targetClientIds as $clientId) {
+                    foreach ($staffIds as $staffId) {
+                        $records[] = [
+                            'client_id'  => $clientId,
+                            'staff_id'   => $staffId,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
+                }
+                foreach (array_chunk($records, 500) as $chunk) {
+                    DB::table('adspv_client_staff')->insert($chunk);
+                }
+            } else {
+                // Append mode: insert only pairs that do not already exist
+                $existing = DB::table('adspv_client_staff')
+                    ->whereIn('client_id', $targetClientIds)
+                    ->whereIn('staff_id', $staffIds)
+                    ->get(['client_id', 'staff_id'])
+                    ->map(fn($r) => "{$r->client_id}-{$r->staff_id}")
+                    ->flip();
+
+                $records = [];
+                foreach ($targetClientIds as $clientId) {
+                    foreach ($staffIds as $staffId) {
+                        if (!isset($existing["{$clientId}-{$staffId}"])) {
+                            $records[] = [
+                                'client_id'  => $clientId,
+                                'staff_id'   => $staffId,
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+                        }
+                    }
+                }
+                foreach (array_chunk($records, 500) as $chunk) {
+                    DB::table('adspv_client_staff')->insert($chunk);
+                }
+            }
+        });
+
+        $clientCount = count($targetClientIds);
+        $staffCount = count($staffIds);
+        $modeText = $this->bulk_assign_mode === 'replace' ? 'assigned (replaced)' : 'assigned';
+
+        session()->flash('success', "Successfully {$modeText} {$staffCount} staff member(s) across {$clientCount} client(s).");
+
+        $this->dispatch('close-modal', name: 'bulk-assign-staff-modal');
+        $this->clearSelection();
+        $this->bulk_staff_ids = [];
     }
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'company_name', 'profile_image', 'existing_profile_image', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids', 'assigned_staff_id', 'address', 'landmark', 'state', 'country', 'region', 'zip_code']);
+        $this->reset(['name', 'email', 'password', 'company_name', 'profile_image', 'existing_profile_image', 'phones', 'status', 'notes', 'editingClientId', 'editingUserId', 'plan_ids', 'assigned_staff_id', 'assigned_staff_ids', 'address', 'landmark', 'state', 'country', 'region', 'zip_code']);
         $this->phones = [['phone' => '', 'label' => 'Work']];
         $this->plan_ids = [];
         $this->assigned_staff_id = null;
+        $this->assigned_staff_ids = [];
         $this->address = '';
         $this->landmark = '';
         $this->state = '';
@@ -296,6 +458,8 @@ class ManageClients extends Component
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
             'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
+            'assigned_staff_ids' => 'nullable|array',
+            'assigned_staff_ids.*' => 'exists:adspv_staff,id',
             'address' => 'nullable|string|max:1000',
             'landmark' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
@@ -347,7 +511,10 @@ class ManageClients extends Component
             $client->plans()->sync($this->plan_ids);
 
             // 5. Sync assigned staff
-            $client->assignedStaff()->sync($this->assigned_staff_id ? [$this->assigned_staff_id] : []);
+            $staffIds = !empty($this->assigned_staff_ids) 
+                ? $this->assigned_staff_ids 
+                : ($this->assigned_staff_id ? [$this->assigned_staff_id] : []);
+            $client->assignedStaff()->sync($staffIds);
         });
 
         $this->dispatch('close-modal', name: 'add-client-modal');
@@ -362,6 +529,7 @@ class ManageClients extends Component
         $this->editingClientId = $client->id;
         $this->editingUserId = $client->user_id;
         $this->plan_ids = $client->plans->pluck('id')->toArray();
+        $this->assigned_staff_ids = $client->assignedStaff->pluck('id')->map(fn($id) => (int)$id)->toArray();
         $this->assigned_staff_id = $client->assignedStaff->first()?->id;
 
         $this->name = $client->user->name;
@@ -410,6 +578,8 @@ class ManageClients extends Component
             'plan_ids' => 'nullable|array',
             'plan_ids.*' => 'exists:adspv_plans,id',
             'assigned_staff_id' => 'nullable|exists:adspv_staff,id',
+            'assigned_staff_ids' => 'nullable|array',
+            'assigned_staff_ids.*' => 'exists:adspv_staff,id',
             'address' => 'nullable|string|max:1000',
             'landmark' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
@@ -471,7 +641,10 @@ class ManageClients extends Component
             $client->plans()->sync($this->plan_ids);
 
             // 5. Sync assigned staff
-            $client->assignedStaff()->sync($this->assigned_staff_id ? [$this->assigned_staff_id] : []);
+            $staffIds = !empty($this->assigned_staff_ids) 
+                ? $this->assigned_staff_ids 
+                : ($this->assigned_staff_id ? [$this->assigned_staff_id] : []);
+            $client->assignedStaff()->sync($staffIds);
         });
 
         $this->dispatch('close-modal', name: 'edit-client-modal');
@@ -4621,17 +4794,9 @@ class ManageClients extends Component
                     ->get();
             }
         } else {
-            $query = Client::with(['user', 'phones', 'plans', 'assignedStaff.user', 'clickUpFolders'])
-                ->withCount('websites')
-                ->where(function ($query) {
-                    $query->where('company_name', 'like', '%' . $this->search . '%')
-                        ->orWhereHas('user', function ($uQuery) {
-                            $uQuery->where('name', 'like', '%' . $this->search . '%')
-                                ->orWhere('email', 'like', '%' . $this->search . '%');
-                        });
-                })
-                ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
-                ->when($this->planFilter, fn($q) => $q->whereHas('plans', fn($pq) => $pq->where('plan_id', $this->planFilter)));
+            $query = $this->getClientsBaseQuery()
+                ->with(['user', 'phones', 'plans', 'assignedStaff.user', 'assignedStaff.designations', 'clickUpFolders'])
+                ->withCount('websites');
 
             if ($this->sortField === 'websites_count') {
                 $query->orderBy('websites_count', $this->sortDirection);
@@ -4654,9 +4819,12 @@ class ManageClients extends Component
                     ->get()
                     ->sortBy(fn($s) => $s->user?->name)
                     ->map(fn($s) => [
-                        'id' => $s->id,
-                        'name' => $s->user?->name ?? 'Unknown Staff',
-                        'role' => $s->designations->pluck('name')->implode(', ')
+                        'id'            => $s->id,
+                        'name'          => $s->user?->name ?? 'Unknown Staff',
+                        'email'         => $s->user?->email ?? '',
+                        'role'          => $s->designations->pluck('name')->implode(', '),
+                        'profile_image' => $s->profile_image,
+                        'initials'      => $s->getInitials(),
                     ])
                     ->values();
             } else {
@@ -4704,9 +4872,12 @@ class ManageClients extends Component
                 ->get()
                 ->sortBy(fn($s) => $s->user?->name)
                 ->map(fn($s) => [
-                    'id' => $s->id,
-                    'name' => $s->user?->name ?? 'Unknown Staff',
-                    'role' => $s->designations->pluck('name')->implode(', ')
+                    'id'            => $s->id,
+                    'name'          => $s->user?->name ?? 'Unknown Staff',
+                    'email'         => $s->user?->email ?? '',
+                    'role'          => $s->designations->pluck('name')->implode(', '),
+                    'profile_image' => $s->profile_image,
+                    'initials'      => $s->getInitials(),
                 ])
                 ->values();
 

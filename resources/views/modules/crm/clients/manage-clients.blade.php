@@ -101,6 +101,7 @@
                         : [['phone' => '', 'label' => 'Work']],
                     'plan_ids' => $clientDetails->plans->pluck('id')->toArray(),
                     'assigned_staff_id' => $clientDetails->assignedStaff->first()?->id,
+                    'assigned_staff_ids' => $clientDetails->assignedStaff->pluck('id')->toArray(),
                 ];
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
@@ -162,6 +163,8 @@
                             $wire.phones = data.phones;
                             $wire.plan_ids = data.plan_ids;
                             $wire.assigned_staff_id = data.assigned_staff_id;
+                                                    $wire.assigned_staff_ids = data.assigned_staff_ids || [];
+                            $wire.assigned_staff_ids = data.assigned_staff_ids || [];
                             $dispatch('open-modal', { name: 'edit-client-modal' });
                         " 
                         class="flex-1 sm:flex-none px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-350 font-bold text-xs rounded-xl active:scale-95 transition">
@@ -3123,6 +3126,14 @@
             </p>
 
             <div class="flex items-center gap-2">
+                <button type="button" wire:click="openBulkAssignStaffModal"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-sm font-semibold transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Assign Staff
+                </button>
+
                 <a href="{{ route('admin.settings', ['tab' => 'plans']) }}"
                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-sm font-semibold transition-all duration-150 active:scale-95 shrink-0 whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -3320,14 +3331,33 @@
 
             {{-- Bulk Action Bar (visible only when items are selected) --}}
             @if(count($selectedClients) > 0)
-                <div class="flex items-center justify-between gap-3 mb-4 px-1 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-700/30">
-                    <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-2 pl-2">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                        Selected {{ count($selectedClients) }} item(s)
-                    </span>
-                    <div class="flex items-center gap-2 pr-2">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-700/30">
+                    <div class="flex items-center gap-2 pl-1">
+                        <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            Selected <span class="font-extrabold">{{ count($selectedClients) }}</span> client(s)
+                        </span>
+                        @if(!$selectAllAcrossPages && $clients->total() > count($selectedClients))
+                            <span class="text-xs text-slate-400">|</span>
+                            <button type="button" wire:click="selectAllClientsAcrossPages" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline transition">
+                                Select all {{ $clients->total() }} clients
+                            </button>
+                        @elseif($selectAllAcrossPages)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 tracking-wider">
+                                All {{ $clients->total() }} clients selected
+                            </span>
+                        @endif
+                    </div>
+                    <div class="flex items-center gap-2 pr-1">
+                        {{-- Assign Staff Button --}}
+                        <button type="button" wire:click="openBulkAssignStaffModal" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition active:scale-95 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                            Assign Staff
+                        </button>
                         <button type="button" wire:click="bulkActivate" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition active:scale-95">
                             Activate
                         </button>
@@ -3364,12 +3394,13 @@
                                 {{-- Select All checkbox --}}
                                 <th class="px-3 py-3.5 w-10 text-center">
                                     <input type="checkbox"
-                                           wire:model="selectAll"
-                                             x-on:change="const isChecked = $event.target.checked; Array.from(document.querySelectorAll('input[type=checkbox]')).filter(cb => cb.getAttribute('wire:model') && cb.getAttribute('wire:model').startsWith('selected')).forEach(cb => { if(cb.checked !== isChecked) { cb.checked = isChecked; cb.dispatchEvent(new window.Event('change')); } });"
+                                           wire:click="toggleSelectAllOnPage({{ json_encode($pageIds) }})"
+                                           @checked(!empty($pageIds) && count(array_intersect(array_map('strval', $pageIds), array_map('strval', $selectedClients))) === count($pageIds))
                                            class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                                 </th>
                                 <th class="px-3 py-3.5">Client Details</th>
                                 <th class="px-3 py-3.5">Company Name</th>
+                                <th class="px-3 py-3.5">Assigned Staff</th>
                                 <th class="px-3 py-3.5">Plans</th>
                                 <th class="px-3 py-3.5 text-center cursor-pointer select-none" wire:click="sortBy('websites_count')">
                                     <div class="inline-flex items-center gap-1 justify-center">
@@ -3397,7 +3428,7 @@
                                     {{-- Row Checkbox --}}
                                     <td class="px-3 py-3.5 w-10 text-center">
                                         <input type="checkbox"
-                                               wire:model="selectedClients"
+                                               wire:model.live="selectedClients"
                                                value="{{ $client->id }}"
                                                class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40 focus:ring-2 cursor-pointer transition" />
                                     </td>
@@ -3424,6 +3455,44 @@
                                         <div class="truncate max-w-[150px] sm:max-w-none">
                                             {{ $client->company_name ?: '—' }}
                                         </div>
+                                    </td>
+                                    <td class="px-3 py-3.5">
+                                        @if($client->assignedStaff->isNotEmpty())
+                                            <div class="flex items-center -space-x-1.5 overflow-hidden">
+                                                @foreach($client->assignedStaff->take(3) as $staff)
+                                                    @php
+                                                        $sImg = $staff->profile_image;
+                                                        $sImgUrl = $sImg ? (Str::startsWith($sImg, 'http') ? $sImg : asset('storage/' . $sImg)) : null;
+                                                        $sRole = $staff->designations->pluck('name')->implode(', ') ?: 'Staff';
+                                                    @endphp
+                                                    @if($sImgUrl)
+                                                        <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 object-cover"
+                                                             src="{{ $sImgUrl }}"
+                                                             alt="{{ $staff->user->name ?? 'Staff' }}"
+                                                             title="{{ $staff->user->name ?? 'Staff' }} ({{ $sRole }})"
+                                                             onerror="this.outerHTML=`<div class='inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-[9px]'>{{ $staff->getInitials() }}</div>`" />
+                                                    @else
+                                                        <div class="inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-[9px]"
+                                                             title="{{ $staff->user->name ?? 'Staff' }} ({{ $sRole }})">
+                                                            {{ $staff->getInitials() }}
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                                @if($client->assignedStaff->count() > 3)
+                                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[9px]"
+                                                          title="{{ $client->assignedStaff->pluck('user.name')->implode(', ') }}">
+                                                        +{{ $client->assignedStaff->count() - 3 }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[130px] mt-0.5" title="{{ $client->assignedStaff->pluck('user.name')->implode(', ') }}">
+                                                {{ $client->assignedStaff->pluck('user.name')->implode(', ') }}
+                                            </div>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
+                                                Unassigned
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-3 py-3.5">
                                         @if($client->plans->isNotEmpty())
@@ -3491,6 +3560,7 @@
                                                 : [['phone' => '', 'label' => 'Work']],
                                             'plan_ids' => $client->plans->pluck('id')->toArray(),
                                             'assigned_staff_id' => $client->assignedStaff->first()?->id,
+                                            'assigned_staff_ids' => $client->assignedStaff->pluck('id')->toArray(),
                                         ];
 
                                         $clickUpFolderIds = $client->clickUpFolders->pluck('id')->map(fn($id) => (string)$id)->toArray();
@@ -3576,6 +3646,7 @@
                                                     $wire.phones = data.phones;
                                                     $wire.plan_ids = data.plan_ids;
                                                     $wire.assigned_staff_id = data.assigned_staff_id;
+                                                    $wire.assigned_staff_ids = data.assigned_staff_ids || [];
                                                     $dispatch('open-modal', { name: 'edit-client-modal' });
                                                 "
                                                 class="inline-flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all duration-150 active:scale-95 shrink-0"
@@ -3762,12 +3833,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <!-- Assign Staff -->
                     <div>
-                        <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Assign Account Manager</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Assign Staff</label>
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">Multiple allowed</span>
+                        </div>
                         <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
                             @foreach($staffMembers as $staffOpt)
-                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
-                                    <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
-                                           class="rounded-full border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
+                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer select-none">
+                                    <input type="checkbox" wire:model="assigned_staff_ids" value="{{ $staffOpt['id'] }}"
+                                           class="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
                                     <div class="flex flex-col truncate">
                                         <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
                                         <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
@@ -3775,7 +3849,7 @@
                                 </label>
                             @endforeach
                         </div>
-                        <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
+                        <x-input-error :messages="$errors->get('assigned_staff_ids')" class="mt-1" />
                     </div>
 
                     <!-- Plans Selection -->
@@ -4043,12 +4117,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <!-- Assign Staff -->
                     <div>
-                        <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Assign Account Manager</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Assign Staff</label>
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">Multiple allowed</span>
+                        </div>
                         <div class="grid grid-cols-1 gap-2 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 max-h-36 overflow-y-auto custom-scrollbar">
                             @foreach($staffMembers as $staffOpt)
-                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer">
-                                    <input type="radio" wire:model="assigned_staff_id" value="{{ $staffOpt['id'] }}"
-                                           class="rounded-full border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
+                                <label class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-600 transition duration-150 cursor-pointer select-none">
+                                    <input type="checkbox" wire:model="assigned_staff_ids" value="{{ $staffOpt['id'] }}"
+                                           class="rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/40">
                                     <div class="flex flex-col truncate">
                                         <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ $staffOpt['name'] }}</span>
                                         <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 truncate">{{ $staffOpt['role'] ?: 'Staff Member' }}</span>
@@ -4056,7 +4133,7 @@
                                 </label>
                             @endforeach
                         </div>
-                        <x-input-error :messages="$errors->get('assigned_staff_id')" class="mt-1" />
+                        <x-input-error :messages="$errors->get('assigned_staff_ids')" class="mt-1" />
                     </div>
 
                     <!-- Plans Selection -->
@@ -4424,6 +4501,175 @@
                     </div>
                 </div>
             </template>
+        </div>
+    </x-admin.modal>
+
+    <!-- Bulk Assign Staff Modal -->
+    <x-admin.modal name="bulk-assign-staff-modal" title="Bulk Assign Staff to Clients" maxWidth="max-w-2xl">
+        <div class="space-y-5">
+            <!-- Target Clients Scope -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                    1. Target Clients
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="flex items-center gap-3 p-3 rounded-xl border {{ $bulk_assign_scope === 'selected' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800' }} {{ empty($selectedClients) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }} transition">
+                        <input type="radio" wire:model.live="bulk_assign_scope" value="selected" {{ empty($selectedClients) ? 'disabled' : '' }} class="w-4 h-4 text-indigo-600 focus:ring-indigo-500/30 border-slate-300 dark:border-slate-600">
+                        <div class="min-w-0">
+                            <span class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                                Selected Clients ({{ count($selectedClients) }})
+                            </span>
+                            <span class="block text-[11px] text-slate-500 dark:text-slate-400">
+                                {{ empty($selectedClients) ? 'No clients currently selected' : 'Apply only to checked clients' }}
+                            </span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-3 p-3 rounded-xl border {{ $bulk_assign_scope === 'all' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800' }} cursor-pointer transition">
+                        <input type="radio" wire:model.live="bulk_assign_scope" value="all" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500/30 border-slate-300 dark:border-slate-600">
+                        <div class="min-w-0">
+                            <span class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                                All Clients ({{ $totalClientsCount }})
+                            </span>
+                            <span class="block text-[11px] text-slate-500 dark:text-slate-400">
+                                Apply to all clients in the system
+                            </span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Assignment Mode -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                    2. Assignment Mode
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="flex items-start gap-3 p-3 rounded-xl border {{ $bulk_assign_mode === 'append' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800' }} cursor-pointer transition">
+                        <input type="radio" wire:model.live="bulk_assign_mode" value="append" class="w-4 h-4 mt-0.5 text-indigo-600 focus:ring-indigo-500/30 border-slate-300 dark:border-slate-600">
+                        <div class="min-w-0">
+                            <span class="block text-xs font-bold text-slate-800 dark:text-slate-200">Add to Existing Staff</span>
+                            <span class="block text-[11px] text-slate-500 dark:text-slate-400">Keep already assigned staff and add the selected staff members.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-xl border {{ $bulk_assign_mode === 'replace' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800' }} cursor-pointer transition">
+                        <input type="radio" wire:model.live="bulk_assign_mode" value="replace" class="w-4 h-4 mt-0.5 text-indigo-600 focus:ring-indigo-500/30 border-slate-300 dark:border-slate-600">
+                        <div class="min-w-0">
+                            <span class="block text-xs font-bold text-slate-800 dark:text-slate-200">Replace Existing Staff</span>
+                            <span class="block text-[11px] text-slate-500 dark:text-slate-400">Remove currently assigned staff and assign only the selected staff.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Staff Selection -->
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                        3. Select Staff Members <span class="text-indigo-600 dark:text-indigo-400 font-extrabold">({{ count($bulk_staff_ids) }} selected)</span>
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <button type="button" wire:click="selectAllBulkStaff" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                            Select All
+                        </button>
+                        <span class="text-slate-300 dark:text-slate-700">•</span>
+                        <button type="button" wire:click="deselectAllBulkStaff" class="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:underline">
+                            Deselect All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Staff Search Input -->
+                <div class="relative mb-3">
+                    <input type="text"
+                           wire:model.live="bulkStaffSearch"
+                           placeholder="Search staff by name, role or email..."
+                           class="w-full px-3 py-2 pl-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition" />
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+
+                <!-- Staff Cards List -->
+                @php
+                    $filteredStaff = $staffMembers;
+                    if (!empty($bulkStaffSearch)) {
+                        $searchLower = strtolower($bulkStaffSearch);
+                        $filteredStaff = $staffMembers->filter(function($s) use ($searchLower) {
+                            return str_contains(strtolower($s['name'] ?? ''), $searchLower)
+                                || str_contains(strtolower($s['role'] ?? ''), $searchLower)
+                                || str_contains(strtolower($s['email'] ?? ''), $searchLower);
+                        });
+                    }
+                @endphp
+
+                @if($filteredStaff->isEmpty())
+                    <div class="p-6 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 text-xs">
+                        No active staff members found matching your search.
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto p-1 custom-scrollbar">
+                        @foreach($filteredStaff as $staffOpt)
+                            @php
+                                $isStaffSelected = in_array($staffOpt['id'], $bulk_staff_ids);
+                            @endphp
+                            <label class="flex items-center gap-3 p-2.5 rounded-xl border {{ $isStaffSelected ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 ring-1 ring-indigo-500/20 shadow-sm' : 'border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40' }} cursor-pointer transition select-none">
+                                <input type="checkbox"
+                                       wire:model.live="bulk_staff_ids"
+                                       value="{{ $staffOpt['id'] }}"
+                                       class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500/30 cursor-pointer">
+                                <div class="shrink-0">
+                                    @if(!empty($staffOpt['profile_image']))
+                                        <img src="{{ Str::startsWith($staffOpt['profile_image'], 'http') ? $staffOpt['profile_image'] : asset('storage/' . $staffOpt['profile_image']) }}"
+                                             alt="{{ $staffOpt['name'] }}"
+                                             class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                                             onerror="this.outerHTML=`<div class='w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] flex items-center justify-center'>{{ $staffOpt['initials'] ?? 'ST' }}</div>`" />
+                                    @else
+                                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] flex items-center justify-center">
+                                            {{ $staffOpt['initials'] ?? 'ST' }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                                        {{ $staffOpt['name'] }}
+                                    </div>
+                                    <div class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 truncate">
+                                        {{ $staffOpt['role'] ?: 'Staff Member' }}
+                                    </div>
+                                    @if(!empty($staffOpt['email']))
+                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 truncate">
+                                            {{ $staffOpt['email'] }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+                <x-input-error :messages="$errors->get('bulk_staff_ids')" class="mt-1.5" />
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div class="text-xs text-slate-500 dark:text-slate-400">
+                    Target: <span class="font-bold text-slate-800 dark:text-slate-200">{{ $bulk_assign_scope === 'all' ? $totalClientsCount : count($selectedClients) }}</span> client(s)
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="button" @click="$dispatch('close-modal', { name: 'bulk-assign-staff-modal' })" class="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button type="button"
+                            wire:click="applyBulkAssignStaff"
+                            wire:loading.attr="disabled"
+                            style="background: linear-gradient(90deg, #105166 0%, #529daa 100%);"
+                            class="inline-flex items-center gap-2 px-5 py-2 text-white text-xs font-bold rounded-xl shadow-md transition-all duration-200 active:scale-95 disabled:opacity-50">
+                        <span wire:loading wire:target="applyBulkAssignStaff" class="animate-spin inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full"></span>
+                        <span>Assign Staff</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </x-admin.modal>
 </div>
