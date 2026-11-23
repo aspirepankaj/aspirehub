@@ -301,141 +301,151 @@
     @endphp
 
     <!-- Platform Navigation Tabs Bar (Visible only when inside a single integration report) -->
-    @if($activeReportIntegrationId !== 'overview' && ($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected))
+    @if($activeReportIntegrationId !== 'overview' && ($isGa4Connected || $isGscConnected || $isYoutubeConnected || $isKeywordConnected || $isGbpConnected || $isGadsConnected || $isFacebookConnected || $isMetaAdsConnected || $isLinkedinConnected || $isGtmConnected))
         @php
-            $tabList = [
-                'gads' => [
-                    'connected' => $isGadsConnected, 
-                    'label' => 'Google Ads',
-                    'color' => '#4285F4'
+            $channelGroups = [
+                'all' => [
+                    'label' => 'All Channels',
+                    'badge_bg' => 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
+                    'container_border' => 'border-amber-200/70 dark:border-amber-900/40',
+                    'tabs' => [
+                        'ga4' => ['connected' => $isGa4Connected, 'label' => 'Google Analytics 4', 'color' => '#E37400'],
+                    ]
                 ],
-                'ga4' => [
-                    'connected' => $isGa4Connected, 
-                    'label' => 'Google Analytics 4',
-                    'color' => '#E37400'
+                'seo' => [
+                    'label' => 'SEO',
+                    'badge_bg' => 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
+                    'container_border' => 'border-emerald-200/70 dark:border-emerald-900/40',
+                    'tabs' => [
+                        'gsc' => ['connected' => $isGscConnected, 'label' => 'Search Console', 'color' => '#458CF5'],
+                        'keyword' => ['connected' => $isKeywordConnected, 'label' => 'Keyword.com', 'color' => '#10B981'],
+                    ]
                 ],
-                'gbp' => [
-                    'connected' => $isGbpConnected, 
-                    'label' => 'Google Business Profile',
-                    'color' => '#1A73E8'
+                'paid' => [
+                    'label' => 'Paid Advertising',
+                    'badge_bg' => 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60',
+                    'container_border' => 'border-blue-200/70 dark:border-blue-900/40',
+                    'tabs' => [
+                        'gads' => ['connected' => $isGadsConnected, 'label' => 'Google Ads', 'color' => '#4285F4'],
+                        'meta_ads' => ['connected' => $isMetaAdsConnected, 'label' => 'Meta Ads', 'color' => '#0081FB'],
+                    ]
                 ],
-                'keyword' => [
-                    'connected' => $isKeywordConnected, 
-                    'label' => 'Keyword.com',
-                    'color' => '#10B981'
+                'social' => [
+                    'label' => 'Organic Social',
+                    'badge_bg' => 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/60',
+                    'container_border' => 'border-purple-200/70 dark:border-purple-900/40',
+                    'tabs' => [
+                        'facebook' => ['connected' => $isFacebookConnected, 'label' => 'Meta', 'color' => '#0081FB'],
+                        'linkedin' => ['connected' => $isLinkedinConnected, 'label' => 'LinkedIn', 'color' => '#0A66C2'],
+                        'youtube' => ['connected' => $isYoutubeConnected, 'label' => 'YouTube', 'color' => '#FF0000'],
+                    ]
                 ],
-                'linkedin' => [
-                    'connected' => $isLinkedinConnected, 
-                    'label' => 'LinkedIn',
-                    'color' => '#0A66C2'
-                ],
-                'facebook' => [
-                    'connected' => $isFacebookConnected, 
-                    'label' => 'Meta',
-                    'color' => '#0081FB'
-                ],
-                'meta_ads' => [
-                    'connected' => $isMetaAdsConnected, 
-                    'label' => 'Meta Ads',
-                    'color' => '#0081FB'
-                ],
-                'gsc' => [
-                    'connected' => $isGscConnected, 
-                    'label' => 'Search Console',
-                    'color' => '#458CF5'
-                ],
-                'gtm' => [
-                    'connected' => $isGtmConnected, 
-                    'label' => 'Tag Manager',
-                    'color' => '#246FDB'
-                ],
-                'youtube' => [
-                    'connected' => $isYoutubeConnected, 
-                    'label' => 'YouTube',
-                    'color' => '#FF0000'
+                'other' => [
+                    'label' => 'Local & Measurement',
+                    'badge_bg' => 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
+                    'container_border' => 'border-slate-200/80 dark:border-slate-700/60',
+                    'tabs' => [
+                        'gbp' => ['connected' => $isGbpConnected, 'label' => 'Business Profile', 'color' => '#1A73E8'],
+                        'gtm' => ['connected' => $isGtmConnected, 'label' => 'Tag Manager', 'color' => '#246FDB'],
+                    ]
                 ],
             ];
         @endphp
 
-        <section class="platform-nav-wrapper mb-4">
-            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-2.5 shadow-sm">
-                <!-- Navigation Tabs with Brand Logos -->
-                <nav class="platform-tabs flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1" aria-label="Marketing Platforms">
-                    @foreach($tabList as $tKey => $tItem)
-                        @if($tItem['connected'])
-                            @php $isActive = ($activeReportIntegrationId === $tKey); @endphp
-                            <button type="button" 
-                                    @if($isActive) disabled @else wire:click="selectIntegration('{{ $tKey }}')" @endif
-                                    wire:loading.attr="disabled"
-                                    class="group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold text-sm tracking-tight transition-all duration-200 shrink-0 whitespace-nowrap border {{ $isActive ? 'bg-[#135266] text-white border-[#135266] shadow-sm font-extrabold cursor-default pointer-events-none' : 'bg-slate-50/90 hover:bg-slate-100/90 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700/70 hover:border-slate-300 cursor-pointer' }}">
-                                
-                                {{-- Loading Spinner when switching --}}
-                                <svg wire:loading wire:target="selectIntegration('{{ $tKey }}')" class="animate-spin w-5 h-5 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-
-                                {{-- Brand Logo / Icon --}}
-                                <span wire:loading.remove wire:target="selectIntegration('{{ $tKey }}')" class="inline-flex items-center justify-center shrink-0">
-                                    @if($tKey === 'facebook')
-                                        {{-- Meta Official Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#0081FB]' }}" viewBox="0 0 24 24">
-                                            <path d="m7.70344 7c-1.23357 0-2.34615.74172-2.8206 1.8804-.4329 1.03896-1.01718 3.6147-1.28132 4.8445-.07314.3406-.10356.6331-.08009.8958.07865.8799.35137 1.3002.60615 1.5162.26749.2268.67379.3631 1.26738.3631.65348 0 1.26086-.3366 1.60721-.8908l1.64468-2.6315 2.18665-3.6444-.5099-.84981c0-.00001 0-.00001 0-.00002-.55223-.92034-1.54684-1.48347-2.62016-1.48347zm4.29626.39072c-.921-1.48497-2.54534-2.39072-4.29626-2.39072-2.04097 0-3.88177 1.2272-4.66676 3.11117-.52019 1.24848-1.14231 4.03793-1.39056 5.19383-.09571.4456-.16486.9554-.11675 1.4937.11079 1.2396.53906 2.2145 1.30481 2.8637.75304.6385 1.68679.8376 2.56078.8376 1.34306 0 2.59138-.6919 3.3032-1.8308l1.64954-2.6392.0095-.0155 1.6425-2.7375 1.6425 2.7375.0095.0155 1.6495 2.6392c.7118 1.1389 1.9601 1.8308 3.3032 1.8308.9828 0 2.0043-.2803 2.7714-1.0857.7607-.7988 1.1239-1.9601 1.1239-3.4143 0-.9227-.3499-2.2661-.6743-3.3415-.3381-1.1208-.7029-2.11985-.815-2.4217-.0261-.07037-.0574-.15077-.0953-.23604-.81-1.82143-2.6184-3.00076-4.6192-3.00076-1.7509 0-3.3752.90576-4.2962 2.39072zm1.1662 1.94259 2.1866 3.64439 1.6447 2.6315c.3463.5542.9537.8908 1.6072.8908.6162 0 1.0423-.1702 1.3231-.465.2872-.3015.5722-.8902.5722-2.035 0-.5842-.2546-1.6551-.5891-2.7639-.3207-1.0633-.6693-2.0183-.775-2.30278-.0186-.05014-.0336-.08768-.0479-.11987-.4895-1.10065-1.5825-1.81345-2.7918-1.81345-1.0733 0-2.0679.56315-2.6201 1.48352z" />
-                                        </svg>
-                                    @elseif($tKey === 'meta_ads')
-                                        {{-- Meta Ads Logo (Megaphone & Chart Badge) --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#0081FB]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                                        </svg>
-                                    @elseif($tKey === 'gads')
-                                        {{-- Google Ads Logo --}}
-                                        <svg class="w-5 h-5" viewBox="0 0 48 48">
-                                            <path d="M46.79,32.49c-11.62-20.12-17-30.28-18.1-29.18A9,9,0,0,0,16.11,6.69c-1.52,2.6,5.46-9.48-14.82,25.66A8.94,8.94,0,0,0,0,37c0,9.19,12.22,12.42,16.79,4.5C17.5,40.26,14.23,45.94,24,29L31.2,41.5a9,9,0,1,0,15.59-9ZM9,44A7,7,0,0,1,2.93,33.5h0A1.31,1.31,0,0,0,3,33.37c4.21-6.95,15.15-2.22,12.64,5.74A7,7,0,0,1,9,44Zm8.89-8.4a9,9,0,0,0-12.12-7l9.34-16.18c.37,2.34,1.07,3.06,7.73,14.61ZM39,44a7,7,0,0,1-6.06-3.5C16.38,11.82,17,13.52,17,11A7,7,0,0,1,27.39,4.88C29.51,5.82,29.19,6,45,33.37A7,7,0,0,1,39,44Z" fill="{{ $isActive ? '#ffffff' : '#FBBC04' }}"/>
-                                        </svg>
-                                    @elseif($tKey === 'ga4')
-                                        {{-- Google Analytics 4 Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#E37400]' }}" viewBox="0 0 24 24">
-                                            <path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-                                        </svg>
-                                    @elseif($tKey === 'keyword')
-                                        {{-- Keyword.com Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#10B981]' }}" viewBox="0 0 53 44">
-                                            <rect x="2" y="8" width="10" height="34" rx="4" />
-                                            <path d="m29 2-16 20 16 20h13L26 22 42 2Z" />
-                                        </svg>
-                                    @elseif($tKey === 'linkedin')
-                                        {{-- LinkedIn Official Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#0A66C2]' }}" viewBox="0 0 24 24">
-                                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-                                        </svg>
-                                    @elseif($tKey === 'gsc')
-                                        {{-- Search Console Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#458CF5]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-                                        </svg>
-                                    @elseif($tKey === 'gbp')
-                                        {{-- Google Business Profile Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#1A73E8]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    @elseif($tKey === 'gtm')
-                                        {{-- Google Tag Manager Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'text-white' : 'text-[#246FDB]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                                        </svg>
-                                    @elseif($tKey === 'youtube')
-                                        {{-- YouTube Official Logo --}}
-                                        <svg class="w-5 h-5 {{ $isActive ? 'fill-white' : 'fill-[#FF0000]' }}" viewBox="0 0 24 24">
-                                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                        </svg>
-                                    @endif
+        <section class="platform-nav-wrapper mb-5">
+            <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-3 shadow-sm">
+                <!-- Grouped Channel Containers with Brand Logos -->
+                <div class="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-0.5" aria-label="Marketing Channels">
+                    @foreach($channelGroups as $groupKey => $group)
+                        @php
+                            $connectedTabsInGroup = array_filter($group['tabs'], fn($tab) => !empty($tab['connected']));
+                        @endphp
+                        @if(count($connectedTabsInGroup) > 0)
+                            <div class="inline-flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border {{ $group['container_border'] }} shrink-0">
+                                <!-- Channel Label Pill -->
+                                <span class="px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wider uppercase border select-none shrink-0 {{ $group['badge_bg'] }}">
+                                    {{ $group['label'] }}
                                 </span>
 
-                                <span class="text-sm font-semibold">{{ $tItem['label'] }}</span>
-                            </button>
+                                <!-- Channel Member Buttons -->
+                                <div class="flex items-center gap-1.5">
+                                    @foreach($connectedTabsInGroup as $tKey => $tItem)
+                                        @php $isActive = ($activeReportIntegrationId === $tKey); @endphp
+                                        <button type="button" 
+                                                @if($isActive) disabled @else wire:click="selectIntegration('{{ $tKey }}')" @endif
+                                                wire:loading.attr="disabled"
+                                                class="group inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm tracking-tight transition-all duration-200 shrink-0 whitespace-nowrap border {{ $isActive ? 'bg-[#135266] text-white border-[#135266] shadow-sm font-extrabold cursor-default pointer-events-none' : 'bg-white hover:bg-slate-100/90 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700/70 hover:border-slate-300 cursor-pointer' }}">
+                                            
+                                            {{-- Loading Spinner when switching --}}
+                                            <svg wire:loading wire:target="selectIntegration('{{ $tKey }}')" class="animate-spin w-4 h-4 shrink-0 text-current" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+
+                                            {{-- Brand Logo / Icon --}}
+                                            <span wire:loading.remove wire:target="selectIntegration('{{ $tKey }}')" class="inline-flex items-center justify-center shrink-0">
+                                                @if($tKey === 'facebook')
+                                                    {{-- Meta Official Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'fill-white' : 'fill-[#0081FB]' }}" viewBox="0 0 24 24">
+                                                        <path d="m7.70344 7c-1.23357 0-2.34615.74172-2.8206 1.8804-.4329 1.03896-1.01718 3.6147-1.28132 4.8445-.07314.3406-.10356.6331-.08009.8958.07865.8799.35137 1.3002.60615 1.5162.26749.2268.67379.3631 1.26738.3631.65348 0 1.26086-.3366 1.60721-.8908l1.64468-2.6315 2.18665-3.6444-.5099-.84981c0-.00001 0-.00001 0-.00002-.55223-.92034-1.54684-1.48347-2.62016-1.48347zm4.29626.39072c-.921-1.48497-2.54534-2.39072-4.29626-2.39072-2.04097 0-3.88177 1.2272-4.66676 3.11117-.52019 1.24848-1.14231 4.03793-1.39056 5.19383-.09571.4456-.16486.9554-.11675 1.4937.11079 1.2396.53906 2.2145 1.30481 2.8637.75304.6385 1.68679.8376 2.56078.8376 1.34306 0 2.59138-.6919 3.3032-1.8308l1.64954-2.6392.0095-.0155 1.6425-2.7375 1.6425 2.7375.0095.0155 1.6495 2.6392c.7118 1.1389 1.9601 1.8308 3.3032 1.8308.9828 0 2.0043-.2803 2.7714-1.0857.7607-.7988 1.1239-1.9601 1.1239-3.4143 0-.9227-.3499-2.2661-.6743-3.3415-.3381-1.1208-.7029-2.11985-.815-2.4217-.0261-.07037-.0574-.15077-.0953-.23604-.81-1.82143-2.6184-3.00076-4.6192-3.00076-1.7509 0-3.3752.90576-4.2962 2.39072zm1.1662 1.94259 2.1866 3.64439 1.6447 2.6315c.3463.5542.9537.8908 1.6072.8908.6162 0 1.0423-.1702 1.3231-.465.2872-.3015.5722-.8902.5722-2.035 0-.5842-.2546-1.6551-.5891-2.7639-.3207-1.0633-.6693-2.0183-.775-2.30278-.0186-.05014-.0336-.08768-.0479-.11987-.4895-1.10065-1.5825-1.81345-2.7918-1.81345-1.0733 0-2.0679.56315-2.6201 1.48352z" />
+                                                    </svg>
+                                                @elseif($tKey === 'meta_ads')
+                                                    {{-- Meta Ads Logo (Megaphone & Chart Badge) --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'text-white' : 'text-[#0081FB]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                                                    </svg>
+                                                @elseif($tKey === 'gads')
+                                                    {{-- Google Ads Logo --}}
+                                                    <svg class="w-4 h-4" viewBox="0 0 48 48">
+                                                        <path d="M46.79,32.49c-11.62-20.12-17-30.28-18.1-29.18A9,9,0,0,0,16.11,6.69c-1.52,2.6,5.46-9.48-14.82,25.66A8.94,8.94,0,0,0,0,37c0,9.19,12.22,12.42,16.79,4.5C17.5,40.26,14.23,45.94,24,29L31.2,41.5a9,9,0,1,0,15.59-9ZM9,44A7,7,0,0,1,2.93,33.5h0A1.31,1.31,0,0,0,3,33.37c4.21-6.95,15.15-2.22,12.64,5.74A7,7,0,0,1,9,44Zm8.89-8.4a9,9,0,0,0-12.12-7l9.34-16.18c.37,2.34,1.07,3.06,7.73,14.61ZM39,44a7,7,0,0,1-6.06-3.5C16.38,11.82,17,13.52,17,11A7,7,0,0,1,27.39,4.88C29.51,5.82,29.19,6,45,33.37A7,7,0,0,1,39,44Z" fill="{{ $isActive ? '#ffffff' : '#FBBC04' }}"/>
+                                                    </svg>
+                                                @elseif($tKey === 'ga4')
+                                                    {{-- Google Analytics 4 Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'fill-white' : 'fill-[#E37400]' }}" viewBox="0 0 24 24">
+                                                        <path d="M22 20.5H2v-2h20v2zM5.5 17.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6-5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M5.5 16V4M11.5 16V9M17.5 16V13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                                    </svg>
+                                                @elseif($tKey === 'keyword')
+                                                    {{-- Keyword.com Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'fill-white' : 'fill-[#10B981]' }}" viewBox="0 0 53 44">
+                                                        <rect x="2" y="8" width="10" height="34" rx="4" />
+                                                        <path d="m29 2-16 20 16 20h13L26 22 42 2Z" />
+                                                    </svg>
+                                                @elseif($tKey === 'linkedin')
+                                                    {{-- LinkedIn Official Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'fill-white' : 'fill-[#0A66C2]' }}" viewBox="0 0 24 24">
+                                                        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                                                    </svg>
+                                                @elseif($tKey === 'gsc')
+                                                    {{-- Search Console Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'text-white' : 'text-[#458CF5]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                                                    </svg>
+                                                @elseif($tKey === 'gbp')
+                                                    {{-- Google Business Profile Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'text-white' : 'text-[#1A73E8]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 012 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                @elseif($tKey === 'gtm')
+                                                    {{-- Google Tag Manager Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'text-white' : 'text-[#246FDB]' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                                    </svg>
+                                                @elseif($tKey === 'youtube')
+                                                    {{-- YouTube Official Logo --}}
+                                                    <svg class="w-4 h-4 {{ $isActive ? 'fill-white' : 'fill-[#FF0000]' }}" viewBox="0 0 24 24">
+                                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                    </svg>
+                                                @endif
+                                            </span>
+
+                                            <span class="text-xs font-semibold">{{ $tItem['label'] }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
                         @endif
                     @endforeach
-                </nav>
+                </div>
             </div>
         </section>
     @endif

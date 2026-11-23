@@ -767,8 +767,8 @@ body:has(.is-marketing-report),
 
 .stat-circle-icon svg,
 .stat-circle-icon i {
-  width: 22px;
-  height: 22px;
+  width: 25px;
+  height: 25px;
   stroke-width: 1.8;
 }
 
@@ -1133,7 +1133,7 @@ body:has(.is-marketing-report),
 }
 
 /* ── Responsiveness ── */
-@media (max-width: 1240px) {
+@media (max-width: 1200px) {
   .growth-note {
     display: none !important;
   }
@@ -1142,8 +1142,7 @@ body:has(.is-marketing-report),
     font-size: 34px !important;
   }
 
-  .stats-grid-4,
-  .stats-grid-3 {
+  .stats-grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1197,8 +1196,7 @@ body:has(.is-marketing-report),
     width: 100%;
   }
 
-  .stats-grid-4,
-  .stats-grid-3 {
+  .stats-grid-4 {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -2151,20 +2149,12 @@ body:has(.is-marketing-report),
 .client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"]>div[class*="rounded-2xl"],
 .client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-4"]>div[class*="rounded-2xl"],
 .client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-5"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-1 md:grid-cols-3"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-3"]>div[class*="rounded-2xl"],
 .client-integration-theme .grid[class*="grid-cols-4"]>div[class*="rounded-2xl"],
 .client-integration-theme .grid[class*="grid-cols-5"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-6"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="lg:grid-cols-6"]>div[class*="rounded-2xl"],
 .client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-4"]>div[class*="rounded-xl"],
 .client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="grid-cols-1 md:grid-cols-3"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-3"]>div[class*="rounded-xl"],
 .client-integration-theme .grid[class*="grid-cols-4"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="grid-cols-5"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="grid-cols-6"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="lg:grid-cols-6"]>div[class*="rounded-xl"] {
+.client-integration-theme .grid[class*="grid-cols-5"]>div[class*="rounded-xl"] {
   background: var(--card) !important;
   border: 1px solid var(--border) !important;
   border-radius: 10px !important;
@@ -2180,31 +2170,14 @@ body:has(.is-marketing-report),
   text-align: left !important;
 }
 
-
-.client-integration-theme .grid>div[class*="rounded-2xl"]>div:last-child {
-  text-align: left !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-}
-
-.client-integration-theme .grid>div[class*="rounded-xl"]>div:last-child {
-  text-align: left !important;
-  display: flex !important;
-  align-items: flex-start !important;
-  /* justify-content: center !important; */
-}
-
-/* Ensure chart & table panels and device breakdown cards NEVER get forced into stat-card flex row */
+/* Ensure chart & table panels NEVER get forced into stat-card flex row */
 .client-integration-theme .grid-cols-1>div,
 .client-integration-theme .lg\:grid-cols-2>div,
 .client-integration-theme div:has(> table),
 .client-integration-theme div:has(> canvas),
 .client-integration-theme div:has(> div > canvas),
 .client-integration-theme div:has(> .overflow-x-auto),
-.client-integration-theme .events-breakdown-grid>div,
-.client-integration-theme .device-breakdown-card {
+.client-integration-theme .events-breakdown-grid>div {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
@@ -2229,10 +2202,10 @@ body:has(.is-marketing-report),
 }
 
 /* Stat card icon badge matching GA4 stat-icon */
-.client-integration-theme .grid>div[class*="rounded-2xl"]:not(.keyword-stat-card)>span:first-child[class*="rounded-full"],
-.client-integration-theme .grid>div[class*="rounded-xl"]:not(.keyword-stat-card)>span:first-child[class*="rounded-full"] {
-  width: 44px !important;
-  height: 44px !important;
+.client-integration-theme .grid>div[class*="rounded-2xl"]>span:first-child[class*="rounded-full"],
+.client-integration-theme .grid>div[class*="rounded-xl"]>span:first-child[class*="rounded-full"] {
+  width: 56px !important;
+  height: 56px !important;
   border-radius: 50% !important;
   background-color: #d0e7ec !important;
   display: flex !important;
@@ -2242,18 +2215,18 @@ body:has(.is-marketing-report),
   color: #135266 !important;
 }
 
-.client-integration-theme .grid>div[class*="rounded-2xl"]:not(.keyword-stat-card)>span:first-child[class*="rounded-full"] svg,
-.client-integration-theme .grid>div[class*="rounded-xl"]:not(.keyword-stat-card)>span:first-child[class*="rounded-full"] svg {
-  width: 22px !important;
-  height: 22px !important;
+.client-integration-theme .grid>div[class*="rounded-2xl"]>span:first-child[class*="rounded-full"] svg,
+.client-integration-theme .grid>div[class*="rounded-xl"]>span:first-child[class*="rounded-full"] svg {
+  width: 28px !important;
+  height: 28px !important;
   stroke: #135266 !important;
   stroke-width: 1.8 !important;
   fill: none !important;
 }
 
 /* Stat card label */
-.client-integration-theme .grid>div[class*="rounded-2xl"]:not(.keyword-stat-card) span[class*="uppercase"],
-.client-integration-theme .grid>div[class*="rounded-xl"]:not(.keyword-stat-card) span[class*="uppercase"] {
+.client-integration-theme .grid>div[class*="rounded-2xl"] span[class*="uppercase"],
+.client-integration-theme .grid>div[class*="rounded-xl"] span[class*="uppercase"] {
   color: var(--muted-foreground) !important;
   font-size: 10px !important;
   font-weight: 700 !important;
@@ -2266,16 +2239,16 @@ body:has(.is-marketing-report),
 }
 
 /* Stat card values */
-.client-integration-theme .grid>div[class*="rounded-2xl"]:not(.keyword-stat-card) span[class*="text-lg"],
-.client-integration-theme .grid>div[class*="rounded-2xl"]:not(.keyword-stat-card) span[class*="text-xl"],
-.client-integration-theme .grid>div[class*="rounded-2xl"]:not(.keyword-stat-card) span[class*="text-2xl"],
-.client-integration-theme .grid>div[class*="rounded-2xl"]:not(.keyword-stat-card) span[class*="font-extrabold"],
-.client-integration-theme .grid>div[class*="rounded-xl"]:not(.keyword-stat-card) span[class*="text-lg"],
-.client-integration-theme .grid>div[class*="rounded-xl"]:not(.keyword-stat-card) span[class*="text-xl"],
-.client-integration-theme .grid>div[class*="rounded-xl"]:not(.keyword-stat-card) span[class*="text-2xl"],
-.client-integration-theme .grid>div[class*="rounded-xl"]:not(.keyword-stat-card) span[class*="font-extrabold"] {
-  font-size: 24px !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
+.client-integration-theme .grid>div[class*="rounded-2xl"] span[class*="text-lg"],
+.client-integration-theme .grid>div[class*="rounded-2xl"] span[class*="text-xl"],
+.client-integration-theme .grid>div[class*="rounded-2xl"] span[class*="text-2xl"],
+.client-integration-theme .grid>div[class*="rounded-2xl"] span[class*="font-extrabold"],
+.client-integration-theme .grid>div[class*="rounded-xl"] span[class*="text-lg"],
+.client-integration-theme .grid>div[class*="rounded-xl"] span[class*="text-xl"],
+.client-integration-theme .grid>div[class*="rounded-xl"] span[class*="text-2xl"],
+.client-integration-theme .grid>div[class*="rounded-xl"] span[class*="font-extrabold"] {
+  font-size: 30px !important;
+  font-family: Figtree, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   line-height: 1.1 !important;
   font-weight: 900 !important;
   letter-spacing: -0.02em !important;
@@ -2283,6 +2256,7 @@ body:has(.is-marketing-report),
   display: block !important;
   overflow-wrap: anywhere;
 }
+
 
 /* Keyword.com 3-column prominent stat cards - Full override */
 .client-integration-theme .keyword-stat-card,
@@ -2474,11 +2448,6 @@ body:has(.is-marketing-report),
   border: 0 !important;
   background: transparent !important;
   margin-bottom: 8px !important;
-}
-
-.client-integration-theme [wire\:key*="gads-replica"] .grid.border-b>* {
-  border-left-width: 0 !important;
-  border-right-width: 0 !important;
 }
 
 @media (max-width: 1050px) {
@@ -2798,103 +2767,4 @@ body:has(.is-marketing-report),
 
 .dark .client-integration-theme div[class*="group relative overflow-hidden bg-gradient-to-br"] div[class*="bg-gradient-to-br"] svg {
   stroke: #5eead4 !important;
-}
-
-/* ==========================================================================
-   FINAL AUTHORITATIVE TYPOGRAPHY STANDARDIZATION (18px, 16px, 14px)
-   Placed at the bottom to guarantee highest cascading precedence.
-   ========================================================================== */
-
-/* 18px: All Headings, Titles, Section Headers, Modal & Card Headers */
-h1:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
-h2:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
-h3:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
-h4:not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]):not([class*="text-[2"]):not([class*="text-[3"]):not(.stat-val):not(.kpi-value):not(.stat-number):not([class*="metric-val"]),
-h5,
-h6,
-.portal-heading,
-.card-title,
-.section-title,
-.table-title,
-.modal-title,
-.portal-card-title {
-  font-family: var(--portal-heading-font) !important;
-  font-size: 18px !important;
-  line-height: 1.35 !important;
-}
-
-/* Table Headers: strictly 16px Bold (700) */
-table thead th,
-table th,
-.table-head-th,
-.portal-table th,
-table thead th * {
-  font-family: var(--portal-font) !important;
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  line-height: 1.4 !important;
-}
-
-/* Table Cells: strictly 14px Regular (400) */
-table tbody td,
-table td,
-.table-cell-td,
-.portal-table td,
-table tbody td :not(.stat-val):not(.kpi-value):not([class*="text-2xl"]):not([class*="text-3xl"]):not([class*="text-4xl"]) {
-  font-family: var(--portal-font) !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  line-height: 1.45 !important;
-}
-
-/* 16px: Form Controls & Inputs */
-input:not([type="checkbox"]):not([type="radio"]):not(.text-14):not(.quick-search input),
-select,
-textarea {
-  font-family: var(--portal-font) !important;
-  font-size: 16px !important;
-}
-
-/* 14px: Secondary Text, Navigation Items, Badges, Dates, Filters, Helper Text */
-.portal-nav-item,
-.portal-profile-name,
-.portal-profile-sub,
-.portal-btn-theme,
-.portal-btn-logout,
-.text-meta,
-.meta-text,
-.sub-title,
-.sub-text,
-.text-sub,
-.help-text,
-.form-hint,
-.badge,
-.tag,
-.date-label,
-.table-pagination,
-.quick-search,
-.quick-search input,
-small {
-  font-size: 14px !important;
-  line-height: 1.4 !important;
-}
-
-/* Clamp arbitrary small text classes down to clean 14px */
-[class*="text-[10px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]),
-[class*="text-[11px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]),
-[class*="text-[12px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]),
-[class*="text-[13px]"]:not(.meta-kpi-subtext):not(.meta-kpi-label):not([class*="meta-kpi-"]):not([class*="kpi-"]) {
-  font-size: 14px !important;
-}
-
-/* Clamp 15px/16px arbitrary classes to clean 16px */
-[class*="text-[15px]"],
-[class*="text-[16px]"] {
-  font-size: 16px !important;
-}
-
-/* Clamp 17px/18px arbitrary classes to clean 18px */
-[class*="text-[17px]"],
-[class*="text-[18px]"] {
-  font-size: 18px !important;
 }

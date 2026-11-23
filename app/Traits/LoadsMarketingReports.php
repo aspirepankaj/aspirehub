@@ -132,9 +132,14 @@ trait LoadsMarketingReports
         $version = !empty($mtimes) ? md5(implode('_', $mtimes) . '_' . count($mtimes)) : '0';
         $cacheKey = "mkt_rep_{$clientFolder}_{$websiteFolder}_{$integrationType}_{$startDate}_{$endDate}_" . ($fetchDefaultCompare ? '1' : '0') . "_{$version}";
         
-        return Cache::remember($cacheKey, now()->addHours(6), function () use ($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare) {
+        try {
+            return Cache::remember($cacheKey, now()->addHours(6), function () use ($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare) {
+                return $this->computeIntegrationJsonData($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare);
+            });
+        } catch (\Throwable $e) {
+            // If MySQL cache table rejects huge payload (e.g. packet bigger than max_allowed_packet)
             return $this->computeIntegrationJsonData($clientFolder, $websiteFolder, $integrationType, $startDate, $endDate, $fetchDefaultCompare);
-        });
+        }
     }
 
     protected function computeIntegrationJsonData(string $clientFolder, string $websiteFolder, string $integrationType, string $startDate, string $endDate, bool $fetchDefaultCompare = true): array
@@ -203,6 +208,17 @@ trait LoadsMarketingReports
                     $normDate = strlen($rawDate) === 8 ? substr($rawDate, 0, 4) . '-' . substr($rawDate, 4, 2) . '-' . substr($rawDate, 6, 2) : $rawDate;
                     if ($normDate >= $startDate && $normDate <= $endDate) {
                         $mergedDailyKeywords[] = $item;
+                    }
+                }
+            }
+
+            if (!empty($jsonData['daily_pages'])) {
+                if (!isset($mergedDailyPages)) $mergedDailyPages = [];
+                foreach ($jsonData['daily_pages'] as $item) {
+                    $rawDate = (string)($item['date'] ?? '');
+                    $normDate = strlen($rawDate) === 8 ? substr($rawDate, 0, 4) . '-' . substr($rawDate, 4, 2) . '-' . substr($rawDate, 6, 2) : $rawDate;
+                    if ($normDate >= $startDate && $normDate <= $endDate) {
+                        $mergedDailyPages[] = $item;
                     }
                 }
             }
@@ -505,6 +521,9 @@ trait LoadsMarketingReports
                 $allData['summary']['impressions'] = $totalImpressions;
                 $allData['summary']['ctr'] = $totalImpressions > 0 ? round(($totalClicks / $totalImpressions) * 100, 2) : 0;
                 $allData['summary']['position'] = $totalImpressions > 0 ? round($weightedPosition / $totalImpressions, 1) : 0;
+                if (!empty($mergedDailyPages)) {
+                    $allData['daily_pages'] = $mergedDailyPages;
+                }
             }
             // Re-calculate YouTube summary
             elseif ($integrationType === 'youtube') {

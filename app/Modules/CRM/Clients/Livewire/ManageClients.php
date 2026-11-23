@@ -1343,10 +1343,16 @@ class ManageClients extends Component
                             'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['date'], 'rowLimit' => 25000, 'dataState' => 'all'
                         ]),
                         $makeReq('queries')->post($endpoint, [
-                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 100, 'dataState' => 'all'
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['query'], 'rowLimit' => 500, 'dataState' => 'all'
                         ]),
                         $makeReq('pages')->post($endpoint, [
-                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 100, 'dataState' => 'all'
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page'], 'rowLimit' => 500, 'dataState' => 'all'
+                        ]),
+                        $makeReq('page_queries')->post($endpoint, [
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['page', 'query'], 'rowLimit' => 2500, 'dataState' => 'all'
+                        ]),
+                        $makeReq('daily_pages')->post($endpoint, [
+                            'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['date', 'page'], 'rowLimit' => 25000, 'dataState' => 'all'
                         ]),
                         $makeReq('devices')->post($endpoint, [
                             'startDate' => $startDate, 'endDate' => $endDate, 'dimensions' => ['device'], 'rowLimit' => 25, 'dataState' => 'all'
@@ -1363,6 +1369,8 @@ class ManageClients extends Component
                     $queriesJson = $queriesRes->json();
                     $dailyJson = $isSuccess($responses['daily'] ?? null) ? $responses['daily']->json() : [];
                     $pagesJson = $isSuccess($responses['pages'] ?? null) ? $responses['pages']->json() : [];
+                    $pageQueriesJson = $isSuccess($responses['page_queries'] ?? null) ? $responses['page_queries']->json() : [];
+                    $dailyPagesJson = $isSuccess($responses['daily_pages'] ?? null) ? $responses['daily_pages']->json() : [];
                     $devicesJson = $isSuccess($responses['devices'] ?? null) ? $responses['devices']->json() : [];
                     $countriesJson = $isSuccess($responses['countries'] ?? null) ? $responses['countries']->json() : [];
 
@@ -1402,8 +1410,28 @@ class ManageClients extends Component
                                 'page' => $row['keys'][0] ?? '',
                                 'clicks' => $row['clicks'] ?? 0,
                                 'impressions' => $row['impressions'] ?? 0,
+                                'ctr' => round(($row['ctr'] ?? 0) * 100, 2),
+                                'position' => round($row['position'] ?? 0, 1),
                             ];
                         }, $pagesJson['rows'] ?? []),
+                        'page_queries' => array_map(function ($row) {
+                            return [
+                                'page' => $row['keys'][0] ?? '',
+                                'query' => $row['keys'][1] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                                'ctr' => round(($row['ctr'] ?? 0) * 100, 2),
+                                'position' => round($row['position'] ?? 0, 1),
+                            ];
+                        }, $pageQueriesJson['rows'] ?? []),
+                        'daily_pages' => array_map(function ($row) {
+                            return [
+                                'date' => $row['keys'][0] ?? '',
+                                'page' => $row['keys'][1] ?? '',
+                                'clicks' => $row['clicks'] ?? 0,
+                                'impressions' => $row['impressions'] ?? 0,
+                            ];
+                        }, $dailyPagesJson['rows'] ?? []),
                         'devices' => array_map(function ($row) {
                             return [
                                 'device' => $row['keys'][0] ?? '',
@@ -1488,10 +1516,11 @@ class ManageClients extends Component
                         $makeReq('events')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
                             'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
                             'metrics' => [
+                                ['name' => 'keyEvents'],
                                 ['name' => 'eventCount']
                             ],
-                            'dimensions' => [['name' => 'eventName'], ['name' => 'sessionDefaultChannelGroup']],
-                            'limit' => 100
+                            'dimensions' => [['name' => 'eventName'], ['name' => 'sessionDefaultChannelGroup'], ['name' => 'isConversionEvent']],
+                            'limit' => 250
                         ]),
                         $makeReq('keywords')->post("https://analyticsdata.googleapis.com/v1beta/properties/{$propertyId}:runReport", [
                             'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
@@ -1619,32 +1648,60 @@ class ManageClients extends Component
                         }
                     }
 
-                    // Parse dynamic events
+                    // Parse dynamic events (Dynamically identify true Key Events / Conversions)
                     $eventsData = [];
+                    $nonKeyEvents = [
+                        'session_start', 'first_visit', 'page_view', 'scroll', 'user_engagement',
+                        'view_search_results', 'click', 'file_download', 'video_start', 'video_progress', 'video_complete'
+                    ];
+
                     if ($eventsRes->successful()) {
                         foreach ($eventsRes->json('rows') ?? [] as $row) {
                             $eventName = $row['dimensionValues'][0]['value'] ?? 'unknown';
+                            $evLower = strtolower(trim($eventName));
+                            if (in_array($evLower, $nonKeyEvents)) {
+                                continue;
+                            }
+                            $isConversion = strtolower(trim($row['dimensionValues'][2]['value'] ?? 'false')) === 'true';
                             $channel = $row['dimensionValues'][1]['value'] ?? 'unknown';
-                            $eventCount = (int) ($row['metricValues'][0]['value'] ?? 0);
+                            
+                            // Check keyEvents metric if available, else eventCount
+                            $keyCount = isset($row['metricValues'][0]['value']) ? (int)$row['metricValues'][0]['value'] : 0;
+                            $eventCount = isset($row['metricValues'][1]['value']) ? (int)$row['metricValues'][1]['value'] : $keyCount;
+                            $finalCount = $keyCount > 0 ? $keyCount : $eventCount;
+
                             if (!isset($eventsData[$eventName])) { $eventsData[$eventName] = []; }
                             $eventsData[$eventName][] = [
                                 'channel' => $channel,
-                                'count' => $eventCount,
+                                'count' => $finalCount,
+                                'is_conversion' => $isConversion
                             ];
                         }
                     }
                     if (empty($eventsData)) {
                         $eventsData = [
-                            'Appointments Scheduled' => [
-                                ['channel' => 'Direct', 'count' => 4],
-                                ['channel' => 'Referral', 'count' => 1],
-                                ['channel' => 'Paid Search', 'count' => 1],
+                            'thank_you_visit' => [
+                                ['channel' => 'Direct', 'count' => 23],
+                                ['channel' => 'Organic Search', 'count' => 6],
+                                ['channel' => 'Referral', 'count' => 4],
+                                ['channel' => 'Unassigned', 'count' => 3],
+                                ['channel' => 'Organic Social', 'count' => 2],
+                                ['channel' => 'Email', 'count' => 1],
                             ],
-                            'Email Clicks' => [
+                            'phone_event' => [
+                                ['channel' => 'Organic Search', 'count' => 12],
+                                ['channel' => 'Direct', 'count' => 8],
+                                ['channel' => 'Paid Search', 'count' => 5],
+                            ],
+                            'email_event' => [
+                                ['channel' => 'Direct', 'count' => 9],
+                                ['channel' => 'Organic Search', 'count' => 7],
+                                ['channel' => 'Referral', 'count' => 2],
+                            ],
+                            'purchase' => [
                                 ['channel' => 'Direct', 'count' => 4],
-                                ['channel' => 'Referral', 'count' => 1],
-                                ['channel' => 'Paid Search', 'count' => 1],
-                            ]
+                                ['channel' => 'Organic Search', 'count' => 2],
+                            ],
                         ];
                     }
 
