@@ -242,8 +242,8 @@ class ClientMarketingReports extends Component
             $requestedTab = null;
         }
         $requestedTab = $requestedTab ?: $this->activeReportIntegrationId;
-        if ($requestedTab === 'overview') {
-            $this->activeReportIntegrationId = 'overview';
+        if (in_array($requestedTab, ['overview', 'seo', 'social'])) {
+            $this->activeReportIntegrationId = $requestedTab;
         } elseif ($requestedTab && isset($this->integrations[$requestedTab])) {
             $this->activeReportIntegrationId = $requestedTab;
         } elseif (!empty($this->integrations)) {
@@ -299,38 +299,44 @@ class ClientMarketingReports extends Component
 
             // Optimize loading:
             // 1. If a specific tab is clicked, ONLY load that tab's data and completely skip all other integrations.
-            // 2. If overview is active, only load connected integrations with $fetchDefaultCompare = false to make it fast.
-            if ($this->activeReportIntegrationId === 'overview') {
+            // 2. If overview/seo/social is active, only load the relevant connected integrations.
+            if (in_array($this->activeReportIntegrationId, ['overview', 'seo', 'social'])) {
                 $connected = array_keys($this->integrations);
+
+                $allowedIntegrations = match($this->activeReportIntegrationId) {
+                    'seo' => ['ga4', 'gsc', 'keyword'],
+                    'social' => ['facebook', 'linkedin', 'youtube'],
+                    default => $connected,
+                };
                 
-                if (in_array('ga4', $connected)) {
+                if (in_array('ga4', $allowedIntegrations) && in_array('ga4', $connected)) {
                     $this->ga4Data = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'ga4', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('gsc', $connected)) {
+                if (in_array('gsc', $allowedIntegrations) && in_array('gsc', $connected)) {
                     $this->gscData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gsc', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('youtube', $connected)) {
+                if (in_array('youtube', $allowedIntegrations) && in_array('youtube', $connected)) {
                     $this->youtubeData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'youtube', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('keyword', $connected)) {
+                if (in_array('keyword', $allowedIntegrations) && in_array('keyword', $connected)) {
                     $this->keywordData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'keyword', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('gbp', $connected)) {
+                if (in_array('gbp', $allowedIntegrations) && in_array('gbp', $connected)) {
                     $this->gbpData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gbp', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('gads', $connected)) {
+                if (in_array('gads', $allowedIntegrations) && in_array('gads', $connected)) {
                     $this->gadsData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gads', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('facebook', $connected)) {
+                if (in_array('facebook', $allowedIntegrations) && in_array('facebook', $connected)) {
                     $this->facebookData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'facebook', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('meta_ads', $connected)) {
+                if (in_array('meta_ads', $allowedIntegrations) && in_array('meta_ads', $connected)) {
                     $this->metaAdsData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'meta_ads', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('linkedin', $connected)) {
+                if (in_array('linkedin', $allowedIntegrations) && in_array('linkedin', $connected)) {
                     $this->linkedinData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'linkedin', $this->dateFrom, $this->dateTo);
                 }
-                if (in_array('gtm', $connected)) {
+                if (in_array('gtm', $allowedIntegrations) && in_array('gtm', $connected)) {
                     $this->gtmData = $this->loadIntegrationOverviewSummary($clientFolder, $websiteFolder, 'gtm', $this->dateFrom, $this->dateTo);
                 }
                 $this->activeReportData = [];

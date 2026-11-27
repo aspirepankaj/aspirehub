@@ -1114,7 +1114,8 @@ class StaffClients extends Component
                         'dateRanges' => [['startDate' => $gaStartDate, 'endDate' => $endDateStr]],
                         'metrics' => [
                             ['name' => 'screenPageViews'],
-                            ['name' => 'activeUsers']
+                            ['name' => 'activeUsers'],
+                            ['name' => 'keyEvents']
                         ],
                         'dimensions' => [['name' => 'pagePath']],
                         'limit' => 15
@@ -1368,6 +1369,7 @@ class StaffClients extends Component
                                 'page_path' => $row['dimensionValues'][0]['value'] ?? '/',
                                 'pageviews' => (int) ($row['metricValues'][0]['value'] ?? 0),
                                 'users' => (int) ($row['metricValues'][1]['value'] ?? 0),
+                                'key_events' => (int) ($row['metricValues'][2]['value'] ?? 0),
                             ];
                         }, $pagesJson['rows'] ?? []),
                         'traffic_sources' => $trafficSources,

@@ -91,10 +91,43 @@
                 <i data-lucide="globe"></i>
                 <span>My Websites</span>
             </a>
-            <a href="{{ route('client.marketing') }}" class="portal-nav-item {{ $currentRoute === 'client.marketing' ? 'active' : '' }}" data-label="Marketing Reports">
-                <i data-lucide="megaphone"></i>
-                <span>Marketing Reports</span>
-            </a>
+            @php
+                $isMarketingActive = $currentRoute === 'client.marketing';
+                $activeTab = request()->query('tab');
+                $isSeoActive = $isMarketingActive && in_array($activeTab, ['seo', 'ga4', 'gsc', 'keyword']);
+                $isGadsActive = $isMarketingActive && $activeTab === 'gads';
+                $isSocialActive = $isMarketingActive && in_array($activeTab, ['social', 'facebook', 'linkedin', 'youtube']);
+                $isMetaAdsActive = $isMarketingActive && $activeTab === 'meta_ads';
+            @endphp
+            <div x-data="{ openMarketing: {{ $isMarketingActive ? 'true' : 'false' }} }" class="w-full">
+                <div class="flex items-center justify-between w-full">
+                    <a href="{{ route('client.marketing') }}" class="portal-nav-item flex-1 {{ $isMarketingActive && !$activeTab ? 'active' : '' }}" data-label="Marketing Reports">
+                        <i data-lucide="megaphone"></i>
+                        <span>Marketing Reports</span>
+                    </a>
+                    <button type="button" @click.stop="openMarketing = !openMarketing" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-transform duration-200 cursor-pointer" :class="openMarketing ? 'rotate-180' : ''" title="Toggle sub menu">
+                        <i data-lucide="chevron-down" style="width: 15px; height: 15px;"></i>
+                    </button>
+                </div>
+                <div x-show="openMarketing" x-transition.origin.top class="flex flex-col gap-1 pl-7 pr-2 pt-1 pb-1">
+                    <a href="{{ route('client.marketing') }}?tab=seo" class="portal-nav-item text-xs h-8 pl-3.5 {{ $isSeoActive ? 'active' : '' }}" data-label="SEO Reports">
+                        <i data-lucide="search" style="width:14px;height:14px"></i>
+                        <span>SEO Reports</span>
+                    </a>
+                    <a href="{{ route('client.marketing') }}?tab=gads" class="portal-nav-item text-xs h-8 pl-3.5 {{ $isGadsActive ? 'active' : '' }}" data-label="Google Ads">
+                        <i data-lucide="trending-up" style="width:14px;height:14px"></i>
+                        <span>Google Ads</span>
+                    </a>
+                    <a href="{{ route('client.marketing') }}?tab=social" class="portal-nav-item text-xs h-8 pl-3.5 {{ $isSocialActive ? 'active' : '' }}" data-label="Social Media">
+                        <i data-lucide="share-2" style="width:14px;height:14px"></i>
+                        <span>Social Media</span>
+                    </a>
+                    <a href="{{ route('client.marketing') }}?tab=meta_ads" class="portal-nav-item text-xs h-8 pl-3.5 {{ $isMetaAdsActive ? 'active' : '' }}" data-label="Meta Ads">
+                        <i data-lucide="badge-percent" style="width:14px;height:14px"></i>
+                        <span>Meta Ads</span>
+                    </a>
+                </div>
+            </div>
             <a href="{{ route('client.maintenance') }}" class="portal-nav-item {{ str_starts_with($currentRoute ?? '', 'client.maintenance') ? 'active' : '' }}" data-label="Maintenance Reports">
                 <i data-lucide="settings"></i>
                 <span>Maintenance Reports</span>

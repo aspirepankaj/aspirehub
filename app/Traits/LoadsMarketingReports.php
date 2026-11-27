@@ -410,6 +410,9 @@ trait LoadsMarketingReports
                 foreach ($allData['pages_report'] as &$pg) {
                     $pg['pageviews'] = (int)round(($pg['pageviews'] ?? 0) * $scaleFactor);
                     $pg['users'] = (int)round(($pg['users'] ?? 0) * $scaleFactor);
+                    if (isset($pg['key_events'])) {
+                        $pg['key_events'] = (int)round(($pg['key_events'] ?? 0) * $scaleFactor);
+                    }
                 }
                 unset($pg);
             }

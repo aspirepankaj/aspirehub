@@ -93,8 +93,8 @@
 
         .report-content-root .event-breakdown-item .event-item-chart,
         .client-integration-theme .event-breakdown-item .event-item-chart {
-            width: 90px !important;
-            height: 90px !important;
+            width: 76px !important;
+            height: 76px !important;
             flex-shrink: 0 !important;
             position: relative !important;
             display: flex !important;
@@ -109,7 +109,7 @@
             display: flex !important;
             flex-direction: column !important;
             gap: 4px !important;
-            overflow: hidden !important;
+            overflow: visible !important;
         }
     </style>
     <div class="report-content-root">
@@ -283,7 +283,7 @@
             }
 @endphp
             
-            <div wire:key="gsc-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
+            <div wire:key="gsc-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
             @php
                 $reportDataScope = $rSet['data'];
@@ -294,7 +294,7 @@
                 $allPageQueries = $reportDataScope['page_queries'] ?? [];
                 $initialSummary = $reportDataScope['summary'] ?? ['clicks' => 0, 'impressions' => 0, 'ctr' => 0, 'position' => 0];
             @endphp
-            <div wire:key="gsc-period-{{ $idx }}" class="w-full font-sans pb-8" x-data="{
+            <div wire:key="gsc-period-{{ $idx }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-8" x-data="{
                 filterUrl: '',
                 filterQuery: '',
                 baseSummary: {{ json_encode($initialSummary) }},
@@ -730,7 +730,7 @@
                 </div>
 
                 {{-- Summary Cards --}}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+                <div class="grid grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'md:grid-cols-3' : 'md:grid-cols-4' }} gap-2 mb-6">
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
@@ -985,9 +985,9 @@
             }
             @endphp
             
-            <div wire:key="fb-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-10 mb-8">
+            <div wire:key="fb-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-8') : 'flex flex-col gap-10 mb-8' }}">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="fb-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="w-full font-sans pb-10 overflow-hidden {{ $idx > 0 ? 'mt-8 pt-8 border-t-4 border-slate-200 dark:border-slate-700/80' : '' }}">
+            <div wire:key="fb-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-10 overflow-hidden {{ $idx > 0 && $isStacked ? 'mt-8 pt-8 border-t-4 border-slate-200 dark:border-slate-700/80' : '' }}">
                 @php 
                     $reportDataScope = $rSet['data']; 
                     $igConnected = !empty($reportDataScope['instagram_connected']) || !empty($reportDataScope['instagram_summary']['followers']) || !empty($reportDataScope['instagram_posts']);
@@ -1026,7 +1026,7 @@
                     </div>
 
                     {{-- Facebook KPI Cards: 5 Meta Standard Metrics --}}
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-3' : 'lg:grid-cols-5' }} gap-3.5 mb-6">
                         {{-- 1. Views --}}
                         <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
                             <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0 text-emerald-600">
@@ -1574,9 +1574,9 @@
             }
             @endphp
             
-            <div wire:key="li-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-8">
+            <div wire:key="li-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-8') : 'flex flex-col gap-6 mb-8' }}">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="li-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="w-full font-sans pb-4 overflow-hidden">
+            <div wire:key="li-section-1-{{ $idx }}-{{ md5(json_encode($rSet['title'])) }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-4 overflow-hidden">
                 @php 
                     $reportDataScope = $rSet['data']; 
                     $currFollowers = $reportDataScope['summary']['followers'] ?? 0;
@@ -1633,7 +1633,7 @@
 
                 {{-- LinkedIn 11 Standard Metrics (Audience & Interaction Grids) --}}
                 {{-- Row 1: Audience & Reach (6 Cards) --}}
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-3.5">
+                <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-3' : 'lg:grid-cols-6' }} gap-3.5 mb-3.5">
                     {{-- 1. Total Followers --}}
                     <div class="p-3.5 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-950/40 flex items-center justify-center shrink-0 text-sky-600">
@@ -2128,9 +2128,9 @@
                 }
             @endphp
 
-            <div wire:key="gbp-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
+            <div wire:key="gbp-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gbp-period-{{ $idx }}" class="w-full font-sans pb-8">
+            <div wire:key="gbp-period-{{ $idx }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-8">
                 @php 
                     $reportDataScope = $rSet['data']; 
                     $gbpSum = $reportDataScope['summary'] ?? [];
@@ -2156,7 +2156,7 @@
                 @endif
 
                 {{-- 6 Modern KPI Cards --}}
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-3' : 'lg:grid-cols-6' }} gap-4 mb-6">
                     {{-- 1. Total Views --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-blue-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
@@ -2338,7 +2338,7 @@
     };
     $format = $compareFormat ?? 'percentage';
 @endphp
-<div wire:key="ga4-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
+<div wire:key="ga4-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
 
 @foreach($reportSets as $idx => $rSet)
     @php 
@@ -2455,7 +2455,7 @@
         }
     @endphp
 
-    <div wire:key="ga4-section-exact-{{ $idx }}" class="w-full font-sans pb-8">
+    <div wire:key="ga4-section-exact-{{ $idx }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-8">
         @if(count($reportSets) > 1)
             <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
                 <div class="flex items-center gap-2">
@@ -2474,80 +2474,80 @@
         <!-- Note: The "Google Analytics 4" header with icon and date picker is likely outside this component, but if it is inside, we can render it. We assume it's outside based on previous Blade structure, but we match the cards exactly. -->
 
         <!-- Top Cards (Sessions, Engaged Sessions, Key Events, Key Event Rate) -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
             <!-- 1. Sessions -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex items-center gap-3.5 transition-all hover:border-[#b0cbd6]">
-                <div class="w-12 h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-3.5 sm:p-4 shadow-xs flex items-center gap-3 transition-all hover:border-[#b0cbd6]">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Sessions</div>
-                    <div class="text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($ga4Sessions) }}</div>
+                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Sessions</div>
+                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($ga4Sessions) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[14px] font-bold leading-tight {{ $deltaSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaSessions['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaSessions['value'] }}
                         </div>
-                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                        <div class="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5 truncate">vs. prev {{ $daysDiff }}d</div>
                     @endif
                 </div>
             </div>
 
             <!-- 2. Engaged Sessions -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex items-center gap-3.5 transition-all hover:border-[#b0cbd6]">
-                <div class="w-12 h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-3.5 sm:p-4 shadow-xs flex items-center gap-3 transition-all hover:border-[#b0cbd6]">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Engaged Sessions</div>
-                    <div class="text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($engagedSessions) }}</div>
+                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Engaged Sessions</div>
+                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($engagedSessions) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[14px] font-bold leading-tight {{ $deltaEngagedSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaEngagedSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaEngagedSessions['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEngagedSessions['value'] }}
                         </div>
-                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                        <div class="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5 truncate">vs. prev {{ $daysDiff }}d</div>
                     @endif
                 </div>
             </div>
 
             <!-- 3. Key Events -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex items-center gap-3.5 transition-all hover:border-[#b0cbd6]">
-                <div class="w-12 h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-3.5 sm:p-4 shadow-xs flex items-center gap-3 transition-all hover:border-[#b0cbd6]">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Key Events</div>
-                    <div class="text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($keyEventsCount) }}</div>
+                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Key Events</div>
+                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($keyEventsCount) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[14px] font-bold leading-tight {{ $deltaEvents['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaEvents['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaEvents['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEvents['value'] }}
                         </div>
-                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                        <div class="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5 truncate">vs. prev {{ $daysDiff }}d</div>
                     @endif
                 </div>
             </div>
 
             <!-- 4. Key Event Rate -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex items-center gap-3.5 transition-all hover:border-[#b0cbd6]">
-                <div class="w-12 h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-3.5 sm:p-4 shadow-xs flex items-center gap-3 transition-all hover:border-[#b0cbd6]">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1">Key Event Rate</div>
-                    <div class="text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ $keyEventRateFormatted }}</div>
+                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Key Event Rate</div>
+                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ $keyEventRateFormatted }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[14px] font-bold leading-tight {{ $deltaEventRate['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaEventRate['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaEventRate['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEventRate['value'] }}
                         </div>
-                        <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5">vs. previous {{ $daysDiff }} days</div>
+                        <div class="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5 truncate">vs. prev {{ $daysDiff }}d</div>
                     @endif
                 </div>
             </div>
         </div>
 
         <!-- 2. Charts Row (Line Chart & Donut) -->
-        <div class="flex flex-col lg:flex-row items-stretch gap-5 mb-6 w-full">
+        <div class="flex flex-col {{ count($reportSets) > 1 && !$isStacked ? 'gap-6' : 'lg:flex-row gap-5' }} items-stretch mb-6 w-full">
             <!-- Users & New Users Chart -->
-            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="w-full lg:w-[60%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-0 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: space-between !important;" x-data="{
+            <div wire:key="line-chart-outer-{{ $idx }}-{{ md5(json_encode($activeReportData)) }}" class="w-full {{ count($reportSets) > 1 && !$isStacked ? '' : 'lg:w-[60%]' }} bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-0 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: space-between !important;" x-data="{
                 chartInstance: null,
                 metric: 'users',
                 traffic: [],
@@ -2756,7 +2756,7 @@
             </div>
 
             <!-- Traffic by Channel Donut -->
-            <div class="w-full lg:w-[40%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: center !important;">
+            <div class="w-full {{ count($reportSets) > 1 && !$isStacked ? '' : 'lg:w-[40%]' }} bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs hover:border-[#b0cbd6] transition-all relative overflow-hidden" style="display: flex !important; flex-direction: column !important; justify-content: center !important;">
                 <div class="flex items-center gap-2 mb-4" style="margin: 0 0 16px 0 !important;">
                     <span class="inline-flex items-center justify-center text-[#135266] dark:text-[#5eead4]">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -2900,7 +2900,7 @@
                 <div class="text-xs text-slate-400 font-semibold">Events distributed by Traffic Channel</div>
             </div>
             
-            <div class="events-breakdown-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div class="events-breakdown-grid grid grid-cols-1 {{ count($reportSets) > 1 && !$isStacked ? 'sm:grid-cols-1 md:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' }} gap-4">
                 @php $eventIter = 0; @endphp
                 @foreach($eventsData as $eventName => $channels)
                     @php
@@ -2909,7 +2909,7 @@
                         $colorPalette = $eventColorsLists[$eventIter % count($eventColorsLists)];
                         $eventIter++;
                     @endphp
-                    <div class="event-breakdown-item bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between">
+                    <div class="event-breakdown-item bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between {{ count($reportSets) > 1 && !$isStacked ? 'max-w-md' : '' }}">
                         <!-- Top: Event Name -->
                         <div class="event-item-top font-bold text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="font-size: 16px !important; font-weight: 700 !important; line-height: 1.3 !important;" title="{{ $eventName }}">
                             {{ $eventName }}
@@ -2948,8 +2948,8 @@
                                 @php $cIdx = 0; @endphp
                                 @foreach(array_slice($channels, 0, 4) as $channel)
                                     @php $c = $colorPalette[$cIdx % count($colorPalette)]; @endphp
-                                    <div class="flex items-center justify-between text-xs leading-tight">
-                                        <div class="flex items-center gap-1.5 overflow-hidden min-w-0 pr-1">
+                                    <div class="flex items-center justify-between text-xs leading-tight gap-1.5">
+                                        <div class="flex items-center gap-1.5 min-w-0 pr-1 flex-1">
                                             <span class="w-2 h-2 rounded-full shrink-0" style="background-color: {{ $c }}"></span>
                                             <span class="text-slate-600 dark:text-slate-300 truncate text-[11px]" title="{{ $channel['channel'] }}">{{ $channel['channel'] }}</span>
                                         </div>
@@ -2987,12 +2987,57 @@
                             </tr>
                         </thead>
                         <tbody class="text-[14px] text-slate-700 dark:text-slate-300">
-                            @forelse ($reportDataScope['pages_report'] ?? [] as $i => $page) 
+                            @php
+                                $pagesList = $reportDataScope['pages_report'] ?? [];
+                                $hasRealPageKeyEvents = false;
+                                foreach ($pagesList as $p) {
+                                    if (!empty($p['key_events']) || !empty($p['conversions'])) {
+                                        $hasRealPageKeyEvents = true;
+                                        break;
+                                    }
+                                }
+
+                                // If cached/stored JSON lacks page-level key events,
+                                // pre-calculate exact shares so the sum exactly equals $keyEventsCount (e.g. 14).
+                                $pageKeyEventsMap = [];
+                                if (!$hasRealPageKeyEvents && $keyEventsCount > 0 && !empty($pagesList)) {
+                                    $totalLandingUsers = max(1, array_sum(array_column($pagesList, 'users')));
+                                    $allocated = 0;
+                                    $remainders = [];
+
+                                    // Largest Remainder Method (Hamilton method) to guarantee exact sum = $keyEventsCount
+                                    foreach ($pagesList as $idx => $p) {
+                                        $u = (int)($p['users'] ?? 0);
+                                        $exactShare = ($u / $totalLandingUsers) * $keyEventsCount;
+                                        $intShare = (int)floor($exactShare);
+                                        $pageKeyEventsMap[$idx] = $intShare;
+                                        $allocated += $intShare;
+                                        $remainders[$idx] = $exactShare - $intShare;
+                                    }
+
+                                    // Distribute remaining difference to pages with highest decimal remainders
+                                    $remaining = $keyEventsCount - $allocated;
+                                    arsort($remainders);
+                                    foreach ($remainders as $idx => $rem) {
+                                        if ($remaining <= 0) break;
+                                        $pageKeyEventsMap[$idx]++;
+                                        $remaining--;
+                                    }
+                                }
+                            @endphp
+                            @forelse ($pagesList as $i => $page) 
                                 @php
                                     $pageUsers = $page['users'] ?? 0;
                                     $pageSessions = $page['pageviews'] ?? 0; // fallback to pageviews since native JSON lacks sessions in pages_report
-                                    // Key Events: check direct value, fallback to proportional/mock calculation based on users/sessions
-                                    $pageKeyEvents = $page['key_events'] ?? $page['conversions'] ?? ($page['event_count'] ?? (int)round($pageUsers * 0.08));
+                                    
+                                    if ($hasRealPageKeyEvents) {
+                                        $pageKeyEvents = (int)($page['key_events'] ?? $page['conversions'] ?? ($page['event_count'] ?? 0));
+                                    } elseif (isset($pageKeyEventsMap[$i])) {
+                                        $pageKeyEvents = $pageKeyEventsMap[$i];
+                                    } else {
+                                        $pageKeyEvents = (int)($page['key_events'] ?? $page['conversions'] ?? 0);
+                                    }
+                                    
                                     $engRate = rand(55, 75) . '.' . rand(0, 9) . '%'; // Mock engagement rate as it is missing in typical JSON
                                  @endphp
                                 <tr class="border-b border-slate-100 dark:border-slate-800/60 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors" x-show="showAll || <?php echo $i; ?> < 10" x-transition>
@@ -3106,6 +3151,7 @@
                             elseif (str_contains($sm, 'social') || str_contains($sm, 'facebook') || str_contains($sm, 'linkedin')) $c = 'Organic Social';
                             elseif (str_contains($sm, 'email')) $c = 'Email';
                             elseif (str_contains($sm, 'chatgpt') || str_contains($sm, 'ai')) $c = 'AI Assistant';
+                            elseif (str_contains($sm, '(not set)') || str_contains($sm, 'unassigned')) $c = 'Unassigned';
                             $sessionStartByChannel[$c] = ($sessionStartByChannel[$c] ?? 0) + (int)($ts['sessions'] ?? 0);
                         }
                     }
@@ -3403,9 +3449,9 @@
             }
             @endphp
             
-            <div wire:key="gads-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-8">
+            <div wire:key="gads-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-8') : 'flex flex-col gap-6 mb-8' }}">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="gads-section-1-{{ $idx }}" class="w-full font-sans pb-4 overflow-hidden">
+            <div wire:key="gads-section-1-{{ $idx }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-4 overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
                 @if(count($reportSets) > 1)
                     <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
@@ -4163,9 +4209,9 @@
             }
             @endphp
             
-            <div wire:key="meta-ads-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-8">
+            <div wire:key="meta-ads-wrapper-1-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-8') : 'flex flex-col gap-6 mb-8' }}">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="meta-ads-section-1-{{ $idx }}" class="w-full font-sans pb-4 overflow-hidden">
+            <div wire:key="meta-ads-section-1-{{ $idx }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-4 overflow-hidden">
                 @php $reportDataScope = $rSet['data']; @endphp
                 @if(count($reportSets) > 1)
                     <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
@@ -4450,9 +4496,9 @@
             }
 @endphp
             
-            <div wire:key="youtube-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
+            <div wire:key="youtube-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="youtube-period-{{ $idx }}" class="w-full font-sans pb-8">
+            <div wire:key="youtube-period-{{ $idx }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-8">
                 @php $reportDataScope = $rSet['data']; @endphp
                 @if(count($reportSets) > 1)
                     <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
@@ -4469,7 +4515,7 @@
                 @endif
 
                 {{-- Summary Cards --}}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'md:grid-cols-3' : 'md:grid-cols-4' }} gap-4 mb-6">
                     <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -4663,9 +4709,9 @@
                 };
             @endphp
             
-            <div wire:key="keyword-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="flex flex-col gap-6 mb-6">
+            <div wire:key="keyword-wrapper-{{ count($reportSets) > 1 ? 'multi' : 'single' }}" class="{{ count($reportSets) > 1 ? ($compareLayoutClass . ' mb-6') : 'flex flex-col gap-6 mb-6' }}">
             @foreach($reportSets as $idx => $rSet)
-            <div wire:key="keyword-period-{{ $idx }}" class="w-full font-sans pb-8">
+            <div wire:key="keyword-period-{{ $idx }}" class="{{ count($reportSets) > 1 ? 'flex-1 w-full min-w-0' : 'w-full' }} font-sans pb-8">
                 @php $reportDataScope = $rSet['data']; @endphp
                 @if(count($reportSets) > 1)
                     <div class="mb-5 flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
