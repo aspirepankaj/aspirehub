@@ -88,12 +88,12 @@
         }
 
         /* Ensure KPI Stat Cards across all grids ALWAYS stay flex-row with icon on left and text on right */
-        .report-content-root .grid > div.flex:not(.flex-col),
-        .client-integration-theme .grid > div.flex:not(.flex-col),
-        .report-content-root .grid > div.flex.items-center:not(.flex-col),
-        .client-integration-theme .grid > div.flex.items-center:not(.flex-col),
-        .report-content-root div.rounded-2xl.flex.items-center:not(.flex-col),
-        .client-integration-theme div.rounded-2xl.flex.items-center:not(.flex-col) {
+        .report-content-root .grid > div.flex:not(.flex-col):not(.event-breakdown-item):not(.device-breakdown-card),
+        .client-integration-theme .grid > div.flex:not(.flex-col):not(.event-breakdown-item):not(.device-breakdown-card),
+        .report-content-root .grid > div.flex.items-center:not(.flex-col):not(.event-breakdown-item):not(.device-breakdown-card),
+        .client-integration-theme .grid > div.flex.items-center:not(.flex-col):not(.event-breakdown-item):not(.device-breakdown-card),
+        .report-content-root div.rounded-2xl.flex.items-center:not(.flex-col):not(.event-breakdown-item):not(.device-breakdown-card),
+        .client-integration-theme div.rounded-2xl.flex.items-center:not(.flex-col):not(.event-breakdown-item):not(.device-breakdown-card) {
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
@@ -2972,13 +2972,13 @@
                         $colorPalette = $eventColorsLists[$eventIter % count($eventColorsLists)];
                         $eventIter++;
                     @endphp
-                    <div class="event-breakdown-item bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between {{ count($reportSets) > 1 && !$isStacked ? 'max-w-md' : '' }}">
+                    <div class="event-breakdown-item bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between {{ count($reportSets) > 1 && !$isStacked ? 'max-w-md' : '' }}" style="display: flex !important; flex-direction: column !important; align-items: stretch !important; justify-content: space-between !important; min-height: 140px;">
                         <!-- Top: Event Name -->
-                        <div class="event-item-top font-bold text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="font-size: 16px !important; font-weight: 700 !important; line-height: 1.3 !important;" title="{{ $eventName }}">
+                        <div class="event-item-top font-bold text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="font-size: 16px !important; font-weight: 700 !important; line-height: 1.3 !important; width: 100% !important; display: block !important; margin-bottom: 8px !important;" title="{{ $eventName }}">
                             {{ $eventName }}
                         </div>
 
-                        <div class="event-item-body flex items-center justify-between gap-3 w-full">
+                        <div class="event-item-body flex items-center justify-between gap-3 w-full" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; gap: 12px !important;">
                             <!-- Donut Chart -->
                             <div class="event-item-chart relative shrink-0 flex items-center justify-center w-[90px] h-[90px]">
                                 <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">
@@ -3975,13 +3975,13 @@
                                 $colorPalette = $gEventColorsLists[$gEventIter % count($gEventColorsLists)];
                                 $gEventIter++;
                             @endphp
-                            <div class="event-breakdown-item bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between" style="min-height: 140px;">
+                            <div class="event-breakdown-item bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs hover:border-[#b0cbd6] transition-all flex flex-col justify-between" style="display: flex !important; flex-direction: column !important; align-items: stretch !important; justify-content: space-between !important; min-height: 140px;">
                                 <!-- Top: Event Name -->
-                                <div class="event-item-top font-bold text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="font-size: 16px !important; font-weight: 700 !important; line-height: 1.3 !important;" title="{{ $gEventName }}">
+                                <div class="event-item-top font-bold text-slate-900 dark:text-slate-100 mb-2 truncate w-full" style="font-size: 16px !important; font-weight: 700 !important; line-height: 1.3 !important; width: 100% !important; display: block !important; margin-bottom: 8px !important;" title="{{ $gEventName }}">
                                     {{ $gEventName }}
                                 </div>
 
-                                <div class="event-item-body flex items-center justify-between gap-3 w-full" style="display: flex !important; flex-direction: row !important; align-items: center !important;">
+                                <div class="event-item-body flex items-center justify-between gap-3 w-full" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; gap: 12px !important;">
                                     <!-- Left: Donut Chart -->
                                     <div class="event-item-chart relative shrink-0 flex items-center justify-center w-[90px] h-[90px]" style="width: 90px !important; height: 90px !important; flex-shrink: 0 !important;">
                                         <svg viewBox="0 0 36 36" class="w-full h-full transform -rotate-90">

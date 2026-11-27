@@ -2145,16 +2145,16 @@ body:has(.is-marketing-report),
 }
 
 /* Transform KPI Stat Cards across all other integrations - ONLY target stat grids */
-.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-4"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-4"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-5"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-4"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-5"]>div[class*="rounded-2xl"],
-.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-4"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="grid-cols-4"]>div[class*="rounded-xl"],
-.client-integration-theme .grid[class*="grid-cols-5"]>div[class*="rounded-xl"] {
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-4"]>div[class*="rounded-2xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"]>div[class*="rounded-2xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-4"]>div[class*="rounded-2xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-2 lg:grid-cols-5"]>div[class*="rounded-2xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-4"]>div[class*="rounded-2xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-5"]>div[class*="rounded-2xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-4"]>div[class*="rounded-xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-2 md:grid-cols-5"]>div[class*="rounded-xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-4"]>div[class*="rounded-xl"]:not(.event-breakdown-item):not(.device-breakdown-card),
+.client-integration-theme .grid[class*="grid-cols-5"]>div[class*="rounded-xl"]:not(.event-breakdown-item):not(.device-breakdown-card) {
   background: var(--card) !important;
   border: 1px solid var(--border) !important;
   border-radius: 10px !important;
