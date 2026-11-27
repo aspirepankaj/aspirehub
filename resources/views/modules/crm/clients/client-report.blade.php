@@ -88,12 +88,12 @@
         }
 
         /* Ensure KPI Stat Cards across all grids ALWAYS stay flex-row with icon on left and text on right */
-        .report-content-root .grid > div.flex,
-        .client-integration-theme .grid > div.flex,
-        .report-content-root .grid > div.flex.items-center,
-        .client-integration-theme .grid > div.flex.items-center,
-        .report-content-root div.rounded-2xl.flex.items-center,
-        .client-integration-theme div.rounded-2xl.flex.items-center {
+        .report-content-root .grid > div.flex:not(.flex-col),
+        .client-integration-theme .grid > div.flex:not(.flex-col),
+        .report-content-root .grid > div.flex.items-center:not(.flex-col),
+        .client-integration-theme .grid > div.flex.items-center:not(.flex-col),
+        .report-content-root div.rounded-2xl.flex.items-center:not(.flex-col),
+        .client-integration-theme div.rounded-2xl.flex.items-center:not(.flex-col) {
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
@@ -793,47 +793,47 @@
                 </div>
 
                 {{-- Summary Cards --}}
-                <div class="grid grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'md:grid-cols-3' : 'md:grid-cols-4' }} gap-2 mb-6">
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                <div class="grid grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2' : 'md:grid-cols-4' }} gap-3.5 mb-6">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100" x-text="Number(currentSummary.clicks).toLocaleString()">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Clicks</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap" x-text="Number(currentSummary.clicks).toLocaleString()">
                                 {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['clicks'] ?? 0) : number_format($reportDataScope['summary']['clicks'] ?? 0) }}
                             </span>
                         </div>
                     </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100" x-text="Number(currentSummary.impressions).toLocaleString()">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Impressions</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap" x-text="Number(currentSummary.impressions).toLocaleString()">
                                 {{ (isset($this) && method_exists($this, 'formatAbbreviated')) ? $this->formatAbbreviated($reportDataScope['summary']['impressions'] ?? 0) : number_format($reportDataScope['summary']['impressions'] ?? 0) }}
                             </span>
                         </div>
                     </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CTR</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100" x-text="currentSummary.ctr + '%'">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CTR</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap" x-text="currentSummary.ctr + '%'">
                                 {{ $reportDataScope['summary']['ctr'] ?? 0 }}%
                             </span>
                         </div>
                     </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. Position</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100" x-text="currentSummary.position">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. Position</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap" x-text="currentSummary.position">
                                 {{ $reportDataScope['summary']['position'] ?? 0 }}
                             </span>
                         </div>
@@ -2219,16 +2219,16 @@
                 @endif
 
                 {{-- 6 Modern KPI Cards --}}
-                <div class="grid grid-cols-2 md:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-6' }} gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-6' }} gap-3.5 mb-6">
                     {{-- 1. Total Views --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-blue-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Total Views</span>
+                            <span class="meta-kpi-label text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Total Views</span>
                             <div class="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/40 flex items-center justify-center shrink-0 text-blue-600 dark:text-blue-400">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </div>
                         </div>
-                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                        <span class="text-2xl font-black font-momo text-slate-900 dark:text-white block truncate tracking-tight whitespace-nowrap">
                             {{ number_format($views) }}
                         </span>
                         <span class="text-[10px] text-slate-400 mt-1 block">Maps & Search Views</span>
@@ -2237,12 +2237,12 @@
                     {{-- 2. Total Searches --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-indigo-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Searches</span>
+                            <span class="meta-kpi-label text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Searches</span>
                             <div class="w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-900/40 flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                             </div>
                         </div>
-                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                        <span class="text-2xl font-black font-momo text-slate-900 dark:text-white block truncate tracking-tight whitespace-nowrap">
                             {{ number_format($searches) }}
                         </span>
                         <span class="text-[10px] text-slate-400 mt-1 block">Search Discoveries</span>
@@ -2251,12 +2251,12 @@
                     {{-- 3. Total Interactions --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-emerald-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Interactions</span>
+                            <span class="meta-kpi-label text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Interactions</span>
                             <div class="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
                             </div>
                         </div>
-                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                        <span class="text-2xl font-black font-momo text-slate-900 dark:text-white block truncate tracking-tight whitespace-nowrap">
                             {{ number_format($interactions) }}
                         </span>
                         <span class="text-[10px] text-slate-400 mt-1 block">Customer Actions</span>
@@ -2265,12 +2265,12 @@
                     {{-- 4. Phone Calls --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-amber-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Calls</span>
+                            <span class="meta-kpi-label text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Calls</span>
                             <div class="w-7 h-7 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                             </div>
                         </div>
-                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                        <span class="text-2xl font-black font-momo text-slate-900 dark:text-white block truncate tracking-tight whitespace-nowrap">
                             {{ number_format($calls) }}
                         </span>
                         <span class="text-[10px] text-slate-400 mt-1 block">Click-to-Call</span>
@@ -2279,12 +2279,12 @@
                     {{-- 5. Direction Requests --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-teal-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Directions</span>
+                            <span class="meta-kpi-label text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Directions</span>
                             <div class="w-7 h-7 rounded-full bg-teal-50 dark:bg-teal-950/40 border border-teal-200/60 dark:border-teal-900/40 flex items-center justify-center shrink-0 text-teal-600 dark:text-teal-400">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
                             </div>
                         </div>
-                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                        <span class="text-2xl font-black font-momo text-slate-900 dark:text-white block truncate tracking-tight whitespace-nowrap">
                             {{ number_format($directions) }}
                         </span>
                         <span class="text-[10px] text-slate-400 mt-1 block">Driving Requests</span>
@@ -2293,12 +2293,12 @@
                     {{-- 6. Website Clicks --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-sky-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Website Clicks</span>
+                            <span class="meta-kpi-label text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider truncate">Website Clicks</span>
                             <div class="w-7 h-7 rounded-full bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-900/40 flex items-center justify-center shrink-0 text-sky-600 dark:text-sky-400">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                             </div>
                         </div>
-                        <span class="text-2xl font-black text-slate-900 dark:text-white block truncate tracking-tight">
+                        <span class="text-2xl font-black font-momo text-slate-900 dark:text-white block truncate tracking-tight whitespace-nowrap">
                             {{ number_format($clicks) }}
                         </span>
                         <span class="text-[10px] text-slate-400 mt-1 block">Profile to Website</span>
@@ -2544,10 +2544,10 @@
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Sessions</div>
-                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($ga4Sessions) }}</div>
+                    <div class="meta-kpi-label text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Sessions</div>
+                    <div class="text-xl sm:text-2xl font-extrabold font-momo text-[#135266] dark:text-white tracking-tight leading-none mb-1.5 whitespace-nowrap">{{ number_format($ga4Sessions) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight whitespace-nowrap {{ $deltaSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaSessions['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaSessions['value'] }}
                         </div>
                         <div class="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5 truncate">vs. prev {{ $daysDiff }}d</div>
@@ -2561,10 +2561,10 @@
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Engaged Sessions</div>
-                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($engagedSessions) }}</div>
+                    <div class="meta-kpi-label text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Engaged Sessions</div>
+                    <div class="text-xl sm:text-2xl font-extrabold font-momo text-[#135266] dark:text-white tracking-tight leading-none mb-1.5 whitespace-nowrap">{{ number_format($engagedSessions) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaEngagedSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight whitespace-nowrap {{ $deltaEngagedSessions['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaEngagedSessions['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEngagedSessions['value'] }}
                         </div>
                         <div class="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5 truncate">vs. prev {{ $daysDiff }}d</div>
@@ -2578,10 +2578,10 @@
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Key Events</div>
-                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ number_format($keyEventsCount) }}</div>
+                    <div class="meta-kpi-label text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Key Events</div>
+                    <div class="text-xl sm:text-2xl font-extrabold font-momo text-[#135266] dark:text-white tracking-tight leading-none mb-1.5 whitespace-nowrap">{{ number_format($keyEventsCount) }}</div>
                     @if($hasKpiCompare)
-                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaEvents['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
+                        <div class="text-[13px] sm:text-[14px] font-bold leading-tight whitespace-nowrap {{ $deltaEvents['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaEvents['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEvents['value'] }}
                         </div>
                         <div class="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight mt-0.5 truncate">vs. prev {{ $daysDiff }}d</div>
@@ -2595,8 +2595,8 @@
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Key Event Rate</div>
-                    <div class="text-xl sm:text-2xl font-extrabold text-[#135266] dark:text-white tracking-tight leading-none mb-1.5">{{ $keyEventRateFormatted }}</div>
+                    <div class="meta-kpi-label text-[11px] sm:text-[12px] font-semibold text-slate-500 dark:text-slate-400 leading-tight mb-1 truncate">Key Event Rate</div>
+                    <div class="text-xl sm:text-2xl font-extrabold font-momo text-[#135266] dark:text-white tracking-tight leading-none mb-1.5 whitespace-nowrap">{{ $keyEventRateFormatted }}</div>
                     @if($hasKpiCompare)
                         <div class="text-[13px] sm:text-[14px] font-bold leading-tight {{ $deltaEventRate['trend'] === 'up' ? 'text-[#5a9ca7]' : 'text-rose-500' }}">
                             {{ $deltaEventRate['trend'] === 'up' ? '↑' : '↓' }} {{ $deltaEventRate['value'] }}
@@ -3770,7 +3770,7 @@
                     }
                 }">
                     <!-- Top Google Ads Style Metric Selector -->
-                    <div class="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200 divide-x divide-slate-200">
+                    <div class="grid grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5' : 'md:grid-cols-5' }} border-b border-slate-200 divide-x divide-slate-200">
                         <template x-for="(key, index) in Object.keys(metrics)" :key="key">
                             <div @click="toggleMetric(key)" 
                                  class="p-4 cursor-pointer select-none transition-colors h-[100px] flex items-center gap-3"
@@ -3795,9 +3795,9 @@
                                 </span>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-1">
-                                        <span class="text-[13px] font-medium" x-text="metrics[key].label"></span>
+                                        <span class="meta-kpi-label text-[13px] font-medium" x-text="metrics[key].label"></span>
                                     </div>
-                                    <div class="text-[26px] font-normal font-sans leading-none" x-text="formatValue(metrics[key].value, metrics[key])"></div>
+                                    <div class="text-[24px] font-bold font-momo leading-none whitespace-nowrap" x-text="formatValue(metrics[key].value, metrics[key])"></div>
                                 </div>
                             </div>
                         </template>
@@ -4311,67 +4311,67 @@
                 @endphp
 
                 <!-- 5 Metric Cards matching Facebook & Google Ads design -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-5' }} gap-4 mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-5' }} gap-3.5 mb-6">
                     {{-- 1. Link Clicks --}}
-                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
-                        <span class="w-11 h-11 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center shrink-0 text-blue-600">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center shrink-0 text-blue-600">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Clicks</span>
-                            <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Clicks</span>
+                            <span class="text-2xl font-extrabold font-momo !text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 {{ number_format($totalClicks) }}
                             </span>
                         </div>
                     </div>
 
                     {{-- 2. Impressions --}}
-                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
-                        <span class="w-11 h-11 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center shrink-0 text-red-500">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-red-50 dark:bg-red-950/40 flex items-center justify-center shrink-0 text-red-500">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
-                            <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Impressions</span>
+                            <span class="text-2xl font-extrabold font-momo !text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 {{ $totalImpr >= 1000 ? round($totalImpr / 1000, 2) . 'K' : number_format($totalImpr) }}
                             </span>
                         </div>
                     </div>
 
                     {{-- 3. Avg. CPC --}}
-                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
-                        <span class="w-11 h-11 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0 text-emerald-600">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0 text-emerald-600">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CPC</span>
-                            <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg. CPC</span>
+                            <span class="text-2xl font-extrabold font-momo !text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 ${{ number_format($avgCpc, 2) }}
                             </span>
                         </div>
                     </div>
 
                     {{-- 4. Amount Spent --}}
-                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
-                        <span class="w-11 h-11 rounded-full bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center shrink-0 text-teal-600">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center shrink-0 text-teal-600">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Cost</span>
-                            <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Cost</span>
+                            <span class="text-2xl font-extrabold font-momo !text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 ${{ number_format($totalCost) }}
                             </span>
                         </div>
                     </div>
 
                     {{-- 5. Conversions --}}
-                    <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
-                        <span class="w-11 h-11 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0 text-indigo-600">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0 text-indigo-600">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Conversions</span>
-                            <span class="text-2xl font-extrabold !text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Conversions</span>
+                            <span class="text-2xl font-extrabold font-momo !text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 {{ number_format($totalConv) }}
                             </span>
                         </div>
@@ -4578,47 +4578,47 @@
                 @endif
 
                 {{-- Summary Cards --}}
-                <div class="grid grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'md:grid-cols-3' : 'md:grid-cols-4' }} gap-4 mb-6">
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                <div class="grid grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2' : 'md:grid-cols-4' }} gap-3.5 mb-6">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Views</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 {{ number_format($reportDataScope['summary']['views'] ?? 0) }}
                             </span>
                         </div>
                     </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Watch Time (hrs)</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Watch Time (hrs)</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 {{ number_format($reportDataScope['summary']['watch_time'] ?? 0, 1) }}
                             </span>
                         </div>
                     </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Subscribers</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Subscribers</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 {{ number_format($reportDataScope['summary']['subscribers'] ?? 0) }}
                             </span>
                         </div>
                     </div>
-                    <div class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                    <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
+                        <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 8v5l4-4"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Duration</span>
-                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Duration</span>
+                            <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100 whitespace-nowrap">
                                 {{ $reportDataScope['summary']['avg_view_duration'] ?? '0s' }}
                             </span>
                         </div>
@@ -4862,7 +4862,7 @@
                 @endphp
 
                 <div class="mb-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-1 xl:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3' }} gap-4">
                         {{-- 1. Keywords Up --}}
                         <div class="keyword-stat-card p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
                             <div class="flex items-center gap-4 min-w-0">
@@ -5220,28 +5220,28 @@
             </div>
         @elseif($activeReportIntegrationId === 'gtm')
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="p-4 bg-purple-50/20 dark:bg-purple-950/10 border border-purple-100/30 dark:border-purple-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Tags</span>
-                    <span class="text-lg font-extrabold text-purple-600 dark:text-purple-400">
+            <div class="grid grid-cols-2 {{ (isset($reportSets) && count($reportSets) > 1 && !$isStacked) ? 'lg:grid-cols-2' : 'md:grid-cols-4' }} gap-3.5 mb-6">
+                <div class="p-3.5 sm:p-4 bg-purple-50/20 dark:bg-purple-950/10 border border-purple-100/30 dark:border-purple-900/20 rounded-2xl">
+                    <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Tags</span>
+                    <span class="text-2xl font-extrabold font-momo whitespace-nowrap text-purple-600 dark:text-purple-400">
                         {{ number_format($activeReportData['summary']['tags_count'] ?? 0) }}
                     </span>
                 </div>
-                <div class="p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Triggers</span>
-                    <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-450">
+                <div class="p-3.5 sm:p-4 bg-emerald-50/20 dark:bg-emerald-950/10 border border-emerald-100/30 dark:border-emerald-900/20 rounded-2xl">
+                    <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Triggers</span>
+                    <span class="text-2xl font-extrabold font-momo whitespace-nowrap text-emerald-600 dark:text-emerald-450">
                         {{ number_format($activeReportData['summary']['triggers_count'] ?? 0) }}
                     </span>
                 </div>
-                <div class="p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Variables</span>
-                    <span class="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                <div class="p-3.5 sm:p-4 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl">
+                    <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Variables</span>
+                    <span class="text-2xl font-extrabold font-momo whitespace-nowrap text-blue-600 dark:text-blue-400">
                         {{ number_format($activeReportData['summary']['variables_count'] ?? 0) }}
                     </span>
                 </div>
-                <div class="p-4 bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/30 dark:border-orange-900/20 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Folders</span>
-                    <span class="text-lg font-extrabold text-orange-600 dark:text-orange-400">
+                <div class="p-3.5 sm:p-4 bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/30 dark:border-orange-900/20 rounded-2xl">
+                    <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Total Folders</span>
+                    <span class="text-2xl font-extrabold font-momo whitespace-nowrap text-orange-600 dark:text-orange-400">
                         {{ number_format($activeReportData['summary']['folders_count'] ?? 0) }}
                     </span>
                 </div>
