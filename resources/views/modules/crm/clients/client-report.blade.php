@@ -62,11 +62,17 @@
         /* Meta & Social KPI card styling */
         .report-content-root .meta-kpi-label,
         .client-integration-theme .meta-kpi-label,
-        .meta-kpi-label {
+        .meta-kpi-label,
+        .report-content-root .kpi-label,
+        .client-integration-theme .kpi-label,
+        .kpi-label {
             font-size: 11px !important;
             font-weight: 700 !important;
             line-height: 1.25 !important;
             letter-spacing: 0.05em !important;
+            white-space: normal !important;
+            word-break: normal !important;
+            overflow-wrap: normal !important;
         }
 
         .report-content-root .meta-kpi-subtext,
@@ -78,6 +84,63 @@
             white-space: normal !important;
             overflow: visible !important;
             text-overflow: clip !important;
+            word-break: normal !important;
+        }
+
+        /* Ensure KPI Stat Cards across all grids ALWAYS stay flex-row with icon on left and text on right */
+        .report-content-root .grid > div.flex,
+        .client-integration-theme .grid > div.flex,
+        .report-content-root .grid > div.flex.items-center,
+        .client-integration-theme .grid > div.flex.items-center,
+        .report-content-root div.rounded-2xl.flex.items-center,
+        .client-integration-theme div.rounded-2xl.flex.items-center {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 12px !important;
+            min-height: auto !important;
+        }
+
+        .report-content-root .grid > div.flex > span.rounded-full:first-child,
+        .client-integration-theme .grid > div.flex > span.rounded-full:first-child,
+        .report-content-root div.rounded-2xl.flex > span.rounded-full:first-child,
+        .client-integration-theme div.rounded-2xl.flex > span.rounded-full:first-child {
+            width: 42px !important;
+            height: 42px !important;
+            flex-shrink: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .report-content-root .grid > div.flex > span.rounded-full:first-child svg,
+        .client-integration-theme .grid > div.flex > span.rounded-full:first-child svg,
+        .report-content-root div.rounded-2xl.flex > span.rounded-full:first-child svg,
+        .client-integration-theme div.rounded-2xl.flex > span.rounded-full:first-child svg {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        .report-content-root .grid > div.flex > div.flex-1,
+        .client-integration-theme .grid > div.flex > div.flex-1 {
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            justify-content: center !important;
+        }
+
+        .report-content-root .grid > div.flex span.font-momo,
+        .client-integration-theme .grid > div.flex span.font-momo,
+        .report-content-root .grid > div.flex div.font-momo,
+        .client-integration-theme .grid > div.flex div.font-momo {
+            font-size: 20px !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            white-space: nowrap !important;
+            overflow-wrap: normal !important;
             word-break: normal !important;
         }
 
@@ -1026,7 +1089,7 @@
                     </div>
 
                     {{-- Facebook KPI Cards: 5 Meta Standard Metrics --}}
-                    <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-3' : 'lg:grid-cols-5' }} gap-3.5 mb-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-5' }} gap-3.5 mb-6">
                         {{-- 1. Views --}}
                         <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
                             <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0 text-emerald-600">
@@ -1290,7 +1353,7 @@
                     </div>
 
                     {{-- Instagram KPI Cards: 5 Meta Standard Metrics --}}
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-5' }} gap-3.5 mb-6">
                         {{-- 1. Views --}}
                         <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-2.5 sm:gap-3 shadow-xs">
                             <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0 text-emerald-600">
@@ -1633,14 +1696,14 @@
 
                 {{-- LinkedIn 11 Standard Metrics (Audience & Interaction Grids) --}}
                 {{-- Row 1: Audience & Reach (6 Cards) --}}
-                <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-3' : 'lg:grid-cols-6' }} gap-3.5 mb-3.5">
+                <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-6' }} gap-3.5 mb-3.5">
                     {{-- 1. Total Followers --}}
                     <div class="p-3.5 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-950/40 flex items-center justify-center shrink-0 text-sky-600">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Total Followers</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Total Followers</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currFollowers) }}
                             </div>
@@ -1658,7 +1721,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">New Followers</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">New Followers</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currNewFollowers) }}
                             </div>
@@ -1676,7 +1739,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Impressions</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Impressions</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currImpressions) }}
                             </div>
@@ -1694,7 +1757,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Members Reached</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Members Reached</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currMembersReached) }}
                             </div>
@@ -1712,7 +1775,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Page Views</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Page Views</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currPageViews) }}
                             </div>
@@ -1730,7 +1793,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Clicks</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Clicks</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currClicks) }}
                             </div>
@@ -1744,14 +1807,14 @@
                 </div>
 
                 {{-- Row 2: Engagement & Content Interactions (5 Cards) --}}
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-5' }} gap-3.5 mb-6">
                     {{-- 7. CTR --}}
                     <div class="p-3.5 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
                         <span class="w-10 h-10 rounded-full bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center shrink-0 text-teal-600 font-bold text-sm">
                             %
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Click-Through (CTR)</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Click-Through (CTR)</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currCtr, 2) }}%
                             </div>
@@ -1769,7 +1832,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Engagement Rate</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Engagement Rate</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currEngagementRate, 2) }}%
                             </div>
@@ -1787,7 +1850,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Reactions</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Reactions</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currReactions) }}
                             </div>
@@ -1805,7 +1868,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Comments</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Comments</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currComments) }}
                             </div>
@@ -1823,7 +1886,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m17 1 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 23-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Reposts</span>
+                            <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-0.5">Reposts</span>
                             <div class="text-xl font-momo font-medium text-[#135266] dark:text-slate-100 leading-none mb-1">
                                 {{ number_format($currReposts) }}
                             </div>
@@ -1949,14 +2012,14 @@
                             <span class="w-2 h-2 rounded-full bg-sky-500"></span> Post Engagement Overview
                         </h3>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-6' }} gap-3.5">
                         <!-- Posts -->
-                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
+                            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Posts</span>
+                                <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Posts</span>
                                 <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                     {{ number_format($reportDataScope['summary']['posts'] ?? count($reportDataScope['top_posts'] ?? [])) }}
                                 </span>
@@ -1964,12 +2027,12 @@
                         </div>
 
                         <!-- Post Engagement -->
-                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
+                            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Engagement</span>
+                                <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Engagement</span>
                                 <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                     {{ number_format($reportDataScope['summary']['post_engagements'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'engaged'))) }}
                                 </span>
@@ -1977,12 +2040,12 @@
                         </div>
 
                         <!-- Average Post Engagement Rate -->
-                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300 text-sm font-bold">
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
+                            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300 text-sm font-bold">
                                 %
                             </span>
                             <div class="flex-1 min-w-0">
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Rate</span>
+                                <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Avg Rate</span>
                                 <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                     {{ number_format((float)($reportDataScope['summary']['avg_post_engagement_rate'] ?? 0), 2) }}%
                                 </span>
@@ -1990,12 +2053,12 @@
                         </div>
 
                         <!-- Post Reactions & Likes -->
-                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
+                            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Reactions</span>
+                                <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Reactions</span>
                                 <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                     {{ number_format($reportDataScope['summary']['post_reactions'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'reactions'))) }}
                                 </span>
@@ -2003,12 +2066,12 @@
                         </div>
 
                         <!-- Post Comments & Replies -->
-                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
+                            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Comments</span>
+                                <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Comments</span>
                                 <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                     {{ number_format($reportDataScope['summary']['post_comments'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'comments'))) }}
                                 </span>
@@ -2016,12 +2079,12 @@
                         </div>
 
                         <!-- Post Shares / Reposts -->
-                        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+                        <div class="p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3">
+                            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m17 1 4 4-4 4"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 11V9a4 4 0 0 1 4-4h14"/><path stroke-linecap="round" stroke-linejoin="round" d="m7 23-4-4 4-4"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Reposts</span>
+                                <span class="meta-kpi-label text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block mb-1">Reposts</span>
                                 <span class="text-2xl font-momo font-medium text-[#135266] dark:text-slate-100">
                                     {{ number_format($reportDataScope['summary']['post_shares'] ?? ($reportDataScope['summary']['reposts'] ?? array_sum(array_column($reportDataScope['top_posts'] ?? [], 'shares')))) }}
                                 </span>
@@ -2156,7 +2219,7 @@
                 @endif
 
                 {{-- 6 Modern KPI Cards --}}
-                <div class="grid grid-cols-2 md:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-3' : 'lg:grid-cols-6' }} gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-6' }} gap-4 mb-6">
                     {{-- 1. Total Views --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-xs hover:border-blue-300 transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-2">
@@ -2474,7 +2537,7 @@
         <!-- Note: The "Google Analytics 4" header with icon and date picker is likely outside this component, but if it is inside, we can render it. We assume it's outside based on previous Blade structure, but we match the cards exactly. -->
 
         <!-- Top Cards (Sessions, Engaged Sessions, Key Events, Key Event Rate) -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-2 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2' : 'lg:grid-cols-4' }} gap-3.5 mb-6">
             <!-- 1. Sessions -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-3.5 sm:p-4 shadow-xs flex items-center gap-3 transition-all hover:border-[#b0cbd6]">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#e2f1f5] dark:bg-teal-950/40 border border-[#cce5ec] dark:border-teal-900/40 flex items-center justify-center shrink-0 text-[#135266] dark:text-[#5eead4]">
@@ -4248,7 +4311,7 @@
                 @endphp
 
                 <!-- 5 Metric Cards matching Facebook & Google Ads design -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 {{ count($reportSets) > 1 && !$isStacked ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-5' }} gap-4 mb-6">
                     {{-- 1. Link Clicks --}}
                     <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-3 shadow-xs">
                         <span class="w-11 h-11 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center shrink-0 text-blue-600">

@@ -2171,8 +2171,8 @@ body:has(.is-marketing-report),
 }
 
 /* Ensure chart & table panels NEVER get forced into stat-card flex row */
-.client-integration-theme .grid-cols-1>div,
-.client-integration-theme .lg\:grid-cols-2>div,
+.client-integration-theme .grid-cols-1>div:not(.flex):not([class*="items-center"]),
+.client-integration-theme .grid-cols-1.lg\:grid-cols-2>div:not(.flex):not([class*="items-center"]),
 .client-integration-theme div:has(> table),
 .client-integration-theme div:has(> canvas),
 .client-integration-theme div:has(> div > canvas),
@@ -2235,7 +2235,8 @@ body:has(.is-marketing-report),
   display: block !important;
   white-space: normal !important;
   overflow: hidden;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 /* Stat card values */
@@ -2247,14 +2248,16 @@ body:has(.is-marketing-report),
 .client-integration-theme .grid>div[class*="rounded-xl"] span[class*="text-xl"],
 .client-integration-theme .grid>div[class*="rounded-xl"] span[class*="text-2xl"],
 .client-integration-theme .grid>div[class*="rounded-xl"] span[class*="font-extrabold"] {
-  font-size: 30px !important;
+  font-size: 22px !important;
   font-family: Figtree, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-  line-height: 1.1 !important;
-  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
   letter-spacing: -0.02em !important;
   color: var(--portal-primary) !important;
   display: block !important;
-  overflow-wrap: anywhere;
+  white-space: nowrap !important;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 
